@@ -8,6 +8,7 @@ import threading
 from glumpy import app, gl, glm, gloo, data
 from pipeline import *
 from video import *
+import var
 
 window = app.Window()
 
@@ -25,6 +26,7 @@ def on_draw(dt):
     w, h = window.get_size()
     #print("----------")
     pipeline.render_screen(None, (w, h))
+    var.ReloadVar.reload_vars()
 
 @window.event
 def on_key_press(symbol, modifiers):
@@ -53,18 +55,19 @@ def flipy(model):
     #glm.scale(model, 1.0, -1.0, 1.0)
     return model
 
-def transform(model):
+def video_transform(model):
     glm.zrotate(model, 15.0 * time.time())
     #glm.zrotate(model, 45)
     glm.scale(model, 0.5)
     return model
-video_stage = VideoStage(video, transform=transform)
+video_stage = VideoStage(video, transform=video_transform)
 video2_stage = VideoStage(video2, transform=flipy)
+
 
 triangle = np.array(Image.open("data/mask/triangle.png"))
 def rotate_triangle(model):
     glm.zrotate(model, 15.0 * time.time())
-    glm.scale(model, 0.75)
+    #glm.scale(model, float(size))
     return model
 
 rombus = np.array(Image.open("data/mask/rect.png"))
@@ -80,9 +83,13 @@ def transform_circle(model):
     glm.scale(model, 0.75)
     return model
 
+speed = var.ReloadVar(2.0)
+start = var.ReloadVar(0.2)
+end = var.ReloadVar(1.0)
+size = start + ((var.Time() * speed).apply(math.sin) + 1) * 0.5 * (end - start)
 #mask = Pipeline([TextureStage(triangle, force_size=(320, 240))])
-mask = Pipeline([TextureStage(triangle, transform=rotate_triangle, force_size=(320*3, 240*3))])
-mask2 = Pipeline([TextureStage(circle, transform=transform_circle, force_size=(320*3, 240*3))])
+mask = Pipeline([TextureStage(triangle, transform=[rotate_triangle, transform.scale(size)], force_size=(320*3, 240*3))])
+mask2 = Pipeline([TextureStage(circle, transform=[transform.scale(size)], force_size=(320*3, 240*3))])
 
 pipeline = Pipeline()
 #pipeline.add_stage(TextureStage(data.get("lena.png"), transform=flipy))

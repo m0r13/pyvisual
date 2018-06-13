@@ -3,6 +3,9 @@ import time
 from PIL import Image
 from glumpy import app, gl, glm, gloo, data
 
+import transform
+import var
+
 class TextureQuad(gloo.Program):
     def __init__(self, vertex, fragment):
         if not "{" in vertex:
@@ -81,7 +84,7 @@ class Stage:
 
     def transform_destination(self, texture_size, target_size):
         model, view, projection = self._create_transformation(texture_size, target_size)
-        model = self._transform_model(model)
+        model = transform.apply_transform(self._transform_model, model)
         if self._transform_flipy:
             glm.scale(model, 1.0, -1.0, 1.0)
         return np.dot(model, np.dot(view, projection))
@@ -125,15 +128,26 @@ class Stage:
         self.render(texture, screen_size)
         self.after_render()
 
+def configure_program(program, config):
+    if isinstance(config, dict):
+        for key, value in config.items():
+            if isinstance(value, var.Var):
+                value = float(value)
+            program[key] = value
+    elif callable(config):
+        config(program)
+    else:
+        raise ValueError("Bad program configuration object: %s. Expecting dict or callable." % repr(config))
+
 class ShaderStage(Stage):
-    def __init__(self, vertex, fragment, configure_program=lambda quad: None, **kwargs):
+    def __init__(self, vertex, fragment, program_config={}, **kwargs):
         super().__init__(**kwargs)
 
-        self._configure_program = configure_program
+        self._program_config = program_config
         self._quad = TextureQuad(vertex, fragment)
 
     def before_render(self, texture):
-        self._configure_program(self._quad)
+        configure_program(self._quad, self._program_config)
 
     def render(self, texture, target_size):
         h, w, _ = texture.shape
@@ -199,6 +213,117 @@ class MaskStage(ShaderStage):
         if self._mask_pipeline:
             self._mask = self._mask_pipeline.render_texture(None)
         self._quad["uMaskTexture"] = self._mask
+
+class TransitionStage(Stage):
+    def __init__(self, vertex, fragment, stage1=None, stage2=None):
+        self._dummy_input = np.zeros((1, 1, 4), dtype=np.uint8).view(gloo.Texture2D)
+        self._stage1 = stage1
+        self._stage2 = stage2
+        self._stage1_texture = stage1 if isinstance(stage1, gloo.Texture2D) else None
+        self._stage2_texture = stage2 if isinstance(stage2, gloo.Texture2D) else None
+
+        self._shader = ShaderStage(vertex, fragment, self._configure_program)
+        self._progress = 0
+        self._direction = False
+
+    @property
+    def stage1(self):
+        return self._stage1
+    @stage1.setter
+    def stage1(self, stage1):
+        self._stage1 = stage1
+
+    @property
+    def stage2(self):
+        return self._stage2
+    @stage2.setter
+    def stage2(self, stage2):
+        self._stage2 = stage2
+
+    @property
+    def source(self):
+        return self._stage2 if self._direction else self._stage1
+    @source.setter
+    def source(self, stage):
+        if self._direction:
+            self._stage2 = stage
+        else:
+            self._stage1 = stage
+
+    @property
+    def destination(self):
+        return self._stage1 if self._direction else self._stage2
+    @source.setter
+    def destination(self, stage):
+        if self._direction:
+            self._stage1 = stage
+        else:
+            self._stage2 = stage
+
+    @property
+    def progress(self):
+        return self._progress
+
+    @progress.setter
+    def progress(self, progress):
+        self._progress = progress
+
+    def animate(self, duration, direction=None):
+        duration = float(duration)
+        start = float(self._progress)
+        def progress_up(t):
+            return min(start + t / duration, 1.0)
+        def progress_down(t):
+            return max(start - t / duration, 0.0)
+
+        if direction is None:
+            direction = not self._direction
+        if direction:
+            self._progress = var.RelativeTime().apply(progress_up)
+        else:
+            self._progress = var.RelativeTime().apply(progress_down)
+        self._direction = direction
+
+    def animate_to(self, stage, duration):
+        self.destination = stage
+        self.animate(duration)
+
+    def _configure_program(self, program):
+        program["uTexture1"] = self._stage1_texture
+        program["uTexture2"] = self._stage2_texture
+        program["uAlpha"] = float(self._progress)
+        program["strength"] = 0.2
+
+    def _render_stage(self, stage):
+        if isinstance(stage, gloo.Texture2D):
+            return stage
+        elif isinstance(stage, Stage):
+            return stage.render_texture(self._dummy_input)
+        else:
+            return self._dummy_input
+
+    def _render_stages(self):
+        self._stage1_texture = self._render_stage(self._stage1)
+        self._stage2_texture = self._render_stage(self._stage2)
+
+    def _size_texture(self):
+        # texture that has size of wanted output
+        # for now: take the one input texture that is not None
+        # else: return dummy 1x1 input, nothing is rendered anyways
+        if self._stage1 is not None:
+            return self._stage1_texture
+        elif self._stage2 is not None:
+            return self._stage2_texture
+        else:
+            return self._dummy_input
+
+    def render_texture(self, texture):
+        self._render_stages()
+        return self._shader.render_texture(self._size_texture())
+
+    def render_screen(self, texture, screen_size):
+        self._render_stages()
+        self._shader.render_screen(self._size_texture(), screen_size)
 
 class Pipeline(Stage):
     def __init__(self, stages=[]):
