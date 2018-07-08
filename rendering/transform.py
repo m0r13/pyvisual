@@ -1,6 +1,5 @@
 import numpy as np
 from glumpy import glm
-import var
 
 def apply_transform(transform, matrix=None):
     if matrix is None:

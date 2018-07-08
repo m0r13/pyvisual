@@ -3,26 +3,16 @@ import time
 from PIL import Image
 from glumpy import app, gl, glm, gloo, data
 
-import transform
-import var
+from . import primitive, transform, var
 
-class TextureQuad(gloo.Program):
-    def __init__(self, vertex, fragment):
-        if not "{" in vertex:
-            vertex = open("data/shader/" + vertex, "r").read()
-        if not "{" in fragment:
-            fragment = open("data/shader/" + fragment, "r").read()
+class BaseStage:
+    def render_texture(self, texture):
+        pass
 
-        super().__init__(vertex, fragment, count=4, version="130")
-        self["iPosition"] = [(-1,-1), (-1,+1), (+1,-1), (+1,+1)]
-        self["iTexCoord"] = [( 0, 1), ( 0, 0), ( 1, 1), ( 1, 0)]
+    def render_screen(self, texture, screen_size):
+        pass
 
-    def render(self, texture, model_view_projection):
-        self["uModelViewProjection"] = model_view_projection
-        self["uInputTexture"] = texture
-        self.draw(gl.GL_TRIANGLE_STRIP)
-
-class Stage:
+class RenderStage(BaseStage):
     def __init__(self, force_size=None, transform=lambda model: model):
         self._fbo = None
         self._force_size = force_size
@@ -139,31 +129,38 @@ def configure_program(program, config):
     else:
         raise ValueError("Bad program configuration object: %s. Expecting dict or callable." % repr(config))
 
-class ShaderStage(Stage):
-    def __init__(self, vertex, fragment, program_config={}, **kwargs):
+class ShaderStage(RenderStage):
+    def __init__(self, vertex, fragment, uniforms={}, **kwargs):
         super().__init__(**kwargs)
 
-        self._program_config = program_config
-        self._quad = TextureQuad(vertex, fragment)
+        self._uniforms = uniforms
+        self._quad = primitive.TextureQuad(vertex, fragment)
+        self._old_quad = vertex, fragment
 
     def before_render(self, texture):
-        configure_program(self._quad, self._program_config)
+        configure_program(self._quad, self._uniforms)
 
     def render(self, texture, target_size):
         h, w, _ = texture.shape
         mvp = self.transform_destination((w, h), target_size)
         self._quad.render(texture, mvp)
 
+    def set_quad(self, vertex, fragment, uniforms):
+        if (vertex, fragment) != self._old_quad:
+            self._quad = primitive.TextureQuad(vertex, fragment)
+            self._old_quad = vertex, fragment
+        self._uniforms = uniforms
+
     @property
     def preferred_size(self):
         return None
 
-class TextureStage(Stage):
+class TextureStage(RenderStage):
     def __init__(self, texture=np.zeros((1, 1, 4), dtype=np.uint8), **kwargs):
         super().__init__(**kwargs)
 
         self._texture = texture.view(gloo.Texture2D)
-        self._quad = TextureQuad("common/passthrough.vert", "common/passthrough.frag")
+        self._quad = primitive.TextureQuad("common/passthrough.vert", "common/passthrough.frag")
 
     @property
     def texture(self):
@@ -214,17 +211,29 @@ class MaskStage(ShaderStage):
             self._mask = self._mask_pipeline.render_texture(None)
         self._quad["uMaskTexture"] = self._mask
 
-class TransitionStage(Stage):
-    def __init__(self, vertex, fragment, stage1=None, stage2=None):
+class TransitionStage(BaseStage):
+    def __init__(self, vertex, fragment, uniforms=None, stage1=None, stage2=None):
         self._dummy_input = np.zeros((1, 1, 4), dtype=np.uint8).view(gloo.Texture2D)
         self._stage1 = stage1
         self._stage2 = stage2
         self._stage1_texture = stage1 if isinstance(stage1, gloo.Texture2D) else None
         self._stage2_texture = stage2 if isinstance(stage2, gloo.Texture2D) else None
 
+        self._uniforms = uniforms
         self._shader = ShaderStage(vertex, fragment, self._configure_program)
+        #self.set_quad(vertex, fragment, self._configure_program)
+
         self._progress = 0
+        # False: from stage1 to stage2
+        # True: from stage2 to stage1
+        # direction False <==> progress 1->0
+        # direction True  <==> progress 0->1
+        # end? direction == progress
         self._direction = False
+
+    def set_quad(self, vertex, fragment, uniforms):    
+        self._uniforms = uniforms
+        self._shader.set_quad(vertex, fragment, self._configure_program)
 
     @property
     def stage1(self):
@@ -268,6 +277,12 @@ class TransitionStage(Stage):
     def progress(self, progress):
         self._progress = progress
 
+    @property
+    def is_over(self):
+        if self._direction:
+            return float(self._progress) == 1.0
+        return float(self._progress) == 0.0
+
     def animate(self, duration, direction=None):
         duration = float(duration)
         start = float(self._progress)
@@ -279,26 +294,42 @@ class TransitionStage(Stage):
         if direction is None:
             direction = not self._direction
         if direction:
-            self._progress = var.RelativeTime().apply(progress_up)
+            self._progress = var.RelativeTime().apply(progress_up)#.apply(lambda a: a**2)
         else:
             self._progress = var.RelativeTime().apply(progress_down)
         self._direction = direction
 
-    def animate_to(self, stage, duration):
+    def animate_to(self, stage, duration, ping_pong=False):
         self.destination = stage
-        self.animate(duration)
+        self.animate(duration, direction=self.direction)
+
+    def animate_from_to(self, source, destination, duration):
+        self.direction = True
+        self.progress = 0
+
+        #self.source = source
+        #self.destination = destination
+        self.stage1 = source
+        self.stage2 = destination
+        #print(self.progress, self.direction, ":", source, "->", destination)
+        #print(self.stage1, self.stage2)
+        #print(self.source, self.destination)
+        #assert self.source == source
+        #assert self.destination == destination
+        self.animate(duration, direction=True)
 
     def _configure_program(self, program):
         program["uTexture1"] = self._stage1_texture
         program["uTexture2"] = self._stage2_texture
         program["uAlpha"] = float(self._progress)
-        program["strength"] = 0.2
+        configure_program(program, self._uniforms)
 
     def _render_stage(self, stage):
         if isinstance(stage, gloo.Texture2D):
             return stage
-        elif isinstance(stage, Stage):
-            return stage.render_texture(self._dummy_input)
+        elif isinstance(stage, BaseStage):
+            #return stage.render_texture(self._dummy_input)
+            return stage.render_texture(None)
         else:
             return self._dummy_input
 
@@ -325,8 +356,10 @@ class TransitionStage(Stage):
         self._render_stages()
         self._shader.render_screen(self._size_texture(), screen_size)
 
-class Pipeline(Stage):
-    def __init__(self, stages=[]):
+class Pipeline(BaseStage):
+    def __init__(self, stages=None):
+        if stages is None:
+            stages = []
         self._stages = stages
         self._fbos = None
         self._fbo_size = None
@@ -348,11 +381,15 @@ class Pipeline(Stage):
         return self._stages[-1], texture
 
     def render_texture(self, texture):
+        #print("Texture:", self)
         last_stage, texture = self._pre_render(texture)
         return last_stage.render_texture(texture)
 
     def render_screen(self, texture, screen_size):
+        #print("Screen:", self, screen_size)
+        #print("My stages:", self._stages)
         last_stage, texture = self._pre_render(texture)
+        #print("My last stage:", last_stage)
         return last_stage.render_screen(texture, screen_size)
 
 class SubPipeline(Pipeline):

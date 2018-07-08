@@ -91,19 +91,19 @@ class ForwardBackward:
             video.speed = next_speed()
             self._change = addtime(next_time())
 
-class VideoReader(threading.Thread):
+class VideoPlayer(threading.Thread):
 
     FORWARD = True
     BACKWARD = False
 
     def __init__(self, path, time_control=None):
-        super(VideoReader, self).__init__()
+        super(VideoPlayer, self).__init__()
 
         self._video = cv2.VideoCapture(path)
 
         self._time_control = time_control
         self._clock = app.clock.Clock()
-        self._mode = VideoReader.FORWARD
+        self._mode = VideoPlayer.FORWARD
         self._paused = False
         self._paused_read = False
 
@@ -174,7 +174,7 @@ class VideoReader(threading.Thread):
                 continue
             grabbed, frame = self._video.read()
             self._paused_read = True
-            if self.mode == VideoReader.BACKWARD:
+            if self.mode == VideoPlayer.BACKWARD:
                 self._frame_index = self._frame_index - 2
 
             if not grabbed:

@@ -105,7 +105,7 @@ class ReloadVar(Var):
             print("### Warning: Number of ReloadVar's in file %s has changed. Ignoring reloading this file from now on." % filename, file=sys.stderr)
             ReloadVar.ignore_files.add(filename)
         else:
-            #print("Got values %s" % values)
+            print("Got values %s" % values)
             for value, variable in zip(values, variables):
                 variable._value = value
 
