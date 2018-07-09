@@ -118,16 +118,16 @@ class RenderStage(BaseStage):
         self.render(texture, screen_size)
         self.after_render()
 
-def configure_program(program, config):
-    if isinstance(config, dict):
-        for key, value in config.items():
+def apply_uniforms(program, uniforms):
+    if isinstance(uniforms, dict):
+        for key, value in uniforms.items():
             if isinstance(value, var.Var):
                 value = float(value)
             program[key] = value
-    elif callable(config):
-        config(program)
+    elif callable(uniforms):
+        uniforms(program)
     else:
-        raise ValueError("Bad program configuration object: %s. Expecting dict or callable." % repr(config))
+        raise ValueError("Bad uniforms object: %s. Expecting dict or callable." % repr(uniforms))
 
 class ShaderStage(RenderStage):
     def __init__(self, vertex, fragment, uniforms={}, **kwargs):
@@ -138,7 +138,7 @@ class ShaderStage(RenderStage):
         self._old_quad = vertex, fragment
 
     def before_render(self, texture):
-        configure_program(self._quad, self._uniforms)
+        apply_uniforms(self._quad, self._uniforms)
 
     def render(self, texture, target_size):
         h, w, _ = texture.shape
@@ -221,7 +221,6 @@ class TransitionStage(BaseStage):
 
         self._uniforms = uniforms
         self._shader = ShaderStage(vertex, fragment, self._configure_program)
-        #self.set_quad(vertex, fragment, self._configure_program)
 
         self._progress = 0
         # False: from stage1 to stage2
@@ -230,6 +229,12 @@ class TransitionStage(BaseStage):
         # direction True  <==> progress 0->1
         # end? direction == progress
         self._direction = False
+
+    def _configure_program(self, program):
+        program["uTexture1"] = self._stage1_texture
+        program["uTexture2"] = self._stage2_texture
+        program["uAlpha"] = float(self._progress)
+        apply_uniforms(program, self._uniforms)
 
     def set_quad(self, vertex, fragment, uniforms):    
         self._uniforms = uniforms
@@ -318,11 +323,6 @@ class TransitionStage(BaseStage):
         #assert self.destination == destination
         self.animate(duration, direction=True)
 
-    def _configure_program(self, program):
-        program["uTexture1"] = self._stage1_texture
-        program["uTexture2"] = self._stage2_texture
-        program["uAlpha"] = float(self._progress)
-        configure_program(program, self._uniforms)
 
     def _render_stage(self, stage):
         if isinstance(stage, gloo.Texture2D):
