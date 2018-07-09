@@ -51,14 +51,17 @@ class ExprEvent(Event):
         return self._expr()
 
 class Keys(Event):
-    def __init__(self):
+    def __init__(self, window):
         super().__init__()
+
         self._keys = set()
 
-    def attach(self, window):
         def on_key_press(code, modifier, self=self):
             self._keys.add((code, modifier))
         window.attach(on_key_press=on_key_press)
+        # push one more (empty) handler layer
+        # the glumpy app (launched later) seems to overwrite the current layer
+        window.attach()
 
     def evaluate(self):
         keys = self._keys
