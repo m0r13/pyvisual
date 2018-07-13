@@ -60,7 +60,6 @@ def run(window, audio, pipeline):
 
     @window.event
     def on_draw(dt):
-        app.clock.tick()
         window.clear()
 
         audio.process()

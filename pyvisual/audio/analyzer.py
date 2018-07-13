@@ -80,7 +80,7 @@ class AudioAnalyzer:
     def __init__(self):
         self._beat_threshold = 0.15
         self._beat_gain = 0.0
-        self._beat_values = RingBuffer(25*5)
+        self._beat_values = RingBuffer(30*10)
         self._beat_on = False
         
         self._events = []
@@ -94,8 +94,7 @@ class AudioAnalyzer:
         self.vu = event.ExprEvent(lambda: self._events[self.EVENT_VU])
         self.vu_norm = NormalizedVU(self.vu, self.beat_status)
 
-        self._pulse = pulse.PulseAudioContext(self._process_block, block_size=512, sample_rate=5000)
-        #self._pulse_thread = threading.Thread(target=lambda: self._pulse.run())
+        self._pulse = pulse.PulseAudioContext(self._process_block, block_size=256, sample_rate=5000)
 
         self._beat_lowpass = util.Filter(signal.butter, 5, 50, 5000, {"btype" : "low", "analog" : False})
         self._beat_highpass = util.Filter(signal.butter, 5, 5, 5000, {"btype" : "high", "analog" : False})
