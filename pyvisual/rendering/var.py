@@ -35,6 +35,17 @@ class Var:
     # floor
     # ceil
 
+    def map_range(self, min0, max0, min1, max1):
+        # original range mapped to [0; 1]
+        rel = (self - min0) / (max0 - min0)
+        return Const(min1) + rel * (max1 - min1)
+
+    @staticmethod
+    def lerp(alpha, v0, v1):
+        if not isinstance(alpha, Var):
+            alpha = Const(alpha)
+        return (Const(1.0) - alpha) * v0 + alpha * v1
+
 class Const(Var):
     def __init__(self, value):
         super().__init__()
@@ -51,6 +62,14 @@ class OpVar(Var):
 
     def __float__(self):
         return self._operation(*map(float, self._args))
+
+class ExprVar(Var):
+    def __init__(self, expr):
+        super().__init__()
+        self._expr = expr
+
+    def __float__(self):
+        return self._expr()
 
 class ReloadVar(Var):
     # when we last updated vars

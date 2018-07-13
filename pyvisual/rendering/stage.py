@@ -1,9 +1,11 @@
 import numpy as np
 import time
+import logging
 from PIL import Image
 from glumpy import app, gl, glm, gloo, data
-
 from . import primitive, transform, var
+
+log = logging.getLogger(__name__)
 
 class BaseStage:
     def render_texture(self, texture):
@@ -37,6 +39,7 @@ class RenderStage(BaseStage):
             if size == (w, h):
                 return self._fbo
         w, h = size
+        log.debug("Stage %s creating fbo %s" % (repr(self), repr((w, h, 4))))
         texture = np.zeros((h, w, 4), dtype=np.uint8).view(gloo.Texture2D)
         self._fbo = gloo.FrameBuffer(color=[texture])
         return self._fbo
@@ -204,7 +207,7 @@ class MaskStage(ShaderStage):
         if isinstance(mask, Pipeline):
             self._mask_pipeline = mask
         else:
-            self._mask = mask.view(gloo.Texture2D)
+            self._mask = mask
 
     def before_render(self, texture):
         if self._mask_pipeline:
@@ -236,7 +239,7 @@ class TransitionStage(BaseStage):
         program["uAlpha"] = float(self._progress)
         apply_uniforms(program, self._uniforms)
 
-    def set_quad(self, vertex, fragment, uniforms):    
+    def set_quad(self, vertex, fragment, uniforms):
         self._uniforms = uniforms
         self._shader.set_quad(vertex, fragment, self._configure_program)
 

@@ -1,8 +1,11 @@
 import os
 import glob
 import numpy as np
+import logging
 from PIL import Image
 from glumpy import gloo
+
+log = logging.getLogger(__name__)
 
 DATA_PATH = os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "data")
 
@@ -27,6 +30,7 @@ def load_shader(name):
     return cached_shaders[name]
 
 def load_texture(name):
+    log.debug("Loading texture %s" % name)
     path = os.path.join(DATA_PATH, "image", name)
     return np.array(Image.open(path)).view(gloo.Texture2D)
 

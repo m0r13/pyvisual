@@ -10,6 +10,7 @@ void main() {
     vec4 color = texture(uInputTexture, TexCoord0);
     vec4 mask = texture(uMaskTexture, TexCoord0);
 
-    oFragColor = vec4(color.rgb, mask.r);
+    //oFragColor = vec4(color.rgb, mask.r);
+    oFragColor = vec4(vec3(color.rgb), mask.r);
 }
 
