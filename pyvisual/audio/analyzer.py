@@ -156,7 +156,9 @@ class AudioAnalyzer:
         self._events[self.EVENT_VU] = beat_value
 
     def start(self):
-        #self._pulse_thread.start()
-        #self._pulse.run()
         self._pulse.start()
+
+    def stop(self):
+        self._pulse.stop()
+        self._pulse.join()
 

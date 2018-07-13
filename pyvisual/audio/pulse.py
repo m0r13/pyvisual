@@ -26,8 +26,8 @@ class PulseAudioContext(threading.Thread):
         self._block_size = block_size
         self._process_block = process_block
 
-    def _quit(ret):
-        mainloop_api.contents.quit(mainloop_api, ret)
+    def _quit(self, ret):
+        self._mainloop_api.contents.quit(self._mainloop_api, ret)
 
     def _context_state_callback(self, context, userdata):
         state = pa_context_get_state(context)
@@ -159,10 +159,13 @@ class PulseAudioContext(threading.Thread):
 
         if self._stream:
             pa_xfree(self._stream)
-        if context:
+        if self._context:
             pa_xfree(self._context)
-        if mainloop:
+        if self._mainloop:
             pa_mainloop_free(self._mainloop)
+
+    def stop(self):
+        self._quit(0)
 
 def quit(ret):
     mainloop_api.contents.quit(mainloop_api, ret)

@@ -120,5 +120,9 @@ def run(window, audio, pipeline):
     def on_init():
         app.clock.set_fps_limit(30)
 
+    @window.event
+    def on_close():
+        audio.stop()
+
     audio.start()
     app.run()
