@@ -102,7 +102,7 @@ class AudioAnalyzer:
         self._current_beat_amplitude = 0.0
         self._current_beat_on = False
 
-        self._current_fft = np.array([0.0, 0.0])
+        #self._current_fft = np.array([0.0, 0.0])
 
     @property
     def beat_threshold(self):
@@ -127,12 +127,10 @@ class AudioAnalyzer:
         amplitude = self._amplitude_lowpass.process(np.abs(beat))
         self._current_beat_amplitude = amplitude[-1]
         self._current_beat_on = amplitude[-1] * self._beat_gain >= self._beat_threshold
-        #print(self._current_beat_amplitude)
 
-        window = signal.blackman(len(block))
-        #window = np.ones((len(block),))
-        test = fftpack.fft(block * window)
-        self._current_fft = test
+        #window = signal.blackman(len(block))
+        #test = fftpack.fft(block * window)
+        #self._current_fft = test
 
     def process(self):
         #beat_value = self._beat.get(False)

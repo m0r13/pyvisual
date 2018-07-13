@@ -84,10 +84,11 @@ def run(window, audio, pipeline):
             plot_values(audio.beat_values, ortho_px, bounds, color, bg_color,  [0.0, 1.0])
             primitive.draw_line((bounds[0], threshold_y), (bounds[2], threshold_y), threshold_color, ortho_px)
 
-            fft = audio._current_fft
-            freqs = fftpack.fftfreq(len(fft), d=1.0 / 5000.0)
-            fft = fft[0:len(fft) // 2] * 0.05
-            plot_bar_values(fft, ortho_px, (10, 10, w - 10, 210), color, bg_color, [0.0, 1.0])
+            #fft = audio._current_fft
+            #freqs = fftpack.fftfreq(len(fft), d=1.0 / 5000.0)
+            #fft = fft[0:len(fft) // 2] * 0.05
+            #if len(fft) > 1:
+            #    plot_bar_values(fft, ortho_px, (10, 10, w - 10, 210), color, bg_color, [0.0, 1.0])
             #print(freqs)
 
         #print("Resetting:", repr(Event), audio.vu in Event._instances)
