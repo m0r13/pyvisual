@@ -79,7 +79,7 @@ class AudioAnalyzer:
 
     def __init__(self):
         self._beat_threshold = 0.15
-        self._beat_gain = 0.0
+        self._beat_gain = 3.0
         self._beat_values = RingBuffer(30*10)
         self._beat_on = False
         

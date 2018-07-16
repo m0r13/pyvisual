@@ -10,6 +10,11 @@ def make_var(x):
         return x
     return Const(x)
 
+def lerp(alpha, v0, v1):
+    if not isinstance(alpha, Var):
+        alpha = Const(alpha)
+    return (Const(1.0) - alpha) * v0 + alpha * v1
+
 class Var:
     def __float__(self):
         raise NotImplementedError()
@@ -39,12 +44,6 @@ class Var:
         # original range mapped to [0; 1]
         rel = (self - min0) / (max0 - min0)
         return Const(min1) + rel * (max1 - min1)
-
-    @staticmethod
-    def lerp(alpha, v0, v1):
-        if not isinstance(alpha, Var):
-            alpha = Const(alpha)
-        return (Const(1.0) - alpha) * v0 + alpha * v1
 
 class Const(Var):
     def __init__(self, value):

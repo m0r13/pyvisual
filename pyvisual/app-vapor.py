@@ -43,30 +43,47 @@ changes = MultiEvent(change, [
 ])
 
 current_background = Iterated(key_right | changes["background"], shuffle=True, stages=[
-    stage.TextureStage(util.load_texture(name)) for name in util.glob_textures("industrial/*")
+    stage.TextureStage(util.load_texture(name)) for name in util.glob_textures("vapor/*/*.jpg")
 ])
 
 current_foreground = Iterated(key_right | changes["foreground"] | changes["foreground_completely"], shuffle=True, stages=[
-    stage.TextureStage(util.load_texture(name)) for name in util.glob_textures("industrial/*")
+    stage.TextureStage(util.load_texture(name)) for name in util.glob_textures("vapor/*/*.jpg")
 ])
 #current_foreground = current_background
 
 scale = var.Time().apply(lambda x: math.sin(x)).map_range(-1, 1, 0.5, 0.9)
 scale = vu_norm.map_range(0.0, 1.0, 0.5, 0.9)
+
 current_mask = Iterated(key_space | changes["mask"] | changes["foreground_completely"], shuffle=True, stages=[
-    stage.TextureStage(util.load_texture(name), transform=[transform.scale(scale)], force_size=(1920, 1080)) for name in util.glob_textures("mask/industrial/*")
+    stage.TextureStage(util.load_texture(name), transform=[transform.scale(scale)], force_size=(1920, 1080)) for name in util.glob_textures("mask/common/*.png")
 ])
 
-def effect_mirror():
+def effect_mirror(mode=None):
     def _effect(*args):
-        mode = np.random.randint(low=0, high=4)
+        m = mode
+        if m is None:
+            m = np.random.randint(low=0, high=4)
         effect = stage.Pipeline()
-        if mode == 3:
+        if m == 3:
             # horizontal and vertical mirrored
             angle = math.radians(np.random.randint(low=0, high=7) * 45.0)
             effect.add_stage(stage.ShaderStage("common/passthrough.vert", "post/move.frag", {"uDirection" : angle, "uDirectionOffset" : time * 25.0}))
-        effect.add_stage(stage.ShaderStage("common/passthrough.vert", "post/mirror.frag", {"uMode" : mode}))
+        effect.add_stage(stage.ShaderStage("common/passthrough.vert", "post/mirror.frag", {"uMode" : m}))
         return effect
+    return _effect
+
+def effect_chromatic_aberration():
+    def _effect(*args):
+        angle = np.random.uniform(math.radians(0.0), np.radians(360.0), size=(4,))
+        rotation = np.random.uniform(low=-0.5, high=0.5, size=(4,))
+        offset = np.random.uniform(low=0.0, high=25.0, size=(4,))
+        def uniforms(program):
+            t = float(time)
+            stage.apply_uniforms(program, {
+                "uDirections" : angle + t * rotation,
+                "uDirectionsOffset" : offset
+            })
+        return stage.ShaderStage("common/passthrough.vert", "post/chromaticaberration.frag", uniforms)
     return _effect
 
 def effect_slices():
@@ -76,6 +93,24 @@ def effect_slices():
             "offset" : 0.03,
             "time" : time * 0.1,
             "speedV" : 0.3
+        })
+    return _effect
+
+def effect_scanlines_fine():
+    def _effect(*args):
+        return stage.ShaderStage("common/passthrough.vert", "post/scanline.frag", {
+            "time" : time,
+            "count" : 400.0,
+            "noiseAmount" : 0.25,
+            "linesAmount" : 0.25
+        })
+    return _effect
+
+def effect_scanlines_coarse():
+    def _effect(*args):
+        return stage.ShaderStage("common/passthrough.vert", "post/scanlinescoarse.frag", {
+            "uNoiseTexture" : util.load_texture("noise3.png"),
+            "time" : time
         })
     return _effect
 
@@ -93,19 +128,35 @@ mask = stage.Pipeline()
 mask.add_stage(current_mask)
 mask.add_stage(Selected(keys[ord("M")], min_n=1, max_n=1, stages=[
     #stage.ShaderStage("common/passthrough.vert", "common/passthrough.frag", transform=[transform.zrotate(var.Time() * 10.0)]),
-    effect_glitch(bw=True)
+    #effect_mirror(mode=3),
+    
+    #effect_glitch(bw=True)
+
+    stage.ShaderStage("common/passthrough.vert", "post/mirror_polar.frag", {
+        "uAngleOffset" : time * 0.25,
+        "uSegmentCount" : 3,
+    })
 ]))
 
 foreground = stage.Pipeline()
 foreground.add_stage(current_foreground)
+foreground.add_stage(Selected(keys[ord("F")], min_n=1, max_n=2, stages=[
+    #effect_chromatic_aberration(),
+    effect_mirror(),
+    effect_slices(),
+    effect_scanlines_fine(),
+    effect_scanlines_coarse()
+]))
 foreground.add_stage(stage.MaskStage(mask))
-foreground.add_stage(stage.ShaderStage("common/passthrough.vert", "common/red.frag"))
 
 background = stage.Pipeline()
 background.add_stage(current_background)
 background.add_stage(Selected(keys[ord("B")] | changes["background_effect"], min_n=1, max_n=2, stages=[
+    #effect_chromatic_aberration(),
     effect_mirror(),
-    effect_slices()
+    effect_slices(),
+    effect_scanlines_fine(),
+    effect_scanlines_coarse()
 ]))
 
 pipeline = stage.Pipeline()
