@@ -66,5 +66,5 @@ void main() {
         outCol.b = texture2D(uInputTexture, uvOff).b;
     }
     outCol.rgb = vec3(max(max(outCol.r, outCol.g), outCol.b));
-    gl_FragColor = vec4(outCol,1.0);
+    gl_FragColor = vec4(outCol, texture2D(uInputTexture, uvOff).a);
 }

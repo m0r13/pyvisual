@@ -127,16 +127,20 @@ def effect_glitch(bw=False):
 mask = stage.Pipeline()
 mask.add_stage(current_mask)
 mask.add_stage(Selected(keys[ord("M")], min_n=1, max_n=1, stages=[
-    #stage.ShaderStage("common/passthrough.vert", "common/passthrough.frag", transform=[transform.zrotate(var.Time() * 10.0)]),
+    stage.ShaderStage("common/passthrough.vert", "common/passthrough.frag", transform=[transform.zrotate(var.Time() * 10.0)]),
     #effect_mirror(mode=3),
     
     #effect_glitch(bw=True)
 
-    stage.ShaderStage("common/passthrough.vert", "post/mirror_polar.frag", {
-        "uAngleOffset" : time * 0.25,
-        "uSegmentCount" : 3,
-    })
+    #stage.ShaderStage("common/passthrough.vert", "post/mirror_polar.frag", {
+    #    "uAngleOffset" : time * 0.25,
+    #    "uSegmentCount" : 3,
+    #})
 ]))
+
+mask_shadow = stage.Pipeline()
+mask_shadow.add_stage(mask)
+mask_shadow.add_stage(stage.ShaderStage("common/passthrough.vert", "common/mask_shadow.frag", transform=[transform.translate(x=25.0 / 1920.0, y=-25.0 / 1920.0)]))
 
 foreground = stage.Pipeline()
 foreground.add_stage(current_foreground)
@@ -161,8 +165,8 @@ background.add_stage(Selected(keys[ord("B")] | changes["background_effect"], min
 
 pipeline = stage.Pipeline()
 pipeline.add_stage(background)
+pipeline.add_stage(mask_shadow)
 pipeline.add_stage(foreground)
-#pipeline.add_stage(mask)
 
 visualapp.run(window, audio, pipeline)
 
