@@ -55,9 +55,17 @@ current_foreground = Iterated(key_right | changes["foreground"] | changes["foreg
 scale = var.Time().apply(lambda x: math.sin(x)).map_range(-1, 1, 0.5, 0.9)
 scale = vu_norm.map_range(0.0, 1.0, 0.5, 0.9)
 
-current_mask = Iterated(key_space | changes["mask"] | changes["foreground_completely"], shuffle=True, stages=[
+def mask_transition(*args):
+    vertex = "common/passthrough.vert"
+    fragment = "transition/move.frag"
+    uniforms = {}
+    duration = 0.5
+
+    return vertex, fragment, uniforms, duration
+
+current_mask = Transitioned(Iterated(key_space | changes["mask"] | changes["foreground_completely"], shuffle=True, stages=[
     stage.TextureStage(util.load_texture(name), transform=[transform.scale(scale)], force_size=(1920, 1080)) for name in util.glob_textures("mask/common/*.png")
-])
+]), transition_config=mask_transition)
 
 def effect_mirror(mode=None):
     def _effect(*args):
@@ -128,7 +136,7 @@ def effect_glitch(bw=False):
 mask = stage.Pipeline()
 mask.add_stage(current_mask)
 mask.add_stage(Selected(keys[ord("M")], min_n=1, max_n=1, stages=[
-    stage.ShaderStage("common/passthrough.vert", "common/passthrough.frag", transform=[transform.zrotate(var.Time() * 10.0)]),
+    stage.ShaderStage("common/passthrough.vert", "common/passthrough.frag", transform=[transform.zrotate(var.Time() * 10.0 * 0)]),
     #effect_mirror(mode=3),
     
     #effect_glitch(bw=True)
@@ -141,7 +149,10 @@ mask.add_stage(Selected(keys[ord("M")], min_n=1, max_n=1, stages=[
 
 mask_shadow = stage.Pipeline()
 mask_shadow.add_stage(mask)
-mask_shadow.add_stage(stage.ShaderStage("common/passthrough.vert", "common/mask_shadow.frag", transform=[transform.translate(x=25.0 / 1920.0, y=-25.0 / 1920.0)]))
+mask_shadow.add_stage(stage.ShaderStage("common/passthrough.vert", "common/mask_shadow.frag", {
+    "uOffset" : [15, 15],
+    "uColor" : [0.0, 0.0, 0.0, 0.5]
+}))
 
 foreground = stage.Pipeline()
 foreground.add_stage(current_foreground)

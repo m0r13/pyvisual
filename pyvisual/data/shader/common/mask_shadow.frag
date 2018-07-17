@@ -1,19 +1,20 @@
 #version 150
 uniform sampler2D uInputTexture;
+uniform vec2 uOffset;
+uniform vec4 uColor;
 
 in vec2 TexCoord0;
-
 out vec4 oFragColor;
 
 void main() {
-    vec4 mask = texture(uInputTexture, TexCoord0);
+    ivec2 size = textureSize(uInputTexture, 0);
+    vec2 texOffset = uOffset / vec2(size);
+    vec4 mask = texture(uInputTexture, TexCoord0 - texOffset);
     vec4 frag = vec4(0.0);
     if (mask.r > 0.0) {
-        frag.rgb = vec3(1.0);
-        frag.a = 0.5;
+        frag = uColor;
     }
 
-    //oFragColor = vec4(color.rgb, mask.r);
     oFragColor = frag;
 }
 

@@ -48,7 +48,7 @@ class GenerativeStage(stage.BaseStage):
             instance._evaluated = False
 
 class Transitioned(GenerativeStage):
-    def __init__(self, generator, transition_config=("common/passthrough.vert", "transition/move.frag", {})):
+    def __init__(self, generator, transition_config=("common/passthrough.vert", "transition/move.frag", {}, 0.5)):
         super().__init__()
 
         self._event = generator._event
@@ -73,9 +73,9 @@ class Transitioned(GenerativeStage):
             return None
         else:
             config = self._transition_config
-            vertex, fragment, uniforms = config(self._event) if callable(config) else config
+            vertex, fragment, uniforms, duration = config(self._event) if callable(config) else config
             self._transition.set_quad(vertex, fragment, uniforms)
-            self._transition.animate_from_to(self._source, self._generator.actual_stage, 0.7)
+            self._transition.animate_from_to(self._source, self._generator.actual_stage, float(duration))
             return self._transition
 
 class Iterated(GenerativeStage):
