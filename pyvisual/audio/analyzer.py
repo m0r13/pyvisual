@@ -94,7 +94,9 @@ class AudioAnalyzer:
         self.vu = event.ExprEvent(lambda: self._events[self.EVENT_VU])
         self.vu_norm = NormalizedVU(self.vu, self.beat_status)
 
-        self._pulse = pulse.PulseAudioContext(self._process_block, block_size=256, sample_rate=5000)
+        # 128@5000Hz would correspond to 1100@44100Hz, so should be fine
+        # and 5000 / 128 => 39 blocks per second of audio, good for 30 fps video
+        self._pulse = pulse.PulseAudioContext(self._process_block, block_size=128, sample_rate=5000)
 
         self._beat_lowpass = util.Filter(signal.butter, 5, 50, 5000, {"btype" : "low", "analog" : False})
         self._beat_highpass = util.Filter(signal.butter, 5, 5, 5000, {"btype" : "high", "analog" : False})
