@@ -90,6 +90,9 @@ class ReloadVar(Var):
     def get(cls, frame, value):
         location = "%s%s" % (frame.filename, frame.lineno)
 
+        # TODO hmm allow multiple variables per line or assume only one variable per line
+        # (one variable per line would allow using variable in for-bodies for example)
+        # (this that's better for now)
         if location in cls.variables_by_location:
             #print("Instance for location %s already exists" % location)
             return cls.variables_by_location[location]
@@ -106,24 +109,30 @@ class ReloadVar(Var):
     @staticmethod
     def reload_vars():
         for filename, variables in ReloadVar.variables.items():
-            if ReloadVar.last_update < os.path.getmtime(filename) and filename not in ReloadVar.ignore_files:
-                ReloadVar.reload_vars_from_file(filename, variables)
+            # ignore file not found errors
+            # seems to happen the very moment a file is written
+            try:
+                if ReloadVar.last_update < os.path.getmtime(filename) and filename not in ReloadVar.ignore_files:
+                    ReloadVar.reload_vars_from_file(filename, variables)
+            except FileNotFoundError:
+                pass
         ReloadVar.last_update = time.time()
     
     @staticmethod
     def reload_vars_from_file(filename, variables):
         source = ""
+        print(os.getcwd(), filename)
         with open(filename, "r") as f:
             source = f.read()
         values = []
         #print("Gotta reload %s" % filename)
-        for m in re.finditer(r"_V\(([0-9\.]+)\)", source):
+        for m in re.finditer(r"_V\((-?[0-9\.]+)\)", source):
             values.append(float(m.group(1)))
         if len(values) != len(variables):
-            print("### Warning: Number of ReloadVar's in file %s has changed. Ignoring reloading this file from now on." % filename, file=sys.stderr)
+            print("### Warning: Number of ReloadVar's in file %s has changed (got %d, expected %d). Ignoring reloading this file from now on." % (filename, len(values), len(variables)), file=sys.stderr)
             ReloadVar.ignore_files.add(filename)
         else:
-            print("Got values %s" % values)
+            #print("Got values %s" % values)
             for value, variable in zip(values, variables):
                 variable._value = value
 

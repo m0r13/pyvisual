@@ -54,16 +54,10 @@ class RenderStage(BaseStage):
 
         if texture_aspect < target_aspect:
             # border left/right
-            height = target_size[1]
-            width = int(texture_aspect * height)
-            margin = (target_size[0] - width) // 2
             glm.scale(model, texture_aspect, 1.0, 1.0)
             glm.scale(projection, 1.0 / target_aspect, 1.0, 1.0)
         else:
             # border top/bottom
-            width = target_size[0]
-            height = int(width / texture_aspect)
-            margin = (target_size[1] - height) // 2
             glm.scale(model, 1.0, 1.0 / texture_aspect, 1.0)
             glm.scale(projection, 1.0, target_aspect, 1.0)
 

@@ -10,6 +10,7 @@ from glumpy import app, gl, glm, gloo, data, key
 from glumpy.ext import glfw
 
 from pyvisual.rendering import stage, transform, video, var, util
+from pyvisual.rendering.var import _V
 from pyvisual.rendering.generative import *
 from pyvisual.event import *
 from pyvisual.audio import analyzer

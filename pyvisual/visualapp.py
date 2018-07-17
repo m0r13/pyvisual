@@ -2,6 +2,7 @@ from glumpy import app, gl, glm, gloo, data, key
 from scipy import fftpack
 
 from pyvisual.rendering import stage, primitive, transform, video, var, util
+from pyvisual.rendering.var import _V
 from pyvisual.rendering.generative import *
 from pyvisual.event import *
 from pyvisual.audio import analyzer
@@ -94,6 +95,8 @@ def run(window, audio, pipeline):
         #print("Resetting:", repr(Event), audio.vu in Event._instances)
         Event.reset_instances()
         GenerativeStage.reset_instances()
+
+        var.ReloadVar.reload_vars()
 
     @window.event
     def on_key_press(symbol, modifiers):

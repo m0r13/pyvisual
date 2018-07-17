@@ -45,10 +45,17 @@ class Lines(Primitive):
         self["uColor"] = color
         self.draw(gl.GL_LINE_STRIP)
 
+line_quads = {}
 def draw_lines(points, color, transformation, loop=False):
+    global line_quads
+
     if loop:
         points = points + [points[0]]
-    lines = Lines(len(points))
+
+    num = len(points)
+    if not num in line_quads:
+        line_quads[num] = Lines(num)
+    lines = line_quads[num]
     lines.render(points, color, transformation)
 
 def draw_line(p0, p1, color, transformation):
@@ -64,5 +71,4 @@ def fill_rect(rect, color, transformation):
     global color_quad
     if color_quad is None:
         color_quad = ColorQuad()
-    #quad = ColorQuad()
     color_quad.render(rect, color, transformation)
