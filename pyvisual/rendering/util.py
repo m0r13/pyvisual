@@ -29,10 +29,13 @@ def load_shader(name):
         return shader
     return cached_shaders[name]
 
+cached_textures = {}
 def load_texture(name):
-    log.debug("Loading texture %s" % name)
-    path = os.path.join(DATA_PATH, "image", name)
-    return np.array(Image.open(path)).view(gloo.Texture2D)
+    if name not in cached_textures:
+        log.debug("Loading texture %s" % name)
+        path = os.path.join(DATA_PATH, "image", name)
+        cached_textures[name] = np.array(Image.open(path)).view(gloo.Texture2D)
+    return cached_textures[name]
 
 def glob_textures(name):
     wildcard = os.path.join(DATA_PATH, "image", name)

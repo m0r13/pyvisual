@@ -4,7 +4,7 @@ import time
 import random
 import logging
 from glumpy import app, gl, glm, gloo, data
-from pyvisual.rendering import stage
+from pyvisual.rendering import stage, util
 
 log = logging.getLogger(__name__)
 
@@ -99,7 +99,10 @@ class Iterated(GenerativeStage):
             self._index += 1
         self._index = self._index % len(self._stages)
 
-        return self._stages[self._index]
+        actual_stage = self._stages[self._index]
+        if callable(actual_stage):
+            actual_stage = actual_stage()
+        return actual_stage
 
 class Selected(GenerativeStage):
     def __init__(self, event, stages, min_n=1, max_n=1):
@@ -132,4 +135,21 @@ class Selected(GenerativeStage):
             stages.append(actual_stage)
 
         return stage.Pipeline(stages)
+
+def load_resources(wildcard, **stage_kwargs):
+    actual_stages = []
+    actual_index = 0
+    for i in range(2):
+        actual_stages.append(stage.TextureStage(**stage_kwargs))
+
+    stages = []
+    for name in util.glob_textures(wildcard):
+        def _stage(*args, name=name):
+            nonlocal actual_index
+            i = actual_index
+            actual_stages[i]._texture = util.load_texture(name)
+            actual_index = (actual_index + 1) % 2
+            return actual_stages[i]
+        stages.append(_stage)
+    return stages
 

@@ -4,19 +4,18 @@ import sys
 import os
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
 
+import numpy as np
 import math
 import logging
 from glumpy import app, gl, glm, gloo, data, key
 from glumpy.ext import glfw
 
-from pyvisual.rendering import stage, transform, video, var, util
+from pyvisual.rendering import generative, stage, transform, video, var, util
 from pyvisual.rendering.var import _V
-from pyvisual.rendering.generative import *
-from pyvisual.event import *
 from pyvisual.audio import analyzer
-from pyvisual import visualapp
+from pyvisual import visualapp, event
 
-logging.basicConfig(level=logging.INFO)
+logging.basicConfig(level=logging.DEBUG)
 
 app.use("glfw")
 window = app.Window()
@@ -29,12 +28,12 @@ vu = audio.vu
 time = var.RelativeTime()
 vu_norm = audio.vu_norm.as_var
 
-keys = Keys(window)
+keys = event.Keys(window)
 key_space = keys[key.SPACE]
 key_right = keys[key.RIGHT]
 
-change = EveryOnEvent(beat_on, every_n=8)
-changes = MultiEvent(change, [
+change = event.EveryOnEvent(beat_on, every_n=8)
+changes = event.MultiEvent(change, [
     "background",
     "foreground",
     "mask",
@@ -43,13 +42,13 @@ changes = MultiEvent(change, [
     "foreground_completely",
 ])
 
-current_background = Iterated(key_right | changes["background"], shuffle=True, stages=[
-    stage.TextureStage(util.load_texture(name)) for name in util.glob_textures("vapor/*/*.jpg")
-])
+current_background = generative.Iterated(keys[key.UP] | changes["background"], shuffle=True, stages=
+    generative.load_resources("vapor/color scheme 1/*.jpg")
+)
 
-current_foreground = Iterated(key_right | changes["foreground"] | changes["foreground_completely"], shuffle=True, stages=[
-    stage.TextureStage(util.load_texture(name)) for name in util.glob_textures("vapor/*/*.jpg")
-])
+current_foreground = generative.Iterated(key_right | changes["foreground"] | changes["foreground_completely"], shuffle=True, stages=
+    generative.load_resources("vapor/color scheme 1/*.jpg")
+)
 #current_foreground = current_background
 
 scale = var.Time().apply(lambda x: math.sin(x)).map_range(-1, 1, 0.5, 0.9)
@@ -63,25 +62,29 @@ def mask_transition(*args):
 
     return vertex, fragment, uniforms, duration
 
-current_mask = Transitioned(Iterated(key_space | changes["mask"] | changes["foreground_completely"], shuffle=True, stages=[
-    stage.TextureStage(util.load_texture(name), transform=[transform.scale(scale)], force_size=(1920, 1080)) for name in util.glob_textures("mask/common/*.png")
-]), transition_config=mask_transition)
+current_mask = generative.Transitioned(generative.Iterated(key_space | changes["mask"] | changes["foreground_completely"], shuffle=True, stages=
+    generative.load_resources("mask/common/*.png", transform=[transform.scale(scale)], force_size=(1920, 1080))
+
+), transition_config=mask_transition)
 
 def effect_mirror(mode=None):
+    move = stage.ShaderStage("common/passthrough.vert", "post/move.frag")
+    mirror = stage.ShaderStage("common/passthrough.vert", "post/mirror.frag")
+    effect = stage.Pipeline([move, mirror])
     def _effect(*args):
         m = mode
         if m is None:
             m = np.random.randint(low=0, high=4)
-        effect = stage.Pipeline()
         if m == 3:
             # horizontal and vertical mirrored
             angle = math.radians(np.random.randint(low=0, high=7) * 45.0)
-            effect.add_stage(stage.ShaderStage("common/passthrough.vert", "post/move.frag", {"uDirection" : angle, "uDirectionOffset" : time * 25.0}))
-        effect.add_stage(stage.ShaderStage("common/passthrough.vert", "post/mirror.frag", {"uMode" : m}))
+            move.set_uniforms({"uDirection" : angle, "uDirectionOffset" : time * 25.0})
+        mirror.set_uniforms({"uMode" : m})
         return effect
     return _effect
 
 def effect_chromatic_aberration():
+    effect = stage.ShaderStage("common/passthrough.vert", "post/chromaticaberration.frag")
     def _effect(*args):
         angle = np.random.uniform(math.radians(0.0), np.radians(360.0), size=(4,))
         rotation = np.random.uniform(low=-0.5, high=0.5, size=(4,))
@@ -92,35 +95,42 @@ def effect_chromatic_aberration():
                 "uDirections" : angle + t * rotation,
                 "uDirectionsOffset" : offset
             })
-        return stage.ShaderStage("common/passthrough.vert", "post/chromaticaberration.frag", uniforms)
+        effect.set_uniforms(uniforms)
+        return effect
     return _effect
 
 def effect_slices():
+    effect = stage.ShaderStage("common/passthrough.vert", "post/slices.frag")
     def _effect(*args):
-        return stage.ShaderStage("common/passthrough.vert", "post/slices.frag", {
+        effect.set_uniforms({
             "slices" : 3.0,
             "offset" : 0.03,
             "time" : time * 0.1,
             "speedV" : 0.3
         })
+        return effect
     return _effect
 
 def effect_scanlines_fine():
+    effect = stage.ShaderStage("common/passthrough.vert", "post/scanline.frag")
     def _effect(*args):
-        return stage.ShaderStage("common/passthrough.vert", "post/scanline.frag", {
+        effect.set_uniforms({
             "time" : time,
             "count" : 400.0,
             "noiseAmount" : 0.25,
             "linesAmount" : 0.25
         })
+        return effect
     return _effect
 
 def effect_scanlines_coarse():
+    effect = stage.ShaderStage("common/passthrough.vert", "post/scanlinescoarse.frag")
     def _effect(*args):
-        return stage.ShaderStage("common/passthrough.vert", "post/scanlinescoarse.frag", {
+        effect.set_uniforms({
             "uNoiseTexture" : util.load_texture("noise3.png"),
             "time" : time
         })
+        return effect
     return _effect
 
 def effect_glitch(bw=False):
@@ -135,11 +145,11 @@ def effect_glitch(bw=False):
 
 mask = stage.Pipeline()
 mask.add_stage(current_mask)
-mask.add_stage(Selected(keys[ord("M")], min_n=1, max_n=1, stages=[
+mask.add_stage(generative.Selected(keys[ord("M")], min_n=1, max_n=1, stages=[
     stage.ShaderStage("common/passthrough.vert", "common/passthrough.frag", transform=[transform.zrotate(var.Time() * 10.0 * 0)]),
-    #effect_mirror(mode=3),
+    #effect_mirror(mode=1),
     
-    #effect_glitch(bw=True)
+    #effect_glitch(bw=True),
 
     #stage.ShaderStage("common/passthrough.vert", "post/mirror_polar.frag", {
     #    "uAngleOffset" : time * 0.25,
@@ -156,7 +166,7 @@ mask_shadow.add_stage(stage.ShaderStage("common/passthrough.vert", "common/mask_
 
 foreground = stage.Pipeline()
 foreground.add_stage(current_foreground)
-foreground.add_stage(Selected(keys[ord("F")], min_n=1, max_n=2, stages=[
+foreground.add_stage(generative.Selected(keys[ord("F")], min_n=1, max_n=2, stages=[
     #effect_chromatic_aberration(),
     effect_mirror(),
     effect_slices(),
@@ -167,7 +177,7 @@ foreground.add_stage(stage.MaskStage(mask))
 
 background = stage.Pipeline()
 background.add_stage(current_background)
-background.add_stage(Selected(keys[ord("B")] | changes["background_effect"], min_n=1, max_n=2, stages=[
+background.add_stage(generative.Selected(keys[ord("B")] | changes["background_effect"], min_n=1, max_n=2, stages=[
     #effect_chromatic_aberration(),
     effect_mirror(),
     effect_slices(),

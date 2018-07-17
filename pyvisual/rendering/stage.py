@@ -148,15 +148,19 @@ class ShaderStage(RenderStage):
             self._old_quad = vertex, fragment
         self._uniforms = uniforms
 
+    def set_uniforms(self, uniforms):
+        self._uniforms = uniforms
+
     @property
     def preferred_size(self):
         return None
 
 class TextureStage(RenderStage):
-    def __init__(self, texture=np.zeros((1, 1, 4), dtype=np.uint8), **kwargs):
+    def __init__(self, texture=np.zeros((1, 1, 4), dtype=np.uint8).view(gloo.Texture2D), **kwargs):
         super().__init__(**kwargs)
 
-        self._texture = texture.view(gloo.Texture2D)
+        #self._texture = texture.view(gloo.Texture2D)
+        self._texture = texture
         self._quad = primitive.TextureQuad("common/passthrough.vert", "common/passthrough.frag")
 
     @property
