@@ -10,11 +10,6 @@ void main() {
     ivec2 size = textureSize(uInputTexture, 0);
     vec2 texOffset = uOffset / vec2(size);
     vec4 mask = texture(uInputTexture, TexCoord0 - texOffset);
-    vec4 frag = vec4(0.0);
-    if (mask.r > 0.0) {
-        frag = uColor;
-    }
-
-    oFragColor = frag;
+    oFragColor = vec4(uColor.rgb, uColor.a * mask.r);
 }
 
