@@ -32,15 +32,15 @@ keys = event.Keys(window)
 key_space = keys[key.SPACE]
 key_right = keys[key.RIGHT]
 
-change = event.EveryOnEvent(beat_on, every_n=8)
-changes = event.MultiEvent(change, [
-    "background",
-    "foreground",
-    "mask",
+change = event.EveryOnEvent(beat_on, every_n=16)
+changes = event.MultiEvent(change, {
+    "background" : 0.0,
+    "foreground" : 0.0,
+    "mask" : 1.0,
 
-    "background_effect",
-    "foreground_completely",
-])
+    "background_effect" : 0.0,
+    "foreground_completely" : 0.0
+})
 
 current_background = generative.Iterated(keys[key.UP] | changes["background"], shuffle=True, stages=
     generative.load_resources("vapor/color scheme 1/*.jpg")
@@ -56,14 +56,15 @@ scale = vu_norm.map_range(0.0, 1.0, 0.5, 0.9)
 
 def mask_transition(*args):
     vertex = "common/passthrough.vert"
-    fragment = "transition/move.frag"
+    fragment = "transition/lerp.frag"
     uniforms = {}
     duration = 0.5
 
     return vertex, fragment, uniforms, duration
 
 current_mask = generative.Transitioned(generative.Iterated(key_space | changes["mask"] | changes["foreground_completely"], shuffle=True, stages=
-    generative.load_resources("mask/common/*.png", transform=[transform.scale(scale)], force_size=(1920, 1080))
+    #generative.load_resources("mask/common/*.png", transform=[transform.scale(scale)], force_size=(1920, 1080))
+    generative.load_resources("mask/test/*.png", transform=[transform.scale(scale)], force_size=(1920, 1080))
 
 ), transition_config=mask_transition)
 
@@ -143,18 +144,21 @@ def effect_glitch(bw=False):
         })
     return _effect
 
+bpm = 122.0
+
 mask = stage.Pipeline()
 mask.add_stage(current_mask)
-mask.add_stage(generative.Selected(keys[ord("M")], min_n=1, max_n=1, stages=[
-    stage.ShaderStage("common/passthrough.vert", "common/passthrough.frag", transform=[transform.zrotate(var.Time() * 10.0 * 0)]),
+mask.add_stage(generative.Selected(keys[ord("M")], min_n=2, max_n=2, stages=[
     #effect_mirror(mode=1),
     
     #effect_glitch(bw=True),
 
-    #stage.ShaderStage("common/passthrough.vert", "post/mirror_polar.frag", {
-    #    "uAngleOffset" : time * 0.25,
-    #    "uSegmentCount" : 3,
-    #})
+    stage.ShaderStage("common/passthrough.vert", "post/mirror_polar.frag", {
+        "uAngleOffset" : var.Const(bpm / 60.0 * 2 * 3.14159265) * time * var.Const(1.0 / (bpm / 8.0)),
+        "uSegmentCount" : 6,
+    }),
+
+    #stage.ShaderStage("common/passthrough.vert", "common/passthrough.frag", transform=[transform.zrotate(time * _V(2.0))])
 ]))
 
 mask_shadow = stage.Pipeline()
@@ -171,7 +175,7 @@ foreground.add_stage(generative.Selected(keys[ord("F")], min_n=1, max_n=2, stage
     effect_mirror(),
     effect_slices(),
     effect_scanlines_fine(),
-    effect_scanlines_coarse()
+    #effect_scanlines_coarse()
 ]))
 foreground.add_stage(stage.MaskStage(mask))
 
@@ -189,6 +193,7 @@ pipeline = stage.Pipeline()
 pipeline.add_stage(background)
 pipeline.add_stage(mask_shadow)
 pipeline.add_stage(foreground)
+#pipeline.add_stage(mask)
 
 visualapp.run(window, audio, pipeline)
 

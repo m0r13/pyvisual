@@ -1,3 +1,5 @@
+#!/usr/bin/env python3
+
 import logging
 import threading
 import numpy as np
@@ -164,3 +166,7 @@ class AudioAnalyzer:
         self._pulse.stop()
         self._pulse.join()
 
+if __name__ == "__main__":
+    analyzer = AudioAnalyzer()
+    analyzer.start()
+    analyzer._pulse.join()
