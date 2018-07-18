@@ -34,12 +34,12 @@ key_right = keys[key.RIGHT]
 
 change = event.EveryOnEvent(beat_on, every_n=16)
 changes = event.MultiEvent(change, {
-    "background" : 0.0,
-    "foreground" : 0.0,
+    "background" : 1.0,
+    "foreground" : 1.0,
     "mask" : 1.0,
 
-    "background_effect" : 0.0,
-    "foreground_completely" : 0.0
+    "background_effect" : 1.0,
+    "foreground_completely" : 1.0
 })
 
 current_background = generative.Iterated(keys[key.UP] | changes["background"], shuffle=True, stages=

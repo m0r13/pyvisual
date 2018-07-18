@@ -1,7 +1,8 @@
 from glumpy import app, gl, glm, gloo, data, key
 from scipy import fftpack
+import imgui
 
-from pyvisual.rendering import stage, primitive, transform, video, var, util
+from pyvisual.rendering import stage, primitive, transform, video, var, util, glumpy_imgui
 from pyvisual.rendering.var import _V
 from pyvisual.rendering.generative import *
 from pyvisual.event import *
@@ -55,7 +56,7 @@ def plot_bar_values(values, mvp, bounds, color=(1.0, 1.0, 1.0, 1.0), bg_color=(0
     primitive.draw_rect(*bounds, color, mvp)
 
 def run(window, audio, pipeline):
-    app.use("glfw")
+    imgui_renderer = glumpy_imgui.GlumpyGlfwRenderer(window._native_window, False)
 
     render_hud = True
 
@@ -92,6 +93,12 @@ def run(window, audio, pipeline):
             #    plot_bar_values(fft, ortho_px, (10, 10, w - 10, 210), color, bg_color, [0.0, 1.0])
             #print(freqs)
 
+        #imgui_renderer.process_inputs()
+        #imgui.new_frame()
+        #imgui.show_test_window()
+        #imgui.render()
+        #imgui_renderer.render(imgui.get_draw_data())
+        
         #print("Resetting:", repr(Event), audio.vu in Event._instances)
         Event.reset_instances()
         GenerativeStage.reset_instances()
