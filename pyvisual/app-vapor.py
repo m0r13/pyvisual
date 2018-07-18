@@ -126,10 +126,11 @@ def effect_scanlines_fine():
 
 def effect_scanlines_coarse():
     effect = stage.ShaderStage("common/passthrough.vert", "post/scanlinescoarse.frag")
+    seed = np.random.uniform(low=0.0, high=10.0)
     def _effect(*args):
         effect.set_uniforms({
             "uNoiseTexture" : util.load_texture("noise3.png"),
-            "time" : time
+            "time" : time + seed
         })
         return effect
     return _effect
@@ -175,7 +176,7 @@ foreground.add_stage(generative.Selected(keys[ord("F")], min_n=1, max_n=2, stage
     effect_mirror(),
     effect_slices(),
     effect_scanlines_fine(),
-    #effect_scanlines_coarse()
+    effect_scanlines_coarse()
 ]))
 foreground.add_stage(stage.MaskStage(mask))
 
