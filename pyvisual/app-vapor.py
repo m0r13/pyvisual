@@ -42,7 +42,7 @@ changes = event.MultiEvent(change, {
     "foreground_completely" : 1.0
 })
 
-current_background = generative.Iterated(keys[key.UP] | changes["background"], shuffle=True, stages=
+current_background = generative.Iterated(keys[key.LEFT] | changes["background"], shuffle=True, stages=
     generative.load_resources("vapor/color scheme 1/*.jpg")
 )
 

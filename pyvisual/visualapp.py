@@ -60,11 +60,52 @@ def run(window, audio, pipeline):
 
     render_hud = True
 
+    time = var.RelativeTime()
+
+    current_bpm = var.Const(0.0)
+    is_beat_running = False
+
+    # is_beat_running = ...
+    def bpm_fits_lower_threshold(bpm):
+        if not is_beat_running:
+            return float(bpm) > 60.0
+        return float(bpm) > float(current_bpm * 0.9)
+    def bpm_fits_higher_threshold(bpm):
+        if not is_beat_running:
+            return float(bpm) < 200.0
+        return float(bpm) < float(current_bpm * 1.1)
+    def is_bpm_sensible(bpm):
+        return bpm_fits_lower_threshold(bpm) and bpm_fits_higher_threshold(bpm)
+
+    last_beat = var.Const(0.0)
+    delta_to_last_beat = time - last_beat
+    bpm_from_last_beat = var.Const(60.0) / delta_to_last_beat
+
+    def sliding_window_average(n=4):
+        window = []
+        def _process(value):
+            nonlocal window
+            window.append(value)
+            if len(window) > n:
+                window.pop(0)
+            return sum(window) / len(window)
+        return _process
+    bpm_window_average = sliding_window_average(8)
+
     @window.event
     def on_draw(dt):
         window.clear()
 
         audio.process()
+        if audio.beat_on.value:
+            bpm = float(bpm_from_last_beat)
+            if is_bpm_sensible(bpm):
+                current_bpm.value = bpm_window_average(bpm)
+            last_beat.value = float(time)
+
+        is_beat_running = bpm_fits_lower_threshold(bpm_from_last_beat)
+        if not is_beat_running:
+            bpm_window_average.window = []
 
         w, h = window.get_size()
         pipeline.render_screen(None, (w, h))
@@ -93,12 +134,23 @@ def run(window, audio, pipeline):
             #    plot_bar_values(fft, ortho_px, (10, 10, w - 10, 210), color, bg_color, [0.0, 1.0])
             #print(freqs)
 
-        #imgui_renderer.process_inputs()
-        #imgui.new_frame()
-        #imgui.show_test_window()
-        #imgui.render()
-        #imgui_renderer.render(imgui.get_draw_data())
-        
+        imgui_renderer.process_inputs()
+        imgui.new_frame()
+        imgui.show_test_window()
+
+        imgui.set_next_window_position(10, 10, condition=imgui.ALWAYS, pivot_x=0, pivot_y=0)
+        imgui.set_next_window_size(0.0, 0.0)
+        flags = imgui.WINDOW_NO_TITLE_BAR | imgui.WINDOW_NO_RESIZE + imgui.WINDOW_NO_MOVE + imgui.WINDOW_NO_COLLAPSE
+
+        imgui.begin("Stats", None, flags)
+        imgui.text("FPS: %.2f" % app.clock.get_fps())
+        imgui.text("Current BPM: %.2f" % current_bpm.value)
+        imgui.text("Beat running: %s" % {True : "Yes", False : "Nope"}[is_beat_running])
+        imgui.end()
+
+        imgui.render()
+        imgui_renderer.render(imgui.get_draw_data())
+
         #print("Resetting:", repr(Event), audio.vu in Event._instances)
         Event.reset_instances()
         GenerativeStage.reset_instances()

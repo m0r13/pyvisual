@@ -7,6 +7,7 @@ from scipy import signal, fftpack
 
 from pyvisual import event
 from pyvisual.audio import pulse, util
+from pyvisual.rendering import var
 
 log = logging.getLogger(__name__)
 
@@ -89,10 +90,6 @@ class AudioAnalyzer:
         self.beat_on = event.ExprEvent(lambda: self._events[self.EVENT_BEAT_ON])
         self.beat_off = event.ExprEvent(lambda: self._events[self.EVENT_BEAT_OFF])
         self.beat_status = event.ExprEvent(lambda: self._events[self.EVENT_BEAT_STATUS])
-        def test():
-            print("Evaluate me!", self._events[self.EVENT_VU])
-            return self._events[self.EVENT_VU]
-        #self.vu = event.ExprEvent(test)
         self.vu = event.ExprEvent(lambda: self._events[self.EVENT_VU])
         self.vu_norm = NormalizedVU(self.vu, self.beat_status)
 
@@ -156,7 +153,6 @@ class AudioAnalyzer:
             self._events[self.EVENT_BEAT_OFF] = True
         self._beat_on = beat_on
         self._events[self.EVENT_BEAT_STATUS] = self._beat_on
-
         self._events[self.EVENT_VU] = beat_value
 
     def start(self):

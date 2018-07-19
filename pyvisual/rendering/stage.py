@@ -3,7 +3,7 @@ import time
 import logging
 from PIL import Image
 from glumpy import app, gl, glm, gloo, data
-from . import primitive, transform, var
+from pyvisual.rendering import primitive, transform, var
 
 log = logging.getLogger(__name__)
 

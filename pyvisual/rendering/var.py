@@ -46,12 +46,12 @@ class Var:
         return Const(min1) + rel * (max1 - min1)
 
 class Const(Var):
-    def __init__(self, value):
+    def __init__(self, value=0.0):
         super().__init__()
-        self._value = float(value)
+        self.value = float(value)
 
     def __float__(self):
-        return self._value
+        return self.value
 
 class OpVar(Var):
     def __init__(self, operation, *args):
