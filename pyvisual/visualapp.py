@@ -92,20 +92,32 @@ def run(window, audio, pipeline):
         return _process
     bpm_window_average = sliding_window_average(8)
 
+    p = False
+
     @window.event
     def on_draw(dt):
+        nonlocal bpm_window_average, p
+
         window.clear()
 
         audio.process()
         if audio.beat_on.value:
             bpm = float(bpm_from_last_beat)
+            print(bpm)
             if is_bpm_sensible(bpm):
                 current_bpm.value = bpm_window_average(bpm)
+                print("--- bpm", bpm, "---")
+            else:
+                print("hmm?", bpm)
             last_beat.value = float(time)
 
         is_beat_running = bpm_fits_lower_threshold(bpm_from_last_beat)
-        if not is_beat_running:
-            bpm_window_average.window = []
+        if not is_beat_running and not p:
+            bpm_window_average = sliding_window_average(8)
+            print("-- empty --")
+            p = True
+        if is_beat_running:
+            p = False
 
         w, h = window.get_size()
         pipeline.render_screen(None, (w, h))
