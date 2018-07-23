@@ -26,7 +26,7 @@ beat_status = audio.beat_status
 vu = audio.vu
 
 time = var.RelativeTime()
-vu_norm = audio.vu_norm.as_var
+vu_norm = audio.vu_norm
 
 keys = event.Keys(window)
 key_space = keys[key.SPACE]
@@ -140,7 +140,7 @@ def effect_glitch(bw=False):
         fragment = "post/glitchbw.frag" if bw else "post/glitch.frag"
         return stage.ShaderStage("common/passthrough.vert", fragment, {
             "time" : time,
-            "amount" : var.lerp(beat_status.as_var, 0.05 * 0.1, 0.05 * 3),
+            "amount" : var.lerp(beat_status, 0.05 * 0.1, 0.05 * 3),
             "speed" : 0.1
         })
     return _effect

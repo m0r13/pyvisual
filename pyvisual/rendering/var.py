@@ -16,11 +16,17 @@ def lerp(alpha, v0, v1):
     return (Const(1.0) - alpha) * v0 + alpha * v1
 
 class Var:
-    def __float__(self):
+    
+    @property
+    def value(self):
         raise NotImplementedError()
 
+    def __float__(self):
+        return float(self.value)
+
     def apply(self, operation, *args):
-        return OpVar(operation, self, *map(make_var, args))
+        #return OpVar(operation, self, *map(make_var, args))
+        return OpVar(operation, self, *args)
 
     def __add__(self, other):
         return self.apply(lambda a, b: a + b, other)
@@ -32,6 +38,13 @@ class Var:
         return self.apply(lambda a, b: a / b, other)
     def __floordiv__(self, other):
         return self.apply(lambda a, b: a // b, other)
+
+    def __and__(self, other):
+        return self.apply(lambda a, b: bool(a) and bool(b), other)
+    def __or__(self, other):
+        return self.apply(lambda a, b: bool(a) or bool(b), other)
+    def __invert__(self):
+        return self.apply(lambda a, b: not bool(a))
 
     # mod
     # pos
@@ -48,10 +61,14 @@ class Var:
 class Const(Var):
     def __init__(self, value=0.0):
         super().__init__()
-        self.value = float(value)
+        self.value = value
 
-    def __float__(self):
-        return self.value
+    @property
+    def value(self):
+        return self._value
+    @value.setter
+    def value(self, value):
+        self._value = value
 
 class OpVar(Var):
     def __init__(self, operation, *args):
@@ -59,7 +76,8 @@ class OpVar(Var):
         self._operation = operation
         self._args = args
 
-    def __float__(self):
+    @property
+    def value(self):
         return self._operation(*map(float, self._args))
 
 class ExprVar(Var):
@@ -67,7 +85,8 @@ class ExprVar(Var):
         super().__init__()
         self._expr = expr
 
-    def __float__(self):
+    @property
+    def value(self):
         return self._expr()
 
 class ReloadVar(Var):
@@ -83,7 +102,8 @@ class ReloadVar(Var):
     def __init__(self, value):
         self._value = float(value)
 
-    def __float__(self):
+    @property
+    def value(self):
         return self._value
 
     @classmethod
@@ -141,7 +161,9 @@ def _V(value):
     return ReloadVar.get(frame, value)
 
 class Time(Var):
-    def __float__(self):
+
+    @property
+    def value(self):
         return time.time()
 
 class RelativeTime(Var):
@@ -150,5 +172,6 @@ class RelativeTime(Var):
             start = time.time()
         self._start = float(start)
 
-    def __float__(self):
+    @property
+    def value(self):
         return time.time() - self._start

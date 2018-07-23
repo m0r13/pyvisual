@@ -2,7 +2,7 @@ import numpy as np
 
 from pyvisual.rendering import var
 
-class Event:
+class Event(var.Var):
     _instances = []
 
     def __init__(self):
@@ -20,22 +20,6 @@ class Event:
             self._value = self.evaluate()
             self._evaluated = True
         return self._value
-
-    @property
-    def as_var(self):
-        return var.ExprVar(lambda self=self: float(self.value))
-
-    def apply(self, expr):
-        return ExprEvent(expr)
-
-    def __and__(self, other):
-        return self.apply(lambda self=self, other=other: self.value and other.value)
-
-    def __or__(self, other):
-        return self.apply(lambda self=self, other=other: self.value or other.value)
-
-    def __invert__(self):
-        return self.apply(lambda self=self: not self.value)
 
     @staticmethod
     def reset_instances():
