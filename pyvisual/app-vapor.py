@@ -51,6 +51,10 @@ current_foreground = generative.Iterated(key_right | changes["foreground"] | cha
 )
 #current_foreground = current_background
 
+current_foreground2 = generative.Iterated(key_right | changes["foreground"] | changes["foreground_completely"], shuffle=True, stages=
+    generative.load_resources("vapor/color scheme 1/*.jpg")
+)
+
 scale = var.Time().apply(lambda x: math.sin(x)).map_range(-1, 1, 0.5, 0.9)
 scale = vu_norm.map_range(0.0, 1.0, 0.5, 0.9)
 
@@ -63,6 +67,12 @@ def mask_transition(*args):
     return vertex, fragment, uniforms, duration
 
 current_mask = generative.Transitioned(generative.Iterated(key_space | changes["mask"] | changes["foreground_completely"], shuffle=True, stages=
+    #generative.load_resources("mask/common/*.png", transform=[transform.scale(scale)], force_size=(1920, 1080))
+    generative.load_resources("mask/test/*.png", transform=[transform.scale(scale)], force_size=(1920, 1080))
+
+), transition_config=mask_transition)
+
+current_mask2 = generative.Transitioned(generative.Iterated(key_space | changes["mask"] | changes["foreground_completely"], shuffle=True, stages=
     #generative.load_resources("mask/common/*.png", transform=[transform.scale(scale)], force_size=(1920, 1080))
     generative.load_resources("mask/test/*.png", transform=[transform.scale(scale)], force_size=(1920, 1080))
 
@@ -162,11 +172,27 @@ mask.add_stage(generative.Selected(keys[ord("M")], min_n=2, max_n=2, stages=[
     #stage.ShaderStage("common/passthrough.vert", "common/passthrough.frag", transform=[transform.zrotate(time * _V(2.0))])
 ]))
 
+mask2 = stage.Pipeline([
+    current_mask2,
+    stage.ShaderStage("common/passthrough.vert", "common/passthrough.frag", transform=[transform.scale(1.2)]),
+    stage.ShaderStage("common/passthrough.vert", "post/mirror_polar.frag", {
+        "uAngleOffset" : var.Const(bpm / 60.0 * 2 * 3.14159265) * time * var.Const(1.0 / (bpm / 8.0)) + 0.5,
+        "uSegmentCount" : 6,
+    }),
+])
+
 mask_shadow = stage.Pipeline()
 mask_shadow.add_stage(mask)
 mask_shadow.add_stage(stage.ShaderStage("common/passthrough.vert", "common/mask_shadow.frag", {
     "uOffset" : [15, 15],
     "uColor" : [0.0, 0.0, 0.0, 0.5]
+}))
+
+mask_shadow2 = stage.Pipeline()
+mask_shadow2.add_stage(mask2)
+mask_shadow2.add_stage(stage.ShaderStage("common/passthrough.vert", "common/mask_shadow.frag", {
+    "uOffset" : [15, 15],
+    "uColor" : [1.0, 0.0, 0.0, 0.5]
 }))
 
 foreground = stage.Pipeline()
@@ -180,6 +206,17 @@ foreground.add_stage(generative.Selected(keys[ord("F")], min_n=1, max_n=2, stage
 ]))
 foreground.add_stage(stage.MaskStage(mask))
 
+foreground2 = stage.Pipeline()
+foreground2.add_stage(current_foreground2)
+foreground2.add_stage(generative.Selected(keys[ord("F")], min_n=1, max_n=2, stages=[
+    #effect_chromatic_aberration(),
+    effect_mirror(),
+    effect_slices(),
+    effect_scanlines_fine(),
+    effect_scanlines_coarse()
+]))
+foreground2.add_stage(stage.MaskStage(mask2))
+
 background = stage.Pipeline()
 background.add_stage(current_background)
 background.add_stage(generative.Selected(keys[ord("B")] | changes["background_effect"], min_n=1, max_n=2, stages=[
@@ -192,6 +229,8 @@ background.add_stage(generative.Selected(keys[ord("B")] | changes["background_ef
 
 pipeline = stage.Pipeline()
 pipeline.add_stage(background)
+pipeline.add_stage(mask_shadow2)
+pipeline.add_stage(foreground2)
 pipeline.add_stage(mask_shadow)
 pipeline.add_stage(foreground)
 #pipeline.add_stage(mask)

@@ -192,7 +192,7 @@ def run(window, audio, pipeline):
 
     @window.event
     def on_init():
-        app.clock.set_fps_limit(30)
+        app.clock.set_fps_limit(0)
 
     @window.event
     def on_close():
