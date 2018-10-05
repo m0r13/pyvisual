@@ -22,11 +22,83 @@ def t_sub(t1, t2):
 def t_between(t1, t2, x):
     return t1[0] <= x[0] < t2[0] and t1[1] <= x[1] < t2[1]
 
+def t_circle_contains(center, radius, point):
+    a = t_add(center, (-radius, -radius))
+    b = t_add(center, (radius, radius))
+    if not t_between(a, b, point):
+        return False
+    return True
+
 COLOR_EDITOR_BACKGROUND = imgui.get_color_u32_rgba(0.1, 0.1, 0.1, 1.0)
 COLOR_EDITOR_GRID = imgui.get_color_u32_rgba(0.3, 0.3, 0.3, 1.0)
 COLOR_NODE_BACKGROUND = imgui.get_color_u32_rgba(0.0, 0.0, 0.0, 1.0)
 COLOR_NODE_BORDER = imgui.get_color_u32_rgba(0.7, 0.7, 0.7, 1.0)
-COLOR_NODE_BORDER_HOVERED = imgui.get_color_u32_rgba(1.0, 1.0, 1.0, 1.0)
+#COLOR_NODE_BORDER_HOVERED = imgui.get_color_u32_rgba(1.0, 1.0, 1.0, 1.0)
+COLOR_NODE_BORDER_HOVERED = COLOR_NODE_BORDER
+
+COLOR_PORT_INPUT = imgui.get_color_u32_rgba(1.0, 0.0, 0.0, 1.0)
+COLOR_PORT_INPUT_HOVERED = imgui.get_color_u32_rgba(1.0, 1.0, 0.0, 1.0)
+COLOR_PORT_INPUT_DISABLED = COLOR_NODE_BORDER
+
+CHANNEL_BACKGROUND = 0
+CHANNEL_DEFAULT = 1
+CHANNEL_NODE = 2
+CHANNEL_ABOVE_NODE = 3
+CHANNEL_CONNECTION = 4
+
+CHANNEL_COUNT = 5
+
+PORT_TYPE_INPUT = 0
+PORT_TYPE_OUTPUT = 1
+def opposite_port_type(port_type):
+    assert 0 <= port_type <= 1
+    return 0 if port_type == 1 else 1
+
+class Connection:
+    id_counter = 0
+    def __init__(self, input_node, input_index, output_node, output_index):
+        self.input_node = input_node
+        self.input_index = input_index
+        self.output_node = output_node
+        self.output_index = output_index
+        self.connect()
+
+    def connect(self):
+        self.input_node.attach_connection(PORT_TYPE_OUTPUT, self.input_index, self)
+        self.output_node.attach_connection(PORT_TYPE_INPUT, self.output_index, self)
+
+    def disconnect(self):
+        self.input_node.detach_connection(PORT_TYPE_OUTPUT, self.input_index, self)
+        self.output_node.detach_connection(PORT_TYPE_INPUT, self.output_index, self)
+
+    def show(self, draw_list):
+        p1 = self.input_node.get_port_position(PORT_TYPE_OUTPUT, self.input_index)
+        p2 = self.output_node.get_port_position(PORT_TYPE_INPUT, self.output_index)
+        # is connected when both sides are on a node
+        connected = not isinstance(self.input_node, MouseDummyNode) \
+                and not isinstance(self.output_node, MouseDummyNode)
+        color = COLOR_PORT_INPUT if connected else COLOR_PORT_INPUT_HOVERED
+        draw_list.channels_set_current(CHANNEL_CONNECTION)
+        draw_list.add_line(p1, p2, color, 2.0)
+        draw_list.channels_set_current(CHANNEL_DEFAULT)
+
+    @staticmethod
+    def create(node, port_type, port_index):
+        if port_type == PORT_TYPE_INPUT:
+            return Connection(output_node=node, output_index=port_index,
+                    input_node=MouseDummyNode(), input_index=-1)
+        else:
+            return Connection(input_node=node, input_index=port_index,
+                    output_node=MouseDummyNode(), output_index=-1)
+
+class MouseDummyNode:
+    def attach_connection(self, *args):
+        pass
+    def detach_connection(self, *args):
+        pass
+
+    def get_port_position(self, port_type, port_index):
+        return imgui.get_io().mouse_pos
 
 class Node:
     id_counter = 0
@@ -37,12 +109,18 @@ class Node:
 
         self.name = "TestNode"
 
-        self.inputs = []
-        self.outputs = [
+        inputs = [
+            ("input", "float"),
+            ("input2", "float"),
+        ]
+        outputs = [
             ("output", "float"),
         ]
+        self.ports = (inputs, outputs)
+        self.port_positions = ([None]*len(inputs), [None]*len(outputs))
+        self.connections = ([[] for _ in inputs], [[] for _ in outputs])
 
-        self.padding = 10, 10
+        self.padding = 12, 12
         self.pos = pos
         self.size = 10, 10
 
@@ -53,6 +131,85 @@ class Node:
     @property
     def size_with_padding(self):
         return t_add(self.size, t_mul(self.padding, 2))
+
+    def attach_connection(self, port_type, port_index, connection):
+        self.connections[port_type][port_index].append(connection)
+
+    def detach_connection(self, port_type, port_index, connection):
+        self.connections[port_type][port_index].remove(connection)
+
+    def get_port_position(self, port_type, port_index):
+        positions = self.port_positions[port_type]
+        if not self.expanded or port_index >= len(positions) or positions[port_index] is None:
+            x = self.pos[0] if port_type == PORT_TYPE_INPUT else self.pos[0]+self.size[0]+self.padding[0]*2
+            y = self.pos[1] + (self.size[1] + self.padding[1] * 2) / 2
+            return x, y
+        return positions[port_index]
+
+    def show_ports(self, draw_list, ports, port_type):
+        io = imgui.get_io()
+
+        old_channel = draw_list.channels_current
+        draw_list.channels_set_current(CHANNEL_ABOVE_NODE)
+
+        imgui.push_id(int(port_type))
+        imgui.begin_group()
+        for port_index, (name, type) in enumerate(ports):
+            # ui
+            imgui.push_id(port_index)
+            cursor_y = imgui.get_cursor_pos()[1]
+            imgui.text("%s : %s" % (name, type))
+
+            # position calculation
+            size = imgui.get_item_rect_size()
+            x = self.pos[0]
+            if port_type == PORT_TYPE_OUTPUT:
+                x += self.size[0] + self.padding[0]*2
+            y = cursor_y + size[1] / 2
+            radius = 6.0
+            thickness = 2.0
+            center = self.editor.local_to_screen((x, y))
+            self.port_positions[port_type][port_index] = center
+
+            # state
+            connections = self.connections[port_type][port_index]
+            if port_type == PORT_TYPE_INPUT:
+                assert len(connections) in (0, 1)
+            hovered = t_circle_contains(center, radius, io.mouse_pos)
+            disabled = False
+            if self.editor.is_dragging_connection():
+                disabled = not self.editor.is_connection_droppable(self, port_type, port_index)
+            color = COLOR_PORT_INPUT_DISABLED
+            if not disabled:
+                color = COLOR_PORT_INPUT
+                if hovered:
+                    color = COLOR_PORT_INPUT_HOVERED
+                    if port_type == PORT_TYPE_INPUT and len(connections) > 0:
+                        imgui.set_tooltip("Delete connection")
+                        if imgui.is_mouse_released(0):
+                            self.editor.remove_connection(connections[0])
+                    else:
+                        if self.editor.is_dragging_connection():
+                            imgui.set_tooltip("Drop connection")
+                            if imgui.is_mouse_released(0):
+                                self.editor.drop_connection(self, port_type, port_index)
+                        else:
+                            imgui.set_tooltip("Create connection")
+                            if imgui.is_mouse_clicked(0):
+                                self.editor.drag_connection(self, port_type, port_index)
+            # drawing
+            if len(connections) > 0:
+                draw_list.add_circle_filled(center, radius, color)
+            else:
+                draw_list.add_circle(center, radius, color, 12, thickness)
+
+            imgui.push_item_width(100)
+            imgui.input_float("value", 0.0)
+            imgui.pop_id()
+        imgui.end_group()
+        imgui.pop_id()
+
+        draw_list.channels_set_current(old_channel)
 
     def show(self, draw_list):
         io = imgui.get_io()
@@ -66,6 +223,7 @@ class Node:
 
         upper_left = self.editor.local_to_screen(self.pos)
         lower_right = t_add(upper_left, self.size_with_padding)
+        draw_list.channels_set_current(CHANNEL_NODE)
         draw_list.add_rect_filled(upper_left, lower_right, COLOR_NODE_BACKGROUND, 5.0)
 
         # set_cursor_pos is already in window coordinates
@@ -78,38 +236,26 @@ class Node:
         imgui.text("TestNode")
         imgui.same_line()
         if imgui.button("[x]"):
-            imgui.open_popup("confirm_delete")
-        if imgui.begin_popup("confirm_delete"):
-            imgui.menu_item("Delete node?", None, False, False)
-            imgui.menu_item("Nope")
-            if imgui.menu_item("Yep yep yep")[0]:
-                self.editor.remove_node(self)
-            imgui.end_popup()
+            self.editor.remove_node(self)
 
         if self.expanded:
             imgui.begin_group()
             imgui.text("Inputs")
-            imgui.text("Hello!")
-            imgui.dummy(50, 100)
+            self.show_ports(draw_list, self.ports[PORT_TYPE_INPUT], PORT_TYPE_INPUT)
             imgui.end_group()
             imgui.same_line()
 
             imgui.begin_group()
             imgui.text("Outputs")
-            imgui.begin_group()
-            for name, type in self.outputs:
-                imgui.text("%s : %s" % (name, type))
-            imgui.end_group()
-            w = imgui.calculate_item_width()
+            self.show_ports(draw_list, self.ports[PORT_TYPE_OUTPUT], PORT_TYPE_OUTPUT)
             imgui.end_group()
 
-            imgui.text("Output width: %d" % w)
         imgui.end_group()
 
         self.size = imgui.get_item_rect_size()
         mouse_pos = self.editor.screen_to_local(io.mouse_pos)
         self.hovered = imgui.is_window_hovered() and t_between(self.pos, t_add(self.pos, self.size_with_padding), mouse_pos)
-        if self.hovered and imgui.is_mouse_clicked(0):
+        if self.hovered and imgui.is_mouse_clicked(0) and not self.editor.is_dragging_connection():
             self.dragging = True
         if imgui.is_mouse_released(0):
             self.dragging = False
@@ -117,6 +263,7 @@ class Node:
         upper_left = self.editor.local_to_screen(self.pos)
         lower_right = t_add(upper_left, self.size_with_padding)
         color = COLOR_NODE_BORDER_HOVERED if self.hovered else COLOR_NODE_BORDER
+        draw_list.channels_set_current(CHANNEL_NODE)
         draw_list.add_rect(upper_left, lower_right, color, 5.0)
 
         imgui.pop_id()
@@ -124,11 +271,19 @@ class Node:
 
 class NodeEditor:
     def __init__(self):
-        self.nodes = [Node(self, pos=(100, 100))]
+        node1 = Node(self, pos=(50, 50))
+        node2 = Node(self, pos=(500, 200))
+        connection = Connection(output_node=node2, output_index=0, input_node=node1, input_index=0)
+        self.nodes = [node1, node2]
+        self.connections = [connection]
 
         # window position in screen space
         self.pos = (0, 0)
         self.size = (1, 1)
+
+        # state
+        self.dragging_connection = None
+        self.dragging_target_port_type = None
 
     def local_to_screen(self, pos):
         return t_add(self.pos, pos)
@@ -137,7 +292,49 @@ class NodeEditor:
         return t_sub(pos, self.pos)
 
     def remove_node(self, node):
+        for port_type in (PORT_TYPE_INPUT, PORT_TYPE_OUTPUT):
+            for connections in node.connections[port_type]:
+                for connection in connections:
+                    self.remove_connection(connection)
         self.nodes.remove(node)
+
+    def remove_connection(self, connection):
+        connection.disconnect()
+        self.connections.remove(connection)
+
+    def drag_connection(self, node, port_type, port_index):
+        assert self.dragging_connection is None
+        self.dragging_connection = Connection.create(node, port_type, port_index)
+        self.dragging_target_port_type = opposite_port_type(port_type)
+        self.connections.append(self.dragging_connection)
+
+    def is_dragging_connection(self):
+        return self.dragging_connection is not None
+
+    def is_connection_droppable(self, node, port_type, port_index):
+        assert self.is_dragging_connection()
+        # constraint: connect only input with output and vice versa
+        if port_type != self.dragging_target_port_type:
+            return False
+        # TODO prevent this manual hackish check?
+        # constraint: only one connection per input
+        if port_type == PORT_TYPE_INPUT:
+            return len(node.connections[PORT_TYPE_INPUT][port_index]) == 0
+        return True
+
+    def drop_connection(self, node, port_type, port_index):
+        assert self.is_dragging_connection()
+        assert self.is_connection_droppable(node, port_type, port_index)
+
+        self.dragging_connection.disconnect()
+        if port_type == PORT_TYPE_INPUT:
+            self.dragging_connection.output_node = node
+            self.dragging_connection.output_index = port_index
+        else:
+            self.dragging_connection.input_node = node
+            self.dragging_connection.input_index = port_index
+        self.dragging_connection.connect()
+        self.dragging_connection = None
 
     def show(self):
         io = imgui.get_io()
@@ -152,6 +349,8 @@ class NodeEditor:
         self.size = imgui.get_window_size()
         if expanded:
             draw_list = imgui.get_window_draw_list()
+            draw_list.channels_split(CHANNEL_COUNT)
+            draw_list.channels_set_current(CHANNEL_BACKGROUND)
             draw_list.add_rect_filled(self.pos, t_add(self.pos, self.size), COLOR_EDITOR_BACKGROUND)
 
             grid_size = 50
@@ -161,6 +360,14 @@ class NodeEditor:
                 draw_list.add_line(t_add(self.pos, (0, y)), t_add(self.pos, (self.size[0], y)), COLOR_EDITOR_GRID)
             for node in self.nodes:
                 node.show(draw_list)
+            for connection in self.connections:
+                connection.show(draw_list)
+            # dropping connection to ports is handled by nodes
+            # we're checking here if a connection was dropped into nowhere
+            if self.dragging_connection is not None and imgui.is_mouse_released(0):
+                self.dragging_connection.disconnect()
+                self.connections.remove(self.dragging_connection)
+                self.dragging_connection = None
 
             imgui.text("I'm expanded!")
 
@@ -178,6 +385,7 @@ class NodeEditor:
                     imgui.menu_item("AnotherNode")
                     imgui.end_menu()
                 imgui.end_popup()
+            draw_list.channels_merge()
         imgui.end()
 
 editor = NodeEditor()
@@ -196,40 +404,6 @@ def on_draw(event):
     imgui.show_test_window()
 
     editor.show()
-
-    if not closed:
-        flags = imgui.WINDOW_NO_RESIZE | imgui.WINDOW_ALWAYS_AUTO_RESIZE
-        flags = 0
-        expanded, opened = imgui.begin("TestNode", True, flags)
-        if expanded and False:
-            w_pos = imgui.get_window_position()
-            w_size = imgui.get_window_size()
-            line_height = imgui.get_text_line_height()
-            draw_list = imgui.get_window_draw_list()
-            #draw_list.add_rect_filled(w_pos.x - 10, w_pos.y + 80, w_pos.x + 10, w_pos.y + 80 + 20, imgui.get_color_u32_rgba(1, 1, 0, 1))
-
-            width_avail = imgui.get_content_region_available_width()
-            imgui.text("%d pixels wide" % width_avail)
-            imgui.columns(2, "mixed")
-            width_avail = imgui.get_content_region_available_width()
-            imgui.text("%d pixels wide" % width_avail)
-            imgui.same_line()
-            width_avail = imgui.get_content_region_available_width()
-            imgui.text("only %d more for me!" % width_avail)
-            imgui.text("Inputs")
-            imgui.next_column()
-            imgui.text("Outputs")
-            imgui.text("Test!")
-            imgui.text("My window is at %d:%d" % (w_pos.x, w_pos.y))
-            pos = imgui.get_cursor_screen_pos()
-            imgui.text("I start at %d:%d" % (pos.x, pos.y))
-            pos = imgui.get_cursor_screen_pos()
-            imgui.dummy(line_height, line_height)
-            #draw_list.add_rect_filled(pos.x, pos.y, pos.x + line_height, pos.y + line_height, imgui.get_color_u32_rgba(1, 1, 0, 1))
-        imgui.end()
-        if not opened:
-            print("was closed!")
-            closed = True
 
     #imgui.set_next_window_position(10, 10, condition=imgui.ALWAYS, pivot_x=0, pivot_y=0)
     #imgui.set_next_window_size(0.0, 0.0)
