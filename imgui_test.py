@@ -43,8 +43,8 @@ COLOR_PORT_INPUT_DISABLED = COLOR_NODE_BORDER
 CHANNEL_BACKGROUND = 0
 CHANNEL_DEFAULT = 1
 CHANNEL_NODE = 2
-CHANNEL_ABOVE_NODE = 3
-CHANNEL_CONNECTION = 4
+CHANNEL_CONNECTION = 3
+CHANNEL_PORT = 4
 
 CHANNEL_COUNT = 5
 
@@ -150,7 +150,7 @@ class Node:
         io = imgui.get_io()
 
         old_channel = draw_list.channels_current
-        draw_list.channels_set_current(CHANNEL_ABOVE_NODE)
+        draw_list.channels_set_current(CHANNEL_PORT)
 
         imgui.push_id(int(port_type))
         imgui.begin_group()
