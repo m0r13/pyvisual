@@ -36,10 +36,12 @@ COLOR_NODE_BORDER = imgui.get_color_u32_rgba(0.7, 0.7, 0.7, 1.0)
 COLOR_NODE_BORDER_HOVERED = COLOR_NODE_BORDER
 
 COLOR_PORT_HIGHLIGHT_POSITIVE = imgui.get_color_u32_rgba(0.0, 0.5, 0.0, 1.0)
+COLOR_PORT_HIGHLIGHT_POSITIVE_ACTIVE = imgui.get_color_u32_rgba(0.5, 0.5, 0.0, 1.0)
 COLOR_PORT_HIGHLIGHT_NEUTRAL = imgui.get_color_u32_rgba(0.0, 0.0, 0.0, 0.0)
 COLOR_PORT_HIGHLIGHT_NEGATIVE = imgui.get_color_u32_rgba(0.5, 0.5, 0.5, 0.5)
 COLOR_PORT_BULLET = imgui.get_color_u32_rgba(1.0, 0.0, 0.0, 1.0)
 COLOR_PORT_BULLET_HOVERED = imgui.get_color_u32_rgba(1.0, 1.0, 0.0, 1.0)
+COLOR_PORT_BULLET_DROPPABLE = imgui.get_color_u32_rgba(0.0, 1.0, 0.0, 1.0)
 COLOR_PORT_BULLET_DISABLED = COLOR_NODE_BORDER
 
 CHANNEL_BACKGROUND = 0
@@ -72,8 +74,8 @@ def opposite_port_type(port_type):
     return 0 if port_type == 1 else 1
 
 class Connection:
-    id_counter = 0
-    def __init__(self, input_node, input_index, output_node, output_index):
+    def __init__(self, editor, input_node, input_index, output_node, output_index):
+        self.editor = editor
         self.input_node = input_node
         self.input_index = input_index
         self.output_node = output_node
@@ -89,22 +91,31 @@ class Connection:
         self.output_node.detach_connection(PORT_TYPE_INPUT, self.output_index, self)
 
     def show(self, draw_list):
-        p1 = self.input_node.get_port_position(PORT_TYPE_OUTPUT, self.input_index)
-        p2 = self.output_node.get_port_position(PORT_TYPE_INPUT, self.output_index)
         # is connected when both sides are on a node
         connected = not isinstance(self.input_node, MouseDummyNode) \
                 and not isinstance(self.output_node, MouseDummyNode)
-        color = COLOR_PORT_BULLET if connected else COLOR_PORT_BULLET_HOVERED
+        dragging_connection = self.editor.is_dragging_connection()
+
+        color = COLOR_PORT_BULLET
+        if dragging_connection and connected:
+            # show connections while other connection is dragged as inactive
+            color = COLOR_PORT_BULLET_DISABLED
+        elif dragging_connection and not connected:
+            # show connection that is being dragged as active
+            color = COLOR_PORT_BULLET_HOVERED
+
+        p1 = self.input_node.get_port_position(PORT_TYPE_OUTPUT, self.input_index)
+        p2 = self.output_node.get_port_position(PORT_TYPE_INPUT, self.output_index)
         with draw_on_channel(draw_list, CHANNEL_CONNECTION):
             draw_list.add_line(p1, p2, color, 2.0)
 
     @staticmethod
-    def create(node, port_type, port_index):
+    def create(editor, node, port_type, port_index):
         if port_type == PORT_TYPE_INPUT:
-            return Connection(output_node=node, output_index=port_index,
+            return Connection(editor, output_node=node, output_index=port_index,
                     input_node=MouseDummyNode(), input_index=-1)
         else:
-            return Connection(input_node=node, input_index=port_index,
+            return Connection(editor, input_node=node, input_index=port_index,
                     output_node=MouseDummyNode(), output_index=-1)
 
 class MouseDummyNode:
@@ -126,11 +137,12 @@ class Node:
         self.name = "TestNode"
 
         inputs = [
-            ("input", "float"),
+            ("input", "int"),
             ("input2", "float"),
         ]
         outputs = [
             ("output", "float"),
+            ("output2", "int"),
         ]
         self.ports = (inputs, outputs)
         self.port_positions = ([None]*len(inputs), [None]*len(outputs))
@@ -199,6 +211,10 @@ class Node:
 
             # port state
             dragging_connection = self.editor.is_dragging_connection()
+            droppable = False
+            if dragging_connection:
+                droppable = self.editor.is_connection_droppable(self, port_type, port_index)
+            connection_source = self.editor.is_dragging_connection_source(self, port_type, port_index)
             connections = self.connections[port_type][port_index]
             if port_type == PORT_TYPE_INPUT:
                 assert len(connections) in (0, 1)
@@ -206,16 +222,30 @@ class Node:
             hovered_bullet = t_circle_contains(center, radius, io.mouse_pos)
             hovered_port = t_between(port_start, port_end, io.mouse_pos)
             hovered = hovered_bullet or hovered_port
-            disabled = False
-            if dragging_connection:
-                disabled = not self.editor.is_connection_droppable(self, port_type, port_index)
 
-            # decide for port bullet color
-            color = COLOR_PORT_BULLET
-            if disabled:
-                color = COLOR_PORT_BULLET_DISABLED
+            # decide port bullet color
+            bullet_color = COLOR_PORT_BULLET
+            if dragging_connection and connection_source:
+                # connection source is drawn as hovered
+                bullet_color = COLOR_PORT_BULLET_HOVERED
+            elif dragging_connection and not droppable:
+                # any port where it's not droppable disabled
+                bullet_color = COLOR_PORT_BULLET_DISABLED
             elif hovered_bullet or (dragging_connection and hovered_port):
-                color = COLOR_PORT_BULLET_HOVERED
+                bullet_color = COLOR_PORT_BULLET_HOVERED
+            elif dragging_connection and droppable:
+                bullet_color = COLOR_PORT_BULLET_DROPPABLE
+
+            # decide port highlight color
+            highlight_channel = CHANNEL_NODE_BACKGROUND
+            highlight_color = COLOR_PORT_HIGHLIGHT_NEUTRAL
+            if dragging_connection and not connection_source:
+                if not droppable:
+                    highlight_channel = CHANNEL_NODE
+                    highlight_color = COLOR_PORT_HIGHLIGHT_NEGATIVE
+                else:
+                    highlight_channel = CHANNEL_NODE_BACKGROUND
+                    highlight_color = COLOR_PORT_HIGHLIGHT_POSITIVE
 
             # decide for action on port / port bullet
             deleteable = port_type == PORT_TYPE_INPUT and len(connections) > 0
@@ -223,7 +253,9 @@ class Node:
                 imgui.set_tooltip("Delete connection")
                 if imgui.is_mouse_released(0):
                     self.editor.remove_connection(connections[0])
-            elif hovered and dragging_connection and not disabled:
+            elif hovered and dragging_connection and droppable:
+                highlight_channel = CHANNEL_NODE_BACKGROUND
+                highlight_color = COLOR_PORT_HIGHLIGHT_POSITIVE_ACTIVE
                 imgui.set_tooltip("Drop connection")
                 if imgui.is_mouse_released(0):
                     self.editor.drop_connection(self, port_type, port_index)
@@ -235,20 +267,11 @@ class Node:
             # port bullet drawing
             with draw_on_channel(draw_list, CHANNEL_PORT):
                 if len(connections) > 0:
-                    draw_list.add_circle_filled(center, radius, color)
+                    draw_list.add_circle_filled(center, radius, bullet_color)
                 else:
-                    draw_list.add_circle(center, radius, color, 12, thickness)
+                    draw_list.add_circle(center, radius, bullet_color, 12, thickness)
 
             # port highlight drawing
-            highlight_channel = CHANNEL_NODE_BACKGROUND
-            highlight_color = COLOR_PORT_HIGHLIGHT_NEUTRAL
-            if self.editor.is_dragging_connection():
-                droppable = self.editor.is_connection_droppable(self, port_type, port_index)
-                if droppable:
-                    highlight_color = COLOR_PORT_HIGHLIGHT_POSITIVE
-                else:
-                    highlight_channel = CHANNEL_NODE
-                    highlight_color = COLOR_PORT_HIGHLIGHT_NEGATIVE
             with draw_on_channel(draw_list, highlight_channel):
                 draw_list.add_rect_filled(port_start, port_end, highlight_color)
 
@@ -323,7 +346,7 @@ class NodeEditor:
     def __init__(self):
         node1 = Node(self, pos=(50, 50))
         node2 = Node(self, pos=(500, 200))
-        connection = Connection(output_node=node2, output_index=0, input_node=node1, input_index=0)
+        connection = Connection(self, output_node=node2, output_index=0, input_node=node1, input_index=0)
         self.nodes = [node1, node2]
         self.connections = [connection]
 
@@ -363,12 +386,22 @@ class NodeEditor:
 
     def drag_connection(self, node, port_type, port_index):
         assert self.dragging_connection is None
-        self.dragging_connection = Connection.create(node, port_type, port_index)
+        self.dragging_connection = Connection.create(self, node, port_type, port_index)
         self.dragging_target_port_type = opposite_port_type(port_type)
         self.connections.append(self.dragging_connection)
 
     def is_dragging_connection(self):
         return self.dragging_connection is not None
+
+    def is_dragging_connection_source(self, node, port_type, port_index):
+        if not self.is_dragging_connection():
+            return False
+        if port_type == PORT_TYPE_INPUT:
+            return self.dragging_connection.output_node == node \
+                    and self.dragging_connection.output_index == port_index
+        else:
+            return self.dragging_connection.input_node == node \
+                    and self.dragging_connection.input_index == port_index
 
     def is_connection_droppable(self, node, port_type, port_index):
         assert self.is_dragging_connection()
