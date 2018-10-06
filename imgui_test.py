@@ -160,7 +160,7 @@ class Node:
         if not self.expanded or port_index >= len(positions) or positions[port_index] is None:
             x = self.pos[0] if port_type == PORT_TYPE_INPUT else self.pos[0]+self.size[0]+self.padding[0]*2
             y = self.pos[1] + (self.size[1] + self.padding[1] * 2) / 2
-            return x, y
+            return self.editor.local_to_screen((x, y))
         return positions[port_index]
 
     def show_ports(self, draw_list, ports, port_type):
@@ -432,6 +432,7 @@ class NodeEditor:
                 node.show(draw_list)
             for connection in self.connections:
                 connection.show(draw_list)
+
             # dropping connection to ports is handled by nodes
             # we're checking here if a connection was dropped into nowhere
             if self.dragging_connection is not None and imgui.is_mouse_released(0):
