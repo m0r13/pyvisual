@@ -473,7 +473,8 @@ class NodeEditor:
                 self.connections.remove(self.dragging_connection)
                 self.dragging_connection = None
 
-            if self.dragging_connection is None and imgui.is_mouse_clicked(0):
+            if self.dragging_connection is None \
+                    and not imgui.is_any_item_active() and imgui.is_mouse_clicked(0):
                 self.dragging_position = True
             if self.dragging_position:
                 self.offset = t_sub(self.offset, imgui.get_mouse_drag_delta())
