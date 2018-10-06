@@ -33,20 +33,37 @@ COLOR_EDITOR_BACKGROUND = imgui.get_color_u32_rgba(0.1, 0.1, 0.1, 1.0)
 COLOR_EDITOR_GRID = imgui.get_color_u32_rgba(0.3, 0.3, 0.3, 1.0)
 COLOR_NODE_BACKGROUND = imgui.get_color_u32_rgba(0.0, 0.0, 0.0, 1.0)
 COLOR_NODE_BORDER = imgui.get_color_u32_rgba(0.7, 0.7, 0.7, 1.0)
-#COLOR_NODE_BORDER_HOVERED = imgui.get_color_u32_rgba(1.0, 1.0, 1.0, 1.0)
 COLOR_NODE_BORDER_HOVERED = COLOR_NODE_BORDER
 
-COLOR_PORT_INPUT = imgui.get_color_u32_rgba(1.0, 0.0, 0.0, 1.0)
-COLOR_PORT_INPUT_HOVERED = imgui.get_color_u32_rgba(1.0, 1.0, 0.0, 1.0)
-COLOR_PORT_INPUT_DISABLED = COLOR_NODE_BORDER
+COLOR_PORT_HIGHLIGHT_POSITIVE = imgui.get_color_u32_rgba(0.0, 0.5, 0.0, 1.0)
+COLOR_PORT_HIGHLIGHT_NEUTRAL = imgui.get_color_u32_rgba(0.0, 0.0, 0.0, 0.0)
+COLOR_PORT_HIGHLIGHT_NEGATIVE = imgui.get_color_u32_rgba(0.5, 0.5, 0.5, 0.5)
+COLOR_PORT_BULLET = imgui.get_color_u32_rgba(1.0, 0.0, 0.0, 1.0)
+COLOR_PORT_BULLET_HOVERED = imgui.get_color_u32_rgba(1.0, 1.0, 0.0, 1.0)
+COLOR_PORT_BULLET_DISABLED = COLOR_NODE_BORDER
 
 CHANNEL_BACKGROUND = 0
 CHANNEL_DEFAULT = 1
-CHANNEL_NODE = 2
-CHANNEL_CONNECTION = 3
-CHANNEL_PORT = 4
+CHANNEL_NODE_BACKGROUND = 2
+CHANNEL_NODE = 3
+CHANNEL_CONNECTION = 4
+CHANNEL_PORT = 5
 
-CHANNEL_COUNT = 5
+CHANNEL_COUNT = 6
+
+class draw_on_channel:
+    def __init__(self, draw_list, channel):
+        self.draw_list = draw_list
+        self.old_channel = None
+        self.new_channel = channel
+
+    def __enter__(self):
+        self.old_channel = self.draw_list.channels_current
+        self.draw_list.channels_set_current(self.new_channel)
+    def __exit__(self, *args):
+        assert self.old_channel is not None
+        self.draw_list.channels_set_current(self.old_channel)
+        return False
 
 PORT_TYPE_INPUT = 0
 PORT_TYPE_OUTPUT = 1
@@ -77,10 +94,9 @@ class Connection:
         # is connected when both sides are on a node
         connected = not isinstance(self.input_node, MouseDummyNode) \
                 and not isinstance(self.output_node, MouseDummyNode)
-        color = COLOR_PORT_INPUT if connected else COLOR_PORT_INPUT_HOVERED
-        draw_list.channels_set_current(CHANNEL_CONNECTION)
-        draw_list.add_line(p1, p2, color, 2.0)
-        draw_list.channels_set_current(CHANNEL_DEFAULT)
+        color = COLOR_PORT_BULLET if connected else COLOR_PORT_BULLET_HOVERED
+        with draw_on_channel(draw_list, CHANNEL_CONNECTION):
+            draw_list.add_line(p1, p2, color, 2.0)
 
     @staticmethod
     def create(node, port_type, port_index):
@@ -149,15 +165,16 @@ class Node:
     def show_ports(self, draw_list, ports, port_type):
         io = imgui.get_io()
 
-        old_channel = draw_list.channels_current
-        draw_list.channels_set_current(CHANNEL_PORT)
+        channel_stack = draw_on_channel(draw_list, CHANNEL_NODE)
+        channel_stack.__enter__()
 
         imgui.push_id(int(port_type))
         imgui.begin_group()
         for port_index, (name, type) in enumerate(ports):
             # ui
             imgui.push_id(port_index)
-            cursor_y = imgui.get_cursor_pos()[1]
+            imgui.begin_group()
+            port_start = imgui.get_cursor_pos()
             imgui.text("%s : %s" % (name, type))
 
             # position calculation
@@ -165,54 +182,84 @@ class Node:
             x = self.pos[0]
             if port_type == PORT_TYPE_OUTPUT:
                 x += self.size[0] + self.padding[0]*2
-            y = cursor_y + size[1] / 2
+            y = port_start[1] + size[1] / 2
             radius = 6.0
             thickness = 2.0
             center = self.editor.local_to_screen((x, y))
             self.port_positions[port_type][port_index] = center
 
-            # state
+            imgui.push_item_width(100)
+            imgui.input_float("", 0.0)
+            imgui.end_group()
+
+            port_end = imgui.get_item_rect_max()
+
+            # port state
+            dragging_connection = self.editor.is_dragging_connection()
             connections = self.connections[port_type][port_index]
             if port_type == PORT_TYPE_INPUT:
                 assert len(connections) in (0, 1)
-            hovered = t_circle_contains(center, radius, io.mouse_pos)
-            disabled = False
-            if self.editor.is_dragging_connection():
-                disabled = not self.editor.is_connection_droppable(self, port_type, port_index)
-            color = COLOR_PORT_INPUT_DISABLED
-            if not disabled:
-                color = COLOR_PORT_INPUT
-                if hovered:
-                    color = COLOR_PORT_INPUT_HOVERED
-                    if port_type == PORT_TYPE_INPUT and len(connections) > 0:
-                        imgui.set_tooltip("Delete connection")
-                        if imgui.is_mouse_released(0):
-                            self.editor.remove_connection(connections[0])
-                    else:
-                        if self.editor.is_dragging_connection():
-                            imgui.set_tooltip("Drop connection")
-                            if imgui.is_mouse_released(0):
-                                self.editor.drop_connection(self, port_type, port_index)
-                        else:
-                            imgui.set_tooltip("Create connection")
-                            if imgui.is_mouse_clicked(0):
-                                self.editor.drag_connection(self, port_type, port_index)
-            # drawing
-            if len(connections) > 0:
-                draw_list.add_circle_filled(center, radius, color)
-            else:
-                draw_list.add_circle(center, radius, color, 12, thickness)
 
-            imgui.push_item_width(100)
-            imgui.input_float("value", 0.0)
+            hovered_bullet = t_circle_contains(center, radius, io.mouse_pos)
+            hovered_port = t_between(port_start, port_end, io.mouse_pos)
+            hovered = hovered_bullet or hovered_port
+            disabled = False
+            if dragging_connection:
+                disabled = not self.editor.is_connection_droppable(self, port_type, port_index)
+
+            # decide for port bullet color
+            color = COLOR_PORT_BULLET
+            if disabled:
+                color = COLOR_PORT_BULLET_DISABLED
+            elif hovered_bullet or (dragging_connection and hovered_port):
+                color = COLOR_PORT_BULLET_HOVERED
+
+            # decide for action on port / port bullet
+            deleteable = port_type == PORT_TYPE_INPUT and len(connections) > 0
+            if hovered_bullet and deleteable and not dragging_connection:
+                imgui.set_tooltip("Delete connection")
+                if imgui.is_mouse_released(0):
+                    self.editor.remove_connection(connections[0])
+            elif hovered and dragging_connection and not disabled:
+                imgui.set_tooltip("Drop connection")
+                if imgui.is_mouse_released(0):
+                    self.editor.drop_connection(self, port_type, port_index)
+            elif not dragging_connection and hovered_bullet:
+                imgui.set_tooltip("Create connection")
+                if imgui.is_mouse_clicked(0):
+                    self.editor.drag_connection(self, port_type, port_index)
+
+            # port bullet drawing
+            with draw_on_channel(draw_list, CHANNEL_PORT):
+                if len(connections) > 0:
+                    draw_list.add_circle_filled(center, radius, color)
+                else:
+                    draw_list.add_circle(center, radius, color, 12, thickness)
+
+            # port highlight drawing
+            highlight_channel = CHANNEL_NODE_BACKGROUND
+            highlight_color = COLOR_PORT_HIGHLIGHT_NEUTRAL
+            if self.editor.is_dragging_connection():
+                droppable = self.editor.is_connection_droppable(self, port_type, port_index)
+                if droppable:
+                    highlight_color = COLOR_PORT_HIGHLIGHT_POSITIVE
+                else:
+                    highlight_channel = CHANNEL_NODE
+                    highlight_color = COLOR_PORT_HIGHLIGHT_NEGATIVE
+            with draw_on_channel(draw_list, highlight_channel):
+                draw_list.add_rect_filled(port_start, port_end, highlight_color)
+
             imgui.pop_id()
         imgui.end_group()
         imgui.pop_id()
 
-        draw_list.channels_set_current(old_channel)
+        channel_stack.__exit__()
 
     def show(self, draw_list):
         io = imgui.get_io()
+        
+        channel_stack = draw_on_channel(draw_list, CHANNEL_NODE)
+        channel_stack.__enter__()
 
         imgui.push_id(self.window_id)
         old_cursor_pos = imgui.get_cursor_pos()
@@ -223,8 +270,8 @@ class Node:
 
         upper_left = self.editor.local_to_screen(self.pos)
         lower_right = t_add(upper_left, self.size_with_padding)
-        draw_list.channels_set_current(CHANNEL_NODE)
-        draw_list.add_rect_filled(upper_left, lower_right, COLOR_NODE_BACKGROUND, 5.0)
+        with draw_on_channel(draw_list, CHANNEL_NODE_BACKGROUND):
+            draw_list.add_rect_filled(upper_left, lower_right, COLOR_NODE_BACKGROUND, 5.0)
 
         # set_cursor_pos is already in window coordinates
         imgui.set_cursor_pos(t_add(self.pos, self.padding))
@@ -240,13 +287,11 @@ class Node:
 
         if self.expanded:
             imgui.begin_group()
-            imgui.text("Inputs")
             self.show_ports(draw_list, self.ports[PORT_TYPE_INPUT], PORT_TYPE_INPUT)
             imgui.end_group()
             imgui.same_line()
 
             imgui.begin_group()
-            imgui.text("Outputs")
             self.show_ports(draw_list, self.ports[PORT_TYPE_OUTPUT], PORT_TYPE_OUTPUT)
             imgui.end_group()
 
@@ -263,11 +308,13 @@ class Node:
         upper_left = self.editor.local_to_screen(self.pos)
         lower_right = t_add(upper_left, self.size_with_padding)
         color = COLOR_NODE_BORDER_HOVERED if self.hovered else COLOR_NODE_BORDER
-        draw_list.channels_set_current(CHANNEL_NODE)
-        draw_list.add_rect(upper_left, lower_right, color, 5.0)
+        with draw_on_channel(draw_list, CHANNEL_NODE_BACKGROUND):
+            draw_list.add_rect(upper_left, lower_right, color, 5.0)
 
         imgui.pop_id()
         imgui.set_cursor_pos(old_cursor_pos)
+
+        channel_stack.__exit__()
 
 class NodeEditor:
     def __init__(self):
@@ -358,6 +405,7 @@ class NodeEditor:
                 draw_list.add_line(t_add(self.pos, (x, 0)), t_add(self.pos, (x, self.size[1])), COLOR_EDITOR_GRID)
             for y in range(0, int(self.size[1]), grid_size):
                 draw_list.add_line(t_add(self.pos, (0, y)), t_add(self.pos, (self.size[0], y)), COLOR_EDITOR_GRID)
+            draw_list.channels_set_current(CHANNEL_DEFAULT)
             for node in self.nodes:
                 node.show(draw_list)
             for connection in self.connections:
