@@ -449,9 +449,6 @@ class NodeEditor:
 
             imgui.text("I'm expanded!")
             imgui.text("offset: %d %d" % self.offset)
-            grid_x0 = int(self.offset[0] - (self.offset[0] % grid_size))
-            grid_y0 = int(self.offset[1] - (self.offset[1] % grid_size))
-            imgui.text("first grid at: %d %d" % (grid_x0, grid_y0))
 
             if imgui.is_mouse_clicked(1) and imgui.is_window_hovered() \
                     and not any(map(lambda n: n.hovered, self.nodes)):
@@ -459,7 +456,7 @@ class NodeEditor:
             if imgui.begin_popup("context"):
                 if imgui.menu_item("TestNode")[0]:
                     pos = io.mouse_pos
-                    self.nodes.append(Node(self, pos=pos))
+                    self.nodes.append(Node(self, pos=self.screen_to_local(pos)))
                 for name in ["FooNode", "BlahNode"]:
                     imgui.menu_item(name)
                 imgui.separator()
