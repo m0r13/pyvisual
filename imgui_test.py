@@ -137,6 +137,7 @@ class Node:
         self.connections = ([[] for _ in inputs], [[] for _ in outputs])
 
         self.padding = 12, 12
+        # local position (without editor window pos or offset)
         self.pos = pos
         self.size = 10, 10
 
@@ -174,7 +175,8 @@ class Node:
             # ui
             imgui.push_id(port_index)
             imgui.begin_group()
-            port_start = imgui.get_cursor_pos()
+            # port_start is in screen coordinates now
+            port_start = imgui.get_cursor_screen_pos()
             imgui.text("%s : %s" % (name, type))
 
             # position calculation
@@ -182,7 +184,7 @@ class Node:
             x = self.pos[0]
             if port_type == PORT_TYPE_OUTPUT:
                 x += self.size[0] + self.padding[0]*2
-            y = port_start[1] + size[1] / 2
+            y = self.editor.screen_to_local(port_start)[1] + size[1] / 2
             radius = 6.0
             thickness = 2.0
             center = self.editor.local_to_screen((x, y))
@@ -192,6 +194,7 @@ class Node:
             imgui.input_float("", 0.0)
             imgui.end_group()
 
+            # screen coordinates, like port_start
             port_end = imgui.get_item_rect_max()
 
             # port state
@@ -273,8 +276,8 @@ class Node:
         with draw_on_channel(draw_list, CHANNEL_NODE_BACKGROUND):
             draw_list.add_rect_filled(upper_left, lower_right, COLOR_NODE_BACKGROUND, 5.0)
 
-        # set_cursor_pos is already in window coordinates
-        imgui.set_cursor_pos(t_add(self.pos, self.padding))
+        # set_cursor_pos is in window coordinates
+        imgui.set_cursor_pos(self.editor.local_to_window(t_add(self.pos, self.padding)))
         imgui.begin_group()
 
         if imgui.button("[-]" if self.expanded else "[+]"):
@@ -328,15 +331,24 @@ class NodeEditor:
         self.pos = (0, 0)
         self.size = (1, 1)
 
+        # offset for moving position around
+        # offset (100, 100) means that at window (0, 0) is local position (100, 100)
+        self.offset = (0, 0)
+
         # state
         self.dragging_connection = None
         self.dragging_target_port_type = None
 
+        self.dragging_position = False
+
+    def local_to_window(self, pos):
+        return t_sub(pos, self.offset)
+
     def local_to_screen(self, pos):
-        return t_add(self.pos, pos)
+        return t_sub(t_add(self.pos, pos), self.offset)
 
     def screen_to_local(self, pos):
-        return t_sub(pos, self.pos)
+        return t_add(t_sub(pos, self.pos), self.offset)
 
     def remove_node(self, node):
         for port_type in (PORT_TYPE_INPUT, PORT_TYPE_OUTPUT):
@@ -397,15 +409,25 @@ class NodeEditor:
         if expanded:
             draw_list = imgui.get_window_draw_list()
             draw_list.channels_split(CHANNEL_COUNT)
-            draw_list.channels_set_current(CHANNEL_BACKGROUND)
-            draw_list.add_rect_filled(self.pos, t_add(self.pos, self.size), COLOR_EDITOR_BACKGROUND)
-
-            grid_size = 50
-            for x in range(0, int(self.size[0]), grid_size):
-                draw_list.add_line(t_add(self.pos, (x, 0)), t_add(self.pos, (x, self.size[1])), COLOR_EDITOR_GRID)
-            for y in range(0, int(self.size[1]), grid_size):
-                draw_list.add_line(t_add(self.pos, (0, y)), t_add(self.pos, (self.size[0], y)), COLOR_EDITOR_GRID)
             draw_list.channels_set_current(CHANNEL_DEFAULT)
+
+            with draw_on_channel(draw_list, CHANNEL_BACKGROUND):
+                draw_list.add_rect_filled(self.pos, t_add(self.pos, self.size), COLOR_EDITOR_BACKGROUND)
+                # how does the grid work?
+                #   -> find local coords where we see first grid pos
+                #   -> build grid from there
+                # round n down to nearest divisor d: n - (n % d)
+                # (grid_x0 / grid_y0 in local coordinates btw)
+                grid_size = 50
+                grid_x0 = int(self.offset[0] - (self.offset[0] % grid_size))
+                grid_x1 = int(grid_x0 + self.size[0] + grid_size)
+                grid_y0 = int(self.offset[1] - (self.offset[1] % grid_size))
+                grid_y1 = int(grid_y0 + self.size[1] + grid_size)
+                for x in range(grid_x0, grid_x1, grid_size):
+                    draw_list.add_line(self.local_to_screen((x, grid_y0)), self.local_to_screen((x, grid_y1)), COLOR_EDITOR_GRID)
+                for y in range(grid_y0, grid_y1, grid_size):
+                    draw_list.add_line(self.local_to_screen((grid_x0, y)), self.local_to_screen((grid_x1,  y)), COLOR_EDITOR_GRID)
+
             for node in self.nodes:
                 node.show(draw_list)
             for connection in self.connections:
@@ -417,7 +439,19 @@ class NodeEditor:
                 self.connections.remove(self.dragging_connection)
                 self.dragging_connection = None
 
+            if self.dragging_connection is None and imgui.is_mouse_clicked(0):
+                self.dragging_position = True
+            if self.dragging_position:
+                self.offset = t_sub(self.offset, imgui.get_mouse_drag_delta())
+                imgui.reset_mouse_drag_delta()
+            if self.dragging_position and imgui.is_mouse_released(0):
+                self.dragging_position = False
+
             imgui.text("I'm expanded!")
+            imgui.text("offset: %d %d" % self.offset)
+            grid_x0 = int(self.offset[0] - (self.offset[0] % grid_size))
+            grid_y0 = int(self.offset[1] - (self.offset[1] % grid_size))
+            imgui.text("first grid at: %d %d" % (grid_x0, grid_y0))
 
             if imgui.is_mouse_clicked(1) and imgui.is_window_hovered() \
                     and not any(map(lambda n: n.hovered, self.nodes)):
@@ -432,6 +466,9 @@ class NodeEditor:
                 if imgui.begin_menu("More Nodes"):
                     imgui.menu_item("AnotherNode")
                     imgui.end_menu()
+                imgui.separator()
+                if imgui.menu_item("reset offset")[0]:
+                    self.offset = (0, 0)
                 imgui.end_popup()
             draw_list.channels_merge()
         imgui.end()
