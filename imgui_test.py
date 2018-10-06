@@ -29,6 +29,9 @@ def t_circle_contains(center, radius, point):
         return False
     return True
 
+def round_next(n, d):
+    return n - (n % d)
+
 COLOR_EDITOR_BACKGROUND = imgui.get_color_u32_rgba(0.1, 0.1, 0.1, 1.0)
 COLOR_EDITOR_GRID = imgui.get_color_u32_rgba(0.3, 0.3, 0.3, 1.0)
 COLOR_NODE_BACKGROUND = imgui.get_color_u32_rgba(0.0, 0.0, 0.0, 1.0)
@@ -50,8 +53,10 @@ CHANNEL_NODE_BACKGROUND = 2
 CHANNEL_NODE = 3
 CHANNEL_CONNECTION = 4
 CHANNEL_PORT = 5
-
 CHANNEL_COUNT = 6
+
+EDITOR_GRID_SIZE = 50
+EDITOR_NODE_GRID_SIZE = 10
 
 class draw_on_channel:
     def __init__(self, draw_list, channel):
@@ -158,6 +163,11 @@ class Node:
         self.hovered = False
 
     @property
+    def actual_pos(self):
+        # local pos with node grid applied
+        return round_next(self.pos[0], EDITOR_NODE_GRID_SIZE), round_next(self.pos[1], EDITOR_NODE_GRID_SIZE)
+
+    @property
     def size_with_padding(self):
         return t_add(self.size, t_mul(self.padding, 2))
 
@@ -170,8 +180,8 @@ class Node:
     def get_port_position(self, port_type, port_index):
         positions = self.port_positions[port_type]
         if not self.expanded or port_index >= len(positions) or positions[port_index] is None:
-            x = self.pos[0] if port_type == PORT_TYPE_INPUT else self.pos[0]+self.size[0]+self.padding[0]*2
-            y = self.pos[1] + (self.size[1] + self.padding[1] * 2) / 2
+            x = self.actual_pos[0] if port_type == PORT_TYPE_INPUT else self.actual_pos[0]+self.size[0]+self.padding[0]*2
+            y = self.actual_pos[1] + (self.size[1] + self.padding[1] * 2) / 2
             return self.editor.local_to_screen((x, y))
         return positions[port_index]
 
@@ -193,7 +203,7 @@ class Node:
 
             # position calculation
             size = imgui.get_item_rect_size()
-            x = self.pos[0]
+            x = self.actual_pos[0]
             if port_type == PORT_TYPE_OUTPUT:
                 x += self.size[0] + self.padding[0]*2
             y = self.editor.screen_to_local(port_start)[1] + size[1] / 2
@@ -219,7 +229,7 @@ class Node:
             if port_type == PORT_TYPE_INPUT:
                 assert len(connections) in (0, 1)
 
-            hovered_bullet = t_circle_contains(center, radius, io.mouse_pos)
+            hovered_bullet = t_circle_contains(center, radius * 3, io.mouse_pos)
             hovered_port = t_between(port_start, port_end, io.mouse_pos)
             hovered = hovered_bullet or hovered_port
 
@@ -294,13 +304,13 @@ class Node:
             self.pos = t_add(self.pos, imgui.get_mouse_drag_delta())
             imgui.reset_mouse_drag_delta()
 
-        upper_left = self.editor.local_to_screen(self.pos)
+        upper_left = self.editor.local_to_screen(self.actual_pos)
         lower_right = t_add(upper_left, self.size_with_padding)
         with draw_on_channel(draw_list, CHANNEL_NODE_BACKGROUND):
             draw_list.add_rect_filled(upper_left, lower_right, COLOR_NODE_BACKGROUND, 5.0)
 
         # set_cursor_pos is in window coordinates
-        imgui.set_cursor_pos(self.editor.local_to_window(t_add(self.pos, self.padding)))
+        imgui.set_cursor_pos(self.editor.local_to_window(t_add(self.actual_pos, self.padding)))
         imgui.begin_group()
 
         if imgui.button("[-]" if self.expanded else "[+]"):
@@ -325,13 +335,13 @@ class Node:
 
         self.size = imgui.get_item_rect_size()
         mouse_pos = self.editor.screen_to_local(io.mouse_pos)
-        self.hovered = imgui.is_window_hovered() and t_between(self.pos, t_add(self.pos, self.size_with_padding), mouse_pos)
+        self.hovered = imgui.is_window_hovered() and t_between(self.actual_pos, t_add(self.actual_pos, self.size_with_padding), mouse_pos)
         if self.hovered and imgui.is_mouse_clicked(0) and not self.editor.is_dragging_connection():
             self.dragging = True
         if imgui.is_mouse_released(0):
             self.dragging = False
 
-        upper_left = self.editor.local_to_screen(self.pos)
+        upper_left = self.editor.local_to_screen(self.actual_pos)
         lower_right = t_add(upper_left, self.size_with_padding)
         color = COLOR_NODE_BORDER_HOVERED if self.hovered else COLOR_NODE_BORDER
         with draw_on_channel(draw_list, CHANNEL_NODE_BACKGROUND):
@@ -410,8 +420,10 @@ class NodeEditor:
             return False
         # TODO prevent this manual hackish check?
         # constraint: only one connection per input
-        if port_type == PORT_TYPE_INPUT:
-            return len(node.connections[PORT_TYPE_INPUT][port_index]) == 0
+        if port_type == PORT_TYPE_INPUT \
+                and len(node.connections[PORT_TYPE_INPUT][port_index]) != 0:
+            return False
+        
         return True
 
     def drop_connection(self, node, port_type, port_index):
@@ -451,7 +463,7 @@ class NodeEditor:
                 #   -> build grid from there
                 # round n down to nearest divisor d: n - (n % d)
                 # (grid_x0 / grid_y0 in local coordinates btw)
-                grid_size = 50
+                grid_size = EDITOR_GRID_SIZE
                 grid_x0 = int(self.offset[0] - (self.offset[0] % grid_size))
                 grid_x1 = int(grid_x0 + self.size[0] + grid_size)
                 grid_y0 = int(self.offset[1] - (self.offset[1] % grid_size))
