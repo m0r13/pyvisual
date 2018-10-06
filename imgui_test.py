@@ -109,10 +109,15 @@ class Connection:
             # show connection that is being dragged as active
             color = COLOR_PORT_BULLET_HOVERED
 
-        p1 = self.input_node.get_port_position(PORT_TYPE_OUTPUT, self.input_index)
-        p2 = self.output_node.get_port_position(PORT_TYPE_INPUT, self.output_index)
+        p0 = self.input_node.get_port_position(PORT_TYPE_OUTPUT, self.input_index)
+        p1 = self.output_node.get_port_position(PORT_TYPE_INPUT, self.output_index)
+        b0 = t_add(p0, (100, 0))
+        b1 = t_add(p1, (-100, 0))
         with draw_on_channel(draw_list, CHANNEL_CONNECTION):
-            draw_list.add_line(p1, p2, color, 2.0)
+            draw_list.add_bezier_curve(p0, b0, b1, p1, color, 2.0)
+            # visualize the control points
+            #draw_list.add_circle_filled(b0, 3, imgui.get_color_u32_rgba(0.0, 1.0, 0.0, 1.0))
+            #draw_list.add_circle_filled(b1, 3, imgui.get_color_u32_rgba(0.0, 0.0, 1.0, 1.0))
 
     @staticmethod
     def create(editor, node, port_type, port_index):
