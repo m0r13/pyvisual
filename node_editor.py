@@ -4,7 +4,7 @@ import sys
 import time
 from vispy import app, gloo, keys
 import imgui, vispy_imgui
-import node_meta
+import node_meta, node_widget
 
 canvas = app.Canvas(keys='interactive', vsync=False, autoswap=True)
 timer = app.Timer(1.0 / 30.0, connect=canvas.update, start=True)
@@ -113,8 +113,10 @@ class Connection:
 
         p0 = self.input_node.get_port_position(PORT_TYPE_OUTPUT, self.input_index)
         p1 = self.output_node.get_port_position(PORT_TYPE_INPUT, self.output_index)
-        b0 = t_add(p0, (100, 0))
-        b1 = t_add(p1, (-100, 0))
+        offset_x = min(100, abs(p0[0] - p1[0]))
+        offset_y = 0
+        b0 = t_add(p0, (offset_x, offset_y))
+        b1 = t_add(p1, (-offset_x, -offset_y))
         with draw_on_channel(draw_list, CHANNEL_CONNECTION):
             draw_list.add_bezier_curve(p0, b0, b1, p1, color, 2.0)
             # visualize the control points
@@ -148,11 +150,21 @@ class Node:
         self.window_id = Node.id_counter
         Node.id_counter += 1
 
-        # TODO datastructures
+        # TODO datastructures, it's a mess!
         inputs = self.spec.inputs
         outputs = self.spec.outputs
+        self.ports = (inputs, outputs)
         self.port_positions = ([None]*len(inputs), [None]*len(outputs))
+        self.port_widgets = ([None]*len(inputs), [None]*len(outputs))
         self.connections = ([[] for _ in inputs], [[] for _ in outputs])
+
+        def create_widgets(ports, widgets):
+            assert len(ports) == len(widgets)
+            for i, port_spec in enumerate(ports):
+                print(port_spec)
+                widgets[i] = node_widget.ImGuiValue.create(port_spec)
+        create_widgets(self.spec.inputs, self.port_widgets[PORT_TYPE_INPUT])
+        create_widgets(self.spec.outputs, self.port_widgets[PORT_TYPE_OUTPUT])
 
         self.padding = 12, 12
         # local position (without editor window pos or offset)
@@ -219,8 +231,9 @@ class Node:
             center = self.editor.local_to_screen((x, y))
             self.port_positions[port_type][port_index] = center
 
-            imgui.push_item_width(100)
-            imgui.input_float("", 0.0)
+            widget = self.port_widgets[port_type][port_index]
+            if widget is not None:
+                widget.show(port_type)
             imgui.end_group()
 
             # screen coordinates, like port_start
@@ -236,7 +249,8 @@ class Node:
             if port_type == PORT_TYPE_INPUT:
                 assert len(connections) in (0, 1)
 
-            hovered_bullet = t_circle_contains(center, radius * 3, io.mouse_pos)
+            # TODO make it radius*3 or so, but make sure that only one port at a time is selected
+            hovered_bullet = t_circle_contains(center, radius, io.mouse_pos)
             hovered_port = t_between(port_start, port_end, io.mouse_pos)
             hovered = hovered_bullet or hovered_port
 
@@ -438,8 +452,15 @@ class NodeEditor:
         if port_type == PORT_TYPE_INPUT \
                 and len(node.connections[PORT_TYPE_INPUT][port_index]) != 0:
             return False
-        
-        return True
+        # TODO this is hacky too
+        port_spec = node.ports[port_type][port_index]
+        connection = self.dragging_connection
+        other_port_spec = None
+        if port_type == PORT_TYPE_INPUT:
+            other_port_spec = connection.input_node.ports[PORT_TYPE_OUTPUT][connection.input_index]
+        else:
+            other_port_spec = connection.output_node.ports[PORT_TYPE_INPUT][connection.output_index]
+        return port_spec["dtype"] == other_port_spec["dtype"]
 
     def drop_connection(self, node, port_type, port_index):
         assert self.is_dragging_connection()

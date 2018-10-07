@@ -51,6 +51,21 @@ class Node(metaclass=NodeMeta):
         inputs = []
         outputs = []
 
+    def __init__(self):
+        self._evaluated = False
+        self.outputs = OutputMap()
+
+    @property
+    def evaluated(self):
+        return self.evaluated
+    @evaluated.setter
+    def evaluated(self, evaluated):
+        # TODO somehow set that input nodes need to be evaluated?
+        self.evaluated = evaluated
+
+    def evaluate(self):
+        pass
+
     @classmethod
     def get_node_spec(cls):
         return NodeSpec.from_cls(cls)
@@ -64,6 +79,115 @@ class Node(metaclass=NodeMeta):
             if issubclass(node, cls):
                 nodes.append(node)
         return nodes
+
+# TODO I think we don't need this after all
+# a dict with port_id -> settable value should do it
+class OutputMap:
+    def __init__(self):
+        self.values = {}
+        self.changed = {}
+
+    def has_value(self, name):
+        return self.get(name) is not None
+
+    def has_changed(self, name):
+        # TODO how and when to unset this?
+        return self.changed.get(name, False)
+
+    def get(self, name):
+        return self.values.get(name)
+
+    def set(self, name, value):
+        self.values[name] = value
+        self.set_changed(name)
+
+    def set_changed(self, name):
+        self.changed[name] = True
+
+class ValueHolder:
+    @property
+    def has_value(self):
+        raise NotImplementedError()
+    @property
+    def has_changed(self):
+        raise NotImplementedError()
+    @property
+    def value(self):
+        raise NotImplementedError()
+
+class SettableValueHolder(ValueHolder):
+    def __init__(self):
+        self._value = None
+        self._changed = False
+
+    @property
+    def has_value(self):
+        return self.value is not None
+
+    @property
+    def has_changed(self):
+        # TODO when to reset this
+        # maybe once all stages are evaluated
+        # make sure stages are evaluated in right order (output stage last)
+        return self._changed
+    @has_changed.setter
+    def has_changed(self, changed):
+        self._changed = changed
+
+    @property
+    def value(self):
+        return self._value
+    @value.setter
+    def value(self, value):
+        self._value = value
+        self._changed = True
+
+class OverrideValueHolder(ValueHolder):
+    def __init__(self, value, override):
+        self.value = value
+        self.override = override
+
+    @property
+    def current(self):
+        if self.override.has_value:
+            return self.override
+        elif self.value.has_value:
+            return self.value
+        # TODO ?
+        return None
+
+    @property
+    def has_value(self):
+        return self.override.has_value or self.value.has_value
+
+    @property
+    def has_changed(self):
+        current = self.current
+        if current is None:
+            # TODO should return True when current changes
+            return False
+        return current.has_changed
+
+    @property
+    def value(self):
+        current = self.current
+        assert current is not None, "no value assigned"
+        return current.value
+
+class ConnectionValueHolder(ValueHolder):
+    def __init__(self, node, name):
+        self.node = node
+        self.name = name
+
+    @property
+    def has_value(self):
+        return self.node.outputs[name].has_value
+    @property
+    def has_changed(self):
+        return self.node.outputs[name].has_changed
+    @property
+    def value(self):
+        return self.node.outputs[name].value
 
 class TestNode(Node):
     class Meta:
@@ -94,6 +218,8 @@ class EffectMirrorNode(ShaderNode):
             {"name" : "mode", "dtype" : "float"}
         ]
         outputs = [
+            {"name" : "test2", "dtype" : "tex2"},
+            {"name" : "output", "dtype" : "tex2"}
         ]
 
 class EffectHuePhaseNode(ShaderNode):
@@ -122,6 +248,17 @@ class ValueNode(VisualNode):
         inputs = []
         outputs = [
             {"name" : "output", "dtype" : "float"}
+        ]
+
+class TestNode(VisualNode):
+    class Meta:
+        inputs = [
+            {"name" : "input", "dtype" : "tex2d"},
+            {"name" : "input", "dtype" : "tex2d"},
+            {"name" : "input", "dtype" : "float"},
+        ]
+        outputs = [
+            {"name" : "output", "dtype" : "float"},
         ]
 
 if __name__ == "__main__":
