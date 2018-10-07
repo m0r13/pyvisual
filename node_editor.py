@@ -4,6 +4,7 @@ import sys
 import time
 from vispy import app, gloo, keys
 import imgui, vispy_imgui
+import node_meta
 
 canvas = app.Canvas(keys='interactive', vsync=False, autoswap=True)
 timer = app.Timer(1.0 / 30.0, connect=canvas.update, start=True)
@@ -140,22 +141,16 @@ class MouseDummyNode:
 
 class Node:
     id_counter = 0
-    def __init__(self, editor, pos=(100, 100)):
+    def __init__(self, editor, spec, pos=(100, 100)):
         self.editor = editor
+        self.spec = spec
+
         self.window_id = Node.id_counter
         Node.id_counter += 1
 
-        self.name = "TestNode"
-
-        inputs = [
-            ("input", "int"),
-            ("input2", "float"),
-        ]
-        outputs = [
-            ("output", "float"),
-            ("output2", "int"),
-        ]
-        self.ports = (inputs, outputs)
+        # TODO datastructures
+        inputs = self.spec.inputs
+        outputs = self.spec.outputs
         self.port_positions = ([None]*len(inputs), [None]*len(outputs))
         self.connections = ([[] for _ in inputs], [[] for _ in outputs])
 
@@ -199,13 +194,19 @@ class Node:
 
         imgui.push_id(int(port_type))
         imgui.begin_group()
-        for port_index, (name, type) in enumerate(ports):
+        for port_index, port in enumerate(ports):
+            name = port["name"]
+            dtype = port["dtype"]
+
             # ui
             imgui.push_id(port_index)
             imgui.begin_group()
             # port_start is in screen coordinates now
             port_start = imgui.get_cursor_screen_pos()
-            imgui.text("%s : %s" % (name, type))
+            label = "%s > %s" % (dtype, name) 
+            if port_type == PORT_TYPE_OUTPUT:
+                label = "%s > %s" % (name, dtype)
+            imgui.text(label)
 
             # position calculation
             size = imgui.get_item_rect_size()
@@ -322,19 +323,19 @@ class Node:
         if imgui.button("[-]" if self.expanded else "[+]"):
             self.expanded = not self.expanded
         imgui.same_line()
-        imgui.text("TestNode")
+        imgui.text(self.spec.name)
         imgui.same_line()
         if imgui.button("[x]"):
             self.editor.remove_node(self)
 
         if self.expanded:
             imgui.begin_group()
-            self.show_ports(draw_list, self.ports[PORT_TYPE_INPUT], PORT_TYPE_INPUT)
+            self.show_ports(draw_list, self.spec.inputs, PORT_TYPE_INPUT)
             imgui.end_group()
             imgui.same_line()
 
             imgui.begin_group()
-            self.show_ports(draw_list, self.ports[PORT_TYPE_OUTPUT], PORT_TYPE_OUTPUT)
+            self.show_ports(draw_list, self.spec.outputs, PORT_TYPE_OUTPUT)
             imgui.end_group()
 
         imgui.end_group()
@@ -359,9 +360,11 @@ class Node:
         channel_stack.__exit__()
 
 class NodeEditor:
-    def __init__(self):
-        node1 = Node(self, pos=(50, 50))
-        node2 = Node(self, pos=(500, 200))
+    def __init__(self, node_specs):
+        self.node_specs = node_specs
+
+        node1 = Node(self, spec=self.node_specs[0], pos=(50, 50))
+        node2 = Node(self, spec=self.node_specs[0], pos=(500, 200))
         connection = Connection(self, output_node=node2, output_index=0, input_node=node1, input_index=0)
         self.nodes = [node1, node2]
         self.connections = [connection]
@@ -522,15 +525,12 @@ class NodeEditor:
                     and not any(map(lambda n: n.hovered, self.nodes)):
                 imgui.open_popup("context")
             if imgui.begin_popup("context"):
-                if imgui.menu_item("TestNode")[0]:
-                    pos = io.mouse_pos
-                    self.nodes.append(Node(self, pos=self.screen_to_local(pos)))
-                for name in ["FooNode", "BlahNode"]:
-                    imgui.menu_item(name)
-                imgui.separator()
-                if imgui.begin_menu("More Nodes"):
-                    imgui.menu_item("AnotherNode")
-                    imgui.end_menu()
+                for i, spec in enumerate(self.node_specs):
+                    imgui.push_id(i)
+                    if imgui.menu_item(spec.name)[0]:
+                        pos = self.screen_to_local(io.mouse_pos)
+                        self.nodes.append(Node(self, spec, pos=pos))
+                    imgui.pop_id()
                 imgui.separator()
                 clicked, self.show_test_window = imgui.menu_item("show demo window", None, self.show_test_window)
                 if clicked:
@@ -544,7 +544,9 @@ class NodeEditor:
                 imgui.show_test_window()
         imgui.end()
 
-editor = NodeEditor()
+node_types = node_meta.VisualNode.get_sub_nodes(include_self=False)
+node_specs = [ n.get_node_spec() for n in node_types ]
+editor = NodeEditor(node_specs)
 
 editor_time = 0.0
 editor_time_count = 0
