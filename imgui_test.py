@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 
 import sys
+import time
 from vispy import app, gloo, keys
 import imgui, vispy_imgui
 
@@ -373,11 +374,17 @@ class NodeEditor:
         # offset (100, 100) means that at window (0, 0) is local position (100, 100)
         self.offset = (0, 0)
 
+        # TODO naming
         # state
         self.dragging_connection = None
         self.dragging_target_port_type = None
 
         self.dragging_position = False
+
+        self.fps = 0.0
+        self.editor_time = 0.0
+        self.editor_time_relative = 0.0
+        self.show_test_window = False
 
     def local_to_window(self, pos):
         return t_sub(pos, self.offset)
@@ -445,14 +452,21 @@ class NodeEditor:
         self.dragging_connection.connect()
         self.dragging_connection = None
 
+    def fps_callback(self, fps):
+        self.fps = fps
+
+    def editor_time_callback(self, editor_time):
+        self.editor_time = editor_time
+        self.editor_time_relative = editor_time / (1.0 / self.fps)
+
     def show(self):
         io = imgui.get_io()
         w, h = io.display_size
 
         imgui.set_next_window_position(0, 0)
-        imgui.set_next_window_size(w, h * 0.75)
+        imgui.set_next_window_size(w, h)
 
-        flags = imgui.WINDOW_NO_RESIZE | imgui.WINDOW_NO_MOVE
+        flags = imgui.WINDOW_NO_RESIZE | imgui.WINDOW_NO_MOVE | imgui.WINDOW_NO_TITLE_BAR | imgui.WINDOW_NO_BRING_TO_FRONT_ON_FOCUS
         expanded, _ = imgui.begin("NodeEditor", False, flags)
         self.pos = imgui.get_window_position()
         self.size = imgui.get_window_size()
@@ -501,8 +515,8 @@ class NodeEditor:
             if self.dragging_position and imgui.is_mouse_released(0):
                 self.dragging_position = False
 
-            imgui.text("I'm expanded!")
-            imgui.text("offset: %d %d" % self.offset)
+            imgui.text("fps: %.2f" % self.fps)
+            imgui.text("editor time: %.2f ms ~ %.2f%%" % (self.editor_time * 1000.0, self.editor_time_relative * 100.0))
 
             if imgui.is_mouse_clicked(1) and imgui.is_window_hovered() \
                     and not any(map(lambda n: n.hovered, self.nodes)):
@@ -518,42 +532,48 @@ class NodeEditor:
                     imgui.menu_item("AnotherNode")
                     imgui.end_menu()
                 imgui.separator()
+                clicked, self.show_test_window = imgui.menu_item("show demo window", None, self.show_test_window)
+                if clicked:
+                    imgui.set_window_focus("ImGui Demo")
                 if imgui.menu_item("reset offset")[0]:
                     self.offset = (0, 0)
                 imgui.end_popup()
             draw_list.channels_merge()
+
+            if self.show_test_window:
+                imgui.show_test_window()
         imgui.end()
 
 editor = NodeEditor()
 
+editor_time = 0.0
+editor_time_count = 0
+
 @canvas.connect
 def on_draw(event):
-    global closed
+    global editor_time, editor_time_count
 
     gloo.set_clear_color((0.2, 0.4, 0.6, 1.0))
     # TODO why does gloo.clear not work?
     #gloo.clear(depth=True, color=True)
     gloo.gl.glClear(gloo.gl.GL_COLOR_BUFFER_BIT)
 
+    start = time.time()
     imgui_renderer.process_inputs()
     imgui.new_frame()
-    imgui.show_test_window()
 
     editor.show()
-
-    #imgui.set_next_window_position(10, 10, condition=imgui.ALWAYS, pivot_x=0, pivot_y=0)
-    #imgui.set_next_window_size(0.0, 0.0)
-    #flags = imgui.WINDOW_NO_TITLE_BAR | imgui.WINDOW_NO_RESIZE + imgui.WINDOW_NO_MOVE + imgui.WINDOW_NO_COLLAPSE
-
-    #imgui.begin("Stats", None, flags)
-    #imgui.text("FPS: %.2f" % app.clock.get_fps())
-    #imgui.text("Current BPM: %.2f" % current_bpm.value)
-    #imgui.text("Beat running: %s" % {True : "Yes", False : "Nope"}[is_beat_running])
-    #imgui.end()
 
     imgui.render()
     draw = imgui.get_draw_data()
     imgui_renderer.render(draw)
+
+    editor_time += time.time() - start
+    editor_time_count += 1
+    if editor_time_count >= 30:
+        editor.editor_time_callback(editor_time / editor_time_count)
+        editor_time = 0.0
+        editor_time_count = 0
 
 @canvas.connect
 def on_key_press(event):
@@ -562,4 +582,5 @@ def on_key_press(event):
 
 if __name__ == "__main__":
     canvas.show()
+    canvas.measure_fps(1, editor.fps_callback)
     app.run()
