@@ -12,10 +12,12 @@ class NodeMeta(type):
         return cls
 
 class NodeSpec:
-    def __init__(self, cls=None, inputs=None, outputs=None):
+    def __init__(self, cls=None, inputs=None, outputs=None, options={}):
         self.cls = cls
         self.inputs = inputs if inputs is not None else []
         self.outputs = outputs if outputs is not None else []
+        self.options = dict(options)
+        self.options.setdefault("show_title", True)
 
     @property
     def name(self):
@@ -25,9 +27,10 @@ class NodeSpec:
         self.cls = child_spec.cls
         self.inputs = self.inputs + child_spec.inputs
         self.outputs = self.outputs + child_spec.outputs
+        self.options.update(child_spec.options)
 
     def __repr__(self):
-        return "NodeSpec(cls=%s, inputs=%s, outputs=%s)" % (self.cls, self.inputs, self.outputs)
+        return "NodeSpec(cls=%s, inputs=%s, outputs=%s, options=%s)" % (self.cls, self.inputs, self.outputs, self.options)
 
     @staticmethod
     def from_cls(node_cls):
@@ -40,7 +43,8 @@ class NodeSpec:
         def parse(cls):
             inputs = getattr(cls.Meta, "inputs", [])
             outputs = getattr(cls.Meta, "outputs", [])
-            return NodeSpec(cls=cls, inputs=inputs, outputs=outputs)
+            options = getattr(cls.Meta, "options", {})
+            return NodeSpec(cls=cls, inputs=inputs, outputs=outputs, options=options)
         spec = NodeSpec()
         for cls in bases:
             spec.append(parse(cls))
@@ -229,7 +233,7 @@ class EffectHuePhaseNode(ShaderNode):
         ]
         outputs = []
 
-class ScreenOutputNode(VisualNode):
+class RendererNode(VisualNode):
     class Meta:
         inputs = [
             {"name" : "input", "dtype" : "tex2d"}
@@ -249,6 +253,9 @@ class ValueNode(VisualNode):
         outputs = [
             {"name" : "output", "dtype" : "float"}
         ]
+        options = {
+            "show_title" : False
+        }
 
 class TestNode(VisualNode):
     class Meta:

@@ -166,12 +166,13 @@ class Node:
         create_widgets(self.spec.inputs, self.port_widgets[PORT_TYPE_INPUT])
         create_widgets(self.spec.outputs, self.port_widgets[PORT_TYPE_OUTPUT])
 
-        self.padding = 12, 12
+        self.padding = 10, 10
         # local position (without editor window pos or offset)
         self.pos = pos
         self.size = 10, 10
 
-        self.expanded = True
+        self.collapsed = False
+        self.collapsible = self.spec.options["show_title"]
         self.dragging = False
         self.hovered = False
 
@@ -192,7 +193,7 @@ class Node:
 
     def get_port_position(self, port_type, port_index):
         positions = self.port_positions[port_type]
-        if not self.expanded or port_index >= len(positions) or positions[port_index] is None:
+        if self.collapsed or port_index >= len(positions) or positions[port_index] is None:
             x = self.actual_pos[0] if port_type == PORT_TYPE_INPUT else self.actual_pos[0]+self.size[0]+self.padding[0]*2
             y = self.actual_pos[1] + (self.size[1] + self.padding[1] * 2) / 2
             return self.editor.local_to_screen((x, y))
@@ -334,15 +335,10 @@ class Node:
         imgui.set_cursor_pos(self.editor.local_to_window(t_add(self.actual_pos, self.padding)))
         imgui.begin_group()
 
-        if imgui.button("[-]" if self.expanded else "[+]"):
-            self.expanded = not self.expanded
-        imgui.same_line()
-        imgui.text(self.spec.name)
-        imgui.same_line()
-        if imgui.button("[x]"):
-            self.editor.remove_node(self)
+        if self.spec.options["show_title"]:
+            imgui.text(self.spec.name)
 
-        if self.expanded:
+        if not self.collapsed:
             imgui.begin_group()
             self.show_ports(draw_list, self.spec.inputs, PORT_TYPE_INPUT)
             imgui.end_group()
@@ -362,11 +358,31 @@ class Node:
         if imgui.is_mouse_released(0):
             self.dragging = False
 
+        if self.collapsible and self.hovered and not imgui.is_any_item_active():
+            # scroll down
+            if self.collapsed and io.mouse_wheel < 0:
+                self.collapsed = False
+            # scroll up
+            elif not self.collapsed and io.mouse_wheel > 0:
+                self.collapsed = True
+        if self.hovered and imgui.is_mouse_clicked(1) and not imgui.is_any_item_active():
+            # little hack to first context menu entry under cursor
+            pos = io.mouse_pos
+            io.mouse_pos = t_add(pos, (-20, -20))
+            imgui.open_popup("context")
+            io.mouse_pos = pos
+        if imgui.begin_popup("context"):
+            if imgui.menu_item("delete")[0]:
+                self.editor.remove_node(self)
+            if imgui.menu_item("expand..." if self.collapsed else "collaps...")[0]:
+                self.collapsed = not self.collapsed
+            imgui.end_popup()
+
         upper_left = self.editor.local_to_screen(self.actual_pos)
         lower_right = t_add(upper_left, self.size_with_padding)
         color = COLOR_NODE_BORDER_HOVERED if self.hovered else COLOR_NODE_BORDER
         with draw_on_channel(draw_list, CHANNEL_NODE_BACKGROUND):
-            draw_list.add_rect(upper_left, lower_right, color, 5.0)
+            draw_list.add_rect(upper_left, lower_right, color, 2.0)
 
         imgui.pop_id()
         imgui.set_cursor_pos(old_cursor_pos)
@@ -544,12 +560,17 @@ class NodeEditor:
 
             if imgui.is_mouse_clicked(1) and imgui.is_window_hovered() \
                     and not any(map(lambda n: n.hovered, self.nodes)):
+                # have first menu entry under cursor
+                pos = io.mouse_pos
+                io.mouse_pos = t_add(pos, (-20, -20))
                 imgui.open_popup("context")
+                io.mouse_pos = pos
             if imgui.begin_popup("context"):
                 for i, spec in enumerate(self.node_specs):
                     imgui.push_id(i)
                     if imgui.menu_item(spec.name)[0]:
                         pos = self.screen_to_local(io.mouse_pos)
+                        pos = t_add(pos, (-10, -10))
                         self.nodes.append(Node(self, spec, pos=pos))
                     imgui.pop_id()
                 imgui.separator()
