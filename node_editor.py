@@ -113,8 +113,13 @@ class Connection:
 
         p0 = self.input_node.get_port_position(PORT_TYPE_OUTPUT, self.input_index)
         p1 = self.output_node.get_port_position(PORT_TYPE_INPUT, self.output_index)
-        offset_x = min(100, abs(p0[0] - p1[0]))
+
+        delta = p1[0] - p0[0], p1[1] - p0[1]
+        offset_x = min(200, abs(delta[0])) * 0.5
         offset_y = 0
+        if delta[0] < 0:
+            offset_x = min(200, 0.5 * abs(delta[0]))
+            offset_y = min(100, abs(delta[1]))
         b0 = t_add(p0, (offset_x, offset_y))
         b1 = t_add(p1, (-offset_x, -offset_y))
         with draw_on_channel(draw_list, CHANNEL_CONNECTION):
@@ -393,8 +398,8 @@ class NodeEditor:
     def __init__(self, node_specs):
         self.node_specs = node_specs
 
-        node1 = Node(self, spec=self.node_specs[0], pos=(50, 50))
-        node2 = Node(self, spec=self.node_specs[0], pos=(500, 200))
+        node1 = Node(self, spec=self.node_specs[0], pos=(50, 75))
+        node2 = Node(self, spec=self.node_specs[0], pos=(500, 225))
         connection = Connection(self, output_node=node2, output_index=0, input_node=node1, input_index=0)
         self.nodes = [node1, node2]
         self.connections = [connection]
@@ -511,6 +516,20 @@ class NodeEditor:
         self.pos = imgui.get_window_position()
         self.size = imgui.get_window_size()
         if expanded:
+            imgui.begin_main_menu_bar()
+            if imgui.begin_menu("File", True):
+                imgui.menu_item("New", "Ctrl+N", False, True)
+                imgui.menu_item("Open...", "Ctrl+O", False, True)
+                imgui.menu_item("Save", "Ctrl+S", False, True)
+                imgui.menu_item("Save as...", "Shift+Ctrl+S", False, True)
+                imgui.end_menu()
+            imgui.end_main_menu_bar()
+            imgui.begin_main_menu_bar()
+            if imgui.begin_menu("blah", True):
+                imgui.menu_item("New", "Ctrl+N", False, True)
+                imgui.end_menu()
+            imgui.end_main_menu_bar()
+
             draw_list = imgui.get_window_draw_list()
             draw_list.channels_split(CHANNEL_COUNT)
             draw_list.channels_set_current(CHANNEL_DEFAULT)
@@ -555,6 +574,8 @@ class NodeEditor:
             if self.dragging_position and imgui.is_mouse_released(0):
                 self.dragging_position = False
 
+            # navbar is in place
+            imgui.dummy(1, 12)
             imgui.text("fps: %.2f" % self.fps)
             imgui.text("editor time: %.2f ms ~ %.2f%%" % (self.editor_time * 1000.0, self.editor_time_relative * 100.0))
 

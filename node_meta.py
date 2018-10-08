@@ -222,8 +222,8 @@ class EffectMirrorNode(ShaderNode):
             {"name" : "mode", "dtype" : "float"}
         ]
         outputs = [
-            {"name" : "test2", "dtype" : "tex2"},
-            {"name" : "output", "dtype" : "tex2"}
+            {"name" : "test2", "dtype" : "tex2d"},
+            {"name" : "output", "dtype" : "tex2d"}
         ]
 
 class EffectHuePhaseNode(ShaderNode):

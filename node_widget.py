@@ -5,7 +5,7 @@ class ImGuiValue(node_meta.ValueHolder):
     def __init__(self):
         self.label = ""
 
-        self._has_value = False
+        self._has_value = True
         self._has_changed = False
         # TODO initial value
         self._value = 0.0
@@ -15,23 +15,24 @@ class ImGuiValue(node_meta.ValueHolder):
 
     def show(self, port_type):
         # TODO
-        if port_type == 0: # input
-            # TODO str id
-            imgui.push_id(100)
-            self.show_checkbox()
-            imgui.pop_id()
-            imgui.same_line()
-            imgui.push_id(101)
-            self.show_widget()
-            imgui.pop_id()
-        else:
-            imgui.push_id(101)
-            self.show_widget()
-            imgui.pop_id()
-            imgui.same_line()
-            imgui.push_id(100)
-            self.show_checkbox()
-            imgui.pop_id()
+        #if port_type == 0: # input
+        #    # TODO str id
+        #    imgui.push_id(100)
+        #    self.show_checkbox()
+        #    imgui.pop_id()
+        #    imgui.same_line()
+        #    imgui.push_id(101)
+        #    self.show_widget()
+        #    imgui.pop_id()
+        #else:
+        #    imgui.push_id(101)
+        #    self.show_widget()
+        #    imgui.pop_id()
+        #    imgui.same_line()
+        #    imgui.push_id(100)
+        #    self.show_checkbox()
+        #    imgui.pop_id()
+        self.show_widget()
 
     @property
     def has_value(self):
