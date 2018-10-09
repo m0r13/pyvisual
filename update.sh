@@ -1,8 +1,7 @@
 #!/bin/bash
 
 git pull
-git submodule init
-git submodule update
+git submodule update  --init --recursive
 
 cd ext/vispy
 pip3 install --user .
