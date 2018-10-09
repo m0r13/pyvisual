@@ -380,6 +380,8 @@ class Node:
                 draw_list.add_circle_filled(connector_center, connector_radius, bullet_color)
             else:
                 draw_list.add_circle(connector_center, connector_radius, bullet_color, 12, connector_thickness)
+            if hovered_connector and not (is_dragging_connection and not is_connection_droppable):
+                draw_list.add_circle(connector_center, connector_radius * 2, bullet_color, 12, connector_thickness)
 
         # port highlight drawing
         with draw_on_channel(draw_list, highlight_channel):
