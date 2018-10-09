@@ -1,0 +1,3 @@
+[submodule "ext/pyimgui"]
+	path = ext/pyimgui
+	url = https://github.com/m0r13/pyimgui.git
