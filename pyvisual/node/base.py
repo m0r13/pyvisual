@@ -91,6 +91,9 @@ class Node(metaclass=NodeMeta):
     def evaluate(self):
         pass
 
+    def show_custom_ui(self):
+        pass
+
     @classmethod
     def get_node_spec(cls):
         return NodeSpec.from_cls(cls)

@@ -446,9 +446,16 @@ class Node:
                 imgui.begin_group()
                 self.show_ports(draw_list, self.spec.outputs, PORT_TYPE_OUTPUT)
                 imgui.end_group()
+
+        # show custom node ui
+        imgui.begin_group()
+        self.instance.show_custom_ui()
         imgui.end_group()
 
-        # update known size of the node
+        imgui.end_group()
+
+        # all the imgui items inside the node are rendered,
+        # we can update the known size of the node
         self.size = imgui.get_item_rect_size()
 
         # some bounds for hovering / selection highlighting
