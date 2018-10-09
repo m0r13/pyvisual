@@ -1,10 +1,19 @@
 
+def find_node_base(bases):
+    bases = list(filter(lambda b: issubclass(b, Node), bases))
+    assert len(bases) == 1, "There must be exactly one Node base class"
+    return bases[0]
+
 class NodeMeta(type):
     node_types = []
 
     def __new__(meta, name, bases, dct):
-        assert len(bases) <= 1, "Node class may have only up to one base node"
-        dct["base_node"] = bases[0] if len(bases) else None
+        base = None
+        if name == "Node":
+            base = None
+        else:
+            base = find_node_base(bases)
+        dct["base_node"] = base
         cls = super().__new__(meta, name, bases, dct)
         meta.node_types.append(cls)
         print("Registered node type: %s" % cls)
@@ -16,6 +25,7 @@ class NodeSpec:
         self.inputs = inputs if inputs is not None else []
         self.outputs = outputs if outputs is not None else []
         self.options = dict(options)
+        self.options.setdefault("virtual", False)
         self.options.setdefault("category", "")
         self.options.setdefault("show_title", True)
         for port_spec in self.inputs + self.outputs:
@@ -66,11 +76,11 @@ class Node(metaclass=NodeMeta):
 
         spec = self.get_node_spec()
         for port_spec in spec.inputs:
-            manual_input = SettableValueHolder(0.0)
+            manual_input = SettableValueHolder(port_spec["dtype"].default())
             self.manual_inputs[port_spec["name"]] = manual_input
             self.inputs[port_spec["name"]] = InputValueHolder(manual_input)
         for port_spec in spec.outputs:
-            self.outputs[port_spec["name"]] = SettableValueHolder(0.0)
+            self.outputs[port_spec["name"]] = SettableValueHolder(port_spec["dtype"].default())
 
     @property
     def input_nodes(self):
@@ -87,6 +97,11 @@ class Node(metaclass=NodeMeta):
     def evaluated(self, evaluated):
         # TODO somehow set that input nodes need to be evaluated?
         self._evaluated = evaluated
+
+    def get(self, name):
+        return self.inputs[name].value
+    def set(self, name, value):
+        self.outputs[name].value = value
 
     def evaluate(self):
         pass
@@ -117,9 +132,8 @@ class ValueHolder:
         raise NotImplementedError()
 
 class SettableValueHolder(ValueHolder):
-    def __init__(self, value=0.0):
-        # TODO default value
-        self._value = value
+    def __init__(self, default_value):
+        self._value = default_value
         self._changed = False
 
     @property

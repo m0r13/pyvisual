@@ -264,9 +264,9 @@ class Node:
 
         # show port label (if enabled)
         if port_spec["show_label"]:
-            label = "%s > %s" % (dtype, name) 
+            label = "%s > %s" % (dtype.name, name) 
             if port_type == PORT_TYPE_OUTPUT:
-                label = "%s > %s" % (name, dtype)
+                label = "%s > %s" % (name, dtype.name)
             imgui.text(label)
 
         # show port input/output widget (if enabled)
@@ -447,10 +447,8 @@ class Node:
                 self.show_ports(draw_list, self.spec.outputs, PORT_TYPE_OUTPUT)
                 imgui.end_group()
 
-        # show custom node ui
-        imgui.begin_group()
-        self.instance.show_custom_ui()
-        imgui.end_group()
+            # show custom node ui
+            self.instance.show_custom_ui()
 
         imgui.end_group()
 
@@ -952,6 +950,7 @@ node_types.sort(key=lambda n: n.get_node_spec().options["category"])
 # TODO think about naming
 #   ui nodes vs. node instances vs. node types
 node_specs = [ n.get_node_spec() for n in node_types ]
+node_specs = list(filter(lambda s: not s.options["virtual"], node_specs))
 editor = NodeEditor(node_specs)
 
 editor_time = 0.0
