@@ -585,7 +585,6 @@ class NodeEditor:
     #
     
     def remove_node(self, node):
-        print("removing node %s" % node.spec.name)
         for port_type in (PORT_TYPE_INPUT, PORT_TYPE_OUTPUT):
             for port_connections in node.connections[port_type]:
                 # the list of connections at this port will change during deletetion!
@@ -935,7 +934,7 @@ class NodeEditor:
         return processing_time
 
 # sort by node categories and then by names
-node_types = node_meta.VisualNode.get_sub_nodes(include_self=False)
+node_types = node_meta.Node.get_sub_nodes(include_self=False)
 node_types.sort(key=lambda n: n.get_node_spec().name)
 node_types.sort(key=lambda n: n.get_node_spec().options["category"])
 

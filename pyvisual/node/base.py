@@ -7,6 +7,7 @@ class NodeMeta(type):
         dct["base_node"] = bases[0] if len(bases) else None
         cls = super().__new__(meta, name, bases, dct)
         meta.node_types.append(cls)
+        print("Registered node type: %s" % cls)
         return cls
 
 class NodeSpec:
@@ -15,7 +16,7 @@ class NodeSpec:
         self.inputs = inputs if inputs is not None else []
         self.outputs = outputs if outputs is not None else []
         self.options = dict(options)
-        self.options.setdefault("category", None)
+        self.options.setdefault("category", "")
         self.options.setdefault("show_title", True)
         for port_spec in self.inputs + self.outputs:
             port_spec.setdefault("show_label", True)
@@ -178,55 +179,4 @@ class InputValueHolder(ValueHolder):
         if self.connected_value is not None:
             return self.connected_value.value
         return self.manual_value.value
-
-class VisualNode(Node):
-    class Meta:
-        pass
-
-class RendererNode(VisualNode):
-    class Meta:
-        inputs = [
-            {"name" : "input", "dtype" : "tex2d"}
-        ]
-        outputs = []
-        options = {
-            "category" : "output",
-        }
-
-class InputValue(VisualNode):
-    class Meta:
-        outputs = [
-            {"name" : "output", "dtype" : "float", "show_label" : False}
-        ]
-        options = {
-            "category" : "input",
-            "show_title" : False
-        }
-
-class OutputValue(VisualNode):
-    class Meta:
-        inputs = [
-            {"name" : "input", "dtype" : "float", "show_label" : False}
-        ]
-        options = {
-            "category" : "output",
-            "show_title" : False
-        }
-
-class ValueAddNode(VisualNode):
-    class Meta:
-        inputs = [
-            {"name" : "v0", "dtype" : "float", "show_label" : False},
-            {"name" : "v1", "dtype" : "float", "show_label" : False}
-        ]
-        outputs = [
-            {"name" : "output", "dtype" : "float", "show_label" : False}
-        ]
-        options = {
-            "category" : "math",
-        }
-
-    def evaluate(self):
-        self.outputs["output"].value = self.inputs["v0"].value + self.inputs["v1"].value
-
 
