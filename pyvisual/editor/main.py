@@ -4,15 +4,22 @@ import sys
 import time
 from vispy import app, gloo, keys
 import vispy.ext.glfw as glfw
-import imgui, vispy_imgui
-import node_meta, node_widget
+import imgui
 
+from pyvisual.editor import vispy_imgui
+
+# TODO the naming here?
+import pyvisual.node as node_meta
+import pyvisual.editor.widget as node_widget
+
+# create canvas / opengl context already here
+# imgui seems to cause problems otherwise with imgui.get_color_u32_rgba without context
 canvas = app.Canvas(keys=None, vsync=False, autoswap=True)
 timer = app.Timer(1.0 / 30.0, connect=canvas.update, start=True)
 imgui_renderer = vispy_imgui.GlumpyGlfwRenderer(canvas.native, True)
 
-closed = False
-
+# utilities
+# TODO replace them with ImVec2 implementation in pyimgui bindings
 def t_mul(t1, scalar):
     return (t1[0]*scalar, t1[1]*scalar)
 

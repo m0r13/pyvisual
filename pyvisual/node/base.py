@@ -1,4 +1,3 @@
-#!/usr/bin/env python3
 
 class NodeMeta(type):
     node_types = []
@@ -231,7 +230,4 @@ class ValueAddNode(VisualNode):
     def evaluate(self):
         self.outputs["output"].value = self.inputs["v0"].value + self.inputs["v1"].value
 
-if __name__ == "__main__":
-    print(Node.get_node_spec())
-    print(ValueAddNode.get_node_spec())
-    print([ n.get_node_spec().name for n in VisualNode.get_sub_nodes() ])
+
