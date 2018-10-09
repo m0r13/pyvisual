@@ -3,6 +3,8 @@
 git pull
 git submodule update  --init --recursive
 
+pip3 install --user numpy pyopengl .
+
 cd ext/vispy
 pip3 install --user .
 
