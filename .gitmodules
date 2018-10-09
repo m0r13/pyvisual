@@ -1,3 +1,6 @@
 [submodule "ext/pyimgui"]
 	path = ext/pyimgui
 	url = https://github.com/m0r13/pyimgui.git
+[submodule "ext/vispy"]
+	path = ext/vispy
+	url = https://github.com/vispy/vispy.git
