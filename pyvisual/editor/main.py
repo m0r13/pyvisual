@@ -312,8 +312,8 @@ class Node:
             connector_start = t_add(port_start, (-30, 0))
             connector_end = port_start[0], port_end[1]
         else:
-            connector_start = port_end[0], port_start[1]
-            connector_end = t_add(port_end, (30, 0))
+            connector_start = connector_center[0], port_start[1]
+            connector_end = connector_start[0] + 30, port_end[1]
 
         # state of port / connector
         is_dragging_connection = self.editor.is_dragging_connection()
