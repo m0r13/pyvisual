@@ -485,8 +485,9 @@ class Node:
                     self.selected = not self.selected
                 # otherwise select only this node
                 else:
-                    for node in self.editor.nodes:
-                        node.selected = False
+                    if not self.selected:
+                        for node in self.editor.nodes:
+                            node.selected = False
                     self.selected = True
             # handle context menu
             if imgui.is_mouse_clicked(1):
