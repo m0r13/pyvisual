@@ -17,7 +17,10 @@ class NodeSpec:
         self.inputs = inputs if inputs is not None else []
         self.outputs = outputs if outputs is not None else []
         self.options = dict(options)
+        self.options.setdefault("category", None)
         self.options.setdefault("show_title", True)
+        for port_spec in self.inputs + self.outputs:
+            port_spec.setdefault("show_label", True)
 
     @property
     def name(self):
@@ -57,15 +60,34 @@ class Node(metaclass=NodeMeta):
 
     def __init__(self):
         self._evaluated = False
-        self.outputs = OutputMap()
+
+        self.manual_inputs = {}
+        self.inputs = {}
+        self.outputs = {}
+
+        spec = self.get_node_spec()
+        for port_spec in spec.inputs:
+            manual_input = SettableValueHolder(0.0)
+            self.manual_inputs[port_spec["name"]] = manual_input
+            self.inputs[port_spec["name"]] = InputValueHolder(manual_input)
+        for port_spec in spec.outputs:
+            self.outputs[port_spec["name"]] = SettableValueHolder(0.0)
+
+    @property
+    def input_nodes(self):
+        nodes = set()
+        for input_value in self.inputs.values():
+            if input_value.is_connected:
+                nodes.add(input_value.connected_node)
+        return nodes
 
     @property
     def evaluated(self):
-        return self.evaluated
+        return self._evaluated
     @evaluated.setter
     def evaluated(self, evaluated):
         # TODO somehow set that input nodes need to be evaluated?
-        self.evaluated = evaluated
+        self._evaluated = evaluated
 
     def evaluate(self):
         pass
@@ -84,34 +106,7 @@ class Node(metaclass=NodeMeta):
                 nodes.append(node)
         return nodes
 
-# TODO I think we don't need this after all
-# a dict with port_id -> settable value should do it
-class OutputMap:
-    def __init__(self):
-        self.values = {}
-        self.changed = {}
-
-    def has_value(self, name):
-        return self.get(name) is not None
-
-    def has_changed(self, name):
-        # TODO how and when to unset this?
-        return self.changed.get(name, False)
-
-    def get(self, name):
-        return self.values.get(name)
-
-    def set(self, name, value):
-        self.values[name] = value
-        self.set_changed(name)
-
-    def set_changed(self, name):
-        self.changed[name] = True
-
 class ValueHolder:
-    @property
-    def has_value(self):
-        raise NotImplementedError()
     @property
     def has_changed(self):
         raise NotImplementedError()
@@ -120,13 +115,10 @@ class ValueHolder:
         raise NotImplementedError()
 
 class SettableValueHolder(ValueHolder):
-    def __init__(self):
-        self._value = None
+    def __init__(self, value=0.0):
+        # TODO default value
+        self._value = value
         self._changed = False
-
-    @property
-    def has_value(self):
-        return self.value is not None
 
     @property
     def has_changed(self):
@@ -146,92 +138,52 @@ class SettableValueHolder(ValueHolder):
         self._value = value
         self._changed = True
 
-class OverrideValueHolder(ValueHolder):
-    def __init__(self, value, override):
-        self.value = value
-        self.override = override
+class InputValueHolder(ValueHolder):
+    def __init__(self, manual_value):
+        self.manual_value = manual_value
 
+        # TODO storing value and the node might seem a bit weird
+        # but we need the node for knowing on which nodes this depends
+        # and the value so we don't have to look it up from the node every time
+        self.connected_node = None
+        self.connected_value = None
+        self.connection_changed = False
+    
     @property
-    def current(self):
-        if self.override.has_value:
-            return self.override
-        elif self.value.has_value:
-            return self.value
-        # TODO ?
-        return None
+    def is_connected(self):
+        return self.connected_value is not None
 
-    @property
-    def has_value(self):
-        return self.override.has_value or self.value.has_value
+    def connect(self, node, output):
+        self.connected_node = node
+        self.connected_value = node.outputs[output]
+        self.connection_changed = True
+
+    def disconnect(self):
+        # make the manual input keep the value when connection is removed
+        if self.connected_value is not None:
+            self.manual_value.value = self.connected_value.value
+        self.connected_node = None
+        self.connected_value = None
+        self.connection_changed = True
 
     @property
     def has_changed(self):
-        current = self.current
-        if current is None:
-            # TODO should return True when current changes
-            return False
-        return current.has_changed
+        # TODO when to reset connection changed??
+        if self.connection_changed:
+            return True
+        if self.connected_value is not None:
+            return self.connected_value.has_changed
+        return self.manual_value.has_changed
 
     @property
     def value(self):
-        current = self.current
-        assert current is not None, "no value assigned"
-        return current.value
-
-class ConnectionValueHolder(ValueHolder):
-    def __init__(self, node, name):
-        self.node = node
-        self.name = name
-
-    @property
-    def has_value(self):
-        return self.node.outputs[name].has_value
-    @property
-    def has_changed(self):
-        return self.node.outputs[name].has_changed
-    @property
-    def value(self):
-        return self.node.outputs[name].value
-
-class TestNode(Node):
-    class Meta:
-        inputs = ["test_input"]
-        outputs = ["test_output"]
-
-class SubNode(TestNode):
-    class Meta:
-        inputs = ["sub_input"]
-        outputs = ["another_output"]
+        if self.connected_value is not None:
+            return self.connected_value.value
+        return self.manual_value.value
 
 class VisualNode(Node):
     class Meta:
         pass
-
-class ShaderNode(VisualNode):
-    class Meta:
-        inputs = [
-            {"name" : "input", "dtype" : "tex2d"}
-        ]
-        outputs = [
-            {"name" : "output", "dtype" : "tex2d"}
-        ]
-
-class EffectMirrorNode(ShaderNode):
-    class Meta:
-        inputs = [
-            {"name" : "mode", "dtype" : "float"}
-        ]
-        outputs = [
-            {"name" : "test2", "dtype" : "tex2d"},
-            {"name" : "output", "dtype" : "tex2d"}
-        ]
-
-class EffectHuePhaseNode(ShaderNode):
-    class Meta:
-        inputs = [
-            {"name" : "hue", "dtype" : "float"}
-        ]
-        outputs = []
 
 class RendererNode(VisualNode):
     class Meta:
@@ -239,37 +191,47 @@ class RendererNode(VisualNode):
             {"name" : "input", "dtype" : "tex2d"}
         ]
         outputs = []
+        options = {
+            "category" : "output",
+        }
 
-class TextureNode(VisualNode):
+class InputValue(VisualNode):
     class Meta:
-        inputs = []
         outputs = [
-            {"name" : "output", "dtype" : "tex2d"}
-        ]
-
-class ValueNode(VisualNode):
-    class Meta:
-        inputs = []
-        outputs = [
-            {"name" : "output", "dtype" : "float"}
+            {"name" : "output", "dtype" : "float", "show_label" : False}
         ]
         options = {
+            "category" : "input",
             "show_title" : False
         }
 
-class TestNode(VisualNode):
+class OutputValue(VisualNode):
     class Meta:
         inputs = [
-            {"name" : "input", "dtype" : "tex2d"},
-            {"name" : "input", "dtype" : "tex2d"},
-            {"name" : "input", "dtype" : "float"},
+            {"name" : "input", "dtype" : "float", "show_label" : False}
+        ]
+        options = {
+            "category" : "output",
+            "show_title" : False
+        }
+
+class ValueAddNode(VisualNode):
+    class Meta:
+        inputs = [
+            {"name" : "v0", "dtype" : "float", "show_label" : False},
+            {"name" : "v1", "dtype" : "float", "show_label" : False}
         ]
         outputs = [
-            {"name" : "output", "dtype" : "float"},
+            {"name" : "output", "dtype" : "float", "show_label" : False}
         ]
+        options = {
+            "category" : "math",
+        }
+
+    def evaluate(self):
+        self.outputs["output"].value = self.inputs["v0"].value + self.inputs["v1"].value
 
 if __name__ == "__main__":
     print(Node.get_node_spec())
-    print(SubNode.get_node_spec())
+    print(ValueAddNode.get_node_spec())
     print([ n.get_node_spec().name for n in VisualNode.get_sub_nodes() ])
-    print(ShaderNode.get_node_spec())
