@@ -1,4 +1,5 @@
-import node_meta
+# TODO naming
+import pyvisual.node as node_meta
 import imgui
 
 class ImGuiValue:

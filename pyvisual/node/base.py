@@ -7,7 +7,6 @@ class NodeMeta(type):
         dct["base_node"] = bases[0] if len(bases) else None
         cls = super().__new__(meta, name, bases, dct)
         meta.node_types.append(cls)
-        print("Created clasis %s, bases %s" % (str(cls), str(list(bases))))
         return cls
 
 class NodeSpec:
