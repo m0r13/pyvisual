@@ -1,12 +1,21 @@
 from pyvisual.node.base import Node
 
-class RendererNode(Node):
+class Render(Node):
     class Meta:
         inputs = [
-            {"name" : "input", "dtype" : "tex2d"}
+            {"name" : "input", "dtype" : "tex2d", "show_label" : False}
         ]
         outputs = []
         options = {
             "category" : "output",
         }
 
+class InputTexture(Node):
+    class Meta:
+        outputs = [
+            {"name" : "output", "dtype" : "tex2d", "show_label" : False},
+        ]
+        options = {
+            "category" : "input",
+            "show_title" : False
+        }

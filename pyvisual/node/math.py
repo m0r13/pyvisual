@@ -1,6 +1,6 @@
 from pyvisual.node.base import Node
 
-class ValueAddNode(Node):
+class AddFloat(Node):
     class Meta:
         inputs = [
             {"name" : "v0", "dtype" : "float", "show_label" : False},
