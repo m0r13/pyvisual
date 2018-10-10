@@ -580,6 +580,7 @@ class NodeEditor:
         # save position where context menu was opened
         # (for spawning nodes exactly where menu was opened)
         self.context_mouse_pos = None
+        self.context_search_test = ""
 
         # performance measurement stuffs
         self.fps = 0.0
@@ -753,6 +754,91 @@ class NodeEditor:
             node_end = t_add(node.actual_pos, node.size_with_padding)
             node.selected = t_overlap(selection_start, selection_end, node_start, node_end)
 
+    def show_context_menu(self):
+        io = imgui.get_io()
+
+        just_opened_popup = False
+        reopen_popup = False
+
+        # context menu
+        no_node_hovered = lambda: not any(map(lambda n: n.hovered, self.nodes))
+        if imgui.is_window_hovered() and imgui.is_mouse_clicked(1) \
+                and no_node_hovered():
+            # remember where context menu was opened
+            # (to place node there)
+            self.context_mouse_pos = io.mouse_pos
+            imgui.open_popup("context")
+            self.context_search_text = ""
+            self.context_index = 0
+            just_opened_popup = True
+
+        if imgui.begin_popup("context"):
+            assert self.context_mouse_pos is not None
+            # handle when user right-clicked outside of the popup
+            # this should close the popup and re-open it at the new position
+            # re-opening must be handled outside of begin_popup()/end_popup()
+            if not just_opened_popup and not imgui.is_window_hovered() and imgui.is_mouse_clicked(1):
+                reopen = True
+
+            # set keyboard focus only once
+            if not imgui.is_any_item_active():
+                imgui.set_keyboard_focus_here()
+            imgui.push_item_width(200)
+            changed, self.context_search_text = imgui.input_text("", self.context_search_text, 255, imgui.INPUT_TEXT_ENTER_RETURNS_TRUE)
+
+            def filter_nodes(text):
+                for i, spec in enumerate(self.node_specs):
+                    label = spec.name
+                    if spec.options["category"]:
+                        label += " (%s)" % spec.options["category"]
+                    if not text.lower() in label.lower():
+                        continue
+                    yield label, spec
+            entries = list(filter_nodes(self.context_search_text))
+
+            key_map = list(io.key_map)
+            key_up_arrow = key_map[imgui.KEY_UP_ARROW]
+            key_down_arrow = key_map[imgui.KEY_DOWN_ARROW]
+            key_escape = key_map[imgui.KEY_ESCAPE]
+            keys_down = list(io.keys_down)
+            keys_down_duration = list(io.keys_down_duration)
+            if keys_down[key_up_arrow] and keys_down_duration[key_up_arrow] == 0.0:
+                self.context_index -= 1
+            if keys_down[key_down_arrow] and keys_down_duration[key_down_arrow] == 0.0:
+                self.context_index += 1
+            if keys_down[key_escape] and keys_down_duration[key_escape] == 0.0:
+                imgui.close_current_popup()
+
+            self.context_index = max(0, min(len(entries) - 1, self.context_index))
+            selected = self.context_index
+            imgui.listbox_header("", 200, 200)
+            for i, (label, spec) in enumerate(entries):
+                imgui.push_id(i)
+                is_selected = selected == 0
+                imgui.selectable(label, is_selected)
+                if imgui.is_item_clicked() or (is_selected and changed):
+                    pos = self.screen_to_local(self.context_mouse_pos)
+                    self.nodes.append(Node(self, spec, pos=pos))
+                    # TODO it would be nice to set the mouse position back to where the node is now
+                    imgui.close_current_popup()
+                imgui.pop_id()
+                selected -= 1
+            if len(entries) == 0:
+                imgui.text("Nothing found.")
+            imgui.listbox_footer()
+            imgui.separator()
+            clicked, self.show_test_window = imgui.menu_item("show demo window", None, self.show_test_window)
+            if clicked:
+                imgui.set_window_focus("ImGui Demo")
+            if imgui.menu_item("reset offset")[0]:
+                self.offset = (0, 0)
+
+            imgui.end_popup()
+
+        if reopen_popup:
+            imgui.close_current_popup()
+            imgui.open_popup("context")
+
     def show(self):
         # create editor window
         io = imgui.get_io()
@@ -913,37 +999,11 @@ class NodeEditor:
             end = time.time()
             processing_time = end - start
 
-        # context menu
-        no_node_hovered = lambda: not any(map(lambda n: n.hovered, self.nodes))
-        if imgui.is_mouse_clicked(1) and imgui.is_window_hovered() \
-                and no_node_hovered():
-            # have first menu entry under cursor
-            self.context_mouse_pos = io.mouse_pos
-            io.mouse_pos = t_add(self.context_mouse_pos, (-20, -20))
-            imgui.open_popup("context")
-            io.mouse_pos = self.context_mouse_pos
-        if imgui.begin_popup("context"):
-            assert self.context_mouse_pos is not None
-            for i, spec in enumerate(self.node_specs):
-                imgui.push_id(i)
-                label = spec.name
-                if spec.options["category"]:
-                    label += " (%s)" % spec.options["category"]
-                if imgui.menu_item(label)[0]:
-                    pos = self.screen_to_local(self.context_mouse_pos)
-                    self.nodes.append(Node(self, spec, pos=pos))
-                    # TODO it would be nice to set the mouse position back to where the node is now
-                imgui.pop_id()
-            imgui.separator()
-            clicked, self.show_test_window = imgui.menu_item("show demo window", None, self.show_test_window)
-            if clicked:
-                imgui.set_window_focus("ImGui Demo")
-            if imgui.menu_item("reset offset")[0]:
-                self.offset = (0, 0)
-            imgui.end_popup()
-
         # finish our drawing
         draw_list.channels_merge()
+
+        # show context
+        self.show_context_menu()
 
         if self.show_test_window:
             imgui.show_test_window()
