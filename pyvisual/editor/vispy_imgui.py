@@ -40,6 +40,7 @@ class GlumpyGlfwRenderer(FixedProgrammablePipelineRenderer):
         key_map[imgui.KEY_END] = glfw.GLFW_KEY_END
         key_map[imgui.KEY_DELETE] = glfw.GLFW_KEY_DELETE
         key_map[imgui.KEY_BACKSPACE] = glfw.GLFW_KEY_BACKSPACE
+        key_map[imgui.KEY_SPACE] = glfw.GLFW_KEY_SPACE
         key_map[imgui.KEY_ENTER] = glfw.GLFW_KEY_ENTER
         key_map[imgui.KEY_ESCAPE] = glfw.GLFW_KEY_ESCAPE
         key_map[imgui.KEY_A] = glfw.GLFW_KEY_A

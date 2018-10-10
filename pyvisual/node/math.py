@@ -1,5 +1,6 @@
 from pyvisual.node.base import Node
 from pyvisual.node import dtype
+from pyvisual.editor import widget
 import imgui
 
 # as test for lambdas
@@ -10,11 +11,11 @@ import time
 class AddFloat(Node):
     class Meta:
         inputs = [
-            {"name" : "v0", "dtype" : dtype.float, "show_label" : False},
-            {"name" : "v1", "dtype" : dtype.float, "show_label" : False}
+            {"name" : "v0", "dtype" : dtype.float, "widgets" : [widget.Float()]},
+            {"name" : "v1", "dtype" : dtype.float, "widgets" : [widget.Float()]}
         ]
         outputs = [
-            {"name" : "output", "dtype" : dtype.float, "show_label" : False}
+            {"name" : "output", "dtype" : dtype.float, "widgets" : [widget.Float()]}
         ]
         options = {
             "category" : "math",
@@ -78,10 +79,10 @@ class Lambda(Node):
 class FloatLambda(Lambda):
     class Meta:
         inputs = [
-            {"name" : "input", "dtype" : dtype.float, "show_label" : False},
+            {"name" : "input", "dtype" : dtype.float, "widgets" : [widget.Float()]},
         ]
         outputs = [
-            {"name" : "output", "dtype" : dtype.float, "show_label" : False}
+            {"name" : "output", "dtype" : dtype.float, "widgets" : [widget.Float()]}
         ]
         options = {
             "category" : "math",
@@ -90,10 +91,10 @@ class FloatLambda(Lambda):
 class ColorLambda(Lambda):
     class Meta:
         inputs = [
-            {"name" : "input", "dtype" : dtype.vec4, "show_label" : False},
+            {"name" : "input", "dtype" : dtype.vec4, "widgets" : [widget.Color()]},
         ]
         outputs = [
-            {"name" : "output", "dtype" : dtype.vec4, "show_label" : False}
+            {"name" : "output", "dtype" : dtype.vec4, "widgets" : [widget.Color()]}
         ]
         options = {
             "category" : "math",

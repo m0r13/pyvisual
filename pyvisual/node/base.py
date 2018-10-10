@@ -29,7 +29,8 @@ class NodeSpec:
         self.options.setdefault("category", "")
         self.options.setdefault("show_title", True)
         for port_spec in self.inputs + self.outputs:
-            port_spec.setdefault("show_label", True)
+            port_spec.setdefault("default", None)
+            port_spec.setdefault("widgets", [])
 
     @property
     def name(self):
@@ -76,11 +77,17 @@ class Node(metaclass=NodeMeta):
 
         spec = self.get_node_spec()
         for port_spec in spec.inputs:
-            manual_input = SettableValueHolder(port_spec["dtype"].default())
+            default = port_spec["default"]
+            if default is None:
+                default = port_spec["dtype"].default()
+            manual_input = SettableValueHolder(default)
             self.manual_inputs[port_spec["name"]] = manual_input
             self.inputs[port_spec["name"]] = InputValueHolder(manual_input)
         for port_spec in spec.outputs:
-            self.outputs[port_spec["name"]] = SettableValueHolder(port_spec["dtype"].default())
+            default = port_spec["default"]
+            if default is None:
+                default = port_spec["dtype"].default()
+            self.outputs[port_spec["name"]] = SettableValueHolder(default)
 
     @property
     def input_nodes(self):

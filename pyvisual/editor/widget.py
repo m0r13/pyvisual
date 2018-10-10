@@ -3,30 +3,40 @@ import pyvisual.node as node_meta
 from pyvisual.node import dtype
 import imgui
 
-class ImGuiValue:
-    def __init__(self):
-        pass
+def clamper(minmax):
+    return lambda x: max(minmax[0], (min(minmax[1], x)))
 
-    def show(self, value, read_only=False):
-        pass
+class Int:
+    def __init__(self, minmax=[float("-inf"), float("inf")]):
+        self.clamper = clamper(minmax)
 
-    @staticmethod
-    def create(port_spec):
-        if port_spec["dtype"] == dtype.float:
-            return ImGuiFloat()
-        if port_spec["dtype"] == dtype.vec4:
-            return ImGuiColor()
-        if port_spec["dtype"] == dtype.tex2d:
-            return ImGuiTexture()
+    def show(self, value, read_only):
+        imgui.push_item_width(100)
+        changed, v = imgui.input_int("", value.value)
+        if changed and not read_only:
+            value.value = self.clamper(v)
 
-class ImGuiFloat(ImGuiValue):
+class Choice:
+    def __init__(self, choices=[]):
+        self.choices = choices
+
+    def show(self, value, read_only):
+        imgui.push_item_width(100)
+        changed, v = imgui.combo("", value.value, self.choices)
+        if changed and not read_only:
+            value.value = v
+
+class Float:
+    def __init__(self, minmax=[float("-inf"), float("inf")]):
+        self.clamper = clamper(minmax)
+
     def show(self, value, read_only):
         imgui.push_item_width(100)
         changed, v = imgui.drag_float("", value.value, change_speed=0.01)
         if changed and not read_only:
-            value.value = v
+            value.value = self.clamper(v)
 
-class ImGuiColor(ImGuiValue):
+class Color:
     def show(self, value, read_only):
         r, g, b, a = value.value[:]
         flags = imgui.COLOR_EDIT_NO_INPUTS | imgui.COLOR_EDIT_NO_LABEL | imgui.COLOR_EDIT_ALPHA_PREVIEW
@@ -39,6 +49,7 @@ class ImGuiColor(ImGuiValue):
                     value.value[:] = color
             imgui.end_popup()
 
-class ImGuiTexture(ImGuiValue):
+class Texture:
     def show(self, value, read_only):
         imgui.text("Widget coming soon")
+

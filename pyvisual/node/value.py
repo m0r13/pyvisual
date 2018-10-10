@@ -1,11 +1,12 @@
 import numpy as np
 from pyvisual.node.base import Node
 from pyvisual.node import dtype
+from pyvisual.editor import widget
 
 class InputFloat(Node):
     class Meta:
         outputs = [
-            {"name" : "output", "dtype" : dtype.float, "show_label" : False}
+            {"name" : "output", "dtype" : dtype.float, "widgets" : [widget.Float()]}
         ]
         options = {
             "category" : "input",
@@ -15,7 +16,7 @@ class InputFloat(Node):
 class OutputFloat(Node):
     class Meta:
         inputs = [
-            {"name" : "input", "dtype" : dtype.float, "show_label" : False}
+            {"name" : "input", "dtype" : dtype.float, "widgets" : [widget.Float()]}
         ]
         options = {
             "category" : "output",
@@ -25,7 +26,7 @@ class OutputFloat(Node):
 class InputColor(Node):
     class Meta:
         outputs = [
-            {"name" : "output", "dtype" : dtype.vec4, "show_label" : False},
+            {"name" : "output", "dtype" : dtype.vec4, "widgets" : [widget.Color()]},
         ]
         options = {
             "category" : "input",
@@ -35,7 +36,7 @@ class InputColor(Node):
 class OutputColor(Node):
     class Meta:
         inputs = [
-            {"name" : "input", "dtype" : dtype.vec4, "show_label" : False},
+            {"name" : "input", "dtype" : dtype.vec4, "widgets" : [widget.Color()]},
         ]
         options = {
             "category" : "output",
@@ -45,13 +46,13 @@ class OutputColor(Node):
 class Float2Color(Node):
     class Meta:
         inputs = [
-            {"name" : "r", "dtype" : dtype.float, "show_label" : False},
-            {"name" : "g", "dtype" : dtype.float, "show_label" : False},
-            {"name" : "b", "dtype" : dtype.float, "show_label" : False},
-            {"name" : "a", "dtype" : dtype.float, "show_label" : False},
+            {"name" : "r", "dtype" : dtype.float, "widgets" : [widget.Float()]},
+            {"name" : "g", "dtype" : dtype.float, "widgets" : [widget.Float()]},
+            {"name" : "b", "dtype" : dtype.float, "widgets" : [widget.Float()]},
+            {"name" : "a", "dtype" : dtype.float, "widgets" : [widget.Float()], "default" : 1.0},
         ]
         outputs = [
-            {"name" : "color", "dtype" : dtype.vec4, "show_label" : False},
+            {"name" : "color", "dtype" : dtype.vec4, "widgets" : [widget.Color()]},
         ]
         options = {
             "category" : "conversion",
@@ -69,13 +70,13 @@ class Float2Color(Node):
 class Color2Float(Node):
     class Meta:
         inputs = [
-            {"name" : "input", "dtype" : dtype.vec4, "show_label" : False},
+            {"name" : "input", "dtype" : dtype.vec4, "widgets" : [widget.Color()]},
         ]
         outputs = [
-            {"name" : "r", "dtype" : dtype.float, "show_label" : False},
-            {"name" : "g", "dtype" : dtype.float, "show_label" : False},
-            {"name" : "b", "dtype" : dtype.float, "show_label" : False},
-            {"name" : "a", "dtype" : dtype.float, "show_label" : False},
+            {"name" : "r", "dtype" : dtype.float, "widgets" : [widget.Float()]},
+            {"name" : "g", "dtype" : dtype.float, "widgets" : [widget.Float()]},
+            {"name" : "b", "dtype" : dtype.float, "widgets" : [widget.Float()]},
+            {"name" : "a", "dtype" : dtype.float, "widgets" : [widget.Float()]},
         ]
         options = {
             "category" : "conversion",

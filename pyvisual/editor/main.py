@@ -75,8 +75,9 @@ CHANNEL_NODE_BACKGROUND = 3
 CHANNEL_NODE = 4
 CHANNEL_CONNECTION = 5
 CHANNEL_PORT = 2
-CHANNEL_SELECTION = 6
-CHANNEL_COUNT = 7
+CHANNEL_PORT_LABEL = 6
+CHANNEL_SELECTION = 7
+CHANNEL_COUNT = 8
 
 EDITOR_GRID_SIZE = 50
 EDITOR_NODE_GRID_SIZE = 5
@@ -190,7 +191,8 @@ class Node:
         def create_widgets(ports, widgets):
             assert len(ports) == len(widgets)
             for i, port_spec in enumerate(ports):
-                widgets[i] = node_widget.ImGuiValue.create(port_spec)
+                assert len(port_spec["widgets"]) in (0, 1), "Only up to one widget allowed for now"
+                widgets[i] = port_spec["widgets"][0] if len(port_spec["widgets"]) else None
         create_widgets(self.spec.inputs, self.port_widgets[PORT_TYPE_INPUT])
         create_widgets(self.spec.outputs, self.port_widgets[PORT_TYPE_OUTPUT])
 
@@ -262,13 +264,6 @@ class Node:
         # screen coordinates
         port_start = imgui.get_cursor_screen_pos()
 
-        # show port label (if enabled)
-        if port_spec["show_label"]:
-            label = "%s > %s" % (dtype.name, name) 
-            if port_type == PORT_TYPE_OUTPUT:
-                label = "%s > %s" % (name, dtype.name)
-            imgui.text(label)
-
         # show port input/output widget (if enabled)
         widget = self.port_widgets[port_type][port_index]
         if widget is not None:
@@ -288,6 +283,9 @@ class Node:
             else:
                 value = self.instance.outputs[name]
             widget.show(value, read_only=read_only)
+        else:
+            # make some space in case there is no widget
+            imgui.dummy(0, 10)
         imgui.end_group()
 
         # got the area our port takes up now
@@ -327,8 +325,8 @@ class Node:
         if port_type == PORT_TYPE_INPUT:
             assert len(connections) in (0, 1)
 
-        hovered_port = t_between(port_start, port_end, io.mouse_pos)
-        hovered_connector = t_between(connector_start, connector_end, io.mouse_pos)
+        hovered_port = not imgui.is_any_item_active() and t_between(port_start, port_end, io.mouse_pos)
+        hovered_connector = not imgui.is_any_item_active() and t_between(connector_start, connector_end, io.mouse_pos)
         hovered = hovered_connector or hovered_port
 
         # decide port bullet color
@@ -382,6 +380,16 @@ class Node:
                 draw_list.add_circle(connector_center, connector_radius, bullet_color, 12, connector_thickness)
             if hovered_connector and not (is_dragging_connection and not is_connection_droppable):
                 draw_list.add_circle(connector_center, connector_radius * 2, bullet_color, 12, connector_thickness)
+
+        with draw_on_channel(draw_list, CHANNEL_PORT_LABEL):
+            label = port_spec["name"]
+            size = imgui.calc_text_size(label)
+            text_pos = None
+            if port_type == PORT_TYPE_OUTPUT:
+                text_pos = t_add(connector_center, (10, -size[1] / 2))
+            else:
+                text_pos = t_add(connector_center, (-10 - size[0], -size[1] / 2))
+            draw_list.add_text(text_pos, imgui.get_color_u32_rgba(0.7, 0.7, 0.7, 1.0), label)
 
         # port highlight drawing
         with draw_on_channel(draw_list, highlight_channel):

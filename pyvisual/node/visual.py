@@ -4,7 +4,7 @@ from pyvisual.node import dtype
 class Render(Node):
     class Meta:
         inputs = [
-            {"name" : "input", "dtype" : dtype.tex2d, "show_label" : False}
+            {"name" : "input", "dtype" : dtype.tex2d}
         ]
         outputs = []
         options = {
@@ -14,7 +14,7 @@ class Render(Node):
 class InputTexture(Node):
     class Meta:
         outputs = [
-            {"name" : "output", "dtype" : dtype.tex2d, "show_label" : False},
+            {"name" : "output", "dtype" : dtype.tex2d},
         ]
         options = {
             "category" : "input",
