@@ -778,7 +778,7 @@ class NodeEditor:
             # this should close the popup and re-open it at the new position
             # re-opening must be handled outside of begin_popup()/end_popup()
             if not just_opened_popup and not imgui.is_window_hovered() and imgui.is_mouse_clicked(1):
-                reopen = True
+                reopen_popup = True
 
             # set keyboard focus only once
             if not imgui.is_any_item_active():
