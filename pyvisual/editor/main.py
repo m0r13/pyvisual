@@ -51,6 +51,22 @@ def t_overlap(a_start, a_end, b_start, b_end):
 def round_next(n, d):
     return n - (n % d)
 
+def is_substring_partly(substring, string):
+    # returns if substring is a substring of string,
+    # where characters in string can be skipped
+    # example: "infloat" is in "inputfloat"
+
+    # empty substring always contained
+    if not substring:
+        return True
+    i = 0
+    for c in string:
+        if c == substring[i]:
+            i += 1
+            if i == len(substring):
+                return True
+    return i == len(substring)
+
 COLOR_EDITOR_BACKGROUND = imgui.get_color_u32_rgba(0.1, 0.1, 0.1, 1.0)
 COLOR_EDITOR_GRID = imgui.get_color_u32_rgba(0.3, 0.3, 0.3, 1.0)
 COLOR_NODE_BACKGROUND = imgui.get_color_u32_rgba(0.0, 0.0, 0.0, 1.0)
@@ -801,16 +817,16 @@ class NodeEditor:
                     label = spec.name
                     if spec.options["category"]:
                         label += " (%s)" % spec.options["category"]
-                    if not text.lower() in label.lower():
+                    if not is_substring_partly(text.lower(), label.lower()):
                         continue
                     yield label, spec
             entries = list(filter_nodes(self.context_search_text))
 
-            if keys_down[key_up_arrow] and keys_down_duration[key_up_arrow] == 0.0:
+            if is_key_down(key_up_arrow):
                 self.context_index -= 1
-            if keys_down[key_down_arrow] and keys_down_duration[key_down_arrow] == 0.0:
+            if is_key_down(key_down_arrow):
                 self.context_index += 1
-            if keys_down[key_escape] and keys_down_duration[key_escape] == 0.0:
+            if is_key_down(key_escape):
                 imgui.close_current_popup()
 
             self.context_index = max(0, min(len(entries) - 1, self.context_index))
