@@ -8,6 +8,7 @@ def clamper(minmax):
 
 class Int:
     def __init__(self, minmax=[float("-inf"), float("inf")]):
+        self.minmax = minmax
         self.clamper = clamper(minmax)
 
     def show(self, value, read_only):
@@ -28,11 +29,13 @@ class Choice:
 
 class Float:
     def __init__(self, minmax=[float("-inf"), float("inf")]):
+        self.minmax = minmax
         self.clamper = clamper(minmax)
 
     def show(self, value, read_only):
         imgui.push_item_width(100)
-        changed, v = imgui.drag_float("", value.value, change_speed=0.01)
+        changed, v = imgui.drag_float("", value.value,
+                change_speed=0.01, min_value=self.minmax[0], max_value=self.minmax[1], format="%0.4f")
         if changed and not read_only:
             value.value = self.clamper(v)
 

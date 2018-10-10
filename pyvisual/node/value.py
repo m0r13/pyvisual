@@ -46,10 +46,10 @@ class OutputColor(Node):
 class Float2Color(Node):
     class Meta:
         inputs = [
-            {"name" : "r", "dtype" : dtype.float, "widgets" : [widget.Float()]},
-            {"name" : "g", "dtype" : dtype.float, "widgets" : [widget.Float()]},
-            {"name" : "b", "dtype" : dtype.float, "widgets" : [widget.Float()]},
-            {"name" : "a", "dtype" : dtype.float, "widgets" : [widget.Float()], "default" : 1.0},
+            {"name" : "r", "dtype" : dtype.float, "widgets" : [widget.Float(minmax=(0.0, 1.0))]},
+            {"name" : "g", "dtype" : dtype.float, "widgets" : [widget.Float(minmax=(0.0, 1.0))]},
+            {"name" : "b", "dtype" : dtype.float, "widgets" : [widget.Float(minmax=(0.0, 1.0))]},
+            {"name" : "a", "dtype" : dtype.float, "widgets" : [widget.Float(minmax=(0.0, 1.0))], "default" : 1.0},
         ]
         outputs = [
             {"name" : "color", "dtype" : dtype.vec4, "widgets" : [widget.Color()]},
@@ -73,10 +73,10 @@ class Color2Float(Node):
             {"name" : "input", "dtype" : dtype.vec4, "widgets" : [widget.Color()]},
         ]
         outputs = [
-            {"name" : "r", "dtype" : dtype.float, "widgets" : [widget.Float()]},
-            {"name" : "g", "dtype" : dtype.float, "widgets" : [widget.Float()]},
-            {"name" : "b", "dtype" : dtype.float, "widgets" : [widget.Float()]},
-            {"name" : "a", "dtype" : dtype.float, "widgets" : [widget.Float()]},
+            {"name" : "r", "dtype" : dtype.float, "widgets" : [widget.Float(minmax=(0.0, 1.0))]},
+            {"name" : "g", "dtype" : dtype.float, "widgets" : [widget.Float(minmax=(0.0, 1.0))]},
+            {"name" : "b", "dtype" : dtype.float, "widgets" : [widget.Float(minmax=(0.0, 1.0))]},
+            {"name" : "a", "dtype" : dtype.float, "widgets" : [widget.Float(minmax=(0.0, 1.0))], "default" : 1.0},
         ]
         options = {
             "category" : "conversion",

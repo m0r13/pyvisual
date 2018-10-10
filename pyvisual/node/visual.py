@@ -1,10 +1,11 @@
 from pyvisual.node.base import Node
 from pyvisual.node import dtype
+from pyvisual.editor import widget
 
 class Render(Node):
     class Meta:
         inputs = [
-            {"name" : "input", "dtype" : dtype.tex2d}
+            {"name" : "input", "dtype" : dtype.tex2d, "widgets" : [widget.Texture()]}
         ]
         outputs = []
         options = {
@@ -14,9 +15,8 @@ class Render(Node):
 class InputTexture(Node):
     class Meta:
         outputs = [
-            {"name" : "output", "dtype" : dtype.tex2d},
+            {"name" : "output", "dtype" : dtype.tex2d, "widgets" : [widget.Texture()]},
         ]
         options = {
-            "category" : "input",
-            "show_title" : False
+            "category" : "input"
         }
