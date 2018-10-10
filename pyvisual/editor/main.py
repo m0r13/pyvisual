@@ -3,6 +3,7 @@
 import sys
 import time
 from vispy import app, gloo, keys
+from vispy.ext import glfw
 import vispy.ext.glfw as glfw
 import imgui
 
@@ -756,13 +757,22 @@ class NodeEditor:
 
     def show_context_menu(self):
         io = imgui.get_io()
+        key_map = list(io.key_map)
+        key_g = glfw.GLFW_KEY_G
+        key_up_arrow = key_map[imgui.KEY_UP_ARROW]
+        key_down_arrow = key_map[imgui.KEY_DOWN_ARROW]
+        key_escape = key_map[imgui.KEY_ESCAPE]
+        keys_down = list(io.keys_down)
+        keys_down_duration = list(io.keys_down_duration)
+        is_key_down = lambda key: keys_down[key] and keys_down_duration[key] == 0.0
 
         just_opened_popup = False
         reopen_popup = False
 
         # context menu
         no_node_hovered = lambda: not any(map(lambda n: n.hovered, self.nodes))
-        if imgui.is_window_hovered() and imgui.is_mouse_clicked(1) \
+        if imgui.is_window_hovered() \
+                and (imgui.is_mouse_clicked(1) or is_key_down(key_g)) \
                 and no_node_hovered():
             # remember where context menu was opened
             # (to place node there)
@@ -796,12 +806,6 @@ class NodeEditor:
                     yield label, spec
             entries = list(filter_nodes(self.context_search_text))
 
-            key_map = list(io.key_map)
-            key_up_arrow = key_map[imgui.KEY_UP_ARROW]
-            key_down_arrow = key_map[imgui.KEY_DOWN_ARROW]
-            key_escape = key_map[imgui.KEY_ESCAPE]
-            keys_down = list(io.keys_down)
-            keys_down_duration = list(io.keys_down_duration)
             if keys_down[key_up_arrow] and keys_down_duration[key_up_arrow] == 0.0:
                 self.context_index -= 1
             if keys_down[key_down_arrow] and keys_down_duration[key_down_arrow] == 0.0:
