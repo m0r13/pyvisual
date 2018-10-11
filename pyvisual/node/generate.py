@@ -17,14 +17,14 @@ class LFO(Node):
 
     class Meta:
         inputs = [
-            {"name" : "type", "dtype" : dtype.int,  "widgets" : [widget.Choice(choices=list(LFO_OSCILLATORS.keys()))],  "default" : 2},
-            {"name" : "length", "dtype" : dtype.float, "widgets" : [widget.Float()], "default" : 1.0},
-            {"name" : "phase", "dtype" : dtype.float, "widgets" : [widget.Float()], "default" : 0.0},
-            {"name" : "min", "dtype" : dtype.float, "widgets" : [widget.Float()], "default" : 0.0},
-            {"name" : "max", "dtype" : dtype.float, "widgets" : [widget.Float()], "default" : 1.0},
+            {"name" : "type", "dtype" : dtype.int,  "widgets" : [lambda node: widget.Choice(node, choices=list(LFO_OSCILLATORS.keys()))],  "default" : 2},
+            {"name" : "length", "dtype" : dtype.float, "widgets" : [widget.Float], "default" : 1.0},
+            {"name" : "phase", "dtype" : dtype.float, "widgets" : [widget.Float], "default" : 0.0},
+            {"name" : "min", "dtype" : dtype.float, "widgets" : [widget.Float], "default" : 0.0},
+            {"name" : "max", "dtype" : dtype.float, "widgets" : [widget.Float], "default" : 1.0},
         ]
         outputs = [
-            {"name" : "output", "dtype" : dtype.float, "widgets" : [widget.Float()]}
+            {"name" : "output", "dtype" : dtype.float, "widgets" : [widget.Float]}
         ]
         options = {
             "category" : "generate",

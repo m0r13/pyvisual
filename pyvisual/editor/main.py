@@ -204,11 +204,13 @@ class Node:
         self.connections = ([[] for _ in inputs], [[] for _ in outputs])
 
         # initialize port widgets
+        # TODO hmm not sure about these widget factories yet
         def create_widgets(ports, widgets):
             assert len(ports) == len(widgets)
             for i, port_spec in enumerate(ports):
                 assert len(port_spec["widgets"]) in (0, 1), "Only up to one widget allowed for now"
-                widgets[i] = port_spec["widgets"][0] if len(port_spec["widgets"]) else None
+                widget_func = port_spec["widgets"][0] if len(port_spec["widgets"]) else (lambda *args: None)
+                widgets[i] = widget_func(self)
         create_widgets(self.spec.inputs, self.port_widgets[PORT_TYPE_INPUT])
         create_widgets(self.spec.outputs, self.port_widgets[PORT_TYPE_OUTPUT])
 
