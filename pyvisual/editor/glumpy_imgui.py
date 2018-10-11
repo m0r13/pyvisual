@@ -12,15 +12,16 @@ class GlumpyGlfwRenderer(FixedProgrammablePipelineRenderer):
     def __init__(self, window, attach_callbacks=True):
         super(GlumpyGlfwRenderer, self).__init__()
         self.window = window
+        self.handle = window._native_window
 
         if attach_callbacks:
-            glfw.glfwSetKeyCallback(self.window, self.keyboard_callback)
-            glfw.glfwSetCursorPosCallback(self.window, self.mouse_callback)
-            glfw.glfwSetWindowSizeCallback(self.window, self.resize_callback)
-            glfw.glfwSetCharCallback(self.window, self.char_callback)
-            glfw.glfwSetScrollCallback(self.window, self.scroll_callback)
+            glfw.glfwSetKeyCallback(self.handle, self.keyboard_callback)
+            glfw.glfwSetCursorPosCallback(self.handle, self.mouse_callback)
+            glfw.glfwSetWindowSizeCallback(self.handle, self.resize_callback)
+            glfw.glfwSetCharCallback(self.handle, self.char_callback)
+            glfw.glfwSetScrollCallback(self.handle, self.scroll_callback)
 
-        self.io.display_size = glfw.glfwGetFramebufferSize(self.window)
+        self.io.display_size = glfw.glfwGetFramebufferSize(self.handle)
 
         self._map_keys()
         self._gui_time = None
@@ -39,6 +40,7 @@ class GlumpyGlfwRenderer(FixedProgrammablePipelineRenderer):
         key_map[imgui.KEY_END] = glfw.GLFW_KEY_END
         key_map[imgui.KEY_DELETE] = glfw.GLFW_KEY_DELETE
         key_map[imgui.KEY_BACKSPACE] = glfw.GLFW_KEY_BACKSPACE
+        key_map[imgui.KEY_SPACE] = glfw.GLFW_KEY_SPACE
         key_map[imgui.KEY_ENTER] = glfw.GLFW_KEY_ENTER
         key_map[imgui.KEY_ESCAPE] = glfw.GLFW_KEY_ESCAPE
         key_map[imgui.KEY_A] = glfw.GLFW_KEY_A
@@ -77,7 +79,8 @@ class GlumpyGlfwRenderer(FixedProgrammablePipelineRenderer):
             io.keys_down[glfw.GLFW_KEY_RIGHT_SUPER]
         )
 
-        #self.window.on_keyboard(window, key, scancode, action, mods)
+        if not io.want_capture_keyboard and not io.want_text_input:
+            self.window.on_keyboard(window, key, scancode, action, mods)
 
     def char_callback(self, window, char):
         io = imgui.get_io()
@@ -85,7 +88,8 @@ class GlumpyGlfwRenderer(FixedProgrammablePipelineRenderer):
         if 0 < char < 0x10000:
             io.add_input_character(char)
 
-        #self.window.on_character(window, char)
+        if not io.want_capture_keyboard and not io.want_text_input:
+            self.window.on_keyboard_char(window, char)
 
     def resize_callback(self, window, width, height):
         self.io.display_size = width, height
@@ -105,22 +109,22 @@ class GlumpyGlfwRenderer(FixedProgrammablePipelineRenderer):
         # todo: consider moving to init
         io = imgui.get_io()
 
-        w, h = glfw.glfwGetWindowSize(self.window)
-        dw, dh = glfw.glfwGetFramebufferSize(self.window)
+        w, h = glfw.glfwGetWindowSize(self.handle)
+        dw, dh = glfw.glfwGetFramebufferSize(self.handle)
 
         io.display_size = w, h
         io.display_fb_scale = float(dw)/w, float(dh)/h
 
         io.delta_time = 1.0/60
 
-        if glfw.glfwGetWindowAttrib(self.window, glfw.GLFW_FOCUSED):
-            io.mouse_pos = glfw.glfwGetCursorPos(self.window)
+        if glfw.glfwGetWindowAttrib(self.handle, glfw.GLFW_FOCUSED):
+            io.mouse_pos = glfw.glfwGetCursorPos(self.handle)
         else:
             io.mouse_pos = -1, -1
 
-        io.mouse_down[0] = glfw.glfwGetMouseButton(self.window, 0)
-        io.mouse_down[1] = glfw.glfwGetMouseButton(self.window, 1)
-        io.mouse_down[2] = glfw.glfwGetMouseButton(self.window, 2)
+        io.mouse_down[0] = glfw.glfwGetMouseButton(self.handle, 0)
+        io.mouse_down[1] = glfw.glfwGetMouseButton(self.handle, 1)
+        io.mouse_down[2] = glfw.glfwGetMouseButton(self.handle, 2)
 
         current_time = glfw.glfwGetTime()
 

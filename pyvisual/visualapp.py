@@ -2,7 +2,8 @@ from glumpy import app, gl, glm, gloo, data, key
 from scipy import fftpack
 import imgui
 
-from pyvisual.rendering import stage, primitive, transform, video, var, util, glumpy_imgui
+from pyvisual.rendering import stage, primitive, transform, video, var, util
+from pyvisual.editor import glumpy_imgui
 from pyvisual.rendering.var import _V
 from pyvisual.rendering.generative import *
 from pyvisual.event import *

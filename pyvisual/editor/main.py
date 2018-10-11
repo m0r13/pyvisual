@@ -2,22 +2,21 @@
 
 import sys
 import time
-from vispy import app, gloo, keys
-from vispy.ext import glfw
-import vispy.ext.glfw as glfw
+from glumpy import app, gloo, gl
+from glumpy.ext import glfw
 import imgui
 
-from pyvisual.editor import vispy_imgui
+from pyvisual.editor import glumpy_imgui
 
 # TODO the naming here?
 import pyvisual.node as node_meta
 import pyvisual.editor.widget as node_widget
 
-# create canvas / opengl context already here
+# create window / opengl context already here
 # imgui seems to cause problems otherwise with imgui.get_color_u32_rgba without context
-canvas = app.Canvas(keys=None, vsync=False, autoswap=True)
-timer = app.Timer(1.0 / 30.0, connect=canvas.update, start=True)
-imgui_renderer = vispy_imgui.GlumpyGlfwRenderer(canvas.native, True)
+window = app.Window()
+app.clock.get_default().set_fps_limit(30)
+imgui_renderer = glumpy_imgui.GlumpyGlfwRenderer(window, True)
 
 # utilities
 # TODO replace them with ImVec2 implementation in pyimgui bindings
@@ -737,10 +736,8 @@ class NodeEditor:
     # misc stuff
     #
 
-    def fps_callback(self, fps):
-        self.fps = fps
-
     def timing_callback(self, editor_time, processing_time):
+        self.fps = app.clock.get_default().get_fps()
         self.editor_time = editor_time
         self.editor_time_relative = editor_time / (1.0 / self.fps)
         self.processing_time = processing_time
@@ -1047,14 +1044,14 @@ editor_time = 0.0
 processing_time = 0.0
 time_count = 0
 
-@canvas.connect
+@window.event
 def on_draw(event):
     global editor_time, processing_time, time_count
 
-    gloo.set_clear_color((0.2, 0.4, 0.6, 1.0))
+    #gloo.set_clear_color((0.2, 0.4, 0.6, 1.0))
     # TODO why does gloo.clear not work?
     #gloo.clear(depth=True, color=True)
-    gloo.gl.glClear(gloo.gl.GL_COLOR_BUFFER_BIT)
+    gl.glClear(gl.GL_COLOR_BUFFER_BIT)
 
     start = time.time()
     imgui_renderer.process_inputs()
@@ -1075,12 +1072,12 @@ def on_draw(event):
         processing_time = 0.0
         time_count = 0
 
-@canvas.connect
-def on_key_press(event):
-    if event.key == "q":
+@window.event
+def on_key_press(key, modifier):
+    print("Glumpy: Pressed key: %s" % key)
+    if key == ord("Q"):
         sys.exit(0)
 
 if __name__ == "__main__":
-    canvas.show()
-    canvas.measure_fps(1, editor.fps_callback)
+    window.show()
     app.run()
