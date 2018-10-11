@@ -3,7 +3,7 @@ from pyvisual.node.base import Node
 from pyvisual.node import dtype
 from pyvisual.editor import widget
 import imgui
-from glumpy import gloo, gl
+from glumpy import gloo, gl, glm
 
 class Render(Node):
     class Meta:
@@ -129,7 +129,10 @@ class Shader(Node):
         gl.glViewport(0, 0, size[0], size[1])
         gl.glClearColor(0.0, 0.0, 0.0, 0.0)
         gl.glClear(gl.GL_COLOR_BUFFER_BIT)
-        self.quad["uModelViewProjection"] = np.eye(4, dtype=np.float32)
+        # flip y-axis to get image right
+        mvp = np.eye(4, dtype=np.float32)
+        glm.scale(mvp, 1.0, -1.0, 1.0)
+        self.quad["uModelViewProjection"] = mvp
         self.quad["uInputTexture"] = input_texture
         self.set_uniforms(self.quad)
         self.quad.draw(gl.GL_TRIANGLE_STRIP)
