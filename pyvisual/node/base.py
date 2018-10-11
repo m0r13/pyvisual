@@ -68,8 +68,10 @@ class Node(metaclass=NodeMeta):
         inputs = []
         outputs = []
 
-    def __init__(self):
+    def __init__(self, always_evaluate=False):
+        self.always_evaluate = always_evaluate
         self._evaluated = False
+        self._first_evaluated = False
 
         self.manual_inputs = {}
         self.inputs = {}
@@ -98,11 +100,21 @@ class Node(metaclass=NodeMeta):
         return nodes
 
     @property
+    def needs_evaluation(self):
+        # if any input has changed
+        return not self._first_evaluated or any(map(lambda v: v.has_changed, self.inputs.values()))
+
+    @property
     def evaluated(self):
         return self._evaluated
     @evaluated.setter
     def evaluated(self, evaluated):
-        # TODO somehow set that input nodes need to be evaluated?
+        # at the beginning of each run where all nodes are not evaluated yet
+        # all values will be set unchanged so changes in evaluating nodes will
+        # result in the nodes after them to be evaluated accordingly
+        if not evaluated:
+            for value in self.outputs.values():
+                value.has_changed = False
         self._evaluated = evaluated
 
     def get(self, name):
@@ -110,10 +122,22 @@ class Node(metaclass=NodeMeta):
     def set(self, name, value):
         self.outputs[name].value = value
 
-    def evaluate(self):
+    def process(self):
+        # update a node
+        # return if node needed update
+        if not self.evaluated and (self.needs_evaluation or self.always_evaluate):
+            self._evaluate()
+            self._evaluated = True
+            self._first_evaluated = True
+            return True
+        return False
+
+    def _evaluate(self):
+        # to be implemented by child nodes
+        # never call from outside! use process() instead
         pass
 
-    def show_custom_ui(self):
+    def _show_custom_ui(self):
         pass
 
     @classmethod

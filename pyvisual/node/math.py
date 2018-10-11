@@ -21,7 +21,7 @@ class AddFloat(Node):
             "category" : "math",
         }
 
-    def evaluate(self):
+    def _evaluate(self):
         self.outputs["output"].value = self.inputs["v0"].value + self.inputs["v1"].value
 
 class Lambda(Node):
@@ -44,13 +44,13 @@ class Lambda(Node):
     def process_result(self, result):
         return result
 
-    def evaluate(self):
+    def _evaluate(self):
         try:
             self.set("output", self.process_result(self.function(self.inputs["input"].value)))
         except:
             self.error = True
 
-    def show_custom_ui(self):
+    def _show_custom_ui(self):
         imgui.dummy(1, 5)
         imgui.text("lambda x:")
         imgui.push_item_width(208)

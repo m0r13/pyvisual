@@ -18,7 +18,7 @@ class LFO(Node):
     class Meta:
         inputs = [
             {"name" : "type", "dtype" : dtype.int,  "widgets" : [lambda node: widget.Choice(node, choices=list(LFO_OSCILLATORS.keys()))],  "default" : 2},
-            {"name" : "length", "dtype" : dtype.float, "widgets" : [widget.Float], "default" : 1.0},
+            {"name" : "length", "dtype" : dtype.float, "widgets" : [lambda node: widget.Float(node, minmax=[0.0001, float("inf")])], "default" : 1.0},
             {"name" : "phase", "dtype" : dtype.float, "widgets" : [widget.Float], "default" : 0.0},
             {"name" : "min", "dtype" : dtype.float, "widgets" : [widget.Float], "default" : 0.0},
             {"name" : "max", "dtype" : dtype.float, "widgets" : [widget.Float], "default" : 1.0},
@@ -31,7 +31,10 @@ class LFO(Node):
             "show_title" : True
         }
 
-    def evaluate(self):
+    def __init__(self):
+        super().__init__(always_evaluate=True)
+
+    def _evaluate(self):
         generator = self.get("type")
         value = LFO.OSCILLATORS[generator](time.time(), self.get("length"), self.get("phase"))
         value = self.get("min") + value * (self.get("max") - self.get("min"))

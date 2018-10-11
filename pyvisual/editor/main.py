@@ -476,7 +476,7 @@ class Node:
                 imgui.end_group()
 
             # show custom node ui
-            self.instance.show_custom_ui()
+            self.instance._show_custom_ui()
 
         imgui.end_group()
 
@@ -998,7 +998,7 @@ class NodeEditor:
         num_nodes = len(instances)
         num_connections = sum([ sum([ 1 if v.is_connected else 0 for v in node.inputs.values() ]) for node in instances ])
         imgui.text("#%d nodes, #%d connections" % (num_nodes, num_connections))
-        imgui.text("instances sorted:")
+        imgui.text("Sorted instances:")
         imgui.same_line()
 
         # evaluate nodes
@@ -1011,12 +1011,16 @@ class NodeEditor:
             imgui.text(" -> ".join([ instance.get_node_spec().name for instance in instances ]))
 
             start = time.time()
+            active_instances = 0
+            for instance in instances:
+                if instance.process():
+                    active_instances += 1
             for instance in instances:
                 instance.evaluated = False
-            for instance in instances:
-                instance.evaluate()
             end = time.time()
             processing_time = end - start
+
+            imgui.text("Active instances: %d" % active_instances)
 
         # finish our drawing
         draw_list.channels_merge()
@@ -1043,12 +1047,12 @@ node_specs = list(filter(lambda s: not s.options["virtual"], node_specs))
 editor = NodeEditor(node_specs)
 
 editor_time = 0.0
-processing_time = 0.0
+node_processing_time = 0.0
 time_count = 0
 
 @window.event
 def on_draw(event):
-    global editor_time, processing_time, time_count
+    global editor_time, node_processing_time, time_count
 
     #gloo.set_clear_color((0.2, 0.4, 0.6, 1.0))
     # TODO why does gloo.clear not work?
@@ -1060,7 +1064,8 @@ def on_draw(event):
     imgui.new_frame()
 
     # TODO hmm this is not so nice
-    processing_time += editor.show()
+    processing_time = editor.show()
+    node_processing_time += processing_time
 
     imgui.render()
     draw = imgui.get_draw_data()

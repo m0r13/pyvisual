@@ -59,7 +59,7 @@ class Float2Color(Node):
             "show_title" : True
         }
 
-    def evaluate(self):
+    def _evaluate(self):
         self.set("color", np.array([
             self.get("r"),
             self.get("g"),
@@ -83,7 +83,7 @@ class Color2Float(Node):
             "show_title" : True
         }
 
-    def evaluate(self):
+    def _evaluate(self):
         color = self.get("input")
         self.set("r", color[0])
         self.set("g", color[1])
