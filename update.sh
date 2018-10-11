@@ -5,7 +5,7 @@ git submodule update  --init --recursive
 
 pip3 install --user numpy pyopengl .
 
-cd ext/vispy
+cd ext/glumpy
 pip3 install --user .
 
 cd ../pyimgui
