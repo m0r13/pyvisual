@@ -678,7 +678,7 @@ class NodeEditor:
             other_port_spec = connection.input_node.ports[PORT_TYPE_OUTPUT][connection.input_index]
         else:
             other_port_spec = connection.output_node.ports[PORT_TYPE_INPUT][connection.output_index]
-        return port_spec["dtype"] == other_port_spec["dtype"]
+        return port_spec["dtype"].base_type == other_port_spec["dtype"].base_type
 
     def drop_connection(self, node, port_type, port_index):
         assert self.is_dragging_connection()

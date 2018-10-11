@@ -36,6 +36,10 @@ class LFO(Node):
 
     def _evaluate(self):
         generator = self.get("type")
+        length = self.get("length")
+        if length == 0:
+            self.set("output", float("nan"))
+            return
         value = LFO.OSCILLATORS[generator](time.time(), self.get("length"), self.get("phase"))
         value = self.get("min") + value * (self.get("max") - self.get("min"))
         self.set("output", value)

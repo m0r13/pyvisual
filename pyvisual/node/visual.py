@@ -24,7 +24,7 @@ class DummyTexture(Node):
     class Meta:
         inputs = [
             {"name" : "test", "dtype" : dtype.float, "widgets" : [widget.Float]},
-            {"name" : "c0", "dtype" : dtype.vec4, "widgets" : [widget.Color], "default" : np.float32([0.5, 0.0, 1.0, 1.0])}
+            {"name" : "c0", "dtype" : dtype.color, "widgets" : [widget.Color], "default" : np.float32([0.5, 0.0, 1.0, 1.0])}
         ]
         outputs = [
             {"name" : "output", "dtype" : dtype.tex2d, "widgets" : [widget.Texture]},

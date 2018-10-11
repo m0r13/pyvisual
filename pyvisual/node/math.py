@@ -24,6 +24,67 @@ class AddFloat(Node):
     def _evaluate(self):
         self.outputs["output"].value = self.inputs["v0"].value + self.inputs["v1"].value
 
+class OrEvent(Node):
+    class Meta:
+        inputs = [
+            {"name" : "v0", "dtype" : dtype.event, "widgets" : [widget.Button]},
+            {"name" : "v1", "dtype" : dtype.event, "widgets" : [widget.Button]}
+        ]
+        outputs = [
+            {"name" : "output", "dtype" : dtype.event, "widgets" : [widget.Button]}
+        ]
+        options = {
+            "category" : "math",
+        }
+
+    def __init__(self):
+        super().__init__()
+        self.changed = None
+
+    def _evaluate(self):
+        v = self.get("v0") or self.get("v1")
+        self.set("output", 1.0 if v else 0.0)
+        self.changed = self.inputs["v0"].has_changed, self.inputs["v1"].has_changed
+
+    def _show_custom_ui(self):
+        imgui.text(str(self.changed))
+
+THRESHOLD_MODES = ["rising", "falling", "both"]
+class Threshold(Node):
+    class Meta:
+        inputs = [
+            {"name" : "mode", "dtype" : dtype.int, "widgets" : [lambda node: widget.Choice(node, choices=THRESHOLD_MODES)]},
+            {"name" : "value", "dtype" : dtype.float, "widgets" : [widget.Float]},
+            {"name" : "threshold", "dtype" : dtype.float, "widgets" : [widget.Float]}
+        ]
+        outputs = [
+            {"name" : "output", "dtype" : dtype.event, "widgets" : [widget.Button]}
+        ]
+        options = {
+            "category" : "math",
+        }
+
+    def __init__(self):
+        super().__init__()
+        self.last_value = 0.0
+
+    def _evaluate(self):
+        mode = int(self.get("mode"))
+        if mode < 0 or mode >= len(THRESHOLD_MODES):
+            self.set("output", 0.0)
+            return
+        mode = THRESHOLD_MODES[mode]
+        last_value = self.last_value
+        value = self.get("value")
+        threshold = self.get("threshold")
+        if last_value < threshold and value >= threshold and (mode in ("rising", "both")):
+            self.set("output", 1.0)
+        elif last_value > threshold and value <= threshold and (mode in ("falling", "both")):
+            self.set("output", 1.0)
+        else:
+            self.set("output", 0.0)
+        self.last_value = value
+
 class Lambda(Node):
     class Meta:
         options = {
@@ -91,10 +152,10 @@ class FloatLambda(Lambda):
 class ColorLambda(Lambda):
     class Meta:
         inputs = [
-            {"name" : "input", "dtype" : dtype.vec4, "widgets" : [widget.Color]},
+            {"name" : "input", "dtype" : dtype.color, "widgets" : [widget.Color]},
         ]
         outputs = [
-            {"name" : "output", "dtype" : dtype.vec4, "widgets" : [widget.Color]}
+            {"name" : "output", "dtype" : dtype.color, "widgets" : [widget.Color]}
         ]
         options = {
             "category" : "math",

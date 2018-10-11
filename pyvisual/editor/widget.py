@@ -1,10 +1,33 @@
 # TODO naming
 import pyvisual.node as node_meta
 from pyvisual.node import dtype
+import time
 import imgui
 
 def clamper(minmax):
     return lambda x: max(minmax[0], (min(minmax[1], x)))
+
+class Button:
+    ACTIVE_TIME = 0.1
+    def __init__(self, node):
+        self.last_active = 0
+
+    def show(self, value, read_only):
+        imgui.push_item_width(100)
+        active = value.value or time.time() - self.last_active < Button.ACTIVE_TIME
+        if value.value:
+            self.last_active = time.time()
+        imgui.push_style_color(imgui.COLOR_BUTTON_ACTIVE, 1.0, 0.0, 0.0, 1.0)
+        if active:
+            imgui.push_style_color(imgui.COLOR_BUTTON, 1.0, 0.0, 0.0, 1.0)
+            imgui.push_style_color(imgui.COLOR_BUTTON_HOVERED, 1.0, 0.0, 0.0, 1.0)
+        clicked = imgui.button("Click me")
+        if active:
+            imgui.pop_style_color(2)
+        imgui.pop_style_color(1)
+        if read_only:
+            return
+        value.value = 1.0 if clicked else 0.0
 
 class Int:
     def __init__(self, node, minmax=[float("-inf"), float("inf")]):

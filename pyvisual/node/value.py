@@ -3,6 +3,26 @@ from pyvisual.node.base import Node
 from pyvisual.node import dtype
 from pyvisual.editor import widget
 
+class InputEvent(Node):
+    class Meta:
+        outputs = [
+            {"name" : "output", "dtype" : dtype.event, "widgets" : [widget.Button]}
+        ]
+        options = {
+            "category" : "input",
+            "show_title" : False
+        }
+
+class OutputEvent(Node):
+    class Meta:
+        inputs = [
+            {"name" : "input", "dtype" : dtype.event, "widgets" : [widget.Button]}
+        ]
+        options = {
+            "category" : "output",
+            "show_title" : False
+        }
+
 class InputFloat(Node):
     class Meta:
         outputs = [
@@ -26,7 +46,7 @@ class OutputFloat(Node):
 class InputColor(Node):
     class Meta:
         outputs = [
-            {"name" : "output", "dtype" : dtype.vec4, "widgets" : [widget.Color]},
+            {"name" : "output", "dtype" : dtype.color, "widgets" : [widget.Color]},
         ]
         options = {
             "category" : "input",
@@ -36,7 +56,7 @@ class InputColor(Node):
 class OutputColor(Node):
     class Meta:
         inputs = [
-            {"name" : "input", "dtype" : dtype.vec4, "widgets" : [widget.Color]},
+            {"name" : "input", "dtype" : dtype.color, "widgets" : [widget.Color]},
         ]
         options = {
             "category" : "output",
@@ -52,7 +72,7 @@ class Float2Color(Node):
             {"name" : "a", "dtype" : dtype.float, "widgets" : [lambda node: widget.Float(node, minmax=(0.0, 1.0))], "default" : 1.0},
         ]
         outputs = [
-            {"name" : "color", "dtype" : dtype.vec4, "widgets" : [widget.Color]},
+            {"name" : "color", "dtype" : dtype.color, "widgets" : [widget.Color]},
         ]
         options = {
             "category" : "conversion",
@@ -70,7 +90,7 @@ class Float2Color(Node):
 class Color2Float(Node):
     class Meta:
         inputs = [
-            {"name" : "input", "dtype" : dtype.vec4, "widgets" : [widget.Color]},
+            {"name" : "input", "dtype" : dtype.color, "widgets" : [widget.Color]},
         ]
         outputs = [
             {"name" : "r", "dtype" : dtype.float, "widgets" : [lambda node: widget.Float(node, minmax=(0.0, 1.0))]},

@@ -115,6 +115,8 @@ class Node(metaclass=NodeMeta):
         if not evaluated:
             for value in self.outputs.values():
                 value.has_changed = False
+            for value in self.inputs.values():
+                value.has_changed = False
         self._evaluated = evaluated
 
     def get(self, name):
@@ -215,12 +217,16 @@ class InputValueHolder(ValueHolder):
 
     @property
     def has_changed(self):
-        # TODO when to reset connection changed??
         if self.connection_changed:
             return True
         if self.connected_value is not None:
             return self.connected_value.has_changed
         return self.manual_value.has_changed
+    @has_changed.setter
+    def has_changed(self, changed):
+        # TODO hmm this seems like a hack
+        if not changed:
+            self.connection_changed = False
 
     @property
     def value(self):
