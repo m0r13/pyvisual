@@ -25,12 +25,6 @@ class NodeSpec:
         self.inputs = inputs if inputs is not None else []
         self.outputs = outputs if outputs is not None else []
         self.options = dict(options)
-        self.options.setdefault("virtual", False)
-        self.options.setdefault("category", "")
-        self.options.setdefault("show_title", True)
-        for port_spec in self.inputs + self.outputs:
-            port_spec.setdefault("default", None)
-            port_spec.setdefault("widgets", [])
 
     @property
     def name(self):
@@ -58,9 +52,18 @@ class NodeSpec:
             outputs = getattr(cls.Meta, "outputs", [])
             options = getattr(cls.Meta, "options", {})
             return NodeSpec(cls=cls, inputs=inputs, outputs=outputs, options=options)
+        
         spec = NodeSpec()
         for cls in bases:
             spec.append(parse(cls))
+
+        # set spec defaults at last
+        spec.options.setdefault("virtual", False)
+        spec.options.setdefault("category", "")
+        spec.options.setdefault("show_title", True)
+        for port_spec in spec.inputs + spec.outputs:
+            port_spec.setdefault("default", None)
+            port_spec.setdefault("widgets", [])
         return spec
 
 class Node(metaclass=NodeMeta):
@@ -219,14 +222,16 @@ class InputValueHolder(ValueHolder):
     def has_changed(self):
         if self.connection_changed:
             return True
-        if self.connected_value is not None:
-            return self.connected_value.has_changed
-        return self.manual_value.has_changed
+        connected_changed = self.connected_value.has_changed if self.connected_value else False
+        manual_changed = self.manual_value.has_changed
+        return connected_changed or manual_changed
+
     @has_changed.setter
     def has_changed(self, changed):
         # TODO hmm this seems like a hack
-        if not changed:
-            self.connection_changed = False
+        #if not changed:
+        #    self.connection_changed = False
+        pass
 
     @property
     def value(self):

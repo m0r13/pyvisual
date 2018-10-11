@@ -24,7 +24,7 @@ class AddFloat(Node):
     def _evaluate(self):
         self.outputs["output"].value = self.inputs["v0"].value + self.inputs["v1"].value
 
-class OrEvent(Node):
+class Or(Node):
     class Meta:
         inputs = [
             {"name" : "v0", "dtype" : dtype.event, "widgets" : [widget.Button]},
@@ -37,17 +37,45 @@ class OrEvent(Node):
             "category" : "math",
         }
 
-    def __init__(self):
-        super().__init__()
-        self.changed = None
-
     def _evaluate(self):
         v = self.get("v0") or self.get("v1")
         self.set("output", 1.0 if v else 0.0)
         self.changed = self.inputs["v0"].has_changed, self.inputs["v1"].has_changed
 
-    def _show_custom_ui(self):
-        imgui.text(str(self.changed))
+class And(Node):
+    class Meta:
+        inputs = [
+            {"name" : "v0", "dtype" : dtype.bool, "widgets" : [widget.Bool]},
+            {"name" : "v1", "dtype" : dtype.bool, "widgets" : [widget.Bool]}
+        ]
+        outputs = [
+            {"name" : "output", "dtype" : dtype.bool, "widgets" : [widget.Bool]}
+        ]
+        options = {
+            "category" : "math",
+        }
+
+    def _evaluate(self):
+        v = self.get("v0") and self.get("v1")
+        self.set("output", 1.0 if v else 0.0)
+        self.changed = self.inputs["v0"].has_changed, self.inputs["v1"].has_changed
+
+class Not(Node):
+    class Meta:
+        inputs = [
+            {"name" : "v", "dtype" : dtype.bool, "widgets" : [widget.Bool]},
+        ]
+        outputs= [
+            {"name" : "output", "dtype" : dtype.bool, "widgets" : [widget.Bool]},
+        ]
+        options = {
+            "category" : "math",
+        }
+
+    def _evaluate(self):
+        v = self.get("v")
+        self.set("output", 0.0 if v else 1.0)
+
 
 THRESHOLD_MODES = ["rising", "falling", "both"]
 class Threshold(Node):

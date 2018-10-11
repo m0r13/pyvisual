@@ -3,6 +3,26 @@ from pyvisual.node.base import Node
 from pyvisual.node import dtype
 from pyvisual.editor import widget
 
+class InputBool(Node):
+    class Meta:
+        outputs = [
+            {"name" : "output", "dtype" : dtype.bool, "widgets" : [widget.Bool]}
+        ]
+        options = {
+            "category" : "input",
+            "show_title" : False
+        }
+
+class OutputBool(Node):
+    class Meta:
+        inputs = [
+            {"name" : "input", "dtype" : dtype.bool, "widgets" : [widget.Bool]}
+        ]
+        options = {
+            "category" : "output",
+            "show_title" : False
+        }
+
 class InputEvent(Node):
     class Meta:
         outputs = [

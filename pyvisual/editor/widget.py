@@ -7,6 +7,17 @@ import imgui
 def clamper(minmax):
     return lambda x: max(minmax[0], (min(minmax[1], x)))
 
+# TODO read-only widgets!
+
+class Bool:
+    def __init__(self, node):
+        pass
+
+    def show(self, value, read_only):
+        clicked, state = imgui.checkbox("", value.value)
+        if not read_only:
+            value.value = state
+
 class Button:
     ACTIVE_TIME = 0.1
     def __init__(self, node):
@@ -77,7 +88,11 @@ class Color:
             changed, color = imgui.color_picker4("color", r, g, b, a, imgui.COLOR_EDIT_ALPHA_PREVIEW)
             if changed:
                 if not read_only:
-                    value.value[:] = color
+                    # careful here! update it safely (with numpy-assignment)
+                    # but also set it properly so it is regarded as changed
+                    v = value.value
+                    v[:] = color
+                    value.value = v
             imgui.end_popup()
 
 class Texture:

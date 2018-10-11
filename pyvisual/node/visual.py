@@ -2,6 +2,7 @@ import numpy as np
 from pyvisual.node.base import Node
 from pyvisual.node import dtype
 from pyvisual.editor import widget
+import imgui
 from glumpy import gloo
 
 class Render(Node):
@@ -66,5 +67,37 @@ class InputTexture(Node):
         ]
         options = {
             "category" : "input"
+        }
+
+class Shader(Node):
+    class Meta:
+        inputs = [
+            {"name" : "enabled", "dtype" : dtype.bool, "widgets" : [widget.Bool], "default" : 1.0},
+            {"name" : "input", "dtype" : dtype.tex2d, "widgets" : [widget.Texture]},
+        ]
+        outputs = [
+            {"name" : "enabled", "dtype" : dtype.bool, "widgets" : [widget.Bool], "default" : 1.0},
+            {"name" : "output", "dtype" : dtype.tex2d, "widgets" : [widget.Texture]}
+        ]
+        options = {
+            "virtual" : True
+        }
+
+    def _evaluate(self):
+        enabled = self.get("enabled")
+        self.set("enabled", enabled)
+        if not enabled:
+            self.set("output", self.get("input"))
+            return
+
+    def _show_custom_ui(self):
+        imgui.dummy(1, 5)
+        imgui.text("TODO")
+
+class TestShader(Shader):
+    class Meta:
+        options = {
+            "virtual" : False,
+#            "category" : "visual"
         }
 
