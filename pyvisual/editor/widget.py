@@ -55,7 +55,7 @@ class Int:
 class Choice:
     def __init__(self, node, choices=[]):
         self.node = node
-        self.choices = choices
+        self.choices = [ "(%d) %s" % (i, choice) for i, choice in enumerate(choices) ]
 
     def show(self, value, read_only):
         imgui.push_item_width(100)
