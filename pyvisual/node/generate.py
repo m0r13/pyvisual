@@ -44,3 +44,25 @@ class LFO(Node):
         value = self.get("min") + value * (self.get("max") - self.get("min"))
         self.set("output", value)
 
+class Time(Node):
+    class Meta:
+        inputs = [
+            {"name" : "reset", "dtype" : dtype.event, "widgets" : [widget.Button]}
+        ]
+        outputs = [
+            {"name" : "output", "dtype" : dtype.float, "widgets" : [widget.Float]}
+        ]
+        options = {
+            "category" : "generate",
+            "show_title" : True
+        }
+
+    def __init__(self):
+        super().__init__(always_evaluate=True)
+
+        self.start = time.time()
+
+    def _evaluate(self):
+        if self.get("reset"):
+            self.start = time.time()
+        self.set("output", time.time() - self.start)

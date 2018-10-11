@@ -62,8 +62,10 @@ class NodeSpec:
         spec.options.setdefault("category", "")
         spec.options.setdefault("show_title", True)
         for port_spec in spec.inputs + spec.outputs:
-            port_spec.setdefault("default", None)
+            assert "name" in port_spec
+            assert "dtype" in port_spec
             port_spec.setdefault("widgets", [])
+            port_spec.setdefault("default", None)
         return spec
 
 class Node(metaclass=NodeMeta):

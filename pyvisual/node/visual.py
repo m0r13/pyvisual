@@ -3,7 +3,7 @@ from pyvisual.node.base import Node
 from pyvisual.node import dtype
 from pyvisual.editor import widget
 import imgui
-from glumpy import gloo
+from glumpy import gloo, gl
 
 class Render(Node):
     class Meta:
@@ -69,6 +69,8 @@ class InputTexture(Node):
             "category" : "input"
         }
 
+from pyvisual.rendering import util
+
 class Shader(Node):
     class Meta:
         inputs = [
@@ -83,6 +85,30 @@ class Shader(Node):
             "virtual" : True
         }
 
+    def __init__(self, vertex, fragment):
+        super().__init__()
+
+        vertex = util.load_shader(vertex)
+        fragment = util.load_shader(fragment)
+        self.quad = gloo.Program(vertex, fragment, version="130", count=4)
+        self.quad["iPosition"] = [(-1,-1), (-1,+1), (+1,-1), (+1,+1)]
+        self.quad["iTexCoord"] = [( 0, 1), ( 0, 0), ( 1, 1), ( 1, 0)]
+
+        self._fbo = None
+
+    def get_fbo(self, size):
+        if self._fbo is not None:
+            h, w, _ = self._fbo.color[0].shape
+            if size == (w, h):
+                return self._fbo
+        w, h = size
+        texture = np.zeros((h, w, 4), dtype=np.uint8).view(gloo.Texture2D)
+        self._fbo = gloo.FrameBuffer(color=[texture])
+        return self._fbo
+
+    def set_uniforms(self, program):
+        pass
+
     def _evaluate(self):
         enabled = self.get("enabled")
         self.set("enabled", enabled)
@@ -90,14 +116,46 @@ class Shader(Node):
             self.set("output", self.get("input"))
             return
 
-    def _show_custom_ui(self):
-        imgui.dummy(1, 5)
-        imgui.text("TODO")
+        input_texture = self.get("input")
+        # TODO what to do?!
+        if input_texture is None:
+            self.set("output", None)
+            return
+
+        size = input_texture.shape[:2][::-1]
+        fbo = self.get_fbo(size)
+        fbo.activate()
+
+        gl.glViewport(0, 0, size[0], size[1])
+        gl.glClearColor(0.0, 0.0, 0.0, 0.0)
+        gl.glClear(gl.GL_COLOR_BUFFER_BIT)
+        self.quad["uModelViewProjection"] = np.eye(4, dtype=np.float32)
+        self.quad["uInputTexture"] = input_texture
+        self.set_uniforms(self.quad)
+        self.quad.draw(gl.GL_TRIANGLE_STRIP)
+
+        fbo.deactivate()
+
+        self.set("output", fbo.color[0])
 
 class TestShader(Shader):
     class Meta:
+        inputs = [
+            #{"name" : "mode", "dtype" : dtype.int, "widgets" : [lambda node: widget.Choice(node, choices=["0", "1", "2"])]},
+            {"name" : "time", "dtype" : dtype.float, "widgets" : [widget.Float]},
+            {"name" : "amount", "dtype" : dtype.float, "widgets" : [widget.Float]},
+            {"name" : "speed", "dtype" : dtype.float, "widgets" : [widget.Float]},
+        ]
         options = {
             "virtual" : False,
 #            "category" : "visual"
         }
+
+    def __init__(self):
+        super().__init__("common/passthrough.vert", "post/glitch.frag")
+
+    def set_uniforms(self, program):
+        program["time"] = self.get("time")
+        program["amount"] = self.get("amount")
+        program["speed"] = self.get("speed")
 
