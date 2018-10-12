@@ -60,9 +60,9 @@ class Time(Node):
     def __init__(self):
         super().__init__(always_evaluate=True)
 
-        self.start = time.time()
+        self._start = time.time()
 
     def _evaluate(self):
         if self.get("reset"):
-            self.start = time.time()
-        self.set("output", time.time() - self.start)
+            self._start = time.time()
+        self.set("output", time.time() - self._start)

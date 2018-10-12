@@ -140,6 +140,44 @@ class Threshold(Node):
             self.set("output", 0.0)
         self.last_value = value
 
+# TODO naming?
+class Latch(Node):
+    class Meta:
+        inputs = [
+            {"name" : "enabled", "dtype" : dtype.bool, "widgets" : [widget.Bool], "default" : True}
+        ]
+        options = {
+            "virtual" : True
+        }
+
+    def _evaluate(self):
+        if self.get("enabled"):
+            self.set("output", self.get("input"))
+
+class FloatLatch(Latch):
+    class Meta:
+        inputs = [
+            {"name" : "input", "dtype" : dtype.float, "widgets" : [widget.Float]}
+        ]
+        outputs = [
+            {"name" : "output", "dtype" : dtype.float, "widgets" : [widget.Float]}
+        ]
+        options = {
+            "virtual" : False
+        }
+
+class ColorLatch(Latch):
+    class Meta:
+        inputs = [
+            {"name" : "input", "dtype" : dtype.color, "widgets" : [widget.Color]}
+        ]
+        outputs = [
+            {"name" : "output", "dtype" : dtype.color, "widgets" : [widget.Color]}
+        ]
+        options = {
+            "virtual" : False
+        }
+
 class Lambda(Node):
     class Meta:
         options = {
