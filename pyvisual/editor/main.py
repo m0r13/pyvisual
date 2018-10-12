@@ -191,6 +191,7 @@ class Node:
         self.spec = spec
 
         self.window_id = Node.id_counter
+        self.z_index = editor.touch_z_index()
         Node.id_counter += 1
 
         # TODO maybe this can be somehow better, idk
@@ -253,6 +254,9 @@ class Node:
     @property
     def size_with_padding(self):
         return t_add(self.size, t_mul(self.padding, 2))
+
+    def touch_z_index(self):
+        self.z_index = self.editor.touch_z_index()
 
     def attach_connection(self, port_type, port_index, connection):
         self.connections[port_type][port_index].append(connection)
@@ -502,8 +506,10 @@ class Node:
             if self.collapsible:
                 if self.collapsed and io.mouse_wheel < 0:
                     self.collapsed = False
+                    self.touch_z_index()
                 elif not self.collapsed and io.mouse_wheel > 0:
                     self.collapsed = True
+                    self.touch_z_index()
             # handle selection
             if imgui.is_mouse_clicked(0):
                 # ctrl modifier toggles selection
@@ -514,6 +520,7 @@ class Node:
                     if not self.selected:
                         for node in self.editor.nodes:
                             node.selected = False
+                        self.touch_z_index()
                     self.selected = True
             # handle context menu
             if imgui.is_mouse_clicked(1):
@@ -577,6 +584,7 @@ class NodeEditor:
 
         # collection of ui nodes/connections
         self.nodes = []
+        self.nodes_z_index = 0
         self.connections = []
 
         # window position in screen space
@@ -621,6 +629,11 @@ class NodeEditor:
     #
     # editor api functions used by nodes, connections and editor itself
     #
+
+    def touch_z_index(self):
+        i = self.nodes_z_index
+        self.nodes_z_index += 1
+        return i
     
     def remove_node(self, node):
         for port_type in (PORT_TYPE_INPUT, PORT_TYPE_OUTPUT):
@@ -891,6 +904,7 @@ class NodeEditor:
         draw_list = imgui.get_window_draw_list()
         draw_list.channels_split(CHANNEL_COUNT)
         draw_list.channels_set_current(CHANNEL_DEFAULT)
+        draw_list.channels_set_current(CHANNEL_DEFAULT)
 
         # draw grid
         with draw_on_channel(draw_list, CHANNEL_BACKGROUND):
@@ -924,8 +938,17 @@ class NodeEditor:
                 draw_list.add_rect(upper_left, lower_right, COLOR_SELECTION_BORDER)
 
         # draw / handle nodes and connections
-        for node in self.nodes:
+        # little hack: to get overlapping nodes and such correct,
+        #    render nodes in an order. nodes request a new z-index from the
+        #    editor when they got touched and should be in the foreground again
+        for node in sorted(self.nodes, key=lambda n: n.z_index):
             node.show(draw_list)
+            # TODO
+            # unfortunately we have to merge and split the draw list multiple times for that
+            # maybe there is a better way
+            draw_list.channels_merge()
+            draw_list.channels_split(CHANNEL_COUNT)
+            draw_list.channels_set_current(CHANNEL_DEFAULT)
         for connection in self.connections:
             connection.show(draw_list)
 

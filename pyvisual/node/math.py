@@ -27,8 +27,8 @@ class AddFloat(Node):
 class Or(Node):
     class Meta:
         inputs = [
-            {"name" : "v0", "dtype" : dtype.event, "widgets" : [widget.Button]},
-            {"name" : "v1", "dtype" : dtype.event, "widgets" : [widget.Button]}
+            {"name" : "v0", "dtype" : dtype.bool, "widgets" : [widget.Bool]},
+            {"name" : "v1", "dtype" : dtype.bool, "widgets" : [widget.Bool]}
         ]
         outputs = [
             {"name" : "output", "dtype" : dtype.event, "widgets" : [widget.Button]}
