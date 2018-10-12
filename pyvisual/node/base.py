@@ -129,6 +129,9 @@ class Node(metaclass=NodeMeta):
     def set(self, name, value):
         self.outputs[name].value = value
 
+    def start(self):
+        pass
+
     def process(self):
         # update a node
         # return if node needed update
@@ -138,6 +141,9 @@ class Node(metaclass=NodeMeta):
             self._first_evaluated = True
             return True
         return False
+
+    def stop(self):
+        pass
 
     def _evaluate(self):
         # to be implemented by child nodes
@@ -233,7 +239,7 @@ class InputValueHolder(ValueHolder):
         # TODO hmm this seems like a hack
         #if not changed:
         #    self.connection_changed = False
-        pass
+        self.manual_value.has_changed = False
 
     @property
     def value(self):

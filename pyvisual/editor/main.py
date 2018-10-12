@@ -575,6 +575,7 @@ class Node:
     def instance(self):
         if self._instance is None:
             self._instance = self.spec.cls()
+            self._instance.start()
         return self._instance
 
 class NodeEditor:
@@ -642,6 +643,7 @@ class NodeEditor:
                 # that's why we iterate of a copy
                 for connection in list(port_connections):
                     self.remove_connection(connection)
+        node.instance.stop()
         self.nodes.remove(node)
 
     def remove_connection(self, connection):
@@ -1058,6 +1060,10 @@ class NodeEditor:
         # TODO this is a bit hacky, handle this differently
         return processing_time
 
+    def stop(self):
+        for instance in self.node_instances:
+            instance.stop()
+
 # sort by node categories and then by names
 node_types = node_meta.Node.get_sub_nodes(include_self=False)
 node_types.sort(key=lambda n: n.get_node_spec().name)
@@ -1106,6 +1112,7 @@ def on_draw(event):
 def on_key_press(key, modifier):
     print("Glumpy: Pressed key: %s" % key)
     if key == ord("Q"):
+        editor.stop()
         sys.exit(0)
 
 if __name__ == "__main__":

@@ -50,7 +50,7 @@ class Int:
         imgui.push_item_width(100)
         changed, v = imgui.input_int("", value.value)
         if changed and not read_only:
-            value.value = self.clamper(v)
+            value.value = int(self.clamper(v))
 
 class Choice:
     def __init__(self, node, choices=[]):
