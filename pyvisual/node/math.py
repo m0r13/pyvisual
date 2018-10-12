@@ -202,6 +202,7 @@ class FloatLambda(Lambda):
         ]
         options = {
             "category" : "math",
+            "virtual" : False
         }
 
 class ColorLambda(Lambda):
@@ -214,6 +215,7 @@ class ColorLambda(Lambda):
         ]
         options = {
             "category" : "math",
+            "virtual" : False
         }
 
     def process_result(self, result):
