@@ -76,6 +76,33 @@ class Not(Node):
         v = self.get("v")
         self.set("output", 0.0 if v else 1.0)
 
+# TODO maybe Compare and Threshold can combined somehow or so?
+
+COMPARE_MODES = ["v0 < v1", "v0 <= v1", "v0 > v1", "v0 >= v1"]
+class Compare(Node):
+    class Meta:
+        inputs = [
+            {"name" : "mode", "dtype" : dtype.int, "widgets" : [lambda node: widget.Choice(node, choices=COMPARE_MODES)]},
+            {"name" : "v0", "dtype" : dtype.float, "widgets" : [widget.Float]},
+            {"name" : "v1", "dtype" : dtype.float, "widgets" : [widget.Float]},
+            {"name" : "threshold", "dtype" : dtype.float, "widgets" : [widget.Float]}
+        ]
+        outputs = [
+            {"name" : "output", "dtype" : dtype.bool, "widgets" : [widget.Bool]}
+        ]
+        options = {
+            "category" : "math",
+        }
+
+    def _evaluate(self):
+        mode = int(self.get("mode"))
+        v0 = self.get("v0")
+        v1 = self.get("v1")
+        value = (mode == 0 and v0 < v1) \
+             or (mode == 1 and v0 <= v1) \
+             or (mode == 2 and v0 > v1) \
+             or (mode == 3 and v0 >= v1)
+        self.set("output", 1.0 if value else 0.0)
 
 THRESHOLD_MODES = ["rising", "falling", "both"]
 class Threshold(Node):
