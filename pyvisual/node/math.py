@@ -31,7 +31,7 @@ class Or(Node):
             {"name" : "v1", "dtype" : dtype.bool, "widgets" : [widget.Bool]}
         ]
         outputs = [
-            {"name" : "output", "dtype" : dtype.event, "widgets" : [widget.Button]}
+            {"name" : "output", "dtype" : dtype.event, "widgets" : [widget.Bool]}
         ]
         options = {
             "category" : "math",
