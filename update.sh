@@ -3,7 +3,7 @@
 git pull
 git submodule update  --init --recursive
 
-pip3 install --user numpy pyopengl .
+pip3 install --user numpy scipy pyopengl .
 
 cd ext/glumpy
 pip3 install --user .

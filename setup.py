@@ -25,7 +25,7 @@ setup(
 #    ],
 #    keywords="",
     packages=find_packages(),
-    install_requires=["numpy", "glumpy"],
+    install_requires=["numpy", "scipy", "glumpy"],
 #    extras_require={},
 #    package_data={
 #        "blockcrafter" : ["custom_assets", "blockstates.properties"]
