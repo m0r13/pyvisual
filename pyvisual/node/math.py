@@ -104,19 +104,19 @@ class Compare(Node):
              or (mode == 3 and v0 >= v1)
         self.set("output", 1.0 if value else 0.0)
 
-THRESHOLD_MODES = ["rising", "falling", "both"]
-class Threshold(Node):
+class Edge(Node):
     class Meta:
         inputs = [
-            {"name" : "mode", "dtype" : dtype.int, "widgets" : [lambda node: widget.Choice(node, choices=THRESHOLD_MODES)]},
             {"name" : "value", "dtype" : dtype.float, "widgets" : [widget.Float]},
             {"name" : "threshold", "dtype" : dtype.float, "widgets" : [widget.Float]}
         ]
         outputs = [
-            {"name" : "output", "dtype" : dtype.event, "widgets" : [widget.Button]}
+            {"name" : "rising", "dtype" : dtype.event, "widgets" : [widget.Button]},
+            {"name" : "falling", "dtype" : dtype.event, "widgets" : [widget.Button]},
+            {"name" : "combined", "dtype" : dtype.event, "widgets" : [widget.Button]}
         ]
         options = {
-            "category" : "math",
+            "category" : "math"
         }
 
     def __init__(self):
@@ -124,20 +124,12 @@ class Threshold(Node):
         self.last_value = 0.0
 
     def _evaluate(self):
-        mode = int(self.get("mode"))
-        if mode < 0 or mode >= len(THRESHOLD_MODES):
-            self.set("output", 0.0)
-            return
-        mode = THRESHOLD_MODES[mode]
         last_value = self.last_value
         value = self.get("value")
         threshold = self.get("threshold")
-        if last_value < threshold and value >= threshold and (mode in ("rising", "both")):
-            self.set("output", 1.0)
-        elif last_value > threshold and value <= threshold and (mode in ("falling", "both")):
-            self.set("output", 1.0)
-        else:
-            self.set("output", 0.0)
+        self.set("rising", last_value < threshold and value >= threshold)
+        self.set("falling", last_value > threshold and value <= threshold)
+        self.set("combined", last_value < threshold and value >= threshold or last_value > threshold and value <= threshold)
         self.last_value = value
 
 # TODO naming?
@@ -163,7 +155,8 @@ class FloatLatch(Latch):
             {"name" : "output", "dtype" : dtype.float, "widgets" : [widget.Float]}
         ]
         options = {
-            "virtual" : False
+            "virtual" : False,
+            "category" : "math"
         }
 
 class ColorLatch(Latch):
@@ -175,8 +168,26 @@ class ColorLatch(Latch):
             {"name" : "output", "dtype" : dtype.color, "widgets" : [widget.Color]}
         ]
         options = {
-            "virtual" : False
+            "virtual" : False,
+            "category" : "math"
         }
+
+class BlendFloat(Node):
+    class Meta:
+        inputs = [
+            {"name" : "a", "dtype" : dtype.float, "widgets" : [widget.Float]},
+            {"name" : "b", "dtype" : dtype.float, "widgets" : [widget.Float]},
+            {"name" : "alpha", "dtype" : dtype.float, "widgets" : [lambda node: widget.Float(node, minmax=[0.0, 1.0])]}
+        ]
+        outputs = [
+            {"name" : "output", "dtype" : dtype.float, "widgets" : [widget.Float]}
+        ]
+        options = {
+            "category" : "math"
+        }
+
+    def _evaluate(self):
+        self.set("output", (1.0-self.get("alpha")) * self.get("a") + self.get("alpha") * self.get("b"))
 
 class Lambda(Node):
     class Meta:
@@ -260,3 +271,6 @@ class ColorLambda(Lambda):
         if not isinstance(result, np.ndarray) or result.shape != (4,):
             raise RuntimeError("Invalid result. Must be (4,) array.")
         return result.astype(np.float32)
+
+class Plot(Node):
+    pass

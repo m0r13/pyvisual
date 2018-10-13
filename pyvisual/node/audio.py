@@ -107,6 +107,9 @@ class AudioAbsValue(Node):
         outputs = [
             {"name" : "output", "dtype" : dtype.audio},
         ]
+        options = {
+            "category" : "audio"
+        }
 
     def _evaluate(self):
         input_audio = self.get("input")
@@ -127,6 +130,9 @@ class AudioSampleCurrentValue(Node):
         outputs = [
             {"name" : "output", "dtype" : dtype.float, "widgets" : [widget.Float]},
         ]
+        options = {
+            "category" : "audio"
+        }
 
     def _evaluate(self):
         input_audio = self.get("input")

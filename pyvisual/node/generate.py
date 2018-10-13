@@ -47,6 +47,7 @@ class LFO(Node):
 class Time(Node):
     class Meta:
         inputs = [
+            {"name" : "factor", "dtype" : dtype.float, "widgets" : [widget.Float], "default" : 1.0},
             {"name" : "reset", "dtype" : dtype.event, "widgets" : [widget.Button]}
         ]
         outputs = [
@@ -60,9 +61,14 @@ class Time(Node):
     def __init__(self):
         super().__init__(always_evaluate=True)
 
-        self._start = time.time()
+        self._last_time = time.time()
+        self._time = 0.0
 
     def _evaluate(self):
+        t = time.time()
         if self.get("reset"):
-            self._start = time.time()
-        self.set("output", time.time() - self._start)
+            self._time = 0.0
+        dt = t - self._last_time
+        self._time += dt * self.get("factor")
+        self._last_time = t
+        self.set("output", self._time)

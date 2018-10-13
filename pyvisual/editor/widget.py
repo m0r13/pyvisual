@@ -1,6 +1,8 @@
 # TODO naming
+import os
 import pyvisual.node as node_meta
 from pyvisual.node import dtype
+from pyvisual import assets
 import time
 import imgui
 
@@ -82,9 +84,9 @@ class Color:
     def show(self, value, read_only):
         r, g, b, a = value.value[:]
         flags = imgui.COLOR_EDIT_NO_INPUTS | imgui.COLOR_EDIT_NO_LABEL | imgui.COLOR_EDIT_ALPHA_PREVIEW
-        if imgui.color_button("color", r, g, b, a, flags, 50, 50):
-            imgui.open_popup("picker")
-        if imgui.begin_popup("picker"):
+        if imgui.color_button("color %s" % id(self), r, g, b, a, flags, 50, 50):
+            imgui.open_popup("picker %s" % id(self))
+        if imgui.begin_popup("picker %s" % id(self)):
             changed, color = imgui.color_picker4("color", r, g, b, a, imgui.COLOR_EDIT_ALPHA_PREVIEW)
             if changed:
                 if not read_only:
@@ -93,6 +95,42 @@ class Color:
                     v = value.value
                     v[:] = color
                     value.value = v
+            imgui.end_popup()
+
+def show_file_menu(base_path):
+    try:
+        entries = []
+        for name in os.listdir(base_path):
+            entries.append((not os.path.isdir(os.path.join(base_path, name)), name))
+
+        for not_is_dir, name in sorted(entries):
+            if not not_is_dir:
+                if imgui.begin_menu(name):
+                    selected_path = show_file_menu(os.path.join(base_path, name))
+                    imgui.end_menu()
+                    if selected_path is not None:
+                        return os.path.join(base_path, selected_path)
+            else:
+                clicked, state = imgui.menu_item(name, None, False)
+                if clicked:
+                    return os.path.join(base_path, name)
+    except:
+        imgui.text("Error")
+
+class AssetPath:
+    def __init__(self, node, prefix=""):
+        self.prefix = prefix
+
+    def show(self, value, read_only):
+        imgui.push_item_width(100)
+        changed, v = imgui.input_text("", value.value, 255)
+        imgui.push_item_width(100)
+        if imgui.button("Select file"):
+            imgui.open_popup("select_file")
+        if imgui.begin_popup("select_file"):
+            selected_path = show_file_menu(assets.ASSET_PATH + "/" + self.prefix)
+            if selected_path is not None:
+                value.value = selected_path
             imgui.end_popup()
 
 class Texture:
@@ -106,9 +144,9 @@ class Texture:
             return
 
         cursor_pos = imgui.get_cursor_screen_pos()
-        imgui.set_next_window_size(200, 220, imgui.ONCE)
+        imgui.set_next_window_size(1920 * 0.3, 1080 * 0.3 + 30, imgui.ONCE)
         imgui.set_next_window_position(*imgui.get_io().mouse_pos, imgui.ONCE, pivot_x=0.5, pivot_y=0.5)
-        expanded, opened = imgui.begin("Texture###%s" % id(self.node), True, imgui.WINDOW_NO_SCROLLBAR)
+        expanded, opened = imgui.begin("Texture of %s###%s%s" % (self.node.spec.name, id(self.node), id(self)), True, imgui.WINDOW_NO_SCROLLBAR)
         if not opened:
             self.show_texture = False
         if expanded:

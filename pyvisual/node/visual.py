@@ -1,9 +1,11 @@
+import math
 import numpy as np
 from pyvisual.node.base import Node
 from pyvisual.node import dtype
 from pyvisual.editor import widget
 import imgui
 from glumpy import gloo, gl, glm
+from PIL import Image
 
 class Render(Node):
     class Meta:
@@ -15,13 +17,14 @@ class Render(Node):
             "category" : "output",
         }
 
+
 def checkerboard(grid_num=8, grid_size=32):
     row_even = grid_num // 2 * [0, 1]
     row_odd = grid_num // 2 * [1, 0]
     Z = np.row_stack(grid_num // 2 * (row_even, row_odd)).astype(np.uint8)
     return Z.repeat(grid_size, axis=0).repeat(grid_size, axis=1)
 
-class DummyTexture(Node):
+class Checkerboard(Node):
     class Meta:
         inputs = [
             {"name" : "test", "dtype" : dtype.float, "widgets" : [widget.Float]},
@@ -62,12 +65,24 @@ class DummyTexture(Node):
 
 class InputTexture(Node):
     class Meta:
+        inputs = [
+            {"name" : "path", "dtype" : dtype.assetpath, "widgets" : [lambda node: widget.AssetPath(node, "image/tartuvhs")]},
+        ]
         outputs = [
             {"name" : "output", "dtype" : dtype.tex2d, "widgets" : [widget.Texture]},
         ]
         options = {
             "category" : "input"
         }
+
+    def _evaluate(self):
+        if not self.inputs["path"].has_changed:
+            return
+        print("load texture", self.get("path"))
+        texture = np.array(Image.open(self.get("path"))).view(gloo.Texture2D)
+        texture.activate()
+        texture.deactivate()
+        self.set("output", texture)
 
 from pyvisual.rendering import util
 
@@ -141,7 +156,7 @@ class Shader(Node):
 
         self.set("output", fbo.color[0])
 
-class TestShader(Shader):
+class Glitch(Shader):
     class Meta:
         inputs = [
             #{"name" : "mode", "dtype" : dtype.int, "widgets" : [lambda node: widget.Choice(node, choices=["0", "1", "2"])]},
@@ -151,7 +166,7 @@ class TestShader(Shader):
         ]
         options = {
             "virtual" : False,
-#            "category" : "visual"
+            "category" : "shader"
         }
 
     def __init__(self):
@@ -162,3 +177,59 @@ class TestShader(Shader):
         program["amount"] = self.get("amount")
         program["speed"] = self.get("speed")
 
+class Move(Shader):
+    class Meta:
+        inputs = [
+            {"name" : "direction", "dtype" : dtype.float, "widgets" : [widget.Float]},
+            {"name" : "distance", "dtype" : dtype.float, "widgets" : [widget.Float]},
+        ]
+        options = {
+            "virtual" : False,
+            "category" : "shader"
+        }
+
+    def __init__(self):
+        super().__init__("common/passthrough.vert", "post/move.frag")
+
+    def set_uniforms(self, program):
+        program["uDirection"] = math.radians(self.get("direction"))
+        program["uDirectionOffset"] = self.get("distance")
+
+class Mirror(Shader):
+    class Meta:
+        inputs = [
+            {"name" : "mode", "dtype" : dtype.int, "widgets" : [lambda node: widget.Int(node, minmax=[0, 3])]},
+        ]
+        options = {
+            "virtual" : False,
+            "category" : "shader"
+        }
+
+    def __init__(self):
+        super().__init__("common/passthrough.vert", "post/mirror.frag")
+
+    def set_uniforms(self, program):
+        program["uMode"] = int(self.get("mode"))
+
+dummy = np.zeros((1, 1, 4), dtype=np.uint8).view(gloo.Texture2D)
+class Blend(Shader):
+    class Meta:
+        inputs = [
+            {"name" : "source", "dtype" : dtype.tex2d, "widgets" : [widget.Texture]},
+            {"name" : "alpha", "dtype" : dtype.float, "widgets" : [lambda node: widget.Float(node, minmax=[0, 1])]},
+        ]
+        options = {
+            "virtual" : False,
+            "category" : "shader"
+        }
+
+    def __init__(self):
+        super().__init__("common/passthrough.vert", "post/blend.frag")
+
+    def set_uniforms(self, program):
+        source = self.get("source")
+        if source is None:
+            program["uSource"] = dummy
+            return
+        program["uSource"] = source
+        program["uAlpha"] = self.get("alpha")
