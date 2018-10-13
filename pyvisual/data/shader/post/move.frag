@@ -12,6 +12,7 @@ void main() {
     vec2 sizeDivider = vec2(size.x, size.y);
     vec2 direction = vec2(cos(uDirection), sin(uDirection));
     vec2 texCoords = TexCoord0 + direction * uDirectionOffset / sizeDivider;
+    /*
     if (int(floor(texCoords.x)) % 2 == 0) {
         texCoords.x = fract(texCoords.x);
     } else {
@@ -22,6 +23,7 @@ void main() {
     } else {
         texCoords.y = 1 - fract(texCoords.y);
     }
+    */
     oFragColor = texture2D(uInputTexture, texCoords);
 }
 

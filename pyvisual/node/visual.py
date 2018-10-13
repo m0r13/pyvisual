@@ -177,11 +177,14 @@ class Glitch(Shader):
         program["amount"] = self.get("amount")
         program["speed"] = self.get("speed")
 
-class Move(Shader):
+WRAPPING_MODES = ["repeat", "mirrored repeat", "clamp to edge", "clamp to border"]
+WRAPPING_MODES_GL = [gl.GL_REPEAT, gl.GL_MIRRORED_REPEAT, gl.GL_CLAMP_TO_EDGE, gl.GL_CLAMP_TO_BORDER]
+class SampleTexture(Shader):
     class Meta:
         inputs = [
             {"name" : "direction", "dtype" : dtype.float, "widgets" : [widget.Float]},
-            {"name" : "distance", "dtype" : dtype.float, "widgets" : [widget.Float]},
+            {"name" : "distance", "dtype" : dtype.float, "widgets" : [widget.Float], "default" : 450.0},
+            {"name" : "wrapping", "dtype" : dtype.int, "widgets" : [lambda node: widget.Choice(node, choices=WRAPPING_MODES)], "default" : 1}
         ]
         options = {
             "virtual" : False,
@@ -192,6 +195,11 @@ class Move(Shader):
         super().__init__("common/passthrough.vert", "post/move.frag")
 
     def set_uniforms(self, program):
+        wrapping_mode = int(self.get("wrapping"))
+        if wrapping_mode < 0 or wrapping_mode >= len(WRAPPING_MODES):
+            wrapping_mode = 0
+        input_texture = self.get("input")
+        input_texture.wrapping = WRAPPING_MODES_GL[wrapping_mode]
         program["uDirection"] = math.radians(self.get("direction"))
         program["uDirectionOffset"] = self.get("distance")
 

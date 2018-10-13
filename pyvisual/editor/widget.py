@@ -17,7 +17,7 @@ class Bool:
 
     def show(self, value, read_only):
         clicked, state = imgui.checkbox("", value.value)
-        if not read_only:
+        if clicked and not read_only:
             value.value = state
 
 class Button:
