@@ -2,6 +2,7 @@
 
 import sys
 import time
+from collections import defaultdict
 from glumpy import app, gloo, gl
 from glumpy.ext import glfw
 import imgui
@@ -112,33 +113,27 @@ class draw_on_channel:
         self.draw_list.channels_set_current(self.old_channel)
         return False
 
-PORT_TYPE_INPUT = 0
-PORT_TYPE_OUTPUT = 1
-def opposite_port_type(port_type):
-    assert 0 <= port_type <= 1
-    return 0 if port_type == 1 else 1
-
 class Connection:
-    def __init__(self, editor, input_node, input_index, output_node, output_index):
+    def __init__(self, editor, src_node, src_port_id, dst_node, dst_port_id):
         self.editor = editor
-        self.input_node = input_node
-        self.input_index = input_index
-        self.output_node = output_node
-        self.output_index = output_index
+        self.src_node = src_node
+        self.src_port_id = src_port_id
+        self.dst_node = dst_node
+        self.dst_port_id = dst_port_id
         self.connect()
 
     def connect(self):
-        self.input_node.attach_connection(PORT_TYPE_OUTPUT, self.input_index, self)
-        self.output_node.attach_connection(PORT_TYPE_INPUT, self.output_index, self)
+        self.src_node.attach_connection(self.src_port_id, self)
+        self.dst_node.attach_connection(self.dst_port_id, self)
 
     def disconnect(self):
-        self.input_node.detach_connection(PORT_TYPE_OUTPUT, self.input_index, self)
-        self.output_node.detach_connection(PORT_TYPE_INPUT, self.output_index, self)
+        self.src_node.detach_connection(self.src_port_id, self)
+        self.dst_node.detach_connection(self.dst_port_id, self)
 
     def show(self, draw_list):
         # is connected when both sides are on a node
-        connected = not isinstance(self.input_node, MouseDummyNode) \
-                and not isinstance(self.output_node, MouseDummyNode)
+        connected = not isinstance(self.src_node, MouseDummyNode) \
+                and not isinstance(self.dst_node, MouseDummyNode)
         dragging_connection = self.editor.is_dragging_connection()
 
         color = COLOR_PORT_BULLET
@@ -149,8 +144,8 @@ class Connection:
             # show connection that is being dragged as active
             color = COLOR_PORT_BULLET_HOVERED
 
-        p0 = self.input_node.get_port_position(PORT_TYPE_OUTPUT, self.input_index)
-        p1 = self.output_node.get_port_position(PORT_TYPE_INPUT, self.output_index)
+        p0 = self.src_node.get_port_position(self.src_port_id)
+        p1 = self.dst_node.get_port_position(self.dst_port_id)
 
         delta = p1[0] - p0[0], p1[1] - p0[1]
         offset_x = min(200, abs(delta[0])) * 0.5
@@ -166,14 +161,18 @@ class Connection:
             #draw_list.add_circle_filled(b0, 3, imgui.get_color_u32_rgba(0.0, 1.0, 0.0, 1.0))
             #draw_list.add_circle_filled(b1, 3, imgui.get_color_u32_rgba(0.0, 0.0, 1.0, 1.0))
 
+    def is_end(self, node, port_id):
+        return (self.src_node == node and self.src_port_id == port_id) \
+                or (self.dst_node == node and self.dst_port_id == port_id)
+
     @staticmethod
-    def create(editor, node, port_type, port_index):
-        if port_type == PORT_TYPE_INPUT:
-            return Connection(editor, output_node=node, output_index=port_index,
-                    input_node=MouseDummyNode(), input_index=-1)
+    def create(editor, node, port_id):
+        if node_meta.is_input(port_id):
+            return Connection(editor, dst_node=node, dst_port_id=port_id,
+                    src_node=MouseDummyNode(), src_port_id=None)
         else:
-            return Connection(editor, input_node=node, input_index=port_index,
-                    output_node=MouseDummyNode(), output_index=-1)
+            return Connection(editor, src_node=node, src_port_id=port_id,
+                    dst_node=MouseDummyNode(), dst_port_id=None)
 
 class MouseDummyNode:
     def attach_connection(self, *args):
@@ -181,7 +180,7 @@ class MouseDummyNode:
     def detach_connection(self, *args):
         pass
 
-    def get_port_position(self, port_type, port_index):
+    def get_port_position(self, port_id):
         return imgui.get_io().mouse_pos
 
 class Node:
@@ -199,21 +198,14 @@ class Node:
         # maybe something shared would be possible with proper port IDs
         inputs = self.spec.inputs
         outputs = self.spec.outputs
-        self.ports = (inputs, outputs)
-        self.port_positions = ([None]*len(inputs), [None]*len(outputs))
-        self.port_widgets = ([None]*len(inputs), [None]*len(outputs))
-        self.connections = ([[] for _ in inputs], [[] for _ in outputs])
+        #self.ports = (inputs, outputs)
+        #self.port_positions = ([None]*len(inputs), [None]*len(outputs))
+        #self.port_widgets = ([None]*len(inputs), [None]*len(outputs))
+        #self.connections = ([[] for _ in inputs], [[] for _ in outputs])
+        self.connections = defaultdict(lambda: [])
 
-        # initialize port widgets
-        # TODO hmm not sure about these widget factories yet
-        def create_widgets(ports, widgets):
-            assert len(ports) == len(widgets)
-            for i, port_spec in enumerate(ports):
-                assert len(port_spec["widgets"]) in (0, 1), "Only up to one widget allowed for now"
-                widget_func = port_spec["widgets"][0] if len(port_spec["widgets"]) else (lambda *args: None)
-                widgets[i] = widget_func(self)
-        create_widgets(self.spec.inputs, self.port_widgets[PORT_TYPE_INPUT])
-        create_widgets(self.spec.outputs, self.port_widgets[PORT_TYPE_OUTPUT])
+        self.port_positions = {}
+        self.widgets = {}
 
         #
         # size information of node (everything in local position)
@@ -258,42 +250,53 @@ class Node:
     def touch_z_index(self):
         self.z_index = self.editor.touch_z_index()
 
-    def attach_connection(self, port_type, port_index, connection):
-        self.connections[port_type][port_index].append(connection)
+    def attach_connection(self, port_id, connection):
+        self.connections[port_id].append(connection)
 
-    def detach_connection(self, port_type, port_index, connection):
-        self.connections[port_type][port_index].remove(connection)
+    def detach_connection(self, port_id, connection):
+        self.connections[port_id].remove(connection)
 
-    def get_port_position(self, port_type, port_index):
-        positions = self.port_positions[port_type]
+    def get_widget(self, port_id):
+        if not port_id in self.widgets:
+            assert port_id in self.instance.ports, "Port %s must be in instance ports" % port_id
+            port_spec = self.instance.ports[port_id]
+            assert len(port_spec["widgets"]) in (0, 1), "Only up to one widget allowed for now"
+            widget_func = port_spec["widgets"][0] if len(port_spec["widgets"]) else (lambda *args: None)
+            self.widgets[port_id] = widget_func(self)
+        return self.widgets[port_id]
+
+    def get_port_position(self, port_id):
+        assert port_id in self.instance.ports, "Port %s must be in instance ports" % port_id
+
         # handle collapsed node
-        if self.collapsed or port_index >= len(positions) or positions[port_index] is None:
-            x = self.actual_pos[0] if port_type == PORT_TYPE_INPUT else self.actual_pos[0]+self.size[0]+self.padding[0]*2
+        if self.collapsed or port_id not in self.port_positions:
+            x = self.actual_pos[0] if node_meta.is_input(port_id) else self.actual_pos[0]+self.size[0]+self.padding[0]*2
             y = self.actual_pos[1] + (self.size[1] + self.padding[1] * 2) / 2
             return self.editor.local_to_screen((x, y))
-        return positions[port_index]
+        return self.port_positions[port_id]
 
-    def show_port(self, draw_list, port_type, port_index, port_spec):
+    def show_port(self, draw_list, port_id, port_spec):
         io = imgui.get_io()
 
         name = port_spec["name"]
         dtype = port_spec["dtype"]
+        is_input = node_meta.is_input(port_id)
 
         # ui
-        imgui.push_id(port_index)
+        imgui.push_id(port_id)
         imgui.begin_group()
 
         # screen coordinates
         port_start = imgui.get_cursor_screen_pos()
 
         # show port input/output widget (if enabled)
-        widget = self.port_widgets[port_type][port_index]
+        widget = self.get_widget(port_id)
         if widget is not None:
             # determine value associated with this port
             value = None
             # and whether we can change it
             read_only = False
-            if port_type == PORT_TYPE_INPUT:
+            if is_input:
                 # we can change value of input port only if nothing is connected
                 # otherwise it's a read-only widget that just shows the value for the user
                 value = self.instance.inputs[name]
@@ -307,7 +310,7 @@ class Node:
             widget.show(value, read_only=read_only)
         else:
             # make some space in case there is no widget
-            imgui.dummy(0, 10)
+            imgui.dummy(10, 10)
         imgui.end_group()
 
         # got the area our port takes up now
@@ -317,18 +320,18 @@ class Node:
         # calculate position and size of port connector
         size = imgui.get_item_rect_size()
         x = self.actual_pos[0]
-        if port_type == PORT_TYPE_OUTPUT:
+        if not is_input:
             x += self.size[0] + self.padding[0]*2
         y = self.editor.screen_to_local(port_start)[1] + size[1] / 2
         connector_radius = 5.0
         connector_thickness = 2.0
         connector_center = self.editor.local_to_screen((x, y))
-        self.port_positions[port_type][port_index] = connector_center
+        self.port_positions[port_id] = connector_center
 
         # find connector bounds for hovering
         # they are a bit bigger than the actual connector
         connector_start, connector_end = None, None
-        if port_type == PORT_TYPE_INPUT:
+        if is_input:
             connector_start = t_add(port_start, (-30, 0))
             connector_end = port_start[0], port_end[1]
         else:
@@ -339,12 +342,12 @@ class Node:
         is_dragging_connection = self.editor.is_dragging_connection()
         is_connection_droppable = False
         if is_dragging_connection:
-            is_connection_droppable = self.editor.is_connection_droppable(self, port_type, port_index)
+            is_connection_droppable = self.editor.is_connection_droppable(self, port_id)
         # whether this port is part of a dragging connection
-        is_connection_source = self.editor.is_dragging_connection_source(self, port_type, port_index)
-        connections = self.connections[port_type][port_index]
+        is_connection_source = self.editor.is_dragging_connection_source(self, port_id)
+        connections = self.connections[port_id]
         # constraint: make sure there is maximum one connection per input
-        if port_type == PORT_TYPE_INPUT:
+        if is_input:
             assert len(connections) in (0, 1)
 
         hovered_port = not imgui.is_any_item_active() and t_between(port_start, port_end, io.mouse_pos)
@@ -376,23 +379,23 @@ class Node:
                 highlight_color = COLOR_PORT_HIGHLIGHT_POSITIVE
 
         # decide for action on port / port bullet
-        deleteable = port_type == PORT_TYPE_INPUT and len(connections) > 0
+        deleteable = is_input and len(connections) > 0
         if hovered_connector and deleteable and not is_dragging_connection:
             imgui.set_tooltip("Delete connection")
             if imgui.is_mouse_clicked(0):
                 self.editor.remove_connection(connections[0])
                 # little tweak: start dragging a new connection once a connection is deleted
-                self.editor.drag_connection(self, port_type, port_index)
+                self.editor.drag_connection(self, port_id)
         elif hovered and is_dragging_connection and is_connection_droppable:
             highlight_channel = CHANNEL_NODE_BACKGROUND
             highlight_color = COLOR_PORT_HIGHLIGHT_POSITIVE_ACTIVE
             imgui.set_tooltip("Drop connection")
             if imgui.is_mouse_released(0):
-                self.editor.drop_connection(self, port_type, port_index)
+                self.editor.drop_connection(self, port_id)
         elif not is_dragging_connection and hovered_connector:
             imgui.set_tooltip("Create connection")
             if imgui.is_mouse_clicked(0):
-                self.editor.drag_connection(self, port_type, port_index)
+                self.editor.drag_connection(self, port_id)
 
         # port connector drawing
         with draw_on_channel(draw_list, CHANNEL_PORT):
@@ -407,7 +410,7 @@ class Node:
             label = port_spec["name"]
             size = imgui.calc_text_size(label)
             text_pos = None
-            if port_type == PORT_TYPE_OUTPUT:
+            if not is_input:
                 text_pos = t_add(connector_center, (10, -size[1] / 2))
             else:
                 text_pos = t_add(connector_center, (-10 - size[0], -size[1] / 2))
@@ -419,18 +422,18 @@ class Node:
 
         imgui.pop_id()
 
-    def show_ports(self, draw_list, ports, port_type):
+    def show_ports(self, draw_list, ports):
         io = imgui.get_io()
 
         channel_stack = draw_on_channel(draw_list, CHANNEL_NODE)
         channel_stack.__enter__()
 
-        imgui.push_id(int(port_type))
+        #imgui.push_id(int(port_type))
         imgui.begin_group()
-        for port_index, port_spec in enumerate(ports):
-            self.show_port(draw_list, port_type, port_index, port_spec)
+        for port_id, port_spec in ports.items():
+            self.show_port(draw_list, port_id, port_spec)
         imgui.end_group()
-        imgui.pop_id()
+        #imgui.pop_id()
 
         channel_stack.__exit__()
 
@@ -468,15 +471,15 @@ class Node:
         if self.spec.options["show_title"]:
             imgui.text(self.spec.name)
         if not self.collapsed:
-            if len(self.spec.inputs):
+            if len(self.instance.input_ports):
                 imgui.begin_group()
-                self.show_ports(draw_list, self.spec.inputs, PORT_TYPE_INPUT)
+                self.show_ports(draw_list, self.instance.input_ports)
                 imgui.end_group()
                 imgui.same_line()
 
-            if len(self.spec.outputs):
+            if len(self.instance.output_ports):
                 imgui.begin_group()
-                self.show_ports(draw_list, self.spec.outputs, PORT_TYPE_OUTPUT)
+                self.show_ports(draw_list, self.instance.output_ports)
                 imgui.end_group()
 
             # show custom node ui
@@ -637,85 +640,81 @@ class NodeEditor:
         return i
     
     def remove_node(self, node):
-        for port_type in (PORT_TYPE_INPUT, PORT_TYPE_OUTPUT):
-            for port_connections in node.connections[port_type]:
-                # the list of connections at this port will change during deletetion!
-                # that's why we iterate of a copy
-                for connection in list(port_connections):
-                    self.remove_connection(connection)
+        for port_connections in node.connections.values():
+            # the list of connections at this port will change during deletetion!
+            # that's why we iterate of a copy
+            for connection in list(port_connections):
+                self.remove_connection(connection)
         node.instance.stop()
         self.nodes.remove(node)
 
     def remove_connection(self, connection):
         # remove connection from node instances
-        dst_instance = connection.output_node.instance
-        dst_name = connection.output_node.ports[PORT_TYPE_INPUT][connection.output_index]["name"]
+        dst_instance = connection.dst_node.instance
+        dst_name = node_meta.port_name(connection.dst_port_id)
         dst_instance.inputs[dst_name].disconnect()
 
         # remove connection ui-wise
         connection.disconnect()
         self.connections.remove(connection)
 
-    def drag_connection(self, node, port_type, port_index):
+    def drag_connection(self, node, port_id):
+        # TODO HERE
         assert self.dragging_connection is None
-        self.dragging_connection = Connection.create(self, node, port_type, port_index)
-        self.dragging_target_port_type = opposite_port_type(port_type)
+        self.dragging_connection = Connection.create(self, node, port_id)
+        # TODO
+        self.dragging_target_port_type = not node_meta.is_input(port_id)
         self.connections.append(self.dragging_connection)
 
     def is_dragging_connection(self):
         return self.dragging_connection is not None
 
-    def is_dragging_connection_source(self, node, port_type, port_index):
+    def is_dragging_connection_source(self, node, port_id):
+        # TODO HERE
         if not self.is_dragging_connection():
             return False
-        if port_type == PORT_TYPE_INPUT:
-            return self.dragging_connection.output_node == node \
-                    and self.dragging_connection.output_index == port_index
-        else:
-            return self.dragging_connection.input_node == node \
-                    and self.dragging_connection.input_index == port_index
+        return self.dragging_connection.is_end(node, port_id)
 
-    def is_connection_droppable(self, node, port_type, port_index):
+    def is_connection_droppable(self, node, port_id):
         assert self.is_dragging_connection()
         # constraint: connect only input with output and vice versa
-        if port_type != self.dragging_target_port_type:
+        if node_meta.is_input(port_id) != self.dragging_target_port_type:
             return False
         # TODO prevent this manual hackish check?
         # constraint: only one connection per input
-        if port_type == PORT_TYPE_INPUT \
-                and len(node.connections[PORT_TYPE_INPUT][port_index]) != 0:
+        if node_meta.is_input(port_id) and len(node.connections[port_id]) != 0:
             return False
-        # TODO this is hacky too
-        port_spec = node.ports[port_type][port_index]
+        
+        port_spec = node.instance.ports[port_id]
         connection = self.dragging_connection
         other_port_spec = None
-        if port_type == PORT_TYPE_INPUT:
-            other_port_spec = connection.input_node.ports[PORT_TYPE_OUTPUT][connection.input_index]
+        if node_meta.is_input(port_id):
+            other_port_spec = connection.src_node.instance.ports[connection.src_port_id]
         else:
-            other_port_spec = connection.output_node.ports[PORT_TYPE_INPUT][connection.output_index]
+            other_port_spec = connection.dst_node.instance.ports[connection.dst_port_id]
         return port_spec["dtype"].base_type == other_port_spec["dtype"].base_type
 
-    def drop_connection(self, node, port_type, port_index):
+    def drop_connection(self, node, port_id):
         assert self.is_dragging_connection()
-        assert self.is_connection_droppable(node, port_type, port_index)
+        assert self.is_connection_droppable(node, port_id)
 
         # connect ui nodes
         connection = self.dragging_connection
         connection.disconnect()
-        if port_type == PORT_TYPE_INPUT:
-            connection.output_node = node
-            connection.output_index = port_index
+        if node_meta.is_input(port_id):
+            connection.dst_node = node
+            connection.dst_port_id = port_id
         else:
-            connection.input_node = node
-            connection.input_index = port_index
+            connection.src_node = node
+            connection.src_port_id = port_id
         connection.connect()
         self.dragging_connection = None
 
         # connect node instances
-        src_instance = connection.input_node.instance
-        src_name = connection.input_node.ports[PORT_TYPE_OUTPUT][connection.input_index]["name"]
-        dst_instance = connection.output_node.instance
-        dst_name = connection.output_node.ports[PORT_TYPE_INPUT][connection.output_index]["name"]
+        src_instance = connection.src_node.instance
+        src_name = node_meta.port_name(connection.src_port_id)
+        dst_instance = connection.dst_node.instance
+        dst_name = node_meta.port_name(connection.dst_port_id)
         dst_instance.inputs[dst_name].connect(src_instance, src_name)
 
     #
@@ -1033,19 +1032,19 @@ class NodeEditor:
             # TODO show a warning maybe
             pass
         else:
-            imgui.text(" -> ".join([ instance.get_node_spec().name for instance in instances ]))
+            imgui.text(" -> ".join([ instance.spec.name for instance in instances ]))
 
             start = time.time()
-            active_instances = 0
+            active_instances = set()
             for instance in instances:
                 if instance.process():
-                    active_instances += 1
+                    active_instances.add(instance)
             for instance in instances:
                 instance.evaluated = False
             end = time.time()
             processing_time = end - start
 
-            imgui.text("Active instances: %d" % active_instances)
+            imgui.text("Active instances: %d: %s" % (len(active_instances), [ instance.spec.name for instance in active_instances]))
 
         # finish our drawing
         draw_list.channels_merge()
@@ -1066,12 +1065,12 @@ class NodeEditor:
 
 # sort by node categories and then by names
 node_types = node_meta.Node.get_sub_nodes(include_self=False)
-node_types.sort(key=lambda n: n.get_node_spec().name)
-node_types.sort(key=lambda n: n.get_node_spec().options["category"])
+node_types.sort(key=lambda n: n.spec.name)
+node_types.sort(key=lambda n: n.spec.options["category"])
 
 # TODO think about naming
 #   ui nodes vs. node instances vs. node types
-node_specs = [ n.get_node_spec() for n in node_types ]
+node_specs = [ n.spec for n in node_types ]
 node_specs = list(filter(lambda s: not s.options["virtual"], node_specs))
 editor = NodeEditor(node_specs)
 

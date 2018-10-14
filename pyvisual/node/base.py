@@ -1,3 +1,4 @@
+from collections import OrderedDict
 
 def find_node_base(bases):
     bases = list(filter(lambda b: issubclass(b, Node), bases))
@@ -15,9 +16,22 @@ class NodeMeta(type):
             base = find_node_base(bases)
         dct["base_node"] = base
         cls = super().__new__(meta, name, bases, dct)
+        cls.spec = NodeSpec.from_cls(cls)
         meta.node_types.append(cls)
         print("Registered node type: %s" % cls)
         return cls
+
+def port_id(port_spec, is_input):
+    prefix = "i_" if is_input else "o_"
+    return prefix + port_spec["name"]
+
+def port_name(port_id):
+    assert port_id[:2] in ("i_", "o_")
+    return port_id[2:]
+
+def is_input(port_id):
+    assert port_id[:2] in ("i_", "o_")
+    return port_id.startswith("i_")
 
 class NodeSpec:
     def __init__(self, cls=None, inputs=None, outputs=None, options={}):
@@ -29,6 +43,23 @@ class NodeSpec:
     @property
     def name(self):
         return self.cls.__name__
+
+    @property
+    def ports(self):
+        for port_id, port_spec in self.input_ports:
+            yield port_id, port_spec
+        for port_id, port_spec in self.output_ports:
+            yield port_id, port_spec
+
+    @property
+    def input_ports(self):
+        for port_spec in self.inputs:
+            yield port_id(port_spec, True), port_spec
+
+    @property
+    def output_ports(self):
+        for port_spec in self.outputs:
+            yield port_id(port_spec, False), port_spec
 
     def append(self, child_spec):
         self.cls = child_spec.cls
@@ -82,19 +113,43 @@ class Node(metaclass=NodeMeta):
         self.inputs = {}
         self.outputs = {}
 
-        spec = self.get_node_spec()
-        for port_spec in spec.inputs:
+        for port_spec in self.spec.inputs:
             default = port_spec["default"]
             if default is None:
                 default = port_spec["dtype"].default()
             manual_input = SettableValueHolder(default)
             self.manual_inputs[port_spec["name"]] = manual_input
             self.inputs[port_spec["name"]] = InputValueHolder(manual_input)
-        for port_spec in spec.outputs:
+        for port_spec in self.spec.outputs:
             default = port_spec["default"]
             if default is None:
                 default = port_spec["dtype"].default()
             self.outputs[port_spec["name"]] = SettableValueHolder(default)
+
+    @property
+    def ports(self):
+        ports = OrderedDict()
+        ports.update(self.input_ports)
+        ports.update(self.output_ports)
+        return ports
+
+    @property
+    def input_ports(self):
+        return OrderedDict(self.spec.input_ports)
+
+    @property
+    def output_ports(self):
+        return OrderedDict(self.spec.output_ports)
+
+    @classmethod
+    def get_sub_nodes(cls, include_self=True):
+        nodes = []
+        for node in NodeMeta.node_types:
+            if not include_self and node == cls:
+                continue
+            if issubclass(node, cls):
+                nodes.append(node)
+        return nodes
 
     @property
     def input_nodes(self):
@@ -152,20 +207,6 @@ class Node(metaclass=NodeMeta):
 
     def _show_custom_ui(self):
         pass
-
-    @classmethod
-    def get_node_spec(cls):
-        return NodeSpec.from_cls(cls)
-
-    @classmethod
-    def get_sub_nodes(cls, include_self=True):
-        nodes = []
-        for node in NodeMeta.node_types:
-            if not include_self and node == cls:
-                continue
-            if issubclass(node, cls):
-                nodes.append(node)
-        return nodes
 
 class ValueHolder:
     @property

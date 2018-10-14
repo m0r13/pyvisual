@@ -35,7 +35,7 @@ class LFO(Node):
         super().__init__(always_evaluate=True)
 
     def _evaluate(self):
-        generator = self.get("type")
+        generator = int(self.get("type"))
         length = self.get("length")
         if length == 0:
             self.set("output", float("nan"))
