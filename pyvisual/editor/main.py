@@ -12,6 +12,7 @@ from pyvisual.editor import glumpy_imgui
 # TODO the naming here?
 import pyvisual.node as node_meta
 import pyvisual.editor.widget as node_widget
+from pyvisual.editor.graph import NodeGraph
 
 # create window / opengl context already here
 # imgui seems to cause problems otherwise with imgui.get_color_u32_rgba without context
@@ -185,40 +186,31 @@ class MouseDummyNode:
 
 class Node:
     id_counter = 0
-    def __init__(self, editor, spec, pos=(100, 100)):
+    def __init__(self, editor, instance, ui_data):
         self.editor = editor
-        self.spec = spec
+        self.instance = instance
+        self.spec = instance.spec
 
         self.window_id = Node.id_counter
         self.z_index = editor.touch_z_index()
         Node.id_counter += 1
 
-        # TODO maybe this can be somehow better, idk
-        # at the moment inputs/outputs have separate data structures
-        # maybe something shared would be possible with proper port IDs
-        inputs = self.spec.inputs
-        outputs = self.spec.outputs
-        #self.ports = (inputs, outputs)
-        #self.port_positions = ([None]*len(inputs), [None]*len(outputs))
-        #self.port_widgets = ([None]*len(inputs), [None]*len(outputs))
-        #self.connections = ([[] for _ in inputs], [[] for _ in outputs])
-        self.connections = defaultdict(lambda: [])
-
         self.port_positions = {}
         self.widgets = {}
+        self.connections = defaultdict(lambda: [])
 
         #
         # size information of node (everything in local position)
         #
         self.padding = 5, 5
-        self.pos = pos
+        self.pos = ui_data.get("pos", (0, 0))
         self.size = 10, 10
 
         #
         # state of node
         #
         self.collapsible = self.spec.options["show_title"]
-        self.collapsed = False
+        self.collapsed = ui_data.get("collapsed", False)
         # is this node being dragged?
         # note: - for dragging selections of nodes, only the handle (clicked) node is marked as dragging
         #       - all others get dragging_from set
@@ -348,7 +340,7 @@ class Node:
         connections = self.connections[port_id]
         # constraint: make sure there is maximum one connection per input
         if is_input:
-            assert len(connections) in (0, 1)
+            assert len(connections) in (0, 1), "but is %d: %s" % (len(connections), connections)
 
         hovered_port = not imgui.is_any_item_active() and t_between(port_start, port_end, io.mouse_pos)
         hovered_connector = not imgui.is_any_item_active() and t_between(connector_start, connector_end, io.mouse_pos)
@@ -457,6 +449,7 @@ class Node:
                 if node.selected:
                     # pos = old pos + delta
                     node.pos = t_sub(node.dragging_node_start, delta)
+                    self.editor.node_ui_state_changed(node)
 
         # draw background
         upper_left = self.editor.local_to_screen(self.actual_pos)
@@ -574,20 +567,18 @@ class Node:
 
         channel_stack.__exit__()
 
-    @property
-    def instance(self):
-        if self._instance is None:
-            self._instance = self.spec.cls()
-            self._instance.start()
-        return self._instance
-
 class NodeEditor:
     def __init__(self, node_specs):
         # available nodes for this editor
         self.node_specs = node_specs
 
+        self.graph = NodeGraph()
+        self.graph.listeners.append(self)
+
+        self.ui_nodes = {}
+
         # collection of ui nodes/connections
-        self.nodes = []
+        #self.nodes = []
         self.nodes_z_index = 0
         self.connections = []
 
@@ -620,6 +611,10 @@ class NodeEditor:
         self.processing_time_relative = 0.0
         self.show_test_window = False
 
+    @property
+    def nodes(self):
+        return self.ui_nodes.values()
+
     #
     # coordinate conversions
     #
@@ -631,6 +626,49 @@ class NodeEditor:
         return t_add(t_sub(pos, self.pos), self.offset)
 
     #
+    # node graph handlers
+    #
+
+    def created_node(self, node, ui_data):
+        #print("created node")
+        n = Node(self, node, ui_data)
+        self.ui_nodes[node.id] = n
+
+    def removed_node(self, node):
+        #print("removed node")
+        assert node.id in self.ui_nodes
+        n = self.ui_nodes[node.id]
+        del self.ui_nodes[node.id]
+
+    def created_connection(self, src_node, src_port_id, dst_node, dst_port_id):
+        #print("created connection")
+        src_node = self.ui_nodes[src_node.id]
+        dst_node = self.ui_nodes[dst_node.id]
+        self.connections.append(Connection(self, src_node, src_port_id, dst_node, dst_port_id))
+
+    def removed_connection(self, src_node, src_port_id, dst_node, dst_port_id):
+        #print("removed connection")
+
+        src_node = self.ui_nodes[src_node.id]
+        dst_node = self.ui_nodes[dst_node.id]
+
+        for c in self.connections:
+            if (c.src_node, c.src_port_id, c.dst_node, c.dst_port_id) \
+                != (src_node, src_port_id, dst_node, dst_port_id):
+                continue
+            c.disconnect()
+            self.connections.remove(c)
+            return
+        assert False, "No ui connection found to remove"
+
+    # not called by graph, but by ui nodes
+    def node_ui_state_changed(self, node):
+        ui_data = {}
+        ui_data["pos"] = node.pos
+        ui_data["collapsed"] = node.collapsed
+        self.graph.set_node_ui_data(node.instance, ui_data)
+
+    #
     # editor api functions used by nodes, connections and editor itself
     #
 
@@ -638,39 +676,26 @@ class NodeEditor:
         i = self.nodes_z_index
         self.nodes_z_index += 1
         return i
-    
+
     def remove_node(self, node):
-        for port_connections in node.connections.values():
-            # the list of connections at this port will change during deletetion!
-            # that's why we iterate of a copy
-            for connection in list(port_connections):
-                self.remove_connection(connection)
-        node.instance.stop()
-        self.nodes.remove(node)
+        #print("editor: remove node")
+        self.graph.remove_node(node.instance)
 
     def remove_connection(self, connection):
-        # remove connection from node instances
-        dst_instance = connection.dst_node.instance
-        dst_name = node_meta.port_name(connection.dst_port_id)
-        dst_instance.inputs[dst_name].disconnect()
-
-        # remove connection ui-wise
-        connection.disconnect()
-        self.connections.remove(connection)
+        #print("editor: remove connection")
+        c = connection
+        self.graph.remove_connection(c.src_node.instance, c.src_port_id, c.dst_node.instance, c.dst_port_id)
 
     def drag_connection(self, node, port_id):
-        # TODO HERE
         assert self.dragging_connection is None
+        #print("Start dragging connection")
         self.dragging_connection = Connection.create(self, node, port_id)
-        # TODO
         self.dragging_target_port_type = not node_meta.is_input(port_id)
-        self.connections.append(self.dragging_connection)
 
     def is_dragging_connection(self):
         return self.dragging_connection is not None
 
     def is_dragging_connection_source(self, node, port_id):
-        # TODO HERE
         if not self.is_dragging_connection():
             return False
         return self.dragging_connection.is_end(node, port_id)
@@ -680,7 +705,6 @@ class NodeEditor:
         # constraint: connect only input with output and vice versa
         if node_meta.is_input(port_id) != self.dragging_target_port_type:
             return False
-        # TODO prevent this manual hackish check?
         # constraint: only one connection per input
         if node_meta.is_input(port_id) and len(node.connections[port_id]) != 0:
             return False
@@ -707,46 +731,10 @@ class NodeEditor:
         else:
             connection.src_node = node
             connection.src_port_id = port_id
-        connection.connect()
         self.dragging_connection = None
 
-        # connect node instances
-        src_instance = connection.src_node.instance
-        src_name = node_meta.port_name(connection.src_port_id)
-        dst_instance = connection.dst_node.instance
-        dst_name = node_meta.port_name(connection.dst_port_id)
-        dst_instance.inputs[dst_name].connect(src_instance, src_name)
-
-    #
-    # functions for accessing graph of node instances
-    # TODO maybe move this out of editor?
-    # 
-
-    @property
-    def node_instances(self):
-        return map(lambda node: node.instance, self.nodes)
-
-    @property
-    def node_instances_sorted(self):
-        instances = list(self.node_instances)
-        visited_instances = set()
-        sorted_instances = list()
-        circular = False
-
-        def dfs(instance):
-            nonlocal visited_instances, circular
-            if instance in visited_instances:
-                return
-            visited_instances.add(instance)
-            for instance_before in instance.input_nodes:
-                #if instance_before in visited_instances:
-                #    circular = True
-                dfs(instance_before)
-            sorted_instances.append(instance)
-
-        for instance in instances:
-            dfs(instance)
-        return sorted_instances, circular
+        c = connection
+        self.graph.create_connection(c.src_node.instance, c.src_port_id, c.dst_node.instance, c.dst_port_id)
 
     #
     # misc stuff
@@ -851,7 +839,8 @@ class NodeEditor:
                 imgui.selectable(label, is_selected)
                 if imgui.is_item_clicked() or (is_selected and changed):
                     pos = self.screen_to_local(self.context_mouse_pos)
-                    self.nodes.append(Node(self, spec, pos=pos))
+                    #self.nodes.append(Node(self, spec, pos=pos))
+                    self.graph.create_node(spec, {"pos" : pos})
                     # TODO it would be nice to set the mouse position back to where the node is now
                     imgui.close_current_popup()
                 imgui.pop_id()
@@ -952,12 +941,14 @@ class NodeEditor:
             draw_list.channels_set_current(CHANNEL_DEFAULT)
         for connection in self.connections:
             connection.show(draw_list)
+        if self.dragging_connection is not None:
+            self.dragging_connection.show(draw_list)
 
         # dropping connection to ports is handled by nodes
         # we're checking here if a connection was dropped into nowhere
         if self.is_dragging_connection() and imgui.is_mouse_released(0):
             self.dragging_connection.disconnect()
-            self.connections.remove(self.dragging_connection)
+            #self.connections.remove(self.dragging_connection)
             self.dragging_connection = None
 
         # handle a starting selection
@@ -1017,34 +1008,35 @@ class NodeEditor:
         imgui.text("processing time: %.2f ms ~ %.2f%%" % (self.processing_time * 1000.0, self.processing_time_relative * 100.0))
 
         # gather "graph" of node instances
-        imgui.text("")
-        instances, circular = self.node_instances_sorted
-        num_nodes = len(instances)
-        num_connections = sum([ sum([ 1 if v.is_connected else 0 for v in node.inputs.values() ]) for node in instances ])
-        imgui.text("#%d nodes, #%d connections" % (num_nodes, num_connections))
-        imgui.text("Sorted instances:")
-        imgui.same_line()
+        #imgui.text("")
+        #instances, circular = self.node_instances_sorted
+        #num_nodes = len(instances)
+        #num_connections = sum([ sum([ 1 if v.is_connected else 0 for v in node.inputs.values() ]) for node in instances ])
+        #assert num_connections == len(self.connections)
+        #imgui.text("#%d nodes, #%d connections" % (num_nodes, num_connections))
+        #imgui.text("Sorted instances:")
+        #imgui.same_line()
 
         # evaluate nodes
         # TODO move this out or so
-        processing_time = 0.0
-        if circular:
-            # TODO show a warning maybe
-            pass
-        else:
-            imgui.text(" -> ".join([ instance.spec.name for instance in instances ]))
-
-            start = time.time()
-            active_instances = set()
-            for instance in instances:
-                if instance.process():
-                    active_instances.add(instance)
-            for instance in instances:
-                instance.evaluated = False
-            end = time.time()
-            processing_time = end - start
-
-            imgui.text("Active instances: %d: %s" % (len(active_instances), [ instance.spec.name for instance in active_instances]))
+        #processing_time = 0.0
+        #if circular:
+        #    # TODO show a warning maybe
+        #    pass
+        #else:
+        #    imgui.text(" -> ".join([ instance.spec.name for instance in instances ]))
+        #
+        #    start = time.time()
+        #    active_instances = set()
+        #    for instance in instances:
+        #        if instance.process():
+        #            active_instances.add(instance)
+        #    for instance in instances:
+        #        instance.evaluated = False
+        #    end = time.time()
+        #    processing_time = end - start
+        #
+        #    imgui.text("Active instances: %d: %s" % (len(active_instances), [ instance.spec.name for instance in active_instances]))
 
         # finish our drawing
         draw_list.channels_merge()
@@ -1055,13 +1047,6 @@ class NodeEditor:
         if self.show_test_window:
             imgui.show_test_window()
         imgui.end()
-
-        # TODO this is a bit hacky, handle this differently
-        return processing_time
-
-    def stop(self):
-        for instance in self.node_instances:
-            instance.stop()
 
 # sort by node categories and then by names
 node_types = node_meta.Node.get_sub_nodes(include_self=False)
@@ -1075,31 +1060,34 @@ node_specs = list(filter(lambda s: not s.options["virtual"], node_specs))
 editor = NodeEditor(node_specs)
 
 editor_time = 0.0
-node_processing_time = 0.0
+processing_time = 0.0
 time_count = 0
 
 @window.event
 def on_draw(event):
-    global editor_time, node_processing_time, time_count
+    global editor_time, processing_time, time_count
 
-    #gloo.set_clear_color((0.2, 0.4, 0.6, 1.0))
-    # TODO why does gloo.clear not work?
-    #gloo.clear(depth=True, color=True)
+    # evaluate nodes
+    start = time.time()
+    editor.graph.evaluate()
+    processing_time += time.time() - start
+
+    # render editor
     gl.glClear(gl.GL_COLOR_BUFFER_BIT)
 
     start = time.time()
     imgui_renderer.process_inputs()
     imgui.new_frame()
 
-    # TODO hmm this is not so nice
-    processing_time = editor.show()
-    node_processing_time += processing_time
+    editor.show()
 
     imgui.render()
     draw = imgui.get_draw_data()
     imgui_renderer.render(draw)
 
-    editor_time += time.time() - start - processing_time
+    editor_time += time.time() - start
+
+    # performance stats
     time_count += 1
     if time_count >= 30:
         editor.timing_callback(editor_time / time_count, processing_time / time_count)
@@ -1111,7 +1099,7 @@ def on_draw(event):
 def on_key_press(key, modifier):
     print("Glumpy: Pressed key: %s" % key)
     if key == ord("Q"):
-        editor.stop()
+        editor.graph.stop()
         sys.exit(0)
 
 if __name__ == "__main__":

@@ -61,6 +61,9 @@ class NodeSpec:
         for port_spec in self.outputs:
             yield port_id(port_spec, False), port_spec
 
+    def instantiate_node(self):
+        return self.cls()
+
     def append(self, child_spec):
         self.cls = child_spec.cls
         self.inputs = self.inputs + child_spec.inputs
@@ -106,6 +109,7 @@ class Node(metaclass=NodeMeta):
 
     def __init__(self, always_evaluate=False):
         self.always_evaluate = always_evaluate
+        self.id = -1
         self._evaluated = False
         self._first_evaluated = False
 
