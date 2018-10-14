@@ -222,10 +222,8 @@ class Node:
         self.hovered = False
         self.selected = False
 
-        #
-        # associated node instance
-        #
-        self._instance = None
+        # trigger update of ui data
+        self.editor.node_ui_state_changed(self)
 
     @property
     def actual_pos(self):
@@ -503,9 +501,11 @@ class Node:
                 if self.collapsed and io.mouse_wheel < 0:
                     self.collapsed = False
                     self.touch_z_index()
+                    self.editor.node_ui_state_changed(self)
                 elif not self.collapsed and io.mouse_wheel > 0:
                     self.collapsed = True
                     self.touch_z_index()
+                    self.editor.node_ui_state_changed(self)
             # handle selection
             if imgui.is_mouse_clicked(0):
                 # ctrl modifier toggles selection
@@ -1003,6 +1003,21 @@ class NodeEditor:
 
         # navbar is in place
         imgui.dummy(1, 12)
+
+        if imgui.button("Clear"):
+            self.graph.clear()
+        imgui.same_line()
+        if imgui.button("Save"):
+            f = open("graph.json", "w")
+            f.write(self.graph.serialize())
+            f.close()
+        imgui.same_line()
+        if imgui.button("Load"):
+            self.graph.load("graph.json", append=False)
+        imgui.same_line()
+        if imgui.button("Import"):
+            self.graph.load("graph.json", append=True)
+
         imgui.text("fps: %.2f" % self.fps)
         imgui.text("editor time: %.2f ms ~ %.2f%%" % (self.editor_time * 1000.0, self.editor_time_relative * 100.0))
         imgui.text("processing time: %.2f ms ~ %.2f%%" % (self.processing_time * 1000.0, self.processing_time_relative * 100.0))

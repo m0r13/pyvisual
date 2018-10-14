@@ -102,6 +102,13 @@ class NodeSpec:
             port_spec.setdefault("default", None)
         return spec
 
+    @staticmethod
+    def from_name(node_name):
+        for cls in NodeMeta.node_types:
+            if cls.__name__ == node_name:
+                return NodeSpec.from_cls(cls)
+        assert False, "Unable to find node with name %s" % node_name
+
 class Node(metaclass=NodeMeta):
     class Meta:
         inputs = []

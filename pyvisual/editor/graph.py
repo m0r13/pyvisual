@@ -1,3 +1,4 @@
+import json
 from collections import defaultdict
 import pyvisual.node.base as node_meta
 
@@ -20,7 +21,7 @@ class NodeGraph:
 
         self.node_id_counter = 0
         self.nodes = {}
-        self.node_ui_data = {}
+        self.node_ui_data = defaultdict(lambda: {})
 
         self.connections_from = defaultdict(lambda: set())
         self.connections_to = defaultdict(lambda: set())
@@ -34,11 +35,83 @@ class NodeGraph:
     # serialization
     #
 
-    def serialize():
-        pass
+    def serialize(self):
+        # TODO validation!!
+
+        nodes = []
+        connections = []
+
+        for node in self.nodes.values():
+            node_data = {}
+            node_data["id"] = node.id
+            node_data["type"] = node.spec.name
+            node_data["ui_data"] = self.node_ui_data[node.id]
+
+            manual_values = {}
+            for port_name, value in node.inputs.items():
+                port_id = "i_" + port_name
+                port_spec = node.ports[port_id]
+                dtype = port_spec["dtype"]
+                manual_values[port_name] = dtype.base_type.serialize(value.manual_value.value)
+            node_data["manual_values"] = manual_values
+
+            nodes.append(node_data)
+
+        for src_node, outgoing_connections in self.connections_from.items():
+            for (src_port_id, dst_node, dst_port_id) in outgoing_connections:
+                connection_data = {}
+                connection_data["src_node_id"] = src_node.id
+                connection_data["src_port_id"] = src_port_id
+                connection_data["dst_node_id"] = dst_node.id
+                connection_data["dst_port_id"] = dst_port_id
+                connections.append(connection_data)
+
+        data = {"nodes" : nodes, "connections" : connections}
+        return json.dumps(data, sort_keys=True, indent=4)
 
     def unserialize(self, data):
-        pass
+        # TODO validation!!
+
+        data = json.loads(data)
+
+        id_map = {}
+        for node_data in data.get("nodes", []):
+            assert not node_data["id"] in id_map
+            spec = node_meta.NodeSpec.from_name(node_data["type"])
+            node = self.create_node(spec, node_data["ui_data"])
+            id_map[node_data["id"]] = node.id
+
+            for port_name, json_value in node_data.get("manual_values", {}).items():
+                port_id = "i_" + port_name
+                port_spec = node.ports[port_id]
+                dtype = port_spec["dtype"]
+                node.inputs[port_name].manual_value.value = dtype.base_type.unserialize(json_value)
+
+        for connection_data in data.get("connections", []):
+            src_node_id = id_map[connection_data["src_node_id"]]
+            src_port_id = connection_data["src_port_id"]
+            dst_node_id = id_map[connection_data["dst_node_id"]]
+            dst_port_id = connection_data["dst_port_id"]
+
+            src_node = self.nodes[src_node_id]
+            dst_node = self.nodes[dst_node_id]
+            self.create_connection(src_node, src_port_id, dst_node, dst_port_id)
+
+    def save(self, path):
+        data = self.serialize()
+
+        f = open(path, "w")
+        f.write(data)
+        f.close()
+
+    def load(self, path, append=False):
+        f = open(path, "r")
+        data = f.read()
+        f.close()
+
+        if not append:
+            self.clear()
+        self.unserialize(data)
 
     #
     # functions for changing node graph
@@ -53,6 +126,7 @@ class NodeGraph:
         self.node_ui_data[node.id] = ui_data
         for listener in self.listeners:
             listener.created_node(node, ui_data)
+        return node
 
     def remove_node(self, node):
         assert node.id in self.nodes and self.nodes[node.id] == node
@@ -92,6 +166,11 @@ class NodeGraph:
 
         for listener in self.listeners:
             listener.removed_connection(src_node, src_port_id, dst_node, dst_port_id)
+
+    def clear(self):
+        for instance in list(self.nodes.values()):
+            self.remove_node(instance)
+        self.node_ui_counter = 0
 
     # selection management
 
