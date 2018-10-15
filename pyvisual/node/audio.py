@@ -99,7 +99,7 @@ class AudioFilter(Node):
             self.output.append(self.filter.process(block))
         self.set("output", self.output)
 
-class AudioAbsValue(Node):
+class AbsAudio(Node):
     class Meta:
         inputs = [
             {"name" : "input", "dtype" : dtype.audio}
@@ -122,7 +122,7 @@ class AudioAbsValue(Node):
             output.append(np.abs(block))
         self.set("output", output)
 
-class AudioSampleCurrentValue(Node):
+class SampleAudio(Node):
     class Meta:
         inputs = [
             {"name" : "input", "dtype" : dtype.audio}

@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
 
+import os
 import sys
 import time
 from collections import defaultdict
@@ -13,6 +14,7 @@ from pyvisual.editor import glumpy_imgui
 import pyvisual.node as node_meta
 import pyvisual.editor.widget as node_widget
 from pyvisual.editor.graph import NodeGraph
+from pyvisual import assets
 
 # create window / opengl context already here
 # imgui seems to cause problems otherwise with imgui.get_color_u32_rgba without context
@@ -611,6 +613,9 @@ class NodeEditor:
         self.processing_time_relative = 0.0
         self.show_test_window = False
 
+        if os.path.isfile("session.json"):
+            self.graph.load("session.json")
+
     @property
     def nodes(self):
         return self.ui_nodes.values()
@@ -1006,18 +1011,31 @@ class NodeEditor:
 
         if imgui.button("Clear"):
             self.graph.clear()
+
         imgui.same_line()
         if imgui.button("Save"):
-            f = open("graph.json", "w")
+            imgui.open_popup("save")
+        save_path = node_widget.imgui_pick_file("save", assets.SAVE_PATH)
+        if save_path is not None:
+            f = open(save_path, "w")
             f.write(self.graph.serialize())
             f.close()
+
         imgui.same_line()
         if imgui.button("Load"):
-            self.graph.load("graph.json", append=False)
+            imgui.open_popup("load")
+        load_path = node_widget.imgui_pick_file("load", assets.SAVE_PATH)
+        if load_path is not None:
+            self.graph.load(load_path, append=False)
+        
         imgui.same_line()
         if imgui.button("Import"):
-            self.graph.load("graph.json", append=True)
+            imgui.open_popup("import")
+        import_path = node_widget.imgui_pick_file("import", assets.SAVE_PATH)
+        if import_path is not None:
+            self.graph.load(import_path, append=True)
 
+        imgui.same_line()
         imgui.text("fps: %.2f" % self.fps)
         imgui.text("editor time: %.2f ms ~ %.2f%%" % (self.editor_time * 1000.0, self.editor_time_relative * 100.0))
         imgui.text("processing time: %.2f ms ~ %.2f%%" % (self.processing_time * 1000.0, self.processing_time_relative * 100.0))
@@ -1115,6 +1133,7 @@ def on_key_press(key, modifier):
     print("Glumpy: Pressed key: %s" % key)
     if key == ord("Q"):
         editor.graph.stop()
+        editor.graph.save("session.json")
         sys.exit(0)
 
 if __name__ == "__main__":

@@ -190,15 +190,20 @@ class Node(metaclass=NodeMeta):
                 value.has_changed = False
         self._evaluated = evaluated
 
+    def get_input(self, name):
+        return self.inputs[name]
+    def get_output(self, name):
+        return self.outputs[name]
+
     def get(self, name):
-        return self.inputs[name].value
+        return self.get_input(name).value
     def set(self, name, value):
-        self.outputs[name].value = value
+        self.get_output(name).value = value
 
     def start(self):
         pass
 
-    def process(self):
+    def evaluate(self):
         # update a node
         # return if node needed update
         if not self.evaluated and (self.needs_evaluation or self.always_evaluate):
@@ -272,8 +277,8 @@ class InputValueHolder(ValueHolder):
 
     def disconnect(self):
         # make the manual input keep the value when connection is removed
-        if self.connected_value is not None:
-            self.manual_value.value = self.connected_value.value
+        #if self.connected_value is not None:
+        #    self.manual_value.value = self.connected_value.value
         self.connected_node = None
         self.connected_value = None
         self.connection_changed = True

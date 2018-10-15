@@ -1,5 +1,6 @@
 # TODO naming
 import os
+import fnmatch
 import pyvisual.node as node_meta
 from pyvisual.node import dtype
 from pyvisual import assets
@@ -97,25 +98,50 @@ class Color:
                     value.value = v
             imgui.end_popup()
 
-def show_file_menu(base_path):
+def imgui_pick_file(name, base_path, wildcard="*"):
+    if imgui.begin_popup(name):
+        path = _imgui_pick_file_menu(base_path, wildcard)
+        if path is not None:
+            imgui.close_current_popup()
+            imgui.end_popup()
+            return path
+        imgui.end_popup()
+
+def _imgui_pick_file_menu(base_path, wildcard="*"):
     try:
         entries = []
         for name in os.listdir(base_path):
             entries.append((not os.path.isdir(os.path.join(base_path, name)), name))
 
+        imgui.text("New:")
+        imgui.same_line()
+        imgui.push_item_width(-1)
+        changed, value = imgui.input_text("", "", 255, imgui.INPUT_TEXT_ENTER_RETURNS_TRUE)
+        if changed:
+            return os.path.join(base_path, value)
+        imgui.separator()
+
+        if len(entries) == 0:
+            imgui.dummy(200, 0)
+
         for not_is_dir, name in sorted(entries):
             if not not_is_dir:
                 if imgui.begin_menu(name):
-                    selected_path = show_file_menu(os.path.join(base_path, name))
+                    selected_path = _imgui_pick_file_menu(os.path.join(base_path, name), wildcard)
                     imgui.end_menu()
                     if selected_path is not None:
                         return os.path.join(base_path, selected_path)
             else:
+                if not fnmatch.fnmatch(name, wildcard):
+                    continue
                 clicked, state = imgui.menu_item(name, None, False)
                 if clicked:
                     return os.path.join(base_path, name)
+
+        imgui.separator()
+        imgui.text("Pick: %s" % wildcard)
     except:
-        imgui.text("Error")
+        imgui.text("Unable to open dir")
 
 class AssetPath:
     def __init__(self, node, prefix=""):
@@ -123,15 +149,17 @@ class AssetPath:
 
     def show(self, value, read_only):
         imgui.push_item_width(100)
-        changed, v = imgui.input_text("", value.value, 255)
+        changed, v = imgui.input_text("", value.value, 255, imgui.INPUT_TEXT_ENTER_RETURNS_TRUE)
+        if changed:
+            value.value = v
+            return
         imgui.push_item_width(100)
         if imgui.button("Select file"):
             imgui.open_popup("select_file")
-        if imgui.begin_popup("select_file"):
-            selected_path = show_file_menu(assets.ASSET_PATH + "/" + self.prefix)
-            if selected_path is not None:
-                value.value = selected_path
-            imgui.end_popup()
+
+        path = imgui_pick_file("select_file", assets.ASSET_PATH + "/" + self.prefix)
+        if path is not None:
+            value.value = path
 
 class Texture:
     def __init__(self, node):

@@ -63,7 +63,7 @@ class Checkerboard(Node):
         self.populate_texture()
         self.set("output", self.texture)
 
-class InputTexture(Node):
+class LoadTexture(Node):
     class Meta:
         inputs = [
             {"name" : "path", "dtype" : dtype.assetpath, "widgets" : [lambda node: widget.AssetPath(node, "image/tartuvhs")]},
@@ -75,14 +75,35 @@ class InputTexture(Node):
             "category" : "input"
         }
 
+    def __init__(self):
+        super().__init__()
+
+        self.status = None
+
     def _evaluate(self):
         if not self.inputs["path"].has_changed:
             return
+
         print("load texture", self.get("path"))
-        texture = np.array(Image.open(self.get("path"))).view(gloo.Texture2D)
+        texture = None
+        try:
+            texture = np.array(Image.open(self.get("path"))).view(gloo.Texture2D)
+        except Exception as e:
+            self.set("output", None)
+            self.status = str(e)
+            return
+
         texture.activate()
         texture.deactivate()
+        self.status = None
         self.set("output", texture)
+
+    def _show_custom_ui(self):
+        if self.status:
+            imgui.dummy(1, 5)
+            imgui.text("Error. (?)")
+            if imgui.is_item_hovered():
+                imgui.set_tooltip(self.status)
 
 from pyvisual.rendering import util
 
@@ -177,14 +198,31 @@ class Glitch(Shader):
         program["amount"] = self.get("amount")
         program["speed"] = self.get("speed")
 
+class Translate(Node):
+    class Meta:
+        inputs = [
+            {"name" : "x", "dtype" : dtype.float, "widgets" : [widget.Float]},
+            {"name" : "y", "dtype" : dtype.float, "widgets" : [widget.Float]},
+        ]
+        outputs = [
+            {"name" : "output", "dtype" : dtype.mat3},
+        ]
+
+    def _evaluate(self):
+        transform = np.array([[1.0, 0.0, self.get("x")],
+                              [0.0, 1.0, self.get("y")],
+                              [0.0, 0.0, 1.0]], dtype=np.float32)
+        self.set("output", transform)
+
 WRAPPING_MODES = ["repeat", "mirrored repeat", "clamp to edge", "clamp to border"]
 WRAPPING_MODES_GL = [gl.GL_REPEAT, gl.GL_MIRRORED_REPEAT, gl.GL_CLAMP_TO_EDGE, gl.GL_CLAMP_TO_BORDER]
 class SampleTexture(Shader):
     class Meta:
         inputs = [
-            {"name" : "direction", "dtype" : dtype.float, "widgets" : [widget.Float]},
-            {"name" : "distance", "dtype" : dtype.float, "widgets" : [widget.Float], "default" : 450.0},
-            {"name" : "wrapping", "dtype" : dtype.int, "widgets" : [lambda node: widget.Choice(node, choices=WRAPPING_MODES)], "default" : 1}
+            #{"name" : "direction", "dtype" : dtype.float, "widgets" : [widget.Float]},
+            #{"name" : "distance", "dtype" : dtype.float, "widgets" : [widget.Float], "default" : 450.0},
+            {"name" : "wrapping", "dtype" : dtype.int, "widgets" : [lambda node: widget.Choice(node, choices=WRAPPING_MODES)], "default" : 1},
+            {"name" : "transform", "dtype" : dtype.mat3}
         ]
         options = {
             "virtual" : False,
@@ -200,8 +238,9 @@ class SampleTexture(Shader):
             wrapping_mode = 0
         input_texture = self.get("input")
         input_texture.wrapping = WRAPPING_MODES_GL[wrapping_mode]
-        program["uDirection"] = math.radians(self.get("direction"))
-        program["uDirectionOffset"] = self.get("distance")
+        #program["uDirection"] = math.radians(self.get("direction"))
+        #program["uDirectionOffset"] = self.get("distance")
+        program["uTransform"] = self.get("transform")
 
 class Mirror(Shader):
     class Meta:

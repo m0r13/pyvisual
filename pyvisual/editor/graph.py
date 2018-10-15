@@ -204,7 +204,7 @@ class NodeGraph:
         instances, _ = self.sorted_instances
         active_instances = set()
         for instance in instances:
-            if instance.process():
+            if instance.evaluate():
                 active_instances.add(instance)
         for instance in instances:
             instance.evaluated = False

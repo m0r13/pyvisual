@@ -12,6 +12,20 @@ LFO_OSCILLATORS = OrderedDict(
     sine=lambda t, length, phase: math.sin((2*math.pi*t - phase) / length) * 0.5 + 0.5
 )
 
+def scalable_timer():
+    _last_time = time.time()
+    _time = 0.0
+    def _timer(scale, reset=False):
+        nonlocal _last_time, _time
+        t = time.time()
+        if reset:
+            _time = 0.0
+        dt = t - _last_time
+        _time += dt * scale
+        _last_time = t
+        return _time
+    return _timer
+
 class LFO(Node):
     OSCILLATORS = list(LFO_OSCILLATORS.values())
 
@@ -34,13 +48,16 @@ class LFO(Node):
     def __init__(self):
         super().__init__(always_evaluate=True)
 
+        self.timer = scalable_timer()
+
     def _evaluate(self):
         generator = int(self.get("type"))
         length = self.get("length")
         if length == 0:
             self.set("output", float("nan"))
             return
-        value = LFO.OSCILLATORS[generator](time.time(), self.get("length"), self.get("phase"))
+        t = self.timer(1.0 / self.get("length"), False)
+        value = LFO.OSCILLATORS[generator](t, 1.0 + 0.0 * self.get("length"), self.get("phase"))
         value = self.get("min") + value * (self.get("max") - self.get("min"))
         self.set("output", value)
 

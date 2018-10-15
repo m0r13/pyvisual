@@ -272,5 +272,26 @@ class ColorLambda(Lambda):
             raise RuntimeError("Invalid result. Must be (4,) array.")
         return result.astype(np.float32)
 
+from pyvisual.audio import analyzer
 class Plot(Node):
-    pass
+    class Meta:
+        inputs = [
+            {"name" : "input", "dtype" : dtype.float, "widgets" : [widget.Float]},
+            {"name" : "min", "dtype" : dtype.float, "widgets" : [widget.Float], "default" : 0.0},
+            {"name" : "max", "dtype" : dtype.float, "widgets" : [widget.Float], "default" : 1.0},
+            {"name" : "time", "dtype" : dtype.float, "widgets" : [widget.Float], "default" : 5.0},
+        ]
+        options = {
+            "category" : "math",
+            "virtual" : False
+        }
+
+    def __init__(self):
+        super().__init__(always_evaluate=True)
+        self.buffer = analyzer.RingBuffer(5*60)
+
+    def _evaluate(self):
+        self.buffer.append(self.get("input"))
+
+    def _show_custom_ui(self):
+        imgui.plot_lines("", self.buffer.contents, float(self.get("min")), float(self.get("max")), (200, 50))

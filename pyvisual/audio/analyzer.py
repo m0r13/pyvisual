@@ -35,7 +35,7 @@ class RingBuffer:
 
     @property
     def contents(self):
-        return np.concat()
+        return np.concatenate([self.first, self.second], axis=0)
 
 class NormalizedVU(event.Event):
     def __init__(self, vu, beat_status, min_vu=0.5, max_vu=0.9, last_vu_count=4):
