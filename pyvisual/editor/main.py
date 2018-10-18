@@ -339,8 +339,8 @@ class Node:
         if is_input:
             assert len(connections) in (0, 1), "but is %d: %s" % (len(connections), connections)
 
-        hovered_port = not imgui.is_any_item_active() and t_between(port_start, port_end, io.mouse_pos)
-        hovered_connector = not imgui.is_any_item_active() and t_between(connector_start, connector_end, io.mouse_pos)
+        hovered_port = t_between(port_start, port_end, io.mouse_pos)
+        hovered_connector = t_between(connector_start, connector_end, io.mouse_pos)
         hovered = hovered_connector or hovered_port
 
         # decide port bullet color
