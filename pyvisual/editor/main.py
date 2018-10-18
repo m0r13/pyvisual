@@ -447,6 +447,8 @@ class Node:
             delta = t_sub(self.dragging_mouse_start, io.mouse_pos)
             for node in self.editor.nodes:
                 if node.selected:
+                    if node != self:
+                        assert not node.dragging, "Only one node may execute drag operation"
                     # pos = old pos + delta
                     node.pos = t_sub(node.dragging_node_start, delta)
                     self.editor.node_ui_state_changed(node)
@@ -548,7 +550,7 @@ class Node:
             # set for all selected nodes where they were at beginning of dragging
             for node in self.editor.nodes:
                 if node.selected:
-                    node.dragging_node_start = self.editor.local_to_screen(node.actual_pos)
+                    node.dragging_node_start = node.actual_pos
         # stop dragging once mouse is released again
         if self.dragging and imgui.is_mouse_released(0):
             self.dragging = False
