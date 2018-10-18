@@ -89,7 +89,7 @@ class AudioFilter(Node):
             self.set("output", None)
             return
         if self.filter is None or self.output is None \
-                or any(map(lambda v: v.has_changed, [self.inputs["type"], self.inputs["order"], self.inputs["cutoff"]])) \
+                or self.have_inputs_changed("type", "order", "cutoff") \
                 or self.output.sample_rate != input_audio.sample_rate:
             self.filter = self._create_filter(sample_rate=input_audio.sample_rate)
             self.output = AudioData(sample_rate=input_audio.sample_rate)

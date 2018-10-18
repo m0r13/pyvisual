@@ -5,21 +5,32 @@ import pyvisual.node as node_meta
 from pyvisual.node import dtype
 from pyvisual import assets
 import time
+import contextlib
 import imgui
 
 def clamper(minmax):
     return lambda x: max(minmax[0], (min(minmax[1], x)))
 
-# TODO read-only widgets!
+@contextlib.contextmanager
+def read_only_widget(read_only):
+    # TODO also "gray-out" widget
+    if read_only:
+        imgui.push_item_flag(imgui.ITEM_DISABLED, True)
+
+    yield
+
+    if read_only:
+        imgui.pop_item_flag()
 
 class Bool:
     def __init__(self, node):
         pass
 
     def show(self, value, read_only):
-        clicked, state = imgui.checkbox("", value.value)
-        if clicked and not read_only:
-            value.value = state
+        with read_only_widget(read_only):
+            clicked, state = imgui.checkbox("", value.value)
+            if clicked and not read_only:
+                value.value = state
 
 class Button:
     ACTIVE_TIME = 0.1
@@ -27,21 +38,21 @@ class Button:
         self.last_active = 0
 
     def show(self, value, read_only):
-        imgui.push_item_width(100)
-        active = value.value or time.time() - self.last_active < Button.ACTIVE_TIME
-        if value.value:
-            self.last_active = time.time()
-        imgui.push_style_color(imgui.COLOR_BUTTON_ACTIVE, 1.0, 0.0, 0.0, 1.0)
-        if active:
-            imgui.push_style_color(imgui.COLOR_BUTTON, 1.0, 0.0, 0.0, 1.0)
-            imgui.push_style_color(imgui.COLOR_BUTTON_HOVERED, 1.0, 0.0, 0.0, 1.0)
-        clicked = imgui.button("Click me")
-        if active:
-            imgui.pop_style_color(2)
-        imgui.pop_style_color(1)
-        if read_only:
-            return
-        value.value = 1.0 if clicked else 0.0
+        with read_only_widget(read_only):
+            imgui.push_item_width(100)
+            active = value.value or time.time() - self.last_active < Button.ACTIVE_TIME
+            if value.value:
+                self.last_active = time.time()
+            imgui.push_style_color(imgui.COLOR_BUTTON_ACTIVE, 1.0, 0.0, 0.0, 1.0)
+            if active:
+                imgui.push_style_color(imgui.COLOR_BUTTON, 1.0, 0.0, 0.0, 1.0)
+                imgui.push_style_color(imgui.COLOR_BUTTON_HOVERED, 1.0, 0.0, 0.0, 1.0)
+            clicked = imgui.button("Click me")
+            if active:
+                imgui.pop_style_color(2)
+            imgui.pop_style_color(1)
+            if not read_only:
+                value.value = 1.0 if clicked else 0.0
 
 class Int:
     def __init__(self, node, minmax=[float("-inf"), float("inf")]):
@@ -50,10 +61,11 @@ class Int:
         self.clamper = clamper(minmax)
 
     def show(self, value, read_only):
-        imgui.push_item_width(100)
-        changed, v = imgui.input_int("", value.value)
-        if changed and not read_only:
-            value.value = int(self.clamper(v))
+        with read_only_widget(read_only):
+            imgui.push_item_width(100)
+            changed, v = imgui.input_int("", value.value)
+            if changed and not read_only:
+                value.value = int(self.clamper(v))
 
 class Choice:
     def __init__(self, node, choices=[]):
@@ -61,10 +73,11 @@ class Choice:
         self.choices = [ "(%d) %s" % (i, choice) for i, choice in enumerate(choices) ]
 
     def show(self, value, read_only):
-        imgui.push_item_width(100)
-        changed, v = imgui.combo("", value.value, self.choices)
-        if changed and not read_only:
-            value.value = v
+        with read_only_widget(read_only):
+            imgui.push_item_width(100)
+            changed, v = imgui.combo("", value.value, self.choices)
+            if changed and not read_only:
+                value.value = v
 
 class Float:
     def __init__(self, node, minmax=[float("-inf"), float("inf")]):
@@ -73,16 +86,19 @@ class Float:
         self.clamper = clamper(minmax)
 
     def show(self, value, read_only):
-        imgui.push_item_width(100)
-        changed, v = imgui.drag_float("", value.value,
-                change_speed=0.01, min_value=self.minmax[0], max_value=self.minmax[1], format="%0.4f")
-        if changed and not read_only:
-            value.value = self.clamper(v)
+        with read_only_widget(read_only):
+            imgui.push_item_width(100)
+            changed, v = imgui.drag_float("", value.value,
+                    change_speed=0.01, min_value=self.minmax[0], max_value=self.minmax[1], format="%0.4f")
+            if changed and not read_only:
+                value.value = self.clamper(v)
 
 class Color:
     def __init__(self, node):
         pass
     def show(self, value, read_only):
+        # don't show it as read-only for now
+        # as the color picker dialog might be nice for inspecting the color
         r, g, b, a = value.value[:]
         flags = imgui.COLOR_EDIT_NO_INPUTS | imgui.COLOR_EDIT_NO_LABEL | imgui.COLOR_EDIT_ALPHA_PREVIEW
         if imgui.color_button("color %s" % id(self), r, g, b, a, flags, 50, 50):
@@ -148,18 +164,19 @@ class AssetPath:
         self.prefix = prefix
 
     def show(self, value, read_only):
-        imgui.push_item_width(100)
-        changed, v = imgui.input_text("", value.value, 255, imgui.INPUT_TEXT_ENTER_RETURNS_TRUE)
-        if changed:
-            value.value = v
-            return
-        imgui.push_item_width(100)
-        if imgui.button("Select file"):
-            imgui.open_popup("select_file")
+        with read_only_widget(read_only):
+            imgui.push_item_width(100)
+            changed, v = imgui.input_text("", value.value, 255, imgui.INPUT_TEXT_ENTER_RETURNS_TRUE)
+            if changed:
+                value.value = v
+                return
+            imgui.push_item_width(100)
+            if imgui.button("Select file"):
+                imgui.open_popup("select_file")
 
-        path = imgui_pick_file("select_file", assets.ASSET_PATH + "/" + self.prefix)
-        if path is not None:
-            value.value = path
+            path = imgui_pick_file("select_file", assets.ASSET_PATH + "/" + self.prefix)
+            if path is not None:
+                value.value = path
 
 class Texture:
     def __init__(self, node):

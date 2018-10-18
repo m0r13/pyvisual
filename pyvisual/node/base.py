@@ -95,11 +95,16 @@ class NodeSpec:
         spec.options.setdefault("virtual", False)
         spec.options.setdefault("category", "")
         spec.options.setdefault("show_title", True)
-        for port_spec in spec.inputs + spec.outputs:
+        for i, port_spec in enumerate(spec.inputs + spec.outputs):
             assert "name" in port_spec
             assert "dtype" in port_spec
             port_spec.setdefault("widgets", [])
             port_spec.setdefault("default", None)
+
+            if i < len(spec.inputs):
+                port_spec.setdefault("manual_input", True)
+            else:
+                port_spec.setdefault("manual_input", False)
         return spec
 
     @staticmethod
@@ -120,22 +125,8 @@ class Node(metaclass=NodeMeta):
         self._evaluated = False
         self._first_evaluated = False
 
-        self.manual_inputs = {}
-        self.inputs = {}
-        self.outputs = {}
-
-        for port_spec in self.spec.inputs:
-            default = port_spec["default"]
-            if default is None:
-                default = port_spec["dtype"].default()
-            manual_input = SettableValueHolder(default)
-            self.manual_inputs[port_spec["name"]] = manual_input
-            self.inputs[port_spec["name"]] = InputValueHolder(manual_input)
-        for port_spec in self.spec.outputs:
-            default = port_spec["default"]
-            if default is None:
-                default = port_spec["dtype"].default()
-            self.outputs[port_spec["name"]] = SettableValueHolder(default)
+        self.initial_manual_values = {}
+        self.values = {}
 
     @property
     def ports(self):
@@ -165,15 +156,26 @@ class Node(metaclass=NodeMeta):
     @property
     def input_nodes(self):
         nodes = set()
-        for input_value in self.inputs.values():
-            if input_value.is_connected:
-                nodes.add(input_value.connected_node)
+        for port_id, value in self.values.items():
+            if is_input(port_id) and value.is_connected:
+                nodes.add(value.connected_node)
         return nodes
+
+    def have_inputs_changed(self, *port_names):
+        if len(port_names) == 0:
+            port_names = []
+            for port_id in self.input_ports.keys():
+                # TODO
+                port_names.append(port_id[2:])
+
+        for port_name in port_names:
+            if self.get_input(port_name).has_changed:
+                return True
 
     @property
     def needs_evaluation(self):
         # if any input has changed
-        return not self._first_evaluated or any(map(lambda v: v.has_changed, self.inputs.values()))
+        return not self._first_evaluated or self.have_inputs_changed()
 
     @property
     def evaluated(self):
@@ -184,16 +186,41 @@ class Node(metaclass=NodeMeta):
         # all values will be set unchanged so changes in evaluating nodes will
         # result in the nodes after them to be evaluated accordingly
         if not evaluated:
-            for value in self.outputs.values():
-                value.has_changed = False
-            for value in self.inputs.values():
+            for value in self.values.values():
                 value.has_changed = False
         self._evaluated = evaluated
 
+    def _create_value(self, port_id):
+        assert port_id in self.ports
+        port_spec = self.ports[port_id]
+        is_input = port_id.startswith("i_")
+
+        value = None
+        if is_input:
+            default = port_spec["default"]
+            if default is None:
+                default = port_spec["dtype"].default()
+            if port_id in self.initial_manual_values:
+                default = self.initial_manual_values[port_id]
+            manual_input = SettableValueHolder(default)
+            value = InputValueHolder(manual_input)
+        else:
+            default = port_spec["default"]
+            if default is None:
+                default = port_spec["dtype"].default()
+            if port_id in self.initial_manual_values:
+                default = self.initial_manual_values[port_id]
+            value = SettableValueHolder(default)
+        return value
+
     def get_input(self, name):
-        return self.inputs[name]
+        return self.get_value("i_" + name)
     def get_output(self, name):
-        return self.outputs[name]
+        return self.get_value("o_" + name)
+    def get_value(self, port_id):
+        if not port_id in self.values:
+            self.values[port_id] = self._create_value(port_id)
+        return self.values[port_id]
 
     def get(self, name):
         return self.get_input(name).value
@@ -270,9 +297,9 @@ class InputValueHolder(ValueHolder):
     def is_connected(self):
         return self.connected_value is not None
 
-    def connect(self, node, output):
+    def connect(self, node, port_id):
         self.connected_node = node
-        self.connected_value = node.outputs[output]
+        self.connected_value = node.get_value(port_id)
         self.connection_changed = True
 
     def disconnect(self):

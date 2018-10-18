@@ -81,9 +81,6 @@ class LoadTexture(Node):
         self.status = None
 
     def _evaluate(self):
-        if not self.inputs["path"].has_changed:
-            return
-
         print("load texture", self.get("path"))
         texture = None
         try:

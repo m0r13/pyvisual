@@ -48,11 +48,12 @@ class NodeGraph:
             node_data["ui_data"] = self.node_ui_data[node.id]
 
             manual_values = {}
-            for port_name, value in node.inputs.items():
-                port_id = "i_" + port_name
+            for port_id, value in node.values.items():
                 port_spec = node.ports[port_id]
                 dtype = port_spec["dtype"]
-                manual_values[port_name] = dtype.base_type.serialize(value.manual_value.value)
+                if isinstance(value, node_meta.InputValueHolder):
+                    value = value.manual_value
+                manual_values[port_id] = dtype.base_type.serialize(value.value)
             node_data["manual_values"] = manual_values
 
             nodes.append(node_data)
@@ -81,11 +82,11 @@ class NodeGraph:
             node = self.create_node(spec, node_data["ui_data"])
             id_map[node_data["id"]] = node.id
 
-            for port_name, json_value in node_data.get("manual_values", {}).items():
-                port_id = "i_" + port_name
+            for port_id, json_value in node_data.get("manual_values", {}).items():
                 port_spec = node.ports[port_id]
                 dtype = port_spec["dtype"]
-                node.inputs[port_name].manual_value.value = dtype.base_type.unserialize(json_value)
+                node.initial_manual_values[port_id] = dtype.base_type.unserialize(json_value)
+                #node.get_value(port_id).manual_value.value = dtype.base_type.unserialize(json_value)
 
         for connection_data in data.get("connections", []):
             src_node_id = id_map[connection_data["src_node_id"]]
@@ -146,9 +147,9 @@ class NodeGraph:
         self.node_ui_data[node.id] = ui_data
 
     def create_connection(self, src_node, src_port_id, dst_node, dst_port_id):
-        input_value = dst_node.inputs[node_meta.port_name(dst_port_id)]
+        input_value = dst_node.get_value(dst_port_id)
         assert input_value.connected_node is None
-        input_value.connect(src_node, node_meta.port_name(src_port_id))
+        input_value.connect(src_node, src_port_id)
 
         self.connections_from[src_node].add((src_port_id, dst_node, dst_port_id))
         self.connections_to[dst_node].add((dst_port_id, src_node, src_port_id))
@@ -157,7 +158,7 @@ class NodeGraph:
             listener.created_connection(src_node, src_port_id, dst_node, dst_port_id)
 
     def remove_connection(self, src_node, src_port_id, dst_node, dst_port_id):
-        input_value = dst_node.inputs[node_meta.port_name(dst_port_id)]
+        input_value = dst_node.get_value(dst_port_id)
         assert input_value.connected_node == src_node
         input_value.disconnect()
 

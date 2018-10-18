@@ -285,21 +285,18 @@ class Node:
         widget = self.get_widget(port_id)
         if widget is not None:
             # determine value associated with this port
-            value = None
+            value = self.instance.get_value(port_id)
             # and whether we can change it
             read_only = False
             if is_input:
                 # we can change value of input port only if nothing is connected
                 # otherwise it's a read-only widget that just shows the value for the user
-                value = self.instance.inputs[name]
                 if isinstance(value, node_meta.InputValueHolder):
                     if value.is_connected:
                         read_only = True
                     else:
                         value = value.manual_value
-            else:
-                value = self.instance.outputs[name]
-            widget.show(value, read_only=read_only)
+            widget.show(value, read_only=read_only or not port_spec["manual_input"])
         else:
             # make some space in case there is no widget
             imgui.dummy(10, 10)

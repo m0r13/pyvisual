@@ -8,22 +8,6 @@ import numpy as np
 import math
 import time
 
-class AddFloat(Node):
-    class Meta:
-        inputs = [
-            {"name" : "v0", "dtype" : dtype.float, "widgets" : [widget.Float]},
-            {"name" : "v1", "dtype" : dtype.float, "widgets" : [widget.Float]}
-        ]
-        outputs = [
-            {"name" : "output", "dtype" : dtype.float, "widgets" : [widget.Float]}
-        ]
-        options = {
-            "category" : "math",
-        }
-
-    def _evaluate(self):
-        self.outputs["output"].value = self.inputs["v0"].value + self.inputs["v1"].value
-
 class Or(Node):
     class Meta:
         inputs = [
@@ -40,7 +24,6 @@ class Or(Node):
     def _evaluate(self):
         v = self.get("v0") or self.get("v1")
         self.set("output", 1.0 if v else 0.0)
-        self.changed = self.inputs["v0"].has_changed, self.inputs["v1"].has_changed
 
 class And(Node):
     class Meta:
@@ -58,7 +41,6 @@ class And(Node):
     def _evaluate(self):
         v = self.get("v0") and self.get("v1")
         self.set("output", 1.0 if v else 0.0)
-        self.changed = self.inputs["v0"].has_changed, self.inputs["v1"].has_changed
 
 class Not(Node):
     class Meta:
@@ -85,7 +67,6 @@ class Compare(Node):
             {"name" : "mode", "dtype" : dtype.int, "widgets" : [lambda node: widget.Choice(node, choices=COMPARE_MODES)]},
             {"name" : "v0", "dtype" : dtype.float, "widgets" : [widget.Float]},
             {"name" : "v1", "dtype" : dtype.float, "widgets" : [widget.Float]},
-            {"name" : "threshold", "dtype" : dtype.float, "widgets" : [widget.Float]}
         ]
         outputs = [
             {"name" : "output", "dtype" : dtype.bool, "widgets" : [widget.Bool]}
@@ -211,7 +192,7 @@ class Lambda(Node):
 
     def _evaluate(self):
         try:
-            self.set("output", self.process_result(self.function(self.inputs["input"].value)))
+            self.set("output", self.process_result(self.function(self.get("input"))))
         except:
             self.error = True
 

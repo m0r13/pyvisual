@@ -6,7 +6,7 @@ from pyvisual.editor import widget
 class InputBool(Node):
     class Meta:
         outputs = [
-            {"name" : "output", "dtype" : dtype.bool, "widgets" : [widget.Bool]}
+            {"name" : "output", "dtype" : dtype.bool, "widgets" : [widget.Bool], "manual_input" : True}
         ]
         options = {
             "category" : "input",
@@ -16,7 +16,7 @@ class InputBool(Node):
 class OutputBool(Node):
     class Meta:
         inputs = [
-            {"name" : "input", "dtype" : dtype.bool, "widgets" : [widget.Bool]}
+            {"name" : "input", "dtype" : dtype.bool, "widgets" : [widget.Bool], "manual_input" : False}
         ]
         options = {
             "category" : "output",
@@ -26,7 +26,7 @@ class OutputBool(Node):
 class InputEvent(Node):
     class Meta:
         outputs = [
-            {"name" : "output", "dtype" : dtype.event, "widgets" : [widget.Button]}
+            {"name" : "output", "dtype" : dtype.event, "widgets" : [widget.Button], "manual_input" : True}
         ]
         options = {
             "category" : "input",
@@ -36,7 +36,7 @@ class InputEvent(Node):
 class OutputEvent(Node):
     class Meta:
         inputs = [
-            {"name" : "input", "dtype" : dtype.event, "widgets" : [widget.Button]}
+            {"name" : "input", "dtype" : dtype.event, "widgets" : [widget.Button], "manual_input" : False}
         ]
         options = {
             "category" : "output",
@@ -46,7 +46,7 @@ class OutputEvent(Node):
 class InputFloat(Node):
     class Meta:
         outputs = [
-            {"name" : "output", "dtype" : dtype.float, "widgets" : [widget.Float]}
+            {"name" : "output", "dtype" : dtype.float, "widgets" : [widget.Float], "manual_input" : True}
         ]
         options = {
             "category" : "input",
@@ -56,7 +56,7 @@ class InputFloat(Node):
 class OutputFloat(Node):
     class Meta:
         inputs = [
-            {"name" : "input", "dtype" : dtype.float, "widgets" : [widget.Float]}
+            {"name" : "input", "dtype" : dtype.float, "widgets" : [widget.Float], "manual_input" : False}
         ]
         options = {
             "category" : "output",
@@ -66,7 +66,7 @@ class OutputFloat(Node):
 class InputColor(Node):
     class Meta:
         outputs = [
-            {"name" : "output", "dtype" : dtype.color, "widgets" : [widget.Color]},
+            {"name" : "output", "dtype" : dtype.color, "widgets" : [widget.Color], "manual_input" : True},
         ]
         options = {
             "category" : "input",
@@ -76,7 +76,7 @@ class InputColor(Node):
 class OutputColor(Node):
     class Meta:
         inputs = [
-            {"name" : "input", "dtype" : dtype.color, "widgets" : [widget.Color]},
+            {"name" : "input", "dtype" : dtype.color, "widgets" : [widget.Color], "manual_input" : False},
         ]
         options = {
             "category" : "output",
