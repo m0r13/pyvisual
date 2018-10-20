@@ -810,9 +810,7 @@ class NodeEditor:
         key_up_arrow = key_map[imgui.KEY_UP_ARROW]
         key_down_arrow = key_map[imgui.KEY_DOWN_ARROW]
         key_escape = key_map[imgui.KEY_ESCAPE]
-        keys_down = list(io.keys_down)
-        keys_down_duration = list(io.keys_down_duration)
-        is_key_down = lambda key: keys_down[key] and keys_down_duration[key] == 0.0
+        is_key_down = lambda key: io.is_key_down(key) and io.get_key_down_duration(key) == 0.0
 
         just_opened_popup = False
         reopen_popup = False
@@ -1009,24 +1007,23 @@ class NodeEditor:
 
         # handle different selection and node modifications for some shortcuts
         if imgui.is_window_hovered() and not imgui.is_any_item_active():
-            key_map = list(io.key_map)
+            key_map = self.key_map
             key_a = key_map[imgui.KEY_A]
             key_d = glfw.GLFW_KEY_D
             key_i = glfw.GLFW_KEY_I
             key_escape = key_map[imgui.KEY_ESCAPE]
             key_delete = key_map[imgui.KEY_DELETE]
-            keys_down = list(io.keys_down)
-            if keys_down[key_a]:
+            is_key_down = lambda key: io.is_key_down(key) and io.get_key_down_duration(key) == 0.0
+            if is_key_down(key_a):
                 for node in list(self.nodes):
                     node.selected = True
-            # TODO when we can detect when key was released (so this gets triggered only once)
-            #if list(io.keys_down)[key_i]:
-            #    for node in list(self.nodes):
-            #        node.selected = not node.selected
-            if keys_down[key_escape]:
+            if is_key_down(key_i):
+                for node in list(self.nodes):
+                    node.selected = not node.selected
+            if is_key_down(key_escape):
                 for node in list(self.nodes):
                     node.selected = False
-            if keys_down[key_delete] or list(io.keys_down)[key_d]:
+            if is_key_down(key_delete) or is_key_down(key_d):
                 for node in list(self.nodes):
                     if node.selected:
                         self.remove_node(node)
