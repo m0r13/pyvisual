@@ -1,3 +1,4 @@
+import math
 import numpy as np
 from pyvisual.node.base import Node
 from pyvisual.node import dtype
@@ -130,3 +131,68 @@ class Color2Float(Node):
         self.set("b", color[2])
         self.set("a", color[3])
 
+class Scale(Node):
+    class Meta:
+        inputs = [
+            {"name" : "x", "dtype" : dtype.float, "widgets" : [widget.Float], "default" : 1.0},
+            {"name" : "y", "dtype" : dtype.float, "widgets" : [widget.Float], "default" : 1.0},
+        ]
+        outputs = [
+            {"name" : "output", "dtype" : dtype.mat4},
+        ]
+
+    def _evaluate(self):
+        transform = np.array([[self.get("x"), 0.0, 0.0, 0.0],
+                              [0.0, self.get("y"), 0.0, 0.0],
+                              [0.0, 0.0, 1.0, 0.0],
+                              [0.0, 0.0, 0.0, 1.0]], dtype=np.float32).T
+        self.set("output", transform)
+
+class Rotate(Node):
+    class Meta:
+        inputs = [
+            {"name" : "theta", "dtype" : dtype.float, "widgets" : [widget.Float]},
+        ]
+        outputs = [
+            {"name" : "output", "dtype" : dtype.mat4},
+        ]
+
+    def _evaluate(self):
+        theta = math.radians(self.get("theta"))
+        sinT = math.sin(theta)
+        cosT = math.cos(theta)
+        transform = np.array([[cosT, -sinT, 0.0, 0.0],
+                              [sinT, cosT, 0.0, 0.0],
+                              [0.0, 0.0, 1.0, 0.0],
+                              [0.0, 0.0, 0.0, 1.0]], dtype=np.float32).T
+        self.set("output", transform)
+
+class Translate(Node):
+    class Meta:
+        inputs = [
+            {"name" : "x", "dtype" : dtype.float, "widgets" : [widget.Float]},
+            {"name" : "y", "dtype" : dtype.float, "widgets" : [widget.Float]},
+        ]
+        outputs = [
+            {"name" : "output", "dtype" : dtype.mat4},
+        ]
+
+    def _evaluate(self):
+        transform = np.array([[1.0, 0.0, 0.0, self.get("x")],
+                              [0.0, 1.0, 0.0, self.get("y")],
+                              [0.0, 0.0, 1.0, 0.0],
+                              [0.0, 0.0, 0.0, 1.0]], dtype=np.float32).T
+        self.set("output", transform)
+
+class Dot(Node):
+    class Meta:
+        inputs = [
+            {"name" : "t1", "dtype" : dtype.mat4},
+            {"name" : "t2", "dtype" : dtype.mat4},
+        ]
+        outputs = [
+            {"name" : "output", "dtype" : dtype.mat4},
+        ]
+
+    def _evaluate(self):
+        self.set("output", np.dot(self.get("t1"), self.get("t2")))

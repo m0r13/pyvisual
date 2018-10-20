@@ -100,6 +100,7 @@ class NodeSpec:
             assert "dtype" in port_spec
             port_spec.setdefault("widgets", [])
             port_spec.setdefault("default", None)
+            port_spec.setdefault("hide", False)
 
             if i < len(spec.inputs):
                 port_spec.setdefault("manual_input", True)
@@ -127,21 +128,27 @@ class Node(metaclass=NodeMeta):
 
         self.initial_manual_values = {}
         self.values = {}
+        
+        self.input_ports = OrderedDict(self.spec.input_ports)
+        self.output_ports = OrderedDict(self.spec.output_ports)
+        self.ports = OrderedDict()
+        self.ports.update(self.input_ports)
+        self.ports.update(self.output_ports)
 
-    @property
-    def ports(self):
-        ports = OrderedDict()
-        ports.update(self.input_ports)
-        ports.update(self.output_ports)
-        return ports
+    #@property
+    #def ports(self):
+    #    ports = OrderedDict()
+    #    ports.update(self.input_ports)
+    #    ports.update(self.output_ports)
+    #    return ports
 
-    @property
-    def input_ports(self):
-        return OrderedDict(self.spec.input_ports)
+    #@property
+    #def input_ports(self):
+    #    return OrderedDict(self.spec.input_ports)
 
-    @property
-    def output_ports(self):
-        return OrderedDict(self.spec.output_ports)
+    #@property
+    #def output_ports(self):
+    #    return OrderedDict(self.spec.output_ports)
 
     @classmethod
     def get_sub_nodes(cls, include_self=True):

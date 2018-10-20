@@ -3,6 +3,7 @@
 import os
 import sys
 import time
+import contextlib
 from collections import defaultdict
 from glumpy import app, gloo, gl
 from glumpy.ext import glfw
@@ -15,6 +16,9 @@ import pyvisual.node as node_meta
 import pyvisual.editor.widget as node_widget
 from pyvisual.editor.graph import NodeGraph
 from pyvisual import assets
+
+import cProfile
+profile = cProfile.Profile()
 
 # create window / opengl context already here
 # imgui seems to cause problems otherwise with imgui.get_color_u32_rgba without context
@@ -50,6 +54,14 @@ def t_overlap(a_start, a_end, b_start, b_end):
     #             RectA.Top > RectB.Bottom && RectA.Bottom < RectB.Top ) 
     return a_start[0] < b_end[0] and a_end[0] > b_start[0] and \
             a_start[1] < b_end[1] and a_end[1] > b_start[1]
+
+def t_cull(node_start, node_end):
+    io = imgui.get_io()
+    screen_start = (0, 0)
+    screen_end = io.display_size
+    if not t_overlap(screen_start, screen_end, node_start, node_end):
+        return True
+    return False
 
 def round_next(n, d):
     return n - (n % d)
@@ -102,19 +114,28 @@ CHANNEL_COUNT = 8
 EDITOR_GRID_SIZE = 50
 EDITOR_NODE_GRID_SIZE = 5
 
-class draw_on_channel:
-    def __init__(self, draw_list, channel):
-        self.draw_list = draw_list
-        self.old_channel = None
-        self.new_channel = channel
+#class draw_on_channel:
+#    def __init__(self, draw_list, channel):
+#        self.draw_list = draw_list
+#        self.old_channel = None
+#        self.new_channel = channel
+#
+#    def __enter__(self):
+#        self.old_channel = self.draw_list.channels_current
+#        self.draw_list.channels_set_current(self.new_channel)
+#    def __exit__(self, *args):
+#        assert self.old_channel is not None
+#        self.draw_list.channels_set_current(self.old_channel)
+#        return False
 
-    def __enter__(self):
-        self.old_channel = self.draw_list.channels_current
-        self.draw_list.channels_set_current(self.new_channel)
-    def __exit__(self, *args):
-        assert self.old_channel is not None
-        self.draw_list.channels_set_current(self.old_channel)
-        return False
+@contextlib.contextmanager
+def draw_on_channel(draw_list, channel):
+    old_channel = draw_list.channels_current
+    draw_list.channels_set_current(channel)
+
+    yield
+
+    draw_list.channels_set_current(old_channel)
 
 class Connection:
     def __init__(self, editor, src_node, src_port_id, dst_node, dst_port_id):
@@ -159,6 +180,9 @@ class Connection:
         b0 = t_add(p0, (offset_x, offset_y))
         b1 = t_add(p1, (-offset_x, -offset_y))
         with draw_on_channel(draw_list, CHANNEL_CONNECTION):
+            # simple lines
+            #draw_list.add_line(p0, p1, color, 2.0)
+            # fancy bezier
             draw_list.add_bezier_curve(p0, b0, b1, p1, color, 2.0)
             # visualize the control points
             #draw_list.add_circle_filled(b0, 3, imgui.get_color_u32_rgba(0.0, 1.0, 0.0, 1.0))
@@ -227,6 +251,8 @@ class Node:
         # trigger update of ui data
         self.editor.node_ui_state_changed(self)
 
+        self.io = imgui.get_io()
+
     @property
     def actual_pos(self):
         # local pos with node grid applied
@@ -265,11 +291,15 @@ class Node:
             x = self.actual_pos[0] if node_meta.is_input(port_id) else self.actual_pos[0]+self.size[0]+self.padding[0]*2
             y = self.actual_pos[1] + (self.size[1] + self.padding[1] * 2) / 2
             return self.editor.local_to_screen((x, y))
-        return self.port_positions[port_id]
+        return self.editor.local_to_screen(self.port_positions[port_id])
 
     def show_port(self, draw_list, port_id, port_spec):
-        io = imgui.get_io()
+        #profile.enable()
 
+        io = self.io
+
+        if port_spec["hide"]:
+            return
         name = port_spec["name"]
         dtype = port_spec["dtype"]
         is_input = node_meta.is_input(port_id)
@@ -315,7 +345,7 @@ class Node:
         connector_radius = 5.0
         connector_thickness = 2.0
         connector_center = self.editor.local_to_screen((x, y))
-        self.port_positions[port_id] = connector_center
+        self.port_positions[port_id] = self.editor.screen_to_local(connector_center)
 
         # find connector bounds for hovering
         # they are a bit bigger than the actual connector
@@ -386,51 +416,47 @@ class Node:
             if imgui.is_mouse_clicked(0):
                 self.editor.drag_connection(self, port_id)
 
+        old_channel = draw_list.channels_current
+
+        draw_list.channels_set_current(CHANNEL_PORT)
         # port connector drawing
-        with draw_on_channel(draw_list, CHANNEL_PORT):
-            if len(connections) > 0:
-                draw_list.add_circle_filled(connector_center, connector_radius, bullet_color)
-            else:
-                draw_list.add_circle(connector_center, connector_radius, bullet_color, 12, connector_thickness)
-            if hovered_connector and not (is_dragging_connection and not is_connection_droppable):
-                draw_list.add_circle(connector_center, connector_radius * 2, bullet_color, 12, connector_thickness)
+        if len(connections) > 0:
+            draw_list.add_circle_filled(connector_center, connector_radius, bullet_color, 6)
+        else:
+            draw_list.add_circle(connector_center, connector_radius, bullet_color, 6, connector_thickness)
+        if hovered_connector and not (is_dragging_connection and not is_connection_droppable):
+            draw_list.add_circle(connector_center, connector_radius * 2, bullet_color, 6, connector_thickness)
 
-        with draw_on_channel(draw_list, CHANNEL_PORT_LABEL):
-            label = port_spec["name"]
-            size = imgui.calc_text_size(label)
-            text_pos = None
-            if not is_input:
-                text_pos = t_add(connector_center, (10, -size[1] / 2))
-            else:
-                text_pos = t_add(connector_center, (-10 - size[0], -size[1] / 2))
-            draw_list.add_text(text_pos, imgui.get_color_u32_rgba(0.7, 0.7, 0.7, 1.0), label)
+        draw_list.channels_set_current(CHANNEL_PORT_LABEL)
+        label = port_spec["name"]
+        size = imgui.calc_text_size(label)
+        text_pos = None
+        if not is_input:
+            text_pos = t_add(connector_center, (10, -size[1] / 2))
+        else:
+            text_pos = t_add(connector_center, (-10 - size[0], -size[1] / 2))
+        draw_list.add_text(text_pos, imgui.get_color_u32_rgba(0.7, 0.7, 0.7, 1.0), label)
 
+        draw_list.channels_set_current(highlight_channel)
         # port highlight drawing
-        with draw_on_channel(draw_list, highlight_channel):
-            draw_list.add_rect_filled(port_start, port_end, highlight_color)
+        draw_list.add_rect_filled(port_start, port_end, highlight_color)
+
+        draw_list.channels_set_current(old_channel)
 
         imgui.pop_id()
 
+        #profile.disable()
+
     def show_ports(self, draw_list, ports):
-        io = imgui.get_io()
+        io = self.io
 
-        channel_stack = draw_on_channel(draw_list, CHANNEL_NODE)
-        channel_stack.__enter__()
-
-        #imgui.push_id(int(port_type))
         imgui.begin_group()
         for port_id, port_spec in ports.items():
             self.show_port(draw_list, port_id, port_spec)
         imgui.end_group()
-        #imgui.pop_id()
-
-        channel_stack.__exit__()
 
     def show(self, draw_list):
-        io = imgui.get_io()
-
-        channel_stack = draw_on_channel(draw_list, CHANNEL_NODE)
-        channel_stack.__enter__()
+        io = self.io
 
         imgui.push_id(self.window_id)
         old_cursor_pos = imgui.get_cursor_pos()
@@ -454,7 +480,7 @@ class Node:
         upper_left = self.editor.local_to_screen(self.actual_pos)
         lower_right = t_add(upper_left, self.size_with_padding)
         with draw_on_channel(draw_list, CHANNEL_NODE_BACKGROUND):
-            draw_list.add_rect_filled(upper_left, lower_right, COLOR_NODE_BACKGROUND, 5.0)
+            draw_list.add_rect_filled(upper_left, lower_right, COLOR_NODE_BACKGROUND, 0.0)
 
         # draw content of node
         # (set_cursor_pos is window coordinates)
@@ -557,16 +583,14 @@ class Node:
 
         # draw border(s)
         with draw_on_channel(draw_list, CHANNEL_NODE_BACKGROUND):
-            draw_list.add_rect(upper_left, lower_right, COLOR_NODE_BORDER, 2.0)
+            draw_list.add_rect(upper_left, lower_right, COLOR_NODE_BORDER, 0.0)
             if self.hovered:
-                draw_list.add_rect(upper_left_hover, lower_right_hover, COLOR_NODE_BORDER_HOVERED, 2.0)
+                draw_list.add_rect(upper_left_hover, lower_right_hover, COLOR_NODE_BORDER_HOVERED, 0.0)
             if self.selected:
-                draw_list.add_rect(upper_left_selection, lower_right_selection, COLOR_NODE_BORDER_SELECTED, 2.0)
+                draw_list.add_rect(upper_left_selection, lower_right_selection, COLOR_NODE_BORDER_SELECTED, 0.0)
 
         imgui.pop_id()
         imgui.set_cursor_pos(old_cursor_pos)
-
-        channel_stack.__exit__()
 
 class NodeEditor:
     def __init__(self, node_specs):
@@ -611,6 +635,9 @@ class NodeEditor:
         self.processing_time = 0.0
         self.processing_time_relative = 0.0
         self.show_test_window = False
+
+        self.io = imgui.get_io()
+        self.key_map = list(self.io.key_map)
 
         if os.path.isfile("session.json"):
             self.graph.load("session.json")
@@ -777,8 +804,8 @@ class NodeEditor:
             node.selected = t_overlap(selection_start, selection_end, node_start, node_end)
 
     def show_context_menu(self):
-        io = imgui.get_io()
-        key_map = list(io.key_map)
+        io = self.io
+        key_map = self.key_map
         key_g = glfw.GLFW_KEY_G
         key_up_arrow = key_map[imgui.KEY_UP_ARROW]
         key_down_arrow = key_map[imgui.KEY_DOWN_ARROW]
@@ -865,14 +892,18 @@ class NodeEditor:
             imgui.close_current_popup()
             imgui.open_popup("context")
 
+        #profile.disable()
+
     def show(self):
         # create editor window
+        #profile.enable()
+
         io = imgui.get_io()
         w, h = io.display_size
         imgui.set_next_window_position(0, 0)
         imgui.set_next_window_size(w, h)
 
-        flags = imgui.WINDOW_NO_RESIZE | imgui.WINDOW_NO_MOVE | imgui.WINDOW_NO_TITLE_BAR | imgui.WINDOW_NO_BRING_TO_FRONT_ON_FOCUS
+        flags = imgui.WINDOW_NO_RESIZE | imgui.WINDOW_NO_MOVE | imgui.WINDOW_NO_TITLE_BAR | imgui.WINDOW_NO_BRING_TO_FRONT_ON_FOCUS | imgui.WINDOW_NO_SCROLLBAR | imgui.WINDOW_NO_SCROLL_WITH_MOUSE
         expanded, _ = imgui.begin("NodeEditor", False, flags)
         self.pos = imgui.get_window_position()
         self.size = imgui.get_window_size()
@@ -936,7 +967,14 @@ class NodeEditor:
         #    render nodes in an order. nodes request a new z-index from the
         #    editor when they got touched and should be in the foreground again
         for node in sorted(self.nodes, key=lambda n: n.z_index):
-            node.show(draw_list)
+            # simple culling
+            node_start = self.local_to_screen(node.actual_pos)
+            node_end = t_add(node_start, node.size_with_padding)
+            if t_cull(node_start, node_end):
+                continue
+
+            with draw_on_channel(draw_list, CHANNEL_NODE):
+                node.show(draw_list)
             # TODO
             # unfortunately we have to merge and split the draw list multiple times for that
             # maybe there is a better way
@@ -1080,6 +1118,8 @@ class NodeEditor:
             imgui.show_test_window()
         imgui.end()
 
+        #profile.disable()
+
 # sort by node categories and then by names
 node_types = node_meta.Node.get_sub_nodes(include_self=False)
 node_types.sort(key=lambda n: n.spec.name)
@@ -1133,6 +1173,7 @@ def on_key_press(key, modifier):
     if key == ord("Q"):
         editor.graph.stop()
         editor.graph.save("session.json")
+        profile.dump_stats("profile.stats")
         sys.exit(0)
 
 if __name__ == "__main__":

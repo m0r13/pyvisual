@@ -172,6 +172,9 @@ class BlendFloat(Node):
 
 class Lambda(Node):
     class Meta:
+        inputs = [
+            {"name" : "lambda", "dtype" : dtype.str, "widgets" : [], "default" : "x", "hide" : True},
+        ]
         options = {
             "virtual" : True,
         }
@@ -180,7 +183,7 @@ class Lambda(Node):
         super().__init__()
 
         self.function = lambda x: x
-        self.function_text = "x"
+        self.function_text = None
         self.text_changed = False
         self.compiles = True
 
@@ -197,11 +200,17 @@ class Lambda(Node):
             self.error = True
 
     def _show_custom_ui(self):
+        first_run = False
+        if self.function_text is None:
+            self.function_text = self.get("lambda")
+            first_run = True
+
         imgui.dummy(1, 5)
         imgui.text("lambda x:")
         imgui.push_item_width(208)
         changed, text = imgui.input_text("", self.function_text, 255, imgui.INPUT_TEXT_ENTER_RETURNS_TRUE)
-        if changed or (self.error and time.time() - self.last_try > 1.0):
+        self.get_input("lambda").manual_value.value = self.function_text
+        if changed or first_run or (self.error and time.time() - self.last_try > 1.0):
             self.last_try = time.time()
             try:
                 function = eval("lambda x: %s" % self.function_text)
