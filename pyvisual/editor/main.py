@@ -14,6 +14,7 @@ from pyvisual.editor import glumpy_imgui
 # TODO the naming here?
 import pyvisual.node as node_meta
 import pyvisual.editor.widget as node_widget
+import pyvisual.node.dtype as node_dtype
 from pyvisual.editor.graph import NodeGraph
 from pyvisual import assets
 
@@ -93,10 +94,27 @@ COLOR_PORT_HIGHLIGHT_POSITIVE = imgui.get_color_u32_rgba(0.0, 0.5, 0.0, 1.0)
 COLOR_PORT_HIGHLIGHT_POSITIVE_ACTIVE = imgui.get_color_u32_rgba(0.5, 0.5, 0.0, 1.0)
 COLOR_PORT_HIGHLIGHT_NEUTRAL = imgui.get_color_u32_rgba(0.0, 0.0, 0.0, 0.0)
 COLOR_PORT_HIGHLIGHT_NEGATIVE = imgui.get_color_u32_rgba(0.5, 0.5, 0.5, 0.5)
-COLOR_PORT_BULLET = imgui.get_color_u32_rgba(1.0, 0.0, 0.0, 1.0)
 COLOR_PORT_BULLET_HOVERED = imgui.get_color_u32_rgba(1.0, 1.0, 0.0, 1.0)
 COLOR_PORT_BULLET_DROPPABLE = imgui.get_color_u32_rgba(0.0, 1.0, 0.0, 1.0)
 COLOR_PORT_BULLET_DISABLED = COLOR_NODE_BORDER
+
+_red = imgui.get_color_u32_rgba(0.8, 0.0, 0.0, 1.0)
+_green = imgui.get_color_u32_rgba(0.0, 0.6, 0.0, 1.0)
+_light_blue = imgui.get_color_u32_rgba(0.1, 0.6, 1.0, 1.0)
+_yellow = imgui.get_color_u32_rgba(0.8, 0.8, 0.0, 1.0)
+_orange = imgui.get_color_u32_rgba(0.8, 0.5, 0.0, 1.0)
+_purpol = imgui.get_color_u32_rgba(0.6, 0.0, 0.6, 1.0)
+_white = imgui.get_color_u32_rgba(0.7, 0.7, 0.7, 1.0)
+_colors = {
+    node_dtype.base_float : _green,
+    node_dtype.base_str : _white,
+    node_dtype.base_vec4 : _red,
+    node_dtype.base_mat4 : _purpol,
+    node_dtype.base_tex2d : _light_blue,
+    node_dtype.base_audio : _orange,
+}
+def get_connection_color(dtype):
+    return _colors.get(dtype.base_type, _white)
 
 COLOR_SELECTION = imgui.get_color_u32_rgba(1.0, 0.697, 0.0, 0.3)
 COLOR_SELECTION_BORDER = imgui.get_color_u32_rgba(1.0, 0.697, 0.0, 0.8)
@@ -160,13 +178,22 @@ class Connection:
                 and not isinstance(self.dst_node, MouseDummyNode)
         dragging_connection = self.editor.is_dragging_connection()
 
-        color = COLOR_PORT_BULLET
+        color = None
         if dragging_connection and connected:
             # show connections while other connection is dragged as inactive
             color = COLOR_PORT_BULLET_DISABLED
         elif dragging_connection and not connected:
             # show connection that is being dragged as active
             color = COLOR_PORT_BULLET_HOVERED
+        else:
+            dtype = None
+            if self.src_port_id is not None:
+                dtype = self.src_node.instance.ports[self.src_port_id]["dtype"]
+            elif self.dst_port_id is not None:
+                dtype = self.dst_node.instance.ports[self.dst_port_id]["dtype"]
+            else:
+                assert False
+            color = get_connection_color(dtype)
 
         p0 = self.src_node.get_port_position(self.src_port_id)
         p1 = self.dst_node.get_port_position(self.dst_port_id)
@@ -352,9 +379,9 @@ class Node:
         connector_start, connector_end = None, None
         if is_input:
             connector_start = t_add(port_start, (-30, 0))
-            connector_end = port_start[0], port_end[1]
+            connector_end = port_start[0], port_end[1] + 5
         else:
-            connector_start = connector_center[0], port_start[1]
+            connector_start = connector_center[0] - 5, port_start[1]
             connector_end = connector_start[0] + 30, port_end[1]
 
         # state of port / connector
@@ -374,7 +401,7 @@ class Node:
         hovered = hovered_connector or hovered_port
 
         # decide port bullet color
-        bullet_color = COLOR_PORT_BULLET
+        bullet_color = get_connection_color(port_spec["dtype"])
         if is_dragging_connection and is_connection_source:
             # connection source is drawn as hovered
             bullet_color = COLOR_PORT_BULLET_HOVERED
@@ -424,7 +451,7 @@ class Node:
             draw_list.add_circle_filled(connector_center, connector_radius, bullet_color, 6)
         else:
             draw_list.add_circle(connector_center, connector_radius, bullet_color, 6, connector_thickness)
-        if hovered_connector and not (is_dragging_connection and not is_connection_droppable):
+        if hovered and not (is_dragging_connection and not is_connection_droppable):
             draw_list.add_circle(connector_center, connector_radius * 2, bullet_color, 6, connector_thickness)
 
         draw_list.channels_set_current(CHANNEL_PORT_LABEL)
