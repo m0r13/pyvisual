@@ -4,6 +4,7 @@ from pyvisual.editor import widget
 from pyvisual.audio import pulse, util
 from scipy import signal
 import math
+import time
 import numpy as np
 import imgui
 
@@ -163,3 +164,131 @@ class Gain(Node):
         #gain = 10 ** (db / 20)
         gain = self.get("gain")
         self.set("output", self.get("input") * gain)
+
+class VUNormalizer(Node):
+    class Meta:
+        inputs = [
+            {"name" : "input", "dtype" : dtype.float, "widgets" : [widget.Float]},
+            {"name" : "beat_on", "dtype" : dtype.bool, "widgets" : [widget.Bool]},
+            {"name" : "min", "dtype" : dtype.float, "widgets" : [widget.Float], "default" : 0.5},
+            {"name" : "max", "dtype" : dtype.float, "widgets" : [widget.Float], "default" : 0.9},
+        ]
+        outputs = [
+            {"name" : "output", "dtype" : dtype.float, "widgets" : [widget.Float]}
+        ]
+
+    def __init__(self):
+        super().__init__()
+
+        self._factor = 1.0
+
+        self._current_max_vu = 0.0
+        self._last_vus = []
+        self._last_vu_count = 4
+
+    def evaluate(self):
+        beat_on = self.get("beat_on")
+        vu_norm = self.get("input") * self._factor
+        self.set("output", vu_norm)
+
+        min_vu = self.get("min")
+        max_vu = self.get("max")
+
+        # get highest (normalized) vu while beat is on
+        if beat_on:
+            if self._current_max_vu is None:
+                self._current_max_vu = 0.0
+            self._current_max_vu = max(self._current_max_vu, vu_norm)
+
+        # once beat turns off...
+        if not beat_on and self._current_max_vu is not None:
+            self._last_vus.append(self._current_max_vu)
+            if len(self._last_vus) >= self._last_vu_count:
+                average_vu = sum(self._last_vus) / len(self._last_vus)
+                if (average_vu < min_vu or average_vu > max_vu) and average_vu != 0.0:
+                    adjust_factor = ((max_vu + min_vu) / 2) / average_vu
+                    self._factor *= adjust_factor
+                self._last_vus = []
+            self._current_max_vu = None
+
+        return vu_norm
+
+def sliding_window_average(n=4):
+    window = []
+    def _process(value):
+        nonlocal window
+        window.append(value)
+        if len(window) > n:
+            window.pop(0)
+        return sum(window) / len(window)
+    return _process
+
+class BeatAnalyzer(Node):
+    class Meta:
+        inputs = [
+            {"name" : "beat_on", "dtype" : dtype.bool, "widgets" : [widget.Button]},
+        ]
+        outputs = [
+            {"name" : "beat_running", "dtype" : dtype.bool, "widgets" : [widget.Bool]},
+            {"name" : "bpm", "dtype" : dtype.float, "widgets" : [widget.Float]},
+        ]
+
+    def __init__(self):
+        super().__init__()
+
+        self.last_beat_on = False
+
+        self.current_bpm = 0.0
+        self.is_beat_running = False
+
+        self.last_beat = time.time()
+        self.delta_to_last_beat = lambda self=self: time.time() - self.last_beat
+        self.bpm_from_last_beat = lambda self=self: 60.0 / self.delta_to_last_beat()
+
+        self.bpm_window_average = sliding_window_average(8)
+        self.p = False
+
+    # TODO the whole checking when the beat is running if the
+    # bpm with the new beat is within range of current bpm is broken
+
+    # is_beat_running = ...
+    def bpm_fits_lower_threshold(self, bpm):
+        if not self.is_beat_running or True:
+            return bpm > 60.0
+        return bpm > self.current_bpm * 0.8
+    def bpm_fits_higher_threshold(self, bpm):
+        if not self.is_beat_running or True:
+            return bpm < 200.0
+        return bpm < self.current_bpm * 1.2
+    def is_bpm_sensible(self, bpm):
+        return self.bpm_fits_lower_threshold(bpm) and self.bpm_fits_higher_threshold(bpm)
+
+    def _evaluate(self):
+        beat_on = self.get("beat_on")
+        beat_rising = beat_on and not self.last_beat_on
+        beat_falling = not beat_on and self.last_beat_on
+
+        if beat_rising:
+            bpm = self.bpm_from_last_beat()
+            if self.is_bpm_sensible(bpm):
+                self.current_bpm = self.bpm_window_average(bpm)
+                print("--- bpm", bpm, self.current_bpm, "---")
+            else:
+                print("hmm, new bpm doesn't make sense:", bpm,)
+            self.last_beat = time.time()
+
+        #print(self.bpm_from_last_beat())
+        self.is_beat_running = self.bpm_fits_lower_threshold(self.bpm_from_last_beat())
+        #print(self.is_beat_running)
+        if not self.is_beat_running and not self.p:
+            self.bpm_window_average = sliding_window_average(8)
+            print("-- emptying avg bpm window --")
+            self.p = True
+        if self.is_beat_running:
+            self.p = False
+
+        self.last_beat_on = beat_on
+
+        self.set("beat_running", self.is_beat_running)
+        self.set("bpm", self.current_bpm)
+

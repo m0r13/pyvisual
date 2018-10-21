@@ -26,13 +26,13 @@
         },
         {
             "dst_node_id": 4,
-            "dst_port_id": "i_y",
+            "dst_port_id": "i_x",
             "src_node_id": 5,
             "src_port_id": "o_output"
         },
         {
             "dst_node_id": 4,
-            "dst_port_id": "i_x",
+            "dst_port_id": "i_y",
             "src_node_id": 5,
             "src_port_id": "o_output"
         },
@@ -73,8 +73,14 @@
             "src_port_id": "o_output"
         },
         {
-            "dst_node_id": 27,
-            "dst_port_id": "i_enabled",
+            "dst_node_id": 50,
+            "dst_port_id": "i_input",
+            "src_node_id": 12,
+            "src_port_id": "o_output"
+        },
+        {
+            "dst_node_id": 43,
+            "dst_port_id": "i_input",
             "src_node_id": 12,
             "src_port_id": "o_output"
         },
@@ -140,13 +146,13 @@
         },
         {
             "dst_node_id": 15,
-            "dst_port_id": "i_x",
+            "dst_port_id": "i_y",
             "src_node_id": 23,
             "src_port_id": "o_output"
         },
         {
             "dst_node_id": 15,
-            "dst_port_id": "i_y",
+            "dst_port_id": "i_x",
             "src_node_id": 23,
             "src_port_id": "o_output"
         },
@@ -235,7 +241,7 @@
             "src_port_id": "o_output"
         },
         {
-            "dst_node_id": 36,
+            "dst_node_id": 44,
             "dst_port_id": "i_input",
             "src_node_id": 35,
             "src_port_id": "o_output"
@@ -244,6 +250,72 @@
             "dst_node_id": 12,
             "dst_port_id": "i_v0",
             "src_node_id": 35,
+            "src_port_id": "o_output"
+        },
+        {
+            "dst_node_id": 42,
+            "dst_port_id": "i_input",
+            "src_node_id": 38,
+            "src_port_id": "o_output"
+        },
+        {
+            "dst_node_id": 41,
+            "dst_port_id": "i_input",
+            "src_node_id": 38,
+            "src_port_id": "o_output"
+        },
+        {
+            "dst_node_id": 40,
+            "dst_port_id": "i_input",
+            "src_node_id": 37,
+            "src_port_id": "o_bpm"
+        },
+        {
+            "dst_node_id": 39,
+            "dst_port_id": "i_input",
+            "src_node_id": 37,
+            "src_port_id": "o_beat_running"
+        },
+        {
+            "dst_node_id": 12,
+            "dst_port_id": "i_v1",
+            "src_node_id": 45,
+            "src_port_id": "o_output"
+        },
+        {
+            "dst_node_id": 38,
+            "dst_port_id": "i_input",
+            "src_node_id": 47,
+            "src_port_id": "o_output"
+        },
+        {
+            "dst_node_id": 36,
+            "dst_port_id": "i_input",
+            "src_node_id": 47,
+            "src_port_id": "o_output"
+        },
+        {
+            "dst_node_id": 38,
+            "dst_port_id": "i_beat_on",
+            "src_node_id": 46,
+            "src_port_id": "o_output"
+        },
+        {
+            "dst_node_id": 37,
+            "dst_port_id": "i_beat_on",
+            "src_node_id": 46,
+            "src_port_id": "o_output"
+        },
+        {
+            "dst_node_id": 23,
+            "dst_port_id": "i_alpha",
+            "src_node_id": 48,
+            "src_port_id": "o_output"
+        },
+        {
+            "dst_node_id": 27,
+            "dst_port_id": "i_enabled",
+            "src_node_id": 49,
             "src_port_id": "o_output"
         }
     ],
@@ -359,14 +431,14 @@
                 "i_theta": 12.010000228881836,
                 "o_output": [
                     [
-                        0.9706224203109741,
-                        0.24060769379138947,
+                        0.8892548084259033,
+                        0.45741212368011475,
                         0.0,
                         0.0
                     ],
                     [
-                        -0.24060769379138947,
-                        0.9706224203109741,
+                        -0.45741212368011475,
+                        0.8892548084259033,
                         0.0,
                         0.0
                     ],
@@ -400,14 +472,14 @@
                 "i_y": 1.0,
                 "o_output": [
                     [
-                        1.0955971479415894,
+                        1.1458150148391724,
                         0.0,
                         0.0,
                         0.0
                     ],
                     [
                         0.0,
-                        1.0955971479415894,
+                        1.1458150148391724,
                         0.0,
                         0.0
                     ],
@@ -442,7 +514,7 @@
                 "i_min": 0.75,
                 "i_phase": 0.0,
                 "i_type": 3,
-                "o_output": 1.0955971695424436
+                "o_output": 1.1458149860614444
             },
             "type": "LFO",
             "ui_data": {
@@ -492,14 +564,14 @@
                 ],
                 "o_output": [
                     [
-                        1.0634111166000366,
-                        0.2636091113090515,
+                        1.0189214944839478,
+                        0.5241096615791321,
                         0.0,
                         0.0
                     ],
                     [
-                        -0.2636091113090515,
-                        1.0634111166000366,
+                        -0.5241096615791321,
+                        1.0189214944839478,
                         0.0,
                         0.0
                     ],
@@ -521,8 +593,8 @@
             "ui_data": {
                 "collapsed": false,
                 "pos": [
-                    634.0,
-                    655.0
+                    670.0,
+                    692.0
                 ]
             }
         },
@@ -535,15 +607,15 @@
             "ui_data": {
                 "collapsed": true,
                 "pos": [
-                    -392.0,
-                    -334.0
+                    -1216.0,
+                    -587.0
                 ]
             }
         },
         {
             "id": 8,
             "manual_values": {
-                "i_cutoff": 50.0,
+                "i_cutoff": 75.0,
                 "i_input": "",
                 "i_order": 2,
                 "i_type": 0.0,
@@ -553,8 +625,8 @@
             "ui_data": {
                 "collapsed": true,
                 "pos": [
-                    -397.0,
-                    -284.0
+                    -1216.0,
+                    -507.0
                 ]
             }
         },
@@ -568,8 +640,8 @@
             "ui_data": {
                 "collapsed": true,
                 "pos": [
-                    -382.0,
-                    -234.0
+                    -1206.0,
+                    -457.0
                 ]
             }
         },
@@ -578,7 +650,7 @@
             "manual_values": {
                 "i_cutoff": 2.5,
                 "i_input": "",
-                "i_order": 1,
+                "i_order": 2,
                 "i_type": 0.0,
                 "o_output": ""
             },
@@ -586,8 +658,8 @@
             "ui_data": {
                 "collapsed": true,
                 "pos": [
-                    -387.0,
-                    -184.0
+                    -1211.0,
+                    -402.0
                 ]
             }
         },
@@ -595,14 +667,14 @@
             "id": 11,
             "manual_values": {
                 "i_input": "",
-                "o_output": 0.04950339276105604
+                "o_output": 0.007360309232486019
             },
             "type": "SampleAudio",
             "ui_data": {
                 "collapsed": true,
                 "pos": [
-                    -381.0,
-                    -131.0
+                    -1216.0,
+                    -327.0
                 ]
             }
         },
@@ -611,15 +683,15 @@
             "manual_values": {
                 "i_mode": 2,
                 "i_v0": 0.0,
-                "i_v1": 0.5,
+                "i_v1": 0.25999999046325684,
                 "o_output": 0.0
             },
             "type": "Compare",
             "ui_data": {
                 "collapsed": false,
                 "pos": [
-                    196.0,
-                    -58.0
+                    -596.0,
+                    -317.0
                 ]
             }
         },
@@ -631,7 +703,7 @@
                 "i_min": -35.0,
                 "i_phase": 0.0,
                 "i_type": 3,
-                "o_output": 13.922410002035996
+                "o_output": 27.220242930257193
             },
             "type": "LFO",
             "ui_data": {
@@ -664,14 +736,14 @@
                 "i_y": 3.0,
                 "o_output": [
                     [
-                        0.800000011920929,
+                        1.4761526584625244,
                         0.0,
                         0.0,
                         0.0
                     ],
                     [
                         0.0,
-                        0.800000011920929,
+                        1.4761526584625244,
                         0.0,
                         0.0
                     ],
@@ -800,14 +872,14 @@
                 ],
                 "o_output": [
                     [
-                        0.5115916132926941,
-                        -0.6150398850440979,
+                        0.912262499332428,
+                        -1.160518765449524,
                         0.0,
                         0.0
                     ],
                     [
-                        0.6150398850440979,
-                        0.5115916132926941,
+                        1.160518765449524,
+                        0.912262499332428,
                         0.0,
                         0.0
                     ],
@@ -840,14 +912,14 @@
                 "i_theta": 0.0,
                 "o_output": [
                     [
-                        0.639489471912384,
-                        -0.7687998414039612,
+                        0.6180000901222229,
+                        -0.7861780524253845,
                         0.0,
                         0.0
                     ],
                     [
-                        0.7687998414039612,
-                        0.639489471912384,
+                        0.7861780524253845,
+                        0.6180000901222229,
                         0.0,
                         0.0
                     ],
@@ -882,7 +954,7 @@
                 "i_min": -60.0,
                 "i_phase": 0.0,
                 "i_type": 3,
-                "o_output": -50.24624020603926
+                "o_output": -51.8297634164751
             },
             "type": "LFO",
             "ui_data": {
@@ -974,15 +1046,15 @@
             "manual_values": {
                 "i_a": 1.5,
                 "i_alpha": 1.0,
-                "i_b": 0.800000011920929,
-                "o_output": 0.800000011920929
+                "i_b": 0.6000000238418579,
+                "o_output": 1.4761525993502262
             },
             "type": "BlendFloat",
             "ui_data": {
                 "collapsed": false,
                 "pos": [
-                    -715.0,
-                    80.0
+                    -739.0,
+                    141.0
                 ]
             }
         },
@@ -1086,46 +1158,19 @@
             "ui_data": {
                 "collapsed": false,
                 "pos": [
-                    128.0,
-                    425.0
+                    144.0,
+                    423.0
                 ]
             }
         },
         {
             "id": 27,
             "manual_values": {
-                "i_amount": 0.04399999976158142,
+                "i_amount": 0.07000000029802322,
                 "i_enabled": 1.0,
                 "i_input": "",
-                "i_sizeref": "",
-                "i_speed": 0.002199999988079071,
+                "i_speed": 0.014000000432133675,
                 "i_time": 0.0,
-                "i_transformUV": [
-                    [
-                        1.0,
-                        0.0,
-                        0.0,
-                        0.0
-                    ],
-                    [
-                        0.0,
-                        1.0,
-                        0.0,
-                        0.0
-                    ],
-                    [
-                        0.0,
-                        0.0,
-                        1.0,
-                        0.0
-                    ],
-                    [
-                        0.0,
-                        0.0,
-                        0.0,
-                        1.0
-                    ]
-                ],
                 "o_enabled": 0.0,
                 "o_output": ""
             },
@@ -1143,7 +1188,7 @@
             "manual_values": {
                 "i_factor": 1.0,
                 "i_reset": 0.0,
-                "o_output": 9.001380920410156
+                "o_output": 19.599570751190186
             },
             "type": "Time",
             "ui_data": {
@@ -1194,8 +1239,8 @@
             "ui_data": {
                 "collapsed": false,
                 "pos": [
-                    576.0,
-                    388.0
+                    571.0,
+                    390.0
                 ]
             }
         },
@@ -1224,8 +1269,8 @@
                         0.0
                     ],
                     [
-                        -90.01036071777344,
-                        -90.01036071777344,
+                        -195.96517944335938,
+                        -195.96517944335938,
                         0.0,
                         1.0
                     ]
@@ -1297,14 +1342,14 @@
                 ],
                 "o_output": [
                     [
-                        0.800000011920929,
+                        1.4761526584625244,
                         0.0,
                         0.0,
                         0.0
                     ],
                     [
                         0.0,
-                        0.800000011920929,
+                        1.4761526584625244,
                         0.0,
                         0.0
                     ],
@@ -1315,8 +1360,8 @@
                         0.0
                     ],
                     [
-                        -90.01036071777344,
-                        -90.01036071777344,
+                        -195.96517944335938,
+                        -195.96517944335938,
                         0.0,
                         1.0
                     ]
@@ -1336,7 +1381,7 @@
             "manual_values": {
                 "i_factor": -10.0,
                 "i_reset": 0.0,
-                "o_output": -90.01035690307617
+                "o_output": -195.9651756286621
             },
             "type": "Time",
             "ui_data": {
@@ -1418,16 +1463,16 @@
         {
             "id": 35,
             "manual_values": {
-                "i_gain": 10.0,
+                "i_gain": 3.5999999046325684,
                 "i_input": 0.0,
-                "o_output": 0.49503392761056036
+                "o_output": 0.026497112535015882
             },
             "type": "Gain",
             "ui_data": {
                 "collapsed": false,
                 "pos": [
-                    -150.0,
-                    -155.0
+                    -1016.0,
+                    -347.0
                 ]
             }
         },
@@ -1443,8 +1488,226 @@
             "ui_data": {
                 "collapsed": false,
                 "pos": [
-                    354.0,
-                    -296.0
+                    246.0,
+                    -842.0
+                ]
+            }
+        },
+        {
+            "id": 37,
+            "manual_values": {
+                "i_beat_on": 0.0,
+                "o_beat_running": false,
+                "o_bpm": 0.0
+            },
+            "type": "BeatAnalyzer",
+            "ui_data": {
+                "collapsed": false,
+                "pos": [
+                    406.0,
+                    -402.0
+                ]
+            }
+        },
+        {
+            "id": 38,
+            "manual_values": {
+                "i_beat_on": 0.0,
+                "i_input": 0.0,
+                "i_max": 0.9,
+                "i_min": 0.25,
+                "o_output": 0.026497112535015882
+            },
+            "type": "VUNormalizer",
+            "ui_data": {
+                "collapsed": false,
+                "pos": [
+                    376.0,
+                    -627.0
+                ]
+            }
+        },
+        {
+            "id": 39,
+            "manual_values": {
+                "i_input": 0.0,
+                "i_name": "beat_running"
+            },
+            "type": "SetFloatVar",
+            "ui_data": {
+                "collapsed": false,
+                "pos": [
+                    726.0,
+                    -427.0
+                ]
+            }
+        },
+        {
+            "id": 40,
+            "manual_values": {
+                "i_input": 0.0,
+                "i_name": "bpm"
+            },
+            "type": "SetFloatVar",
+            "ui_data": {
+                "collapsed": false,
+                "pos": [
+                    706.0,
+                    -332.0
+                ]
+            }
+        },
+        {
+            "id": 41,
+            "manual_values": {
+                "i_input": 0.0,
+                "i_name": "beat_vu"
+            },
+            "type": "SetFloatVar",
+            "ui_data": {
+                "collapsed": false,
+                "pos": [
+                    739.0,
+                    -633.0
+                ]
+            }
+        },
+        {
+            "id": 42,
+            "manual_values": {
+                "i_input": 0.0,
+                "i_max": 1.0,
+                "i_min": 0.0,
+                "i_time": 5.0
+            },
+            "type": "Plot",
+            "ui_data": {
+                "collapsed": false,
+                "pos": [
+                    698.0,
+                    -850.0
+                ]
+            }
+        },
+        {
+            "id": 43,
+            "manual_values": {
+                "i_input": 0.0,
+                "i_name": "beat_on"
+            },
+            "type": "SetFloatVar",
+            "ui_data": {
+                "collapsed": false,
+                "pos": [
+                    -361.0,
+                    -392.0
+                ]
+            }
+        },
+        {
+            "id": 44,
+            "manual_values": {
+                "i_input": 0.0,
+                "i_name": "beat_value"
+            },
+            "type": "SetFloatVar",
+            "ui_data": {
+                "collapsed": false,
+                "pos": [
+                    -736.0,
+                    -412.0
+                ]
+            }
+        },
+        {
+            "id": 45,
+            "manual_values": {
+                "i_name": "beat_threshold",
+                "o_output": 0.3499999940395355
+            },
+            "type": "GetFloatVar",
+            "ui_data": {
+                "collapsed": false,
+                "pos": [
+                    -876.0,
+                    -192.0
+                ]
+            }
+        },
+        {
+            "id": 46,
+            "manual_values": {
+                "i_name": "beat_on",
+                "o_output": 0.0
+            },
+            "type": "GetFloatVar",
+            "ui_data": {
+                "collapsed": false,
+                "pos": [
+                    -44.0,
+                    -587.0
+                ]
+            }
+        },
+        {
+            "id": 47,
+            "manual_values": {
+                "i_name": "beat_value",
+                "o_output": 0.026497112535015882
+            },
+            "type": "GetFloatVar",
+            "ui_data": {
+                "collapsed": false,
+                "pos": [
+                    -39.0,
+                    -637.0
+                ]
+            }
+        },
+        {
+            "id": 48,
+            "manual_values": {
+                "i_name": "beat_value",
+                "o_output": 0.026497112535015882
+            },
+            "type": "GetFloatVar",
+            "ui_data": {
+                "collapsed": false,
+                "pos": [
+                    -1067.0,
+                    207.0
+                ]
+            }
+        },
+        {
+            "id": 49,
+            "manual_values": {
+                "i_name": "beat_on",
+                "o_output": 0.0
+            },
+            "type": "GetFloatVar",
+            "ui_data": {
+                "collapsed": false,
+                "pos": [
+                    1027.0,
+                    451.0
+                ]
+            }
+        },
+        {
+            "id": 50,
+            "manual_values": {
+                "i_input": 0.0,
+                "i_max": 1.0,
+                "i_min": 0.0,
+                "i_time": 5.0
+            },
+            "type": "Plot",
+            "ui_data": {
+                "collapsed": false,
+                "pos": [
+                    -326.0,
+                    -267.0
                 ]
             }
         }
