@@ -194,19 +194,42 @@ class Texture:
         self.node = node
         self.show_texture = False
 
+        self.texture_aspect = None
+
+        def window_size_callback(size, self=self):
+            aspect = self.texture_aspect
+            if aspect is None:
+                return
+
+            w, h = size
+            w1, h1 = aspect * h, h
+            w2, h2 = w, w / aspect
+            if w1 < w2:
+                return w1, h1 + 30
+            else:
+                return w2, h2 + 30
+        self.window_size_callback = window_size_callback
+
     def show(self, value, read_only):
         clicked, self.show_texture = imgui.checkbox("Show texture", self.show_texture)
         if not self.show_texture:
             return
 
+        texture = value.value
+        if texture is None:
+            self.texture_aspect = None
+        else:
+            h, w, _ = texture.shape
+            self.texture_aspect = w / h
+
         cursor_pos = imgui.get_cursor_screen_pos()
-        imgui.set_next_window_size(1920 * 0.3, 1080 * 0.3 + 30, imgui.ONCE)
+        imgui.set_next_window_size(500, 500, imgui.ONCE)
+        imgui.set_next_window_size_constraints((0.0, 0.0), (float("inf"), float("inf")), self.window_size_callback)
         imgui.set_next_window_position(*imgui.get_io().mouse_pos, imgui.ONCE, pivot_x=0.5, pivot_y=0.5)
         expanded, opened = imgui.begin("Texture of %s###%s%s" % (self.node.spec.name, id(self.node), id(self)), True, imgui.WINDOW_NO_SCROLLBAR)
         if not opened:
             self.show_texture = False
         if expanded:
-            texture = value.value
             if texture is None:
                 imgui.text("No texture associated")
             else:
