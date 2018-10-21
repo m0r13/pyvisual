@@ -114,21 +114,26 @@ class RenderNode(Node):
         model = np.eye(4, dtype=np.float32)
         view = np.eye(4, dtype=np.float32)
         projection = glm.ortho(-1.0, 1.0, -1.0, 1.0, -1.0, 1.0)
+        texture = np.eye(4, dtype=np.float32)
 
-        if texture_aspect < target_aspect:
+        if abs(texture_aspect - target_aspect) < 0.001:
+            pass
+        elif texture_aspect < target_aspect:
             # border left/right
             glm.scale(model, texture_aspect, 1.0, 1.0)
-            glm.scale(projection, 1.0 / target_aspect, 1.0, 1.0)
+            #glm.scale(projection, 1.0 / target_aspect, 1.0, 1.0)
+            glm.scale(texture, target_aspect, 1.0, 1.0)
         else:
             # border top/bottom
             glm.scale(model, 1.0, 1.0 / texture_aspect, 1.0)
-            glm.scale(projection, 1.0, target_aspect, 1.0)
+            #glm.scale(projection, 1.0, target_aspect, 1.0)
+            glm.scale(texture, 1.0, 1.0 / target_aspect, 1.0)
 
         model = np.dot(model, m)
 
         glm.scale(model, 1.0, -1.0, 1.0)
 
-        return model, view, projection
+        return model, view, projection, texture
 
     def render(self, size, render_func):
         fbo = self.get_fbo(size)
@@ -191,10 +196,10 @@ class Shader(RenderNode):
         target_size = sizeref.shape[:2][::-1]
         def do_render():
             custom_model = np.eye(4, dtype=np.float32)
-            model, view, projection = self.create_transform(custom_model, texture_size, target_size)
+            model, view, projection, texture = self.create_transform(custom_model, texture_size, target_size)
             self.quad["uModelViewProjection"] = np.dot(model, np.dot(view, projection))
             self.quad["uTextureSize"] = texture_size
-            self.quad["uTransformUV"] = self.get("transformUV")
+            self.quad["uTransformUV"] = np.dot(texture, self.get("transformUV"))
             input_texture.interpolation = gl.GL_LINEAR
             input_texture.wrapping = gl.GL_CLAMP_TO_BORDER
             self.quad["uInputTexture"] = input_texture
@@ -269,17 +274,17 @@ class Blend(RenderNode):
         def do_render():
             eye = np.eye(4, dtype=np.float32)
 
-            model, view, projection = self.create_transform(eye, input1_size, target_size)
+            model, view, projection, transform_uv = self.create_transform(eye, input1_size, target_size)
             self.quad["uModelViewProjection"] = np.dot(model, np.dot(view, projection))
             self.quad["uTextureSize"] = input1_size
-            self.quad["uTransformUV"] = np.eye(4, dtype=np.float32)
+            self.quad["uTransformUV"] = transform_uv
             self.quad["uInputTexture"] = input1
             self.quad.draw(gl.GL_TRIANGLE_STRIP)
 
-            model, view, projection = self.create_transform(eye, input2_size, target_size)
+            model, view, projection, transform_uv = self.create_transform(eye, input2_size, target_size)
             self.quad["uModelViewProjection"] = np.dot(model, np.dot(view, projection))
             self.quad["uTextureSize"] = input2_size
-            self.quad["uTransformUV"] = np.eye(4, dtype=np.float32)
+            self.quad["uTransformUV"] = transform_uv
             self.quad["uInputTexture"] = input2
             self.quad.draw(gl.GL_TRIANGLE_STRIP)
 
