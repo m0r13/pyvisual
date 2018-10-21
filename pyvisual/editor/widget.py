@@ -159,6 +159,17 @@ def _imgui_pick_file_menu(base_path, wildcard="*"):
     except:
         imgui.text("Unable to open dir")
 
+class String:
+    def __init__(self, node):
+        pass
+
+    def show(self, value, read_only):
+        with read_only_widget(read_only):
+            imgui.push_item_width(100)
+            changed, v = imgui.input_text("", value.value, 255, imgui.INPUT_TEXT_ENTER_RETURNS_TRUE)
+            if changed:
+                value.value = v
+
 class AssetPath:
     def __init__(self, node, prefix=""):
         self.prefix = prefix

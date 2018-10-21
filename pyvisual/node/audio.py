@@ -39,7 +39,7 @@ class InputPulseAudio(Node):
         self.next_blocks.append(block)
         self.blocks += 1
 
-    def start(self):
+    def start(self, graph):
         self.pulse.start()
 
     def _evaluate(self):

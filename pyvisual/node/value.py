@@ -3,6 +3,7 @@ import numpy as np
 from pyvisual.node.base import Node
 from pyvisual.node import dtype
 from pyvisual.editor import widget
+from collections import defaultdict
 
 class InputBool(Node):
     class Meta:
@@ -63,6 +64,69 @@ class OutputFloat(Node):
             "category" : "output",
             "show_title" : False
         }
+
+class SetFloatVar(Node):
+
+    instances = defaultdict(lambda: set())
+
+    class Meta:
+        inputs = [
+            {"name" : "name", "dtype" : dtype.str, "widgets" : [widget.String], "show_connector" : False},
+            {"name" : "input", "dtype" : dtype.float, "widgets" : [widget.Float]}
+        ]
+        options = {
+            "category" : "output",
+            "show_title" : False
+        }
+
+    def __init__(self):
+        super().__init__()
+
+    def start(self, graph):
+        SetFloatVar.instances[graph].add(self)
+
+class GetFloatVar(Node):
+    class Meta:
+        inputs = [
+            {"name" : "name", "dtype" : dtype.str, "widgets" : [widget.String], "show_connector" : False}
+        ]
+        outputs = [
+            {"name" : "output", "dtype" : dtype.float, "widgets" : [widget.Float], "manual_input" : True}
+        ]
+        options = {
+            "category" : "input",
+            "show_title" : False
+        }
+
+    def __init__(self):
+        super().__init__(always_evaluate=True)
+
+        self.graph = None
+        self.connected_node = None
+
+    def get_sub_nodes(self, include_self):
+        sub_nodes = super().get_sub_nodes(include_self)
+        if self.connected_node is not None:
+            return sub_nodes + [self.connected_node]
+        return sub_nodes
+
+    def start(self, graph):
+        self.graph = graph
+
+    def _evaluate(self):
+        assert self.graph is not None
+
+        if self.get_input("name").has_changed:
+            name = self.get("name")
+
+            self.connected_node = None
+            for node in SetFloatVar.instances[self.graph]:
+                if node.get("name") == name:
+                    self.connected_node = node
+                    break
+
+        if self.connected_node is not None:
+            self.set("output", self.connected_node.get("input"))
 
 class InputColor(Node):
     class Meta:

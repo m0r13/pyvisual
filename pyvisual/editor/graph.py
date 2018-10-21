@@ -121,7 +121,7 @@ class NodeGraph:
     def create_node(self, spec, ui_data):
         node = spec.instantiate_node()
         node.id = self._assign_node_id()
-        node.start()
+        node.start(self)
 
         self.nodes[node.id] = node
         self.node_ui_data[node.id] = ui_data

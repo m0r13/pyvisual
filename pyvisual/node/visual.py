@@ -12,7 +12,7 @@ from PIL import Image
 class LoadTexture(Node):
     class Meta:
         inputs = [
-            {"name" : "path", "dtype" : dtype.assetpath, "widgets" : [lambda node: widget.AssetPath(node, "image/tartuvhs")]},
+            {"name" : "path", "dtype" : dtype.assetpath, "widgets" : [lambda node: widget.AssetPath(node, "image")]},
         ]
         outputs = [
             {"name" : "output", "dtype" : dtype.tex2d, "widgets" : [widget.Texture]},

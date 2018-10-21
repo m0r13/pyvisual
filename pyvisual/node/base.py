@@ -210,7 +210,9 @@ class Node(metaclass=NodeMeta):
             if port_id in self.initial_manual_values:
                 default = self.initial_manual_values[port_id]
             manual_input = SettableValueHolder(default)
+            manual_input.has_changed = True
             value = InputValueHolder(manual_input)
+            value.has_changed = True
         else:
             default = port_spec["default"]
             if default is None:
@@ -221,9 +223,9 @@ class Node(metaclass=NodeMeta):
         return value
 
     def get_input(self, name):
-        return self.get_value("i_" + name)
+        return self.get_value("".join(["i_", name]))
     def get_output(self, name):
-        return self.get_value("o_" + name)
+        return self.get_value("".join(["o_", name]))
     def get_value(self, port_id):
         if not port_id in self.values:
             self.values[port_id] = self._create_value(port_id)
@@ -234,7 +236,7 @@ class Node(metaclass=NodeMeta):
     def set(self, name, value):
         self.get_output(name).value = value
 
-    def start(self):
+    def start(self, graph):
         pass
 
     def evaluate(self):
@@ -261,6 +263,8 @@ class Node(metaclass=NodeMeta):
         pass
 
     def _show_custom_context(self):
+        # called from ui-node to add custom entries in nodes context menu
+        # called only when that context menu is visible
         pass
 
 class ValueHolder:
@@ -335,7 +339,8 @@ class InputValueHolder(ValueHolder):
         # TODO hmm this seems like a hack
         #if not changed:
         #    self.connection_changed = False
-        self.manual_value.has_changed = False
+        if not changed:
+            self.manual_value.has_changed = False
 
     @property
     def value(self):
