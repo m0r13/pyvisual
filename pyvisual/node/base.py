@@ -252,10 +252,15 @@ class Node(metaclass=NodeMeta):
 
     def _evaluate(self):
         # to be implemented by child nodes
-        # never call from outside! use process() instead
+        # never call from outside! use evaluate() instead
         pass
 
     def _show_custom_ui(self):
+        # called from ui-node to draw custom imgui node ui
+        # called only when that ui would be visible
+        pass
+
+    def _show_custom_context(self):
         pass
 
 class ValueHolder:

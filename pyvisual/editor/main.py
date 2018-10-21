@@ -587,6 +587,8 @@ class Node:
             if imgui.menu_item("expand..." if self.collapsed else "collaps...")[0]:
                 self.collapsed = not self.collapsed
             imgui.separator()
+            self.instance._show_custom_context()
+            imgui.separator()
             imgui.menu_item("class %s" % str(self.spec.cls), None, False, False)
             imgui.menu_item("node #%d" % self.window_id, None, False, False)
             imgui.end_popup()

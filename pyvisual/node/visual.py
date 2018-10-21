@@ -1,5 +1,6 @@
 import math
 import numpy as np
+import traceback
 from pyvisual.node.base import Node
 from pyvisual.node import dtype
 from pyvisual.editor import widget
@@ -148,6 +149,8 @@ class RenderNode(Node):
         fbo.deactivate()
         return fbo.color[0]
 
+# TODO
+dummy = np.zeros((1, 1, 4), dtype=np.uint8).view(gloo.Texture2D)
 class Shader(RenderNode):
     class Meta:
         inputs = [
@@ -167,11 +170,35 @@ class Shader(RenderNode):
     def __init__(self, vertex, fragment):
         super().__init__()
 
-        vertex = assets.load_shader(vertex)
-        fragment = assets.load_shader(fragment)
-        self.quad = gloo.Program(vertex, fragment, version="130", count=4)
-        self.quad["iPosition"] = [(-1,-1), (-1,+1), (+1,-1), (+1,+1)]
-        self.quad["iTexCoord"] = [( 0, 1), ( 0, 0), ( 1, 1), ( 1, 0)]
+        self.vertex = vertex
+        self.fragment = fragment
+        self.create_program()
+
+    def create_program(self):
+        # TODO also execute this automatically once shader has changed
+        try:
+            vertex = assets.load_shader(self.vertex)
+            fragment = assets.load_shader(self.fragment)
+
+            self.quad = gloo.Program(vertex, fragment, version="130", count=4)
+            self.quad["iPosition"] = [(-1,-1), (-1,+1), (+1,-1), (+1,+1)]
+            self.quad["iTexCoord"] = [( 0, 1), ( 0, 0), ( 1, 1), ( 1, 0)]
+
+            # HACKY
+            # we want to check if the built shader program compiles
+            # need to run it once
+            # but also set all uniform textures to dummy textures, otherwise it doesn't work
+            # (that's how it's possible with glumpy at the moment)
+            for uniform, gtype in self.quad.all_uniforms:
+                if gtype == gl.GL_SAMPLER_2D:
+                    self.quad[uniform] = dummy
+            self.quad.draw(gl.GL_TRIANGLE_STRIP)
+
+            self.shader_error = None
+        except Exception as e:
+            self.quad = None
+            self.shader_error = traceback.format_exc()
+            traceback.print_exc()
 
     def set_uniforms(self, program):
         pass
@@ -179,7 +206,7 @@ class Shader(RenderNode):
     def _evaluate(self):
         enabled = self.get("enabled")
         self.set("enabled", enabled)
-        if not enabled:
+        if not enabled or self.quad is None:
             self.set("output", self.get("input"))
             return
 
@@ -208,8 +235,19 @@ class Shader(RenderNode):
 
         self.set("output", self.render(target_size, do_render))
 
-# TODO
-dummy = np.zeros((1, 1, 4), dtype=np.uint8).view(gloo.Texture2D)
+    def _show_custom_ui(self):
+        if self.shader_error is None:
+            return
+
+        imgui.dummy(1, 5)
+        imgui.text_colored("Shader error. (?)", 1.0, 0.0, 0.0)
+        if imgui.is_item_hovered():
+            imgui.set_tooltip(self.shader_error)
+
+    def _show_custom_context(self):
+        if imgui.menu_item("reload shaders")[0]:
+            self.create_program()
+
 class Mask(Shader):
     class Meta:
         inputs = [
