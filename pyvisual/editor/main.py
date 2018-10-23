@@ -396,8 +396,8 @@ class Node:
         if is_input:
             assert len(connections) in (0, 1), "but is %d: %s" % (len(connections), connections)
 
-        hovered_port = t_between(port_start, port_end, io.mouse_pos)
-        hovered_connector = t_between(connector_start, connector_end, io.mouse_pos)
+        hovered_port = imgui.is_window_hovered() and t_between(port_start, port_end, io.mouse_pos)
+        hovered_connector = imgui.is_window_hovered() and t_between(connector_start, connector_end, io.mouse_pos)
         hovered = hovered_connector or hovered_port
 
         # decide port bullet color
@@ -594,7 +594,7 @@ class Node:
             imgui.end_popup()
 
         # handle clicking the node once it's selected as dragging
-        if self.hovered and imgui.is_mouse_clicked(0) \
+        if self.hovered and imgui.is_mouse_clicked(0) and not io.key_ctrl \
                 and self.selected and not self.editor.is_dragging_connection():
             # mark this node as being dragged
             self.dragging = True

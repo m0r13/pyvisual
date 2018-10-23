@@ -22,6 +22,8 @@ def read_only_widget(read_only):
     if read_only:
         imgui.pop_item_flag()
 
+WIDGET_WIDTH = 80
+
 class Bool:
     def __init__(self, node):
         pass
@@ -39,7 +41,7 @@ class Button:
 
     def show(self, value, read_only):
         with read_only_widget(read_only):
-            imgui.push_item_width(100)
+            imgui.push_item_width(WIDGET_WIDTH)
             active = value.value or time.time() - self.last_active < Button.ACTIVE_TIME
             if value.value:
                 self.last_active = time.time()
@@ -62,7 +64,7 @@ class Int:
 
     def show(self, value, read_only):
         with read_only_widget(read_only):
-            imgui.push_item_width(100)
+            imgui.push_item_width(WIDGET_WIDTH)
             changed, v = imgui.input_int("", value.value)
             if changed and not read_only:
                 value.value = int(self.clamper(v))
@@ -70,11 +72,12 @@ class Int:
 class Choice:
     def __init__(self, node, choices=[]):
         self.node = node
-        self.choices = [ "(%d) %s" % (i, choice) for i, choice in enumerate(choices) ]
+        #self.choices = [ "(%d) %s" % (i, choice) for i, choice in enumerate(choices) ]
+        self.choices = [ choice for i, choice in enumerate(choices) ]
 
     def show(self, value, read_only):
         with read_only_widget(read_only):
-            imgui.push_item_width(100)
+            imgui.push_item_width(WIDGET_WIDTH)
             changed, v = imgui.combo("", value.value, self.choices)
             if changed and not read_only:
                 value.value = v
@@ -87,7 +90,7 @@ class Float:
 
     def show(self, value, read_only):
         with read_only_widget(read_only):
-            imgui.push_item_width(100)
+            imgui.push_item_width(WIDGET_WIDTH)
             changed, v = imgui.drag_float("", value.value,
                     change_speed=0.01, min_value=self.minmax[0], max_value=self.minmax[1], format="%0.4f")
             if changed and not read_only:
@@ -165,8 +168,10 @@ class String:
 
     def show(self, value, read_only):
         with read_only_widget(read_only):
-            imgui.push_item_width(100)
+            imgui.push_item_width(WIDGET_WIDTH)
             changed, v = imgui.input_text("", value.value, 255, imgui.INPUT_TEXT_ENTER_RETURNS_TRUE)
+            if imgui.is_item_hovered() and not imgui.is_item_active():
+                imgui.set_tooltip(value.value)
             if changed:
                 value.value = v
 
@@ -176,12 +181,14 @@ class AssetPath:
 
     def show(self, value, read_only):
         with read_only_widget(read_only):
-            imgui.push_item_width(100)
+            imgui.push_item_width(WIDGET_WIDTH)
             changed, v = imgui.input_text("", value.value, 255, imgui.INPUT_TEXT_ENTER_RETURNS_TRUE)
+            if imgui.is_item_hovered() and not imgui.is_item_active():
+                imgui.set_tooltip(value.value)
             if changed:
                 value.value = v
                 return
-            imgui.push_item_width(100)
+            imgui.push_item_width(WIDGET_WIDTH)
             if imgui.button("Select file"):
                 imgui.open_popup("select_file")
 
@@ -199,7 +206,7 @@ class Texture:
         def window_size_callback(size, self=self):
             aspect = self.texture_aspect
             if aspect is None:
-                return
+                return size
 
             w, h = size
             w1, h1 = aspect * h, h
@@ -211,7 +218,7 @@ class Texture:
         self.window_size_callback = window_size_callback
 
     def show(self, value, read_only):
-        clicked, self.show_texture = imgui.checkbox("Show texture", self.show_texture)
+        clicked, self.show_texture = imgui.checkbox("Show", self.show_texture)
         if not self.show_texture:
             return
 
