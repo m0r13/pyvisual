@@ -679,15 +679,18 @@ class NodeEditor:
     # coordinate conversions
     #
     def local_to_window(self, pos):
-        return t_sub(pos, self.offset)
+        return pos[0] - self.offset[0], pos[1] - self.offset[1]
     def local_to_screen(self, pos):
-        return t_sub(t_add(self.pos, pos), self.offset)
+        return self.pos[0] + pos[0] - self.offset[0], self.pos[1] + pos[1] - self.offset[1]
     def screen_to_local(self, pos):
-        return t_add(t_sub(pos, self.pos), self.offset)
+        return pos[0] - self.pos[0] + self.offset[0], pos[1] - self.pos[1] + self.offset[1]
 
     #
     # node graph handlers
     #
+
+    def changed_ui_data(self, ui_data):
+        self.offset = ui_data.get("offset", (0, 0))
 
     def created_node(self, node, ui_data):
         #print("created node")
@@ -720,6 +723,10 @@ class NodeEditor:
             self.connections.remove(c)
             return
         assert False, "No ui connection found to remove"
+
+    # not called by graph, but by editor
+    def ui_state_changed(self):
+        self.graph.set_ui_data({"offset" : self.offset})
 
     # not called by graph, but by ui nodes
     def node_ui_state_changed(self, node):
@@ -912,6 +919,7 @@ class NodeEditor:
                 imgui.set_window_focus("ImGui Demo")
             if imgui.menu_item("reset offset")[0]:
                 self.offset = (0, 0)
+                self.ui_state_changed()
 
             imgui.end_popup()
 
@@ -1064,6 +1072,7 @@ class NodeEditor:
         # update position
         if self.dragging_position:
             self.offset = t_sub(self.offset, imgui.get_mouse_drag_delta())
+            self.ui_state_changed()
             imgui.reset_mouse_drag_delta()
         # end of dragging position
         if self.dragging_position and imgui.is_mouse_released(0):

@@ -3,6 +3,9 @@ from collections import defaultdict
 import pyvisual.node.base as node_meta
 
 class NodeGraphListener:
+    def changed_ui_data(self, ui_data):
+        pass
+
     def created_node(self, node, ui_data):
         pass
 
@@ -19,6 +22,7 @@ class NodeGraph:
     def __init__(self):
         self.listeners = []
 
+        self.ui_data = {}
         self.node_id_counter = 0
         self.nodes = {}
         self.node_ui_data = defaultdict(lambda: {})
@@ -67,13 +71,15 @@ class NodeGraph:
                 connection_data["dst_port_id"] = dst_port_id
                 connections.append(connection_data)
 
-        data = {"nodes" : nodes, "connections" : connections}
+        data = {"ui_data" : self.ui_data, "nodes" : nodes, "connections" : connections}
         return json.dumps(data, sort_keys=True, indent=4)
 
     def unserialize(self, data):
         # TODO validation!!
 
         data = json.loads(data)
+
+        self.set_ui_data(data.get("ui_data", {}), notify=True)
 
         id_map = {}
         for node_data in data.get("nodes", []):
@@ -117,6 +123,12 @@ class NodeGraph:
     #
     # functions for changing node graph
     #
+
+    def set_ui_data(self, ui_data, notify=False):
+        self.ui_data = ui_data
+        if notify:
+            for listener in self.listeners:
+                listener.changed_ui_data(ui_data)
 
     def create_node(self, spec, ui_data):
         node = spec.instantiate_node()
