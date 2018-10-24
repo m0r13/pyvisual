@@ -162,15 +162,27 @@ class Connection:
         self.src_port_id = src_port_id
         self.dst_node = dst_node
         self.dst_port_id = dst_port_id
+        self.color = 0
         self.connect()
 
     def connect(self):
         self.src_node.attach_connection(self.src_port_id, self)
         self.dst_node.attach_connection(self.dst_port_id, self)
 
+        dtype = None
+        if self.src_port_id is not None:
+            dtype = self.src_node.instance.ports[self.src_port_id]["dtype"]
+        elif self.dst_port_id is not None:
+            dtype = self.dst_node.instance.ports[self.dst_port_id]["dtype"]
+        else:
+            assert False
+        self.color = get_connection_color(dtype)
+
     def disconnect(self):
         self.src_node.detach_connection(self.src_port_id, self)
         self.dst_node.detach_connection(self.dst_port_id, self)
+
+        self.color = 0
 
     def show(self, draw_list):
         # is connected when both sides are on a node
@@ -186,14 +198,7 @@ class Connection:
             # show connection that is being dragged as active
             color = COLOR_PORT_BULLET_HOVERED
         else:
-            dtype = None
-            if self.src_port_id is not None:
-                dtype = self.src_node.instance.ports[self.src_port_id]["dtype"]
-            elif self.dst_port_id is not None:
-                dtype = self.dst_node.instance.ports[self.dst_port_id]["dtype"]
-            else:
-                assert False
-            color = get_connection_color(dtype)
+            color = self.color
 
         p0 = self.src_node.get_port_position(self.src_port_id)
         p1 = self.dst_node.get_port_position(self.dst_port_id)
@@ -315,8 +320,9 @@ class Node:
 
         # handle collapsed node
         if self.collapsed or port_id not in self.port_positions:
-            x = self.actual_pos[0] if node_meta.is_input(port_id) else self.actual_pos[0]+self.size[0]+self.padding[0]*2
-            y = self.actual_pos[1] + (self.size[1] + self.padding[1] * 2) / 2
+            pos = self.actual_pos
+            x = pos[0] if node_meta.is_input(port_id) else pos[0]+self.size[0]+self.padding[0]*2
+            y = pos[1] + (self.size[1] + self.padding[1] * 2) / 2
             return self.editor.local_to_screen((x, y))
         return self.editor.local_to_screen(self.port_positions[port_id])
 

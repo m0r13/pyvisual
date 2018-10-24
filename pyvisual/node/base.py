@@ -31,7 +31,7 @@ def port_name(port_id):
 
 def is_input(port_id):
     assert port_id[:2] in ("i_", "o_")
-    return port_id.startswith("i_")
+    return port_id[:2] == "i_"
 
 class NodeSpec:
     def __init__(self, cls=None, inputs=None, outputs=None, options={}):
