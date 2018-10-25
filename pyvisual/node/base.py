@@ -347,4 +347,7 @@ class InputValueHolder(ValueHolder):
         if self.connected_value is not None:
             return self.connected_value.value
         return self.manual_value.value
+    @value.setter
+    def value(self, value):
+        self.manual_value.value = value
 

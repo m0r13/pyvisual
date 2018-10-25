@@ -1,5 +1,6 @@
 import math
 import numpy as np
+import imgui
 from pyvisual.node.base import Node
 from pyvisual.node import dtype
 from pyvisual.editor import widget
@@ -71,7 +72,7 @@ class SetFloatVar(Node):
 
     class Meta:
         inputs = [
-            {"name" : "name", "dtype" : dtype.str, "widgets" : [widget.String], "show_connector" : False},
+            {"name" : "name", "dtype" : dtype.str, "widgets" : [widget.String], "hide" : True},
             {"name" : "input", "dtype" : dtype.float, "widgets" : [widget.Float]}
         ]
         options = {
@@ -85,10 +86,16 @@ class SetFloatVar(Node):
     def start(self, graph):
         SetFloatVar.instances[graph].add(self)
 
+    def _show_custom_ui(self):
+        imgui.push_item_width(widget.WIDGET_WIDTH)
+        changed, v = imgui.input_text("", self.get("name"), 255, imgui.INPUT_TEXT_ENTER_RETURNS_TRUE)
+        if changed:
+            self.get_input("name").value = v
+
 class GetFloatVar(Node):
     class Meta:
         inputs = [
-            {"name" : "name", "dtype" : dtype.str, "widgets" : [widget.String], "show_connector" : False}
+            {"name" : "name", "dtype" : dtype.str, "widgets" : [widget.String], "hide" : True}
         ]
         outputs = [
             {"name" : "output", "dtype" : dtype.float, "widgets" : [widget.Float], "manual_input" : True}
@@ -127,6 +134,16 @@ class GetFloatVar(Node):
 
         if self.connected_node is not None:
             self.set("output", self.connected_node.get("input"))
+
+    def _show_custom_ui(self):
+        imgui.push_item_width(widget.WIDGET_WIDTH)
+        if self.connected_node is None:
+            imgui.push_style_color(imgui.COLOR_TEXT, 1.0, 0.0, 0.0)
+        changed, v = imgui.input_text("", self.get("name"), 255, imgui.INPUT_TEXT_ENTER_RETURNS_TRUE)
+        if self.connected_node is None:
+            imgui.pop_style_color()
+        if changed:
+            self.get_input("name").value = v
 
 class InputColor(Node):
     class Meta:

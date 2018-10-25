@@ -484,7 +484,7 @@ class Node:
         io = self.io
 
         imgui.begin_group()
-        for port_id, port_spec in ports.items():
+        for port_id, port_spec in ports:
             self.show_port(draw_list, port_id, port_spec)
         imgui.end_group()
 
@@ -522,15 +522,20 @@ class Node:
         if self.spec.options["show_title"]:
             imgui.text(self.spec.name)
         if not self.collapsed:
-            if len(self.instance.input_ports):
-                imgui.begin_group()
-                self.show_ports(draw_list, self.instance.input_ports)
-                imgui.end_group()
-                imgui.same_line()
+            inputs = list(filter(lambda port: not port[1]["hide"], self.instance.input_ports.items()))
+            outputs = list(filter(lambda port: not port[1]["hide"], self.instance.output_ports.items()))
 
-            if len(self.instance.output_ports):
+            if len(inputs):
                 imgui.begin_group()
-                self.show_ports(draw_list, self.instance.output_ports)
+                self.show_ports(draw_list, inputs)
+                imgui.end_group()
+                # TODO hacked layout
+                if len(outputs) or self.spec.name == "Plot":
+                    imgui.same_line()
+
+            if len(outputs):
+                imgui.begin_group()
+                self.show_ports(draw_list, outputs)
                 imgui.end_group()
 
             # show custom node ui
