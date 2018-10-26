@@ -1,6 +1,8 @@
+import os
 import math
 import numpy as np
 import traceback
+import random
 from pyvisual.node.base import Node
 from pyvisual.node import dtype
 from pyvisual.editor import widget
@@ -27,10 +29,16 @@ class LoadTexture(Node):
         self.status = None
 
     def _evaluate(self):
-        print("load texture", self.get("path"))
+        path = self.get("path")
+        print("load texture", path)
+        if not path:
+            self.set("output", None)
+            self.status = None
+            return
+
         texture = None
         try:
-            texture = np.array(Image.open(self.get("path"))).view(gloo.Texture2D)
+            texture = np.array(Image.open(path)).view(gloo.Texture2D)
         except Exception as e:
             self.set("output", None)
             self.status = str(e)
@@ -86,6 +94,67 @@ class LoadMask(Node):
             imgui.text("Error. (?)")
             if imgui.is_item_hovered():
                 imgui.set_tooltip(self.status)
+
+class LoadTextures(Node):
+    class Meta:
+        inputs = [
+            {"name" : "wildcard", "dtype" : dtype.assetpath, "widgets" : [lambda node: widget.AssetPath(node, "image")]},
+            {"name" : "next", "dtype" : dtype.event, "widgets" : [widget.Button]},
+            {"name" : "shuffle", "dtype" : dtype.bool, "widgets" : [widget.Bool], "default" : 1.0},
+        ]
+        outputs = [
+            {"name" : "texture", "dtype" : dtype.tex2d, "widgets" : [widget.Texture]},
+            {"name" : "last_texture", "dtype" : dtype.tex2d, "widgets" : [widget.Texture]},
+            {"name" : "next", "dtype" : dtype.event, "widgets" : [widget.Button]},
+        ]
+        options = {
+            "category" : "input"
+        }
+
+    def __init__(self):
+        super().__init__()
+
+        self.textures = []
+        self.index = 0
+
+        self.last_texture = None
+
+    def _load_texture(self, path):
+        texture = np.array(Image.open(path)).view(gloo.Texture2D)
+        texture.activate()
+        texture.deactivate()
+        return texture
+
+    def _evaluate(self):
+        if self.have_inputs_changed("wildcard"):
+            self.textures = []
+            self.index = 0
+            wildcard = self.get("wildcard")
+            if wildcard:
+                for path in assets.glob_paths(wildcard):
+                    self.textures.append([os.path.join(assets.ASSET_PATH, path), None])
+
+        if len(self.textures) == 0:
+            self.set("texture", None)
+            self.set("last_texture", None)
+            return
+
+        if self.get("next"):
+            shuffle = self.get("shuffle")
+            self.last_texture = self.textures[self.index][1]
+            if shuffle and len(self.textures) > 1:
+                self.index = (self.index + random.randint(1, len(self.textures) - 1)) % len(self.textures)
+            else:
+                self.index = (self.index + 1) % len(self.textures)
+            print(self.index, self.textures[self.index][0])
+        self.set("next", self.get("next"))
+
+        tt = self.textures[self.index]
+        if tt[1] is None:
+            print("Loading %s" % tt[0])
+            tt[1] = self._load_texture(tt[0])
+        self.set("texture", tt[1])
+        self.set("last_texture", self.last_texture)
 
 class RenderNode(Node):
     class Meta:
@@ -428,11 +497,40 @@ class MaskShadow(Shader):
         program["uColor"] = self.get("color")
         program["uOffset"] = [self.get("x"), self.get("y")]
 
-class Mix(Shader):
+class MixTexture(Shader):
     class Meta:
         inputs = [
-            {"name" : "source", "dtype" : dtype.tex2d, "widgets" : [widget.Texture]},
+            {"name" : "destination", "dtype" : dtype.tex2d, "widgets" : [widget.Texture]},
             {"name" : "alpha", "dtype" : dtype.float, "widgets" : [lambda node: widget.Float(node, minmax=[0, 1])]},
+        ]
+        options = {
+            "virtual" : True,
+            "category" : "shader"
+        }
+
+    def set_uniforms(self, program):
+        source = self.get("destination")
+        if source is None:
+            program["uDestinationTexture"] = dummy
+            return
+        program["uDestinationTexture"] = source
+        program["uAlpha"] = self.get("alpha")
+
+class LerpMixTexture(MixTexture):
+    class Meta:
+        options = {
+            "virtual" : False,
+            "category" : "shader"
+        }
+
+    def __init__(self):
+        super().__init__("common/passthrough.vert", "transition/lerp.frag")
+
+class MoveMixTexture(MixTexture):
+    class Meta:
+        inputs = [
+            {"name" : "x", "dtype" : dtype.float, "widgets" : [widget.Float], "default" : 1.0},
+            {"name" : "y", "dtype" : dtype.float, "widgets" : [widget.Float], "default" : 1.0},
         ]
         options = {
             "virtual" : False,
@@ -440,13 +538,57 @@ class Mix(Shader):
         }
 
     def __init__(self):
-        super().__init__("common/passthrough.vert", "post/mix.frag")
+        super().__init__("common/passthrough.vert", "transition/move.frag")
 
     def set_uniforms(self, program):
-        source = self.get("source")
-        if source is None:
-            program["uSource"] = dummy
-            return
-        program["uSource"] = source
-        program["uAlpha"] = self.get("alpha")
+        super().set_uniforms(program)
+
+        program["uDirection"] = (self.get("x"), self.get("y"))
+
+class SwipeMixTexture(MixTexture):
+    class Meta:
+        inputs = [
+            {"name" : "x", "dtype" : dtype.float, "widgets" : [widget.Float], "default" : 1.0},
+            {"name" : "y", "dtype" : dtype.float, "widgets" : [widget.Float], "default" : 1.0},
+        ]
+        options = {
+            "virtual" : False,
+            "category" : "shader"
+        }
+
+    def __init__(self):
+        super().__init__("common/passthrough.vert", "transition/swipe.frag")
+
+    def set_uniforms(self, program):
+        super().set_uniforms(program)
+
+        program["uDirection"] = (self.get("x"), self.get("y"))
+
+# TODO node restructuring
+from pyvisual.node.generate import scalable_timer
+class TransitionTimer(Node):
+    class Meta:
+        inputs = [
+            {"name" : "duration", "dtype" : dtype.float, "widgets" : [widget.Float], "default" : 1.0},
+            {"name" : "trigger", "dtype" : dtype.event, "widgets" : [widget.Button]},
+            {"name" : "reverse", "dtype" : dtype.bool, "widgets" : [widget.Bool], "default" : 1.0},
+        ]
+        outputs = [
+            {"name" : "output", "dtype" : dtype.float, "widgets" : [widget.Float]},
+        ]
+
+    def __init__(self):
+        super().__init__()
+
+        self.time = scalable_timer()
+
+    def _evaluate(self):
+        duration = self.get("duration")
+        scale = float("inf") if duration == 0.0 else 1.0 / duration
+        t = 0.0
+        if self.get("reverse"):
+            t = max(0.0, 1.0 - self.time(scale, self.get("trigger")))
+        else:
+            t = min(1.0, self.time(scale, self.get("trigger")))
+        self.set("output", t)
 
