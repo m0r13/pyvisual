@@ -1,3 +1,4 @@
+from collections import OrderedDict
 from pyvisual.node.base import Node
 from pyvisual.node import dtype
 from pyvisual.editor import widget
@@ -169,6 +170,73 @@ class BlendFloat(Node):
 
     def _evaluate(self):
         self.set("output", (1.0-self.get("alpha")) * self.get("a") + self.get("alpha") * self.get("b"))
+
+UNARY_OPS = OrderedDict(
+    id=lambda x: x,
+    abs=lambda x: abs(x),
+    neg=lambda x: -x,
+    oneminus=lambda x: 1.0 - x,
+)
+
+class UnaryOpFloat(Node):
+    class Meta:
+        inputs = [
+            {"name" : "op", "dtype" : dtype.int, "widgets" : [lambda node: widget.Choice(node, choices=list(UNARY_OPS.keys()))]},
+            {"name" : "x", "dtype" : dtype.float, "widgets" : [widget.Float]},
+        ]
+        outputs = [
+            {"name" : "out", "dtype" : dtype.float, "widgets" : [widget.Float]}
+        ]
+        options = {
+            "show_title" : False
+        }
+
+    OPS = list(UNARY_OPS.values())
+
+    def _evaluate(self):
+        op = int(self.get("op"))
+        if op < 0 or op >= len(self.OPS):
+            op = 0
+
+        x = self.get("x")
+        self.set("out", self.OPS[op](x))
+
+BINARY_OPS = OrderedDict(
+    add=lambda a, b: a + b,
+    sub=lambda a, b: a - b,
+    mul=lambda a, b: a * b,
+    div=lambda a, b: a / b,
+
+    min=lambda a, b: min(a, b),
+    max=lambda a, b: max(a, b),
+
+    divmod=lambda a, b: a - (a % b)
+)
+
+class BinaryOpFloat(Node):
+    class Meta:
+        inputs = [
+            {"name" : "op", "dtype" : dtype.int, "widgets" : [lambda node: widget.Choice(node, choices=list(BINARY_OPS.keys()))]},
+            {"name" : "a", "dtype" : dtype.float, "widgets" : [widget.Float]},
+            {"name" : "b", "dtype" : dtype.float, "widgets" : [widget.Float]},
+        ]
+        outputs = [
+            {"name" : "out", "dtype" : dtype.float, "widgets" : [widget.Float]}
+        ]
+        options = {
+            "show_title" : False
+        }
+
+    OPS = list(BINARY_OPS.values())
+
+    def _evaluate(self):
+        op = int(self.get("op"))
+        if op < 0 or op >= len(self.OPS):
+            op = 0
+
+        a = self.get("a")
+        b = self.get("b")
+        self.set("out", self.OPS[op](a, b))
 
 class Lambda(Node):
     class Meta:
