@@ -1,6 +1,7 @@
 import json
-from collections import defaultdict
+from collections import defaultdict, OrderedDict
 import pyvisual.node.base as node_meta
+from pyvisual.node import dtype
 
 class NodeGraphListener:
     def changed_ui_data(self, ui_data):
@@ -17,6 +18,19 @@ class NodeGraphListener:
 
     def removed_connection(self, src_node, src_port_id, dst_node, dst_port_id):
         pass
+
+# prepare for serialization
+def format_port_spec(port_spec):
+    port_spec = dict(port_spec)
+    port_spec["dtype"] = port_spec["dtype"].name
+    return port_spec
+
+def unformat_port_spec(port_spec):
+    port_spec = dict(port_spec)
+    dtype_name = port_spec["dtype"]
+    port_spec["dtype"] = dtype.dtypes.get(dtype_name, None)
+    assert port_spec["dtype"] is not None, "Unable to find dtype of name %s" % dtype_name
+    return port_spec
 
 class NodeGraph:
     def __init__(self):
@@ -60,6 +74,11 @@ class NodeGraph:
                 manual_values[port_id] = dtype.base_type.serialize(value.value)
             node_data["manual_values"] = manual_values
 
+            custom_ports = []
+            for port_id, port_spec in node.custom_ports.items():
+                custom_ports.append((port_id, format_port_spec(port_spec)))
+            node_data["custom_ports"] = custom_ports
+
             nodes.append(node_data)
 
         for src_node, outgoing_connections in self.connections_from.items():
@@ -82,23 +101,53 @@ class NodeGraph:
         self.set_ui_data(data.get("ui_data", {}), notify=True)
 
         id_map = {}
+        ignore_ids = set()
         for node_data in data.get("nodes", []):
-            assert not node_data["id"] in id_map
-            spec = node_meta.NodeSpec.from_name(node_data["type"])
+            assert "id" in node_data
+            node_save_id = node_data["id"]
+            assert not node_save_id in id_map
+
+            spec = None
+            try:
+                spec = node_meta.NodeSpec.from_name(node_data["type"])
+            except node_meta.NodeTypeNotFound as e:
+                print("### Warning: Unable to find node type %s for node #%d. Ignoring it." % (node_data["type"], node_save_id))
+                ignore_ids.add(node_save_id)
+                continue
+
             node = self.create_node(spec, node_data["ui_data"])
-            id_map[node_data["id"]] = node.id
+            id_map[node_save_id] = node.id
+
+            for port_id, port_spec in node_data.get("custom_ports", []):
+                port_spec = unformat_port_spec(port_spec)
+
+                if node_meta.is_input(port_id):
+                    node.custom_input_ports[port_id] = port_spec
+                else:
+                    node.custom_output_ports[port_id] = port_spec
+            node.update_ports()
 
             for port_id, json_value in node_data.get("manual_values", {}).items():
+                if port_id not in node.ports:
+                    print("### Warning: Unknown port %s of node %s #%d (trying to set manual value). Ignoring it." % (port_id, spec.name, node_save_id))
+                    continue
                 port_spec = node.ports[port_id]
                 dtype = port_spec["dtype"]
                 node.initial_manual_values[port_id] = dtype.base_type.unserialize(json_value)
-                #node.get_value(port_id).manual_value.value = dtype.base_type.unserialize(json_value)
 
         for connection_data in data.get("connections", []):
-            src_node_id = id_map[connection_data["src_node_id"]]
+            src_node_id = connection_data["src_node_id"]
+            dst_node_id = connection_data["dst_node_id"]
             src_port_id = connection_data["src_port_id"]
-            dst_node_id = id_map[connection_data["dst_node_id"]]
             dst_port_id = connection_data["dst_port_id"]
+
+            if src_node_id in ignore_ids or dst_node_id in ignore_ids:
+                print("### Warning: Ignoring connection %s (node #%d) -> %s (node #%d) because at least one node is to be ignored." \
+                        % (src_port_id, src_node_id, dst_port_id, dst_node_id))
+                continue
+
+            src_node_id = id_map[src_node_id]
+            dst_node_id = id_map[dst_node_id]
 
             src_node = self.nodes[src_node_id]
             dst_node = self.nodes[dst_node_id]

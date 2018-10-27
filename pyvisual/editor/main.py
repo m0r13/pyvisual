@@ -200,6 +200,15 @@ class Connection:
         else:
             color = self.color
 
+        # TODO this is a bit flawed currently
+        # remove itself when input/output port doesn't exist
+        # (in case one was a custom port and got removed by the node itself)
+        # actually the nodes should somehow trigger the connection removal itself
+        if (isinstance(self.src_node, Node) and not self.src_port_id in self.src_node.instance.ports) \
+                or (isinstance(self.dst_node, Node) and not self.dst_port_id in self.dst_node.instance.ports):
+            self.editor.remove_connection(self)
+            return
+
         p0 = self.src_node.get_port_position(self.src_port_id)
         p1 = self.dst_node.get_port_position(self.dst_port_id)
 
@@ -312,9 +321,6 @@ class Node:
             port_spec = self.instance.ports[port_id]
             dtype = port_spec["dtype"]
             dtype_args = port_spec["dtype_args"]
-            #assert len(port_spec["widgets"]) in (0, 1), "Only up to one widget allowed for now"
-            #widget_func = port_spec["widgets"][0] if len(port_spec["widgets"]) else (lambda *args: None)
-            #self.widgets[port_id] = widget_func(self)
             self.widgets[port_id] = node_widget.create_widget(dtype, dtype_args, self)
         return self.widgets[port_id]
 

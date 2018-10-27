@@ -33,6 +33,22 @@ def is_input(port_id):
     assert port_id[:2] in ("i_", "o_")
     return port_id[:2] == "i_"
 
+def prepare_port_spec(port_spec, is_input):
+    assert "name" in port_spec
+    assert "dtype" in port_spec
+    port_spec.setdefault("dtype_args", {})
+    port_spec.setdefault("widgets", [])
+    port_spec.setdefault("default", None)
+    port_spec.setdefault("hide", False)
+
+    if is_input:
+        port_spec.setdefault("manual_input", True)
+    else:
+        port_spec.setdefault("manual_input", False)
+
+class NodeTypeNotFound(Exception):
+    pass
+
 class NodeSpec:
     def __init__(self, cls=None, inputs=None, outputs=None, options={}):
         self.cls = cls
@@ -96,17 +112,8 @@ class NodeSpec:
         spec.options.setdefault("category", "")
         spec.options.setdefault("show_title", True)
         for i, port_spec in enumerate(spec.inputs + spec.outputs):
-            assert "name" in port_spec
-            assert "dtype" in port_spec
-            port_spec.setdefault("dtype_args", {})
-            port_spec.setdefault("widgets", [])
-            port_spec.setdefault("default", None)
-            port_spec.setdefault("hide", False)
-
-            if i < len(spec.inputs):
-                port_spec.setdefault("manual_input", True)
-            else:
-                port_spec.setdefault("manual_input", False)
+            is_input = i < len(spec.inputs)
+            prepare_port_spec(port_spec, is_input)
         return spec
 
     @staticmethod
@@ -114,7 +121,7 @@ class NodeSpec:
         for cls in NodeMeta.node_types:
             if cls.__name__ == node_name:
                 return NodeSpec.from_cls(cls)
-        assert False, "Unable to find node with name %s" % node_name
+        raise NodeTypeNotFound()
 
 class Node(metaclass=NodeMeta):
     class Meta:
@@ -141,7 +148,7 @@ class Node(metaclass=NodeMeta):
         self.input_ports.update(self.base_input_ports)
         self.input_ports.update(self.custom_input_ports)
         assert(len(set(self.base_input_ports.keys()).intersection(self.custom_input_ports.keys())) == 0)
-        
+
         self.output_ports = OrderedDict()
         self.output_ports.update(self.base_output_ports)
         self.output_ports.update(self.custom_output_ports)
@@ -150,6 +157,24 @@ class Node(metaclass=NodeMeta):
         self.ports = OrderedDict()
         self.ports.update(self.input_ports)
         self.ports.update(self.output_ports)
+
+        for port_id in list(self.values.keys()):
+            if port_id in self.ports:
+                continue
+            # disconnect/delete value here
+            # TODO
+            # we just delete the value here for now
+            # but a possible connection should be properly removed too
+            # (right now the removed value is detected by the ui-node and then the connection is deleted there)
+            del self.values[port_id]
+
+    @property
+    def custom_ports(self):
+        # kinda slow, don't use where performance matters!
+        p = OrderedDict()
+        p.update(self.custom_input_ports)
+        p.update(self.custom_output_ports)
+        return p
 
     @classmethod
     def get_sub_nodes(cls, include_self=True):
@@ -208,6 +233,7 @@ class Node(metaclass=NodeMeta):
         default_value = dtype_args["default"] if "default" in dtype_args else dtype.default()
         if port_id in self.initial_manual_values:
             default_value = self.initial_manual_values[port_id]
+            del self.initial_manual_values[port_id]
 
         value = None
         if is_input:
