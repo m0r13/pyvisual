@@ -31,14 +31,14 @@ class LFO(Node):
 
     class Meta:
         inputs = [
-            {"name" : "type", "dtype" : dtype.int,  "widgets" : [lambda node: widget.Choice(node, choices=list(LFO_OSCILLATORS.keys()))],  "default" : 2},
-            {"name" : "length", "dtype" : dtype.float, "widgets" : [lambda node: widget.Float(node, minmax=[0.0001, float("inf")])], "default" : 1.0},
-            {"name" : "phase", "dtype" : dtype.float, "widgets" : [widget.Float], "default" : 0.0},
-            {"name" : "min", "dtype" : dtype.float, "widgets" : [widget.Float], "default" : 0.0},
-            {"name" : "max", "dtype" : dtype.float, "widgets" : [widget.Float], "default" : 1.0},
+            {"name" : "type", "dtype" : dtype.int, "dtype_args" : {"default" : 2, "choices" : list(LFO_OSCILLATORS.keys())}},
+            {"name" : "length", "dtype" : dtype.float, "dtype_args" : {"default" : 1.0, "range" : [0.000001, float("inf")]}},
+            {"name" : "phase", "dtype" : dtype.float, "dtype_args" : {"default" : 0.0}},
+            {"name" : "min", "dtype" : dtype.float, "dtype_args" : {"default" : 0.0}},
+            {"name" : "max", "dtype" : dtype.float, "dtype_args" : {"default" : 1.0}},
         ]
         outputs = [
-            {"name" : "output", "dtype" : dtype.float, "widgets" : [widget.Float]}
+            {"name" : "output", "dtype" : dtype.float}
         ]
         options = {
             "category" : "generate",
@@ -64,11 +64,11 @@ class LFO(Node):
 class Time(Node):
     class Meta:
         inputs = [
-            {"name" : "factor", "dtype" : dtype.float, "widgets" : [widget.Float], "default" : 1.0},
-            {"name" : "reset", "dtype" : dtype.event, "widgets" : [widget.Button]}
+            {"name" : "factor", "dtype" : dtype.float, "dtype_args" : {"default" : 1.0}},
+            {"name" : "reset", "dtype" : dtype.event}
         ]
         outputs = [
-            {"name" : "output", "dtype" : dtype.float, "widgets" : [widget.Float]}
+            {"name" : "output", "dtype" : dtype.float}
         ]
         options = {
             "category" : "generate",

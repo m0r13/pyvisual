@@ -22,7 +22,7 @@ class AudioData:
 class InputPulseAudio(Node):
     class Meta:
         outputs = [
-            {"name" : "output", "dtype" : dtype.audio, "widgets" : []}
+            {"name" : "output", "dtype" : dtype.audio}
         ]
         options = {
             "category" : "audio"
@@ -56,17 +56,33 @@ class InputPulseAudio(Node):
         imgui.dummy(0, 10)
         imgui.text("Sourced %d blocks" % self.blocks)
 
+        sinks = self.pulse.sinks
+        current_sink_index = self.pulse.current_sink_index
+        current_sink_name = sinks.get(current_sink_index, "<unknown>")
+        #print("Unkown sink %s out of %s" % (repr(current_sink_index), sinks))
+
+        imgui.push_item_width(250)
+        if imgui.begin_combo("", current_sink_name):
+            for index, sink_name in sinks.items():
+                is_selected = index == current_sink_index
+                opened, selected = imgui.selectable(sink_name, is_selected)
+                if opened:
+                    self.pulse.current_sink_index = index
+                if is_selected:
+                    imgui.set_item_default_focus()
+            imgui.end_combo()
+
 AUDIO_FILTER_TYPES = ["low", "high"]
 class AudioFilter(Node):
     class Meta:
         inputs = [
             {"name" : "input", "dtype" : dtype.audio},
-            {"name" : "type", "dtype" : dtype.int, "widgets" : [lambda node: widget.Choice(node, choices=AUDIO_FILTER_TYPES)]},
-            {"name" : "order", "dtype" : dtype.int, "widgets" : [lambda node: widget.Int(node, minmax=[1, 10])], "default" : 5},
-            {"name" : "cutoff", "dtype" : dtype.float, "widgets" : [lambda node: widget.Float(node, minmax=[0.0, 20000.0])], "default" : 1000.0},
+            {"name" : "type", "dtype" : dtype.int, "dtype_args" : {"choices" : AUDIO_FILTER_TYPES}},
+            {"name" : "order", "dtype" : dtype.int, "dtype_args" : {"default" : 5, "range" : [1, 10]}},
+            {"name" : "cutoff", "dtype" : dtype.float, "dtype_args" : {"default" : 1000.0, "range" : [0.0, 20000.0]}}
         ]
         outputs = [
-            {"name" : "output", "dtype" : dtype.audio, "widgets" : []}
+            {"name" : "output", "dtype" : dtype.audio}
         ]
         options = {
             "category" : "audio"
@@ -130,7 +146,7 @@ class SampleAudio(Node):
             {"name" : "input", "dtype" : dtype.audio}
         ]
         outputs = [
-            {"name" : "output", "dtype" : dtype.float, "widgets" : [widget.Float]},
+            {"name" : "output", "dtype" : dtype.float},
         ]
         options = {
             "category" : "audio"
@@ -151,11 +167,11 @@ class SampleAudio(Node):
 class Gain(Node):
     class Meta:
         inputs = [
-            {"name" : "input", "dtype" : dtype.float, "widgets" : [widget.Float]},
-            {"name" : "gain", "dtype" : dtype.float, "widgets" : [widget.Float]}
+            {"name" : "input", "dtype" : dtype.float},
+            {"name" : "gain", "dtype" : dtype.float}
         ]
         outputs = [
-            {"name" : "output", "dtype" : dtype.float, "widgets" : [widget.Float]}
+            {"name" : "output", "dtype" : dtype.float}
         ]
 
     def _evaluate(self):
@@ -168,13 +184,13 @@ class Gain(Node):
 class VUNormalizer(Node):
     class Meta:
         inputs = [
-            {"name" : "input", "dtype" : dtype.float, "widgets" : [widget.Float]},
-            {"name" : "beat_on", "dtype" : dtype.bool, "widgets" : [widget.Bool]},
-            {"name" : "min", "dtype" : dtype.float, "widgets" : [widget.Float], "default" : 0.5},
-            {"name" : "max", "dtype" : dtype.float, "widgets" : [widget.Float], "default" : 0.9},
+            {"name" : "input", "dtype" : dtype.float},
+            {"name" : "beat_on", "dtype" : dtype.bool},
+            {"name" : "min", "dtype" : dtype.float, "dtype_args" : {"default" : 0.5}},
+            {"name" : "max", "dtype" : dtype.float, "dtype_args" : {"default" : 0.9}},
         ]
         outputs = [
-            {"name" : "output", "dtype" : dtype.float, "widgets" : [widget.Float]}
+            {"name" : "output", "dtype" : dtype.float}
         ]
 
     def __init__(self):
@@ -226,11 +242,11 @@ def sliding_window_average(n=4):
 class BeatAnalyzer(Node):
     class Meta:
         inputs = [
-            {"name" : "beat_on", "dtype" : dtype.bool, "widgets" : [widget.Button]},
+            {"name" : "beat_on", "dtype" : dtype.bool},
         ]
         outputs = [
-            {"name" : "beat_running", "dtype" : dtype.bool, "widgets" : [widget.Bool]},
-            {"name" : "bpm", "dtype" : dtype.float, "widgets" : [widget.Float]},
+            {"name" : "beat_running", "dtype" : dtype.bool},
+            {"name" : "bpm", "dtype" : dtype.float},
         ]
 
     def __init__(self):

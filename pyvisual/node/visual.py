@@ -14,10 +14,10 @@ from PIL import Image
 class LoadTexture(Node):
     class Meta:
         inputs = [
-            {"name" : "path", "dtype" : dtype.assetpath, "widgets" : [lambda node: widget.AssetPath(node, "image")]},
+            {"name" : "path", "dtype" : dtype.assetpath, "dtype_args" : {"prefix" : "image"}},
         ]
         outputs = [
-            {"name" : "output", "dtype" : dtype.tex2d, "widgets" : [widget.Texture]},
+            {"name" : "output", "dtype" : dtype.tex2d},
         ]
         options = {
             "category" : "input"
@@ -59,10 +59,10 @@ class LoadTexture(Node):
 class LoadMask(Node):
     class Meta:
         inputs = [
-            {"name" : "path", "dtype" : dtype.assetpath, "widgets" : [lambda node: widget.AssetPath(node, "../data/image/mask")]},
+            {"name" : "path", "dtype" : dtype.assetpath, "dtype_args" : {"prefix" : "../data/image/mask"}},
         ]
         outputs = [
-            {"name" : "output", "dtype" : dtype.tex2d, "widgets" : [widget.Texture]},
+            {"name" : "output", "dtype" : dtype.tex2d},
         ]
         options = {
             "category" : "input"
@@ -98,14 +98,14 @@ class LoadMask(Node):
 class LoadTextures(Node):
     class Meta:
         inputs = [
-            {"name" : "wildcard", "dtype" : dtype.assetpath, "widgets" : [lambda node: widget.AssetPath(node, "image")]},
-            {"name" : "next", "dtype" : dtype.event, "widgets" : [widget.Button]},
-            {"name" : "shuffle", "dtype" : dtype.bool, "widgets" : [widget.Bool], "default" : 1.0},
+            {"name" : "wildcard", "dtype" : dtype.assetpath, "dtype_args" : {"prefix" : "image"}},
+            {"name" : "next", "dtype" : dtype.event},
+            {"name" : "shuffle", "dtype" : dtype.bool, "dtype_args" : {"default" : 1.0}},
         ]
         outputs = [
-            {"name" : "texture", "dtype" : dtype.tex2d, "widgets" : [widget.Texture]},
-            {"name" : "last_texture", "dtype" : dtype.tex2d, "widgets" : [widget.Texture]},
-            {"name" : "next", "dtype" : dtype.event, "widgets" : [widget.Button]},
+            {"name" : "texture", "dtype" : dtype.tex2d},
+            {"name" : "last_texture", "dtype" : dtype.tex2d},
+            {"name" : "next", "dtype" : dtype.event},
         ]
         options = {
             "category" : "input"
@@ -223,14 +223,14 @@ dummy = np.zeros((1, 1, 4), dtype=np.uint8).view(gloo.Texture2D)
 class Shader(RenderNode):
     class Meta:
         inputs = [
-            {"name" : "enabled", "dtype" : dtype.bool, "widgets" : [widget.Bool], "default" : 1.0},
+            {"name" : "enabled", "dtype" : dtype.bool, "dtype_args" : {"default" : 1.0}},
             {"name" : "transformUV", "dtype" : dtype.mat4},
             {"name" : "sizeref", "dtype" : dtype.tex2d},
-            {"name" : "input", "dtype" : dtype.tex2d, "widgets" : [widget.Texture]},
+            {"name" : "input", "dtype" : dtype.tex2d},
         ]
         outputs = [
-            {"name" : "enabled", "dtype" : dtype.bool, "widgets" : [widget.Bool], "default" : 1.0},
-            {"name" : "output", "dtype" : dtype.tex2d, "widgets" : [widget.Texture]}
+            {"name" : "enabled", "dtype" : dtype.bool, "dtype_args" : {"default" : 1.0}},
+            {"name" : "output", "dtype" : dtype.tex2d}
         ]
         options = {
             "virtual" : True
@@ -320,7 +320,7 @@ class Shader(RenderNode):
 class Mask(Shader):
     class Meta:
         inputs = [
-            {"name" : "mask", "dtype" : dtype.tex2d, "widgets" : [widget.Texture]},
+            {"name" : "mask", "dtype" : dtype.tex2d},
         ]
         options = {
             "virtual" : False,
@@ -339,11 +339,11 @@ class Mask(Shader):
 class Blend(RenderNode):
     class Meta:
         inputs = [
-            {"name" : "input1", "dtype" : dtype.tex2d, "widgets" : [widget.Texture]},
-            {"name" : "input2", "dtype" : dtype.tex2d, "widgets" : [widget.Texture]},
+            {"name" : "input1", "dtype" : dtype.tex2d},
+            {"name" : "input2", "dtype" : dtype.tex2d},
         ]
         outputs = [
-            {"name" : "output", "dtype" : dtype.tex2d, "widgets" : [widget.Texture]}
+            {"name" : "output", "dtype" : dtype.tex2d}
         ]
         options = {
             "virtual" : False
@@ -400,10 +400,9 @@ class Blend(RenderNode):
 class Glitch(Shader):
     class Meta:
         inputs = [
-            #{"name" : "mode", "dtype" : dtype.int, "widgets" : [lambda node: widget.Choice(node, choices=["0", "1", "2"])]},
-            {"name" : "time", "dtype" : dtype.float, "widgets" : [widget.Float]},
-            {"name" : "amount", "dtype" : dtype.float, "widgets" : [widget.Float]},
-            {"name" : "speed", "dtype" : dtype.float, "widgets" : [widget.Float]},
+            {"name" : "time", "dtype" : dtype.float},
+            {"name" : "amount", "dtype" : dtype.float},
+            {"name" : "speed", "dtype" : dtype.float},
         ]
         options = {
             "virtual" : False,
@@ -423,7 +422,7 @@ WRAPPING_MODES_GL = [gl.GL_REPEAT, gl.GL_MIRRORED_REPEAT, gl.GL_CLAMP_TO_EDGE, g
 class SampleTexture(Shader):
     class Meta:
         inputs = [
-            {"name" : "wrapping", "dtype" : dtype.int, "widgets" : [lambda node: widget.Choice(node, choices=WRAPPING_MODES)], "default" : 1},
+            {"name" : "wrapping", "dtype" : dtype.int, "dtype_args" : {"default" : 1, "choices" : WRAPPING_MODES}},
         ]
         options = {
             "virtual" : False,
@@ -443,7 +442,7 @@ class SampleTexture(Shader):
 class Mirror(Shader):
     class Meta:
         inputs = [
-            {"name" : "mode", "dtype" : dtype.int, "widgets" : [lambda node: widget.Int(node, minmax=[0, 3])]},
+            {"name" : "mode", "dtype" : dtype.int, "dtype_args" : {"range" : [0, 3]}},
         ]
         options = {
             "virtual" : False,
@@ -459,9 +458,9 @@ class Mirror(Shader):
 class PolarMirror(Shader):
     class Meta:
         inputs = [
-            {"name" : "axis_angle", "dtype" : dtype.float, "widgets" : [widget.Float], "default" : 0.0},
-            {"name" : "angle", "dtype" : dtype.float, "widgets" : [widget.Float], "default" : 0.0},
-            {"name" : "segments", "dtype" : dtype.int, "widgets" : [widget.Int], "default" : 5.0},
+            {"name" : "axis_angle", "dtype" : dtype.float, "dtype_args" : {"default" : 0.0}},
+            {"name" : "angle", "dtype" : dtype.float, "dtype_args" : {"default" : 0.0}},
+            {"name" : "segments", "dtype" : dtype.int, "dtype_args" : {"default" : 5.0}},
         ]
         options = {
             "virtual" : False,
@@ -481,9 +480,9 @@ class PolarMirror(Shader):
 class MaskShadow(Shader):
     class Meta:
         inputs = [
-            {"name" : "color", "dtype" : dtype.color, "widgets" : [widget.Color], "default" : np.array([0.8, 0.8, 0.8, 0.5])},
-            {"name" : "x", "dtype" : dtype.float, "widgets" : [widget.Float], "default" : 5.0},
-            {"name" : "y", "dtype" : dtype.float, "widgets" : [widget.Float], "default" : 5.0},
+            {"name" : "color", "dtype" : dtype.color, "dtype_args" : {"default" : np.array([0.8, 0.8, 0.8, 0.5])}},
+            {"name" : "x", "dtype" : dtype.float, "dtype_args" : {"default" : 5.0}},
+            {"name" : "y", "dtype" : dtype.float, "dtype_args" : {"default" : 5.0}},
         ]
         options = {
             "virtual" : False,
@@ -500,8 +499,8 @@ class MaskShadow(Shader):
 class MixTexture(Shader):
     class Meta:
         inputs = [
-            {"name" : "destination", "dtype" : dtype.tex2d, "widgets" : [widget.Texture]},
-            {"name" : "alpha", "dtype" : dtype.float, "widgets" : [lambda node: widget.Float(node, minmax=[0, 1])]},
+            {"name" : "destination", "dtype" : dtype.tex2d},
+            {"name" : "alpha", "dtype" : dtype.float, "dtype_args" : {"range" : [0, 1]}},
         ]
         options = {
             "virtual" : True,
@@ -529,8 +528,8 @@ class LerpMixTexture(MixTexture):
 class MoveMixTexture(MixTexture):
     class Meta:
         inputs = [
-            {"name" : "x", "dtype" : dtype.float, "widgets" : [widget.Float], "default" : 1.0},
-            {"name" : "y", "dtype" : dtype.float, "widgets" : [widget.Float], "default" : 1.0},
+            {"name" : "x", "dtype" : dtype.float, "dtype_args" : {"default" : 1.0}},
+            {"name" : "y", "dtype" : dtype.float, "dtype_args" : {"default" : 1.0}},
         ]
         options = {
             "virtual" : False,
@@ -548,8 +547,8 @@ class MoveMixTexture(MixTexture):
 class SwipeMixTexture(MixTexture):
     class Meta:
         inputs = [
-            {"name" : "x", "dtype" : dtype.float, "widgets" : [widget.Float], "default" : 1.0},
-            {"name" : "y", "dtype" : dtype.float, "widgets" : [widget.Float], "default" : 1.0},
+            {"name" : "x", "dtype" : dtype.float, "dtype_args" : {"default" : 1.0}},
+            {"name" : "y", "dtype" : dtype.float, "dtype_args" : {"default" : 1.0}},
         ]
         options = {
             "virtual" : False,
@@ -569,12 +568,12 @@ from pyvisual.node.generate import scalable_timer
 class TransitionTimer(Node):
     class Meta:
         inputs = [
-            {"name" : "duration", "dtype" : dtype.float, "widgets" : [widget.Float], "default" : 1.0},
-            {"name" : "trigger", "dtype" : dtype.event, "widgets" : [widget.Button]},
-            {"name" : "reverse", "dtype" : dtype.bool, "widgets" : [widget.Bool], "default" : 1.0},
+            {"name" : "duration", "dtype" : dtype.float, "dtype_args" : {"default" : 1.0}},
+            {"name" : "trigger", "dtype" : dtype.event},
+            {"name" : "reverse", "dtype" : dtype.bool, "dtype_args" : {"default" : 1.0}},
         ]
         outputs = [
-            {"name" : "output", "dtype" : dtype.float, "widgets" : [widget.Float]},
+            {"name" : "output", "dtype" : dtype.float},
         ]
 
     def __init__(self):

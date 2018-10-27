@@ -98,6 +98,7 @@ class NodeSpec:
         for i, port_spec in enumerate(spec.inputs + spec.outputs):
             assert "name" in port_spec
             assert "dtype" in port_spec
+            port_spec.setdefault("dtype_args", {})
             port_spec.setdefault("widgets", [])
             port_spec.setdefault("default", None)
             port_spec.setdefault("hide", False)
@@ -128,27 +129,27 @@ class Node(metaclass=NodeMeta):
 
         self.initial_manual_values = {}
         self.values = {}
+
+        self.base_input_ports = OrderedDict(self.spec.input_ports)
+        self.base_output_ports = OrderedDict(self.spec.output_ports)
+        self.custom_input_ports = OrderedDict()
+        self.custom_output_ports = OrderedDict()
+        self.update_ports()
+
+    def update_ports(self):
+        self.input_ports = OrderedDict()
+        self.input_ports.update(self.base_input_ports)
+        self.input_ports.update(self.custom_input_ports)
+        assert(len(set(self.base_input_ports.keys()).intersection(self.custom_input_ports.keys())) == 0)
         
-        self.input_ports = OrderedDict(self.spec.input_ports)
-        self.output_ports = OrderedDict(self.spec.output_ports)
+        self.output_ports = OrderedDict()
+        self.output_ports.update(self.base_output_ports)
+        self.output_ports.update(self.custom_output_ports)
+        assert(len(set(self.base_output_ports.keys()).intersection(self.custom_output_ports.keys())) == 0)
+
         self.ports = OrderedDict()
         self.ports.update(self.input_ports)
         self.ports.update(self.output_ports)
-
-    #@property
-    #def ports(self):
-    #    ports = OrderedDict()
-    #    ports.update(self.input_ports)
-    #    ports.update(self.output_ports)
-    #    return ports
-
-    #@property
-    #def input_ports(self):
-    #    return OrderedDict(self.spec.input_ports)
-
-    #@property
-    #def output_ports(self):
-    #    return OrderedDict(self.spec.output_ports)
 
     @classmethod
     def get_sub_nodes(cls, include_self=True):
@@ -202,24 +203,20 @@ class Node(metaclass=NodeMeta):
         port_spec = self.ports[port_id]
         is_input = port_id.startswith("i_")
 
+        dtype = port_spec["dtype"]
+        dtype_args = port_spec["dtype_args"]
+        default_value = dtype_args["default"] if "default" in dtype_args else dtype.default()
+        if port_id in self.initial_manual_values:
+            default_value = self.initial_manual_values[port_id]
+
         value = None
         if is_input:
-            default = port_spec["default"]
-            if default is None:
-                default = port_spec["dtype"].default()
-            if port_id in self.initial_manual_values:
-                default = self.initial_manual_values[port_id]
-            manual_input = SettableValueHolder(default)
+            manual_input = SettableValueHolder(default_value)
             manual_input.has_changed = True
             value = InputValueHolder(manual_input)
             value.has_changed = True
         else:
-            default = port_spec["default"]
-            if default is None:
-                default = port_spec["dtype"].default()
-            if port_id in self.initial_manual_values:
-                default = self.initial_manual_values[port_id]
-            value = SettableValueHolder(default)
+            value = SettableValueHolder(default_value)
         return value
 
     def get_input(self, name):

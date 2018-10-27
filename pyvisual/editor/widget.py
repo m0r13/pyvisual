@@ -2,7 +2,7 @@
 import os
 import fnmatch
 import pyvisual.node as node_meta
-from pyvisual.node import dtype
+import pyvisual.node.dtype as dtypes
 from pyvisual import assets
 import time
 import contextlib
@@ -23,6 +23,30 @@ def read_only_widget(read_only):
         imgui.pop_item_flag()
 
 WIDGET_WIDTH = 80
+
+def create_widget(dtype, dtype_args, node):
+    widget_types = {
+        dtypes.bool: Bool,
+        dtypes.event: Button,
+        dtypes.int: Int,
+        dtypes.float: Float,
+        dtypes.color: Color,
+        dtypes.str: String,
+        dtypes.tex2d: Texture,
+    }
+
+    # TODO maybe just pass dtype_args to widget?
+    kwargs = {}
+    if "range" in dtype_args:
+        kwargs["minmax"] = dtype_args["range"]
+
+    if dtype == dtypes.int and "choices" in dtype_args:
+        return Choice(node, choices=dtype_args["choices"])
+    if dtype == dtypes.assetpath:
+        return AssetPath(node, prefix=dtype_args.get("prefix", ""))
+    if dtype in widget_types:
+        return widget_types[dtype](node, **kwargs)
+    return None
 
 class Bool:
     def __init__(self, node):

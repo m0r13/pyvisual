@@ -37,3 +37,7 @@ mat4 = Type("mat4", base_mat4, lambda: np.eye(4, dtype=np.float32))
 tex2d = Type("tex2d", base_tex2d, lambda: None)
 audio = Type("audio", base_audio, lambda: None)
 
+dtypes = {}
+for dtype in (bool, event, int, float, str, assetpath, color, mat4, tex2d, audio):
+    dtypes[dtype.name] = dtype
+

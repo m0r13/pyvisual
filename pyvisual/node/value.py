@@ -9,7 +9,7 @@ from collections import defaultdict
 class InputBool(Node):
     class Meta:
         outputs = [
-            {"name" : "output", "dtype" : dtype.bool, "widgets" : [widget.Bool], "manual_input" : True}
+            {"name" : "output", "dtype" : dtype.bool, "manual_input" : True}
         ]
         options = {
             "category" : "input",
@@ -19,7 +19,7 @@ class InputBool(Node):
 class OutputBool(Node):
     class Meta:
         inputs = [
-            {"name" : "input", "dtype" : dtype.bool, "widgets" : [widget.Bool], "manual_input" : False}
+            {"name" : "input", "dtype" : dtype.bool, "manual_input" : False}
         ]
         options = {
             "category" : "output",
@@ -29,7 +29,7 @@ class OutputBool(Node):
 class InputEvent(Node):
     class Meta:
         outputs = [
-            {"name" : "output", "dtype" : dtype.event, "widgets" : [widget.Button], "manual_input" : True}
+            {"name" : "output", "dtype" : dtype.event, "manual_input" : True}
         ]
         options = {
             "category" : "input",
@@ -39,7 +39,7 @@ class InputEvent(Node):
 class OutputEvent(Node):
     class Meta:
         inputs = [
-            {"name" : "input", "dtype" : dtype.event, "widgets" : [widget.Button], "manual_input" : False}
+            {"name" : "input", "dtype" : dtype.event, "manual_input" : False}
         ]
         options = {
             "category" : "output",
@@ -49,7 +49,7 @@ class OutputEvent(Node):
 class InputFloat(Node):
     class Meta:
         outputs = [
-            {"name" : "output", "dtype" : dtype.float, "widgets" : [widget.Float], "manual_input" : True}
+            {"name" : "output", "dtype" : dtype.float, "manual_input" : True}
         ]
         options = {
             "category" : "input",
@@ -59,7 +59,7 @@ class InputFloat(Node):
 class OutputFloat(Node):
     class Meta:
         inputs = [
-            {"name" : "input", "dtype" : dtype.float, "widgets" : [widget.Float], "manual_input" : False}
+            {"name" : "input", "dtype" : dtype.float, "manual_input" : False}
         ]
         options = {
             "category" : "output",
@@ -72,8 +72,8 @@ class SetFloatVar(Node):
 
     class Meta:
         inputs = [
-            {"name" : "name", "dtype" : dtype.str, "widgets" : [widget.String], "hide" : True},
-            {"name" : "input", "dtype" : dtype.float, "widgets" : [widget.Float]}
+            {"name" : "name", "dtype" : dtype.str, "hide" : True},
+            {"name" : "input", "dtype" : dtype.float}
         ]
         options = {
             "category" : "output",
@@ -95,10 +95,10 @@ class SetFloatVar(Node):
 class GetFloatVar(Node):
     class Meta:
         inputs = [
-            {"name" : "name", "dtype" : dtype.str, "widgets" : [widget.String], "hide" : True}
+            {"name" : "name", "dtype" : dtype.str, "hide" : True}
         ]
         outputs = [
-            {"name" : "output", "dtype" : dtype.float, "widgets" : [widget.Float], "manual_input" : True}
+            {"name" : "output", "dtype" : dtype.float, "manual_input" : True}
         ]
         options = {
             "category" : "input",
@@ -148,7 +148,7 @@ class GetFloatVar(Node):
 class InputColor(Node):
     class Meta:
         outputs = [
-            {"name" : "output", "dtype" : dtype.color, "widgets" : [widget.Color], "manual_input" : True},
+            {"name" : "output", "dtype" : dtype.color, "manual_input" : True},
         ]
         options = {
             "category" : "input",
@@ -158,7 +158,7 @@ class InputColor(Node):
 class OutputColor(Node):
     class Meta:
         inputs = [
-            {"name" : "input", "dtype" : dtype.color, "widgets" : [widget.Color], "manual_input" : False},
+            {"name" : "input", "dtype" : dtype.color, "manual_input" : False},
         ]
         options = {
             "category" : "output",
@@ -168,13 +168,13 @@ class OutputColor(Node):
 class Float2Color(Node):
     class Meta:
         inputs = [
-            {"name" : "r", "dtype" : dtype.float, "widgets" : [lambda node: widget.Float(node, minmax=(0.0, 1.0))]},
-            {"name" : "g", "dtype" : dtype.float, "widgets" : [lambda node: widget.Float(node, minmax=(0.0, 1.0))]},
-            {"name" : "b", "dtype" : dtype.float, "widgets" : [lambda node: widget.Float(node, minmax=(0.0, 1.0))]},
-            {"name" : "a", "dtype" : dtype.float, "widgets" : [lambda node: widget.Float(node, minmax=(0.0, 1.0))], "default" : 1.0},
+            {"name" : "r", "dtype" : dtype.float, "dtype_args" : {"range" : (0.0, 1.0)}},
+            {"name" : "g", "dtype" : dtype.float, "dtype_args" : {"range" : (0.0, 1.0)}},
+            {"name" : "b", "dtype" : dtype.float, "dtype_args" : {"range" : (0.0, 1.0)}},
+            {"name" : "a", "dtype" : dtype.float, "dtype_args" : {"range" : (0.0, 1.0), "default" : 1.0}},
         ]
         outputs = [
-            {"name" : "color", "dtype" : dtype.color, "widgets" : [widget.Color]},
+            {"name" : "color", "dtype" : dtype.color},
         ]
         options = {
             "category" : "conversion",
@@ -192,13 +192,13 @@ class Float2Color(Node):
 class Color2Float(Node):
     class Meta:
         inputs = [
-            {"name" : "input", "dtype" : dtype.color, "widgets" : [widget.Color]},
+            {"name" : "input", "dtype" : dtype.color},
         ]
         outputs = [
-            {"name" : "r", "dtype" : dtype.float, "widgets" : [lambda node: widget.Float(node, minmax=(0.0, 1.0))]},
-            {"name" : "g", "dtype" : dtype.float, "widgets" : [lambda node: widget.Float(node, minmax=(0.0, 1.0))]},
-            {"name" : "b", "dtype" : dtype.float, "widgets" : [lambda node: widget.Float(node, minmax=(0.0, 1.0))]},
-            {"name" : "a", "dtype" : dtype.float, "widgets" : [lambda node: widget.Float(node, minmax=(0.0, 1.0))], "default" : 1.0},
+            {"name" : "r", "dtype" : dtype.float, "dtype_args" : {"range" : (0.0, 1.0)}},
+            {"name" : "g", "dtype" : dtype.float, "dtype_args" : {"range" : (0.0, 1.0)}},
+            {"name" : "b", "dtype" : dtype.float, "dtype_args" : {"range" : (0.0, 1.0)}},
+            {"name" : "a", "dtype" : dtype.float, "dtype_args" : {"range" : (0.0, 1.0), "default" : 1.0}},
         ]
         options = {
             "category" : "conversion",
@@ -215,8 +215,8 @@ class Color2Float(Node):
 class Scale(Node):
     class Meta:
         inputs = [
-            {"name" : "x", "dtype" : dtype.float, "widgets" : [widget.Float], "default" : 1.0},
-            {"name" : "y", "dtype" : dtype.float, "widgets" : [widget.Float], "default" : 1.0},
+            {"name" : "x", "dtype" : dtype.float, "dtype_args" : {"default" : 1.0}},
+            {"name" : "y", "dtype" : dtype.float, "dtype_args" : {"default" : 1.0}},
         ]
         outputs = [
             {"name" : "output", "dtype" : dtype.mat4},
@@ -232,7 +232,7 @@ class Scale(Node):
 class Rotate(Node):
     class Meta:
         inputs = [
-            {"name" : "theta", "dtype" : dtype.float, "widgets" : [widget.Float]},
+            {"name" : "theta", "dtype" : dtype.float},
         ]
         outputs = [
             {"name" : "output", "dtype" : dtype.mat4},
@@ -251,8 +251,8 @@ class Rotate(Node):
 class Translate(Node):
     class Meta:
         inputs = [
-            {"name" : "x", "dtype" : dtype.float, "widgets" : [widget.Float]},
-            {"name" : "y", "dtype" : dtype.float, "widgets" : [widget.Float]},
+            {"name" : "x", "dtype" : dtype.float},
+            {"name" : "y", "dtype" : dtype.float},
         ]
         outputs = [
             {"name" : "output", "dtype" : dtype.mat4},

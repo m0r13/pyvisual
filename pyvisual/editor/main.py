@@ -310,9 +310,12 @@ class Node:
         if not port_id in self.widgets:
             assert port_id in self.instance.ports, "Port %s must be in instance ports" % port_id
             port_spec = self.instance.ports[port_id]
-            assert len(port_spec["widgets"]) in (0, 1), "Only up to one widget allowed for now"
-            widget_func = port_spec["widgets"][0] if len(port_spec["widgets"]) else (lambda *args: None)
-            self.widgets[port_id] = widget_func(self)
+            dtype = port_spec["dtype"]
+            dtype_args = port_spec["dtype_args"]
+            #assert len(port_spec["widgets"]) in (0, 1), "Only up to one widget allowed for now"
+            #widget_func = port_spec["widgets"][0] if len(port_spec["widgets"]) else (lambda *args: None)
+            #self.widgets[port_id] = widget_func(self)
+            self.widgets[port_id] = node_widget.create_widget(dtype, dtype_args, self)
         return self.widgets[port_id]
 
     def get_port_position(self, port_id):

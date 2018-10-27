@@ -12,11 +12,11 @@ import time
 class Or(Node):
     class Meta:
         inputs = [
-            {"name" : "v0", "dtype" : dtype.bool, "widgets" : [widget.Bool]},
-            {"name" : "v1", "dtype" : dtype.bool, "widgets" : [widget.Bool]}
+            {"name" : "v0", "dtype" : dtype.bool},
+            {"name" : "v1", "dtype" : dtype.bool}
         ]
         outputs = [
-            {"name" : "output", "dtype" : dtype.event, "widgets" : [widget.Bool]}
+            {"name" : "output", "dtype" : dtype.event}
         ]
         options = {
             "category" : "math",
@@ -29,11 +29,11 @@ class Or(Node):
 class And(Node):
     class Meta:
         inputs = [
-            {"name" : "v0", "dtype" : dtype.bool, "widgets" : [widget.Bool]},
-            {"name" : "v1", "dtype" : dtype.bool, "widgets" : [widget.Bool]}
+            {"name" : "v0", "dtype" : dtype.bool},
+            {"name" : "v1", "dtype" : dtype.bool}
         ]
         outputs = [
-            {"name" : "output", "dtype" : dtype.bool, "widgets" : [widget.Bool]}
+            {"name" : "output", "dtype" : dtype.bool}
         ]
         options = {
             "category" : "math",
@@ -46,10 +46,10 @@ class And(Node):
 class Not(Node):
     class Meta:
         inputs = [
-            {"name" : "v", "dtype" : dtype.bool, "widgets" : [widget.Bool]},
+            {"name" : "v", "dtype" : dtype.bool},
         ]
         outputs= [
-            {"name" : "output", "dtype" : dtype.bool, "widgets" : [widget.Bool]},
+            {"name" : "output", "dtype" : dtype.bool},
         ]
         options = {
             "category" : "math",
@@ -65,12 +65,12 @@ COMPARE_MODES = ["v0 < v1", "v0 <= v1", "v0 > v1", "v0 >= v1"]
 class Compare(Node):
     class Meta:
         inputs = [
-            {"name" : "mode", "dtype" : dtype.int, "widgets" : [lambda node: widget.Choice(node, choices=COMPARE_MODES)]},
-            {"name" : "v0", "dtype" : dtype.float, "widgets" : [widget.Float]},
-            {"name" : "v1", "dtype" : dtype.float, "widgets" : [widget.Float]},
+            {"name" : "mode", "dtype" : dtype.int, "dtype_args" : {"choices" : COMPARE_MODES}},
+            {"name" : "v0", "dtype" : dtype.float},
+            {"name" : "v1", "dtype" : dtype.float},
         ]
         outputs = [
-            {"name" : "output", "dtype" : dtype.bool, "widgets" : [widget.Bool]}
+            {"name" : "output", "dtype" : dtype.bool}
         ]
         options = {
             "category" : "math",
@@ -89,13 +89,13 @@ class Compare(Node):
 class Edge(Node):
     class Meta:
         inputs = [
-            {"name" : "value", "dtype" : dtype.float, "widgets" : [widget.Float]},
-            {"name" : "threshold", "dtype" : dtype.float, "widgets" : [widget.Float]}
+            {"name" : "value", "dtype" : dtype.float},
+            {"name" : "threshold", "dtype" : dtype.float}
         ]
         outputs = [
-            {"name" : "rising", "dtype" : dtype.event, "widgets" : [widget.Button]},
-            {"name" : "falling", "dtype" : dtype.event, "widgets" : [widget.Button]},
-            {"name" : "combined", "dtype" : dtype.event, "widgets" : [widget.Button]}
+            {"name" : "rising", "dtype" : dtype.event},
+            {"name" : "falling", "dtype" : dtype.event},
+            {"name" : "combined", "dtype" : dtype.event}
         ]
         options = {
             "category" : "math"
@@ -118,7 +118,7 @@ class Edge(Node):
 class Latch(Node):
     class Meta:
         inputs = [
-            {"name" : "enabled", "dtype" : dtype.bool, "widgets" : [widget.Bool], "default" : True}
+            {"name" : "enabled", "dtype" : dtype.bool, "dtype_args" : {"default" : True}}
         ]
         options = {
             "virtual" : True
@@ -131,10 +131,10 @@ class Latch(Node):
 class FloatLatch(Latch):
     class Meta:
         inputs = [
-            {"name" : "input", "dtype" : dtype.float, "widgets" : [widget.Float]}
+            {"name" : "input", "dtype" : dtype.float}
         ]
         outputs = [
-            {"name" : "output", "dtype" : dtype.float, "widgets" : [widget.Float]}
+            {"name" : "output", "dtype" : dtype.float}
         ]
         options = {
             "virtual" : False,
@@ -144,10 +144,10 @@ class FloatLatch(Latch):
 class ColorLatch(Latch):
     class Meta:
         inputs = [
-            {"name" : "input", "dtype" : dtype.color, "widgets" : [widget.Color]}
+            {"name" : "input", "dtype" : dtype.color}
         ]
         outputs = [
-            {"name" : "output", "dtype" : dtype.color, "widgets" : [widget.Color]}
+            {"name" : "output", "dtype" : dtype.color}
         ]
         options = {
             "virtual" : False,
@@ -157,12 +157,12 @@ class ColorLatch(Latch):
 class BlendFloat(Node):
     class Meta:
         inputs = [
-            {"name" : "a", "dtype" : dtype.float, "widgets" : [widget.Float]},
-            {"name" : "b", "dtype" : dtype.float, "widgets" : [widget.Float]},
-            {"name" : "alpha", "dtype" : dtype.float, "widgets" : [lambda node: widget.Float(node, minmax=[0.0, 1.0])]}
+            {"name" : "a", "dtype" : dtype.float},
+            {"name" : "b", "dtype" : dtype.float},
+            {"name" : "alpha", "dtype" : dtype.float, "dtype_args" : {"range" : [0.0, 1.0]}}
         ]
         outputs = [
-            {"name" : "output", "dtype" : dtype.float, "widgets" : [widget.Float]}
+            {"name" : "output", "dtype" : dtype.float}
         ]
         options = {
             "category" : "math"
@@ -181,11 +181,11 @@ UNARY_OPS = OrderedDict(
 class UnaryOpFloat(Node):
     class Meta:
         inputs = [
-            {"name" : "op", "dtype" : dtype.int, "widgets" : [lambda node: widget.Choice(node, choices=list(UNARY_OPS.keys()))]},
-            {"name" : "x", "dtype" : dtype.float, "widgets" : [widget.Float]},
+            {"name" : "op", "dtype" : dtype.int, "dtype_args" : {"choices" : list(UNARY_OPS.keys())}},
+            {"name" : "x", "dtype" : dtype.float},
         ]
         outputs = [
-            {"name" : "out", "dtype" : dtype.float, "widgets" : [widget.Float]}
+            {"name" : "out", "dtype" : dtype.float}
         ]
         options = {
             "show_title" : False
@@ -216,12 +216,12 @@ BINARY_OPS = OrderedDict(
 class BinaryOpFloat(Node):
     class Meta:
         inputs = [
-            {"name" : "op", "dtype" : dtype.int, "widgets" : [lambda node: widget.Choice(node, choices=list(BINARY_OPS.keys()))]},
-            {"name" : "a", "dtype" : dtype.float, "widgets" : [widget.Float]},
-            {"name" : "b", "dtype" : dtype.float, "widgets" : [widget.Float]},
+            {"name" : "op", "dtype" : dtype.int, "dtype_args" : {"choices" : list(BINARY_OPS.keys())}},
+            {"name" : "a", "dtype" : dtype.float},
+            {"name" : "b", "dtype" : dtype.float},
         ]
         outputs = [
-            {"name" : "out", "dtype" : dtype.float, "widgets" : [widget.Float]}
+            {"name" : "out", "dtype" : dtype.float}
         ]
         options = {
             "show_title" : False
@@ -241,7 +241,7 @@ class BinaryOpFloat(Node):
 class Lambda(Node):
     class Meta:
         inputs = [
-            {"name" : "lambda", "dtype" : dtype.str, "widgets" : [], "default" : "x", "hide" : True},
+            {"name" : "lambda", "dtype" : dtype.str, "dtype_args" : {"default" : "x"}, "hide" : True},
         ]
         options = {
             "virtual" : True,
@@ -302,10 +302,10 @@ class Lambda(Node):
 class FloatLambda(Lambda):
     class Meta:
         inputs = [
-            {"name" : "input", "dtype" : dtype.float, "widgets" : [widget.Float]},
+            {"name" : "input", "dtype" : dtype.float},
         ]
         outputs = [
-            {"name" : "output", "dtype" : dtype.float, "widgets" : [widget.Float]}
+            {"name" : "output", "dtype" : dtype.float}
         ]
         options = {
             "category" : "math",
@@ -315,10 +315,10 @@ class FloatLambda(Lambda):
 class ColorLambda(Lambda):
     class Meta:
         inputs = [
-            {"name" : "input", "dtype" : dtype.color, "widgets" : [widget.Color]},
+            {"name" : "input", "dtype" : dtype.color},
         ]
         outputs = [
-            {"name" : "output", "dtype" : dtype.color, "widgets" : [widget.Color]}
+            {"name" : "output", "dtype" : dtype.color}
         ]
         options = {
             "category" : "math",
@@ -334,10 +334,10 @@ from pyvisual.audio import analyzer
 class Plot(Node):
     class Meta:
         inputs = [
-            {"name" : "input", "dtype" : dtype.float, "widgets" : [widget.Float]},
-            {"name" : "min", "dtype" : dtype.float, "widgets" : [widget.Float], "default" : 0.0},
-            {"name" : "max", "dtype" : dtype.float, "widgets" : [widget.Float], "default" : 1.0},
-            {"name" : "time", "dtype" : dtype.float, "widgets" : [widget.Float], "default" : 5.0},
+            {"name" : "input", "dtype" : dtype.float},
+            {"name" : "min", "dtype" : dtype.float, "dtype_args" : {"default" : 0.0}},
+            {"name" : "max", "dtype" : dtype.float, "dtype_args" : {"default" : 1.0}},
+            {"name" : "time", "dtype" : dtype.float, "dtype_args" : {"default" : 5.0}},
         ]
         options = {
             "category" : "math",
