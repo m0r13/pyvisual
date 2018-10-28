@@ -831,12 +831,16 @@ class NodeEditor:
     # misc stuff
     #
 
-    def timing_callback(self, editor_time, processing_time):
+    def timing_callback(self, editor_time, imgui_render_time, processing_time):
         self.fps = app.clock.get_default().get_fps()
         self.editor_time = editor_time
         self.editor_time_relative = editor_time / (1.0 / self.fps)
+        self.imgui_render_time = imgui_render_time
+        self.imgui_render_time_relative = imgui_render_time / (1.0 / self.fps)
         self.processing_time = processing_time
         self.processing_time_relative = processing_time / (1.0 / self.fps)
+        self.total_time = editor_time + imgui_render_time + processing_time
+        self.total_time_relative = self.total_time / (1.0 / self.fps)
 
     #
     # rendering and interaction handling
