@@ -48,81 +48,102 @@ def create_widget(dtype, dtype_args, node):
         return widget_types[dtype](node, **kwargs)
     return None
 
-class Bool:
-    def __init__(self, node):
+class Widget:
+    def __init__(self):
+        pass
+
+    def _show(self):
         pass
 
     def show(self, value, read_only):
-        with read_only_widget(read_only):
-            clicked, state = imgui.checkbox("", value.value)
-            if clicked and not read_only:
-                value.value = state
+        # TODO also "gray-out" widget
+        if read_only:
+            imgui.push_item_flag(imgui.ITEM_DISABLED, True)
 
-class Button:
+        self._show(value, read_only)
+
+        if read_only:
+            imgui.pop_item_flag()
+
+class Bool(Widget):
+    def __init__(self, node):
+        super().__init__()
+
+    def _show(self, value, read_only):
+        clicked, state = imgui.checkbox("", value.value)
+        if clicked and not read_only:
+            value.value = state
+
+class Button(Widget):
     ACTIVE_TIME = 0.1
     def __init__(self, node):
+        super().__init__()
+
         self.last_active = 0
 
-    def show(self, value, read_only):
-        with read_only_widget(read_only):
-            imgui.push_item_width(WIDGET_WIDTH)
-            active = value.value or time.time() - self.last_active < Button.ACTIVE_TIME
-            if value.value:
-                self.last_active = time.time()
-            imgui.push_style_color(imgui.COLOR_BUTTON_ACTIVE, 1.0, 0.0, 0.0, 1.0)
-            if active:
-                imgui.push_style_color(imgui.COLOR_BUTTON, 1.0, 0.0, 0.0, 1.0)
-                imgui.push_style_color(imgui.COLOR_BUTTON_HOVERED, 1.0, 0.0, 0.0, 1.0)
-            clicked = imgui.button("Click me")
-            if active:
-                imgui.pop_style_color(2)
-            imgui.pop_style_color(1)
-            if not read_only:
-                value.value = 1.0 if clicked else 0.0
+    def _show(self, value, read_only):
+        imgui.push_item_width(WIDGET_WIDTH)
+        active = value.value or time.time() - self.last_active < Button.ACTIVE_TIME
+        if value.value:
+            self.last_active = time.time()
+        imgui.push_style_color(imgui.COLOR_BUTTON_ACTIVE, 1.0, 0.0, 0.0, 1.0)
+        if active:
+            imgui.push_style_color(imgui.COLOR_BUTTON, 1.0, 0.0, 0.0, 1.0)
+            imgui.push_style_color(imgui.COLOR_BUTTON_HOVERED, 1.0, 0.0, 0.0, 1.0)
+        clicked = imgui.button("Click me")
+        if active:
+            imgui.pop_style_color(2)
+        imgui.pop_style_color(1)
+        if not read_only:
+            value.value = 1.0 if clicked else 0.0
 
-class Int:
+class Int(Widget):
     def __init__(self, node, minmax=[float("-inf"), float("inf")]):
+        super().__init__()
+
         self.node = node
         self.minmax = minmax
         self.clamper = clamper(minmax)
 
-    def show(self, value, read_only):
-        with read_only_widget(read_only):
-            imgui.push_item_width(WIDGET_WIDTH)
-            changed, v = imgui.input_int("", value.value)
-            if changed and not read_only:
-                value.value = int(self.clamper(v))
+    def _show(self, value, read_only):
+        imgui.push_item_width(WIDGET_WIDTH)
+        changed, v = imgui.input_int("", value.value)
+        if changed and not read_only:
+            value.value = int(self.clamper(v))
 
-class Choice:
+class Choice(Widget):
     def __init__(self, node, choices=[]):
+        super().__init__()
+
         self.node = node
         #self.choices = [ "(%d) %s" % (i, choice) for i, choice in enumerate(choices) ]
         self.choices = [ choice for i, choice in enumerate(choices) ]
 
-    def show(self, value, read_only):
-        with read_only_widget(read_only):
-            imgui.push_item_width(WIDGET_WIDTH)
-            changed, v = imgui.combo("", value.value, self.choices)
-            if changed and not read_only:
-                value.value = v
+    def _show(self, value, read_only):
+        imgui.push_item_width(WIDGET_WIDTH)
+        changed, v = imgui.combo("", value.value, self.choices)
+        if changed and not read_only:
+            value.value = v
 
-class Float:
+class Float(Widget):
     def __init__(self, node, minmax=[float("-inf"), float("inf")]):
+        super().__init__()
+
         self.node = node
         self.minmax = minmax
         self.clamper = clamper(minmax)
 
-    def show(self, value, read_only):
-        with read_only_widget(read_only):
-            imgui.push_item_width(WIDGET_WIDTH)
-            changed, v = imgui.drag_float("", value.value,
-                    change_speed=0.01, min_value=self.minmax[0], max_value=self.minmax[1], format="%0.4f")
-            if changed and not read_only:
-                value.value = self.clamper(v)
+    def _show(self, value, read_only):
+        imgui.push_item_width(WIDGET_WIDTH)
+        changed, v = imgui.drag_float("", value.value,
+                change_speed=0.01, min_value=self.minmax[0], max_value=self.minmax[1], format="%0.4f")
+        if changed and not read_only:
+            value.value = self.clamper(v)
 
-class Color:
+class Color(Widget):
     def __init__(self, node):
-        pass
+        super().__init__()
+
     def show(self, value, read_only):
         # don't show it as read-only for now
         # as the color picker dialog might be nice for inspecting the color
@@ -186,42 +207,44 @@ def _imgui_pick_file_menu(base_path, wildcard="*"):
     except:
         imgui.text("Unable to open dir")
 
-class String:
+class String(Widget):
     def __init__(self, node):
-        pass
+        super().__init__()
 
-    def show(self, value, read_only):
-        with read_only_widget(read_only):
-            imgui.push_item_width(WIDGET_WIDTH)
-            changed, v = imgui.input_text("", value.value, 255, imgui.INPUT_TEXT_ENTER_RETURNS_TRUE)
-            if imgui.is_item_hovered() and not imgui.is_item_active():
-                imgui.set_tooltip(value.value)
-            if changed:
-                value.value = v
+    def _show(self, value, read_only):
+        imgui.push_item_width(WIDGET_WIDTH)
+        changed, v = imgui.input_text("", value.value, 255, imgui.INPUT_TEXT_ENTER_RETURNS_TRUE)
+        if imgui.is_item_hovered() and not imgui.is_item_active():
+            imgui.set_tooltip(value.value)
+        if changed:
+            value.value = v
 
-class AssetPath:
+class AssetPath(Widget):
     def __init__(self, node, prefix=""):
+        super().__init__()
+
         self.prefix = prefix
 
-    def show(self, value, read_only):
-        with read_only_widget(read_only):
-            imgui.push_item_width(WIDGET_WIDTH)
-            changed, v = imgui.input_text("", value.value, 255, imgui.INPUT_TEXT_ENTER_RETURNS_TRUE)
-            if imgui.is_item_hovered() and not imgui.is_item_active():
-                imgui.set_tooltip(value.value)
-            if changed:
-                value.value = v
-                return
-            imgui.push_item_width(WIDGET_WIDTH)
-            if imgui.button("Select file"):
-                imgui.open_popup("select_file")
+    def _show(self, value, read_only):
+        imgui.push_item_width(WIDGET_WIDTH)
+        changed, v = imgui.input_text("", value.value, 255, imgui.INPUT_TEXT_ENTER_RETURNS_TRUE)
+        if imgui.is_item_hovered() and not imgui.is_item_active():
+            imgui.set_tooltip(value.value)
+        if changed:
+            value.value = v
+            return
+        imgui.push_item_width(WIDGET_WIDTH)
+        if imgui.button("Select file"):
+            imgui.open_popup("select_file")
 
-            path = imgui_pick_file("select_file", assets.ASSET_PATH + "/" + self.prefix)
-            if path is not None:
-                value.value = path
+        path = imgui_pick_file("select_file", assets.ASSET_PATH + "/" + self.prefix)
+        if path is not None:
+            value.value = path
 
-class Texture:
+class Texture(Widget):
     def __init__(self, node):
+        super().__init__()
+
         self.node = node
         self.show_texture = False
 
