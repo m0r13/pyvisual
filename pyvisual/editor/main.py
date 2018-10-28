@@ -681,8 +681,12 @@ class NodeEditor:
         self.fps = 0.0
         self.editor_time = 0.0
         self.editor_time_relative = 0.0
+        self.imgui_render_time = 0.0
+        self.imgui_render_time_relative = 0.0
         self.processing_time = 0.0
         self.processing_time_relative = 0.0
+        self.total_time = 0.0
+        self.total_time_relative = 0.0
         self.show_test_window = False
 
         self.io = imgui.get_io()
@@ -1130,7 +1134,9 @@ class NodeEditor:
         imgui.same_line()
         imgui.text("fps: %.2f" % self.fps)
         imgui.text("editor time: %.2f ms ~ %.2f%%" % (self.editor_time * 1000.0, self.editor_time_relative * 100.0))
+        imgui.text("imgui render time: %.2f ms ~ %.2f%%" % (self.imgui_render_time * 1000.0, self.imgui_render_time_relative * 100.0))
         imgui.text("processing time: %.2f ms ~ %.2f%%" % (self.processing_time * 1000.0, self.processing_time_relative * 100.0))
+        imgui.text("total: %.2f ms ~ %.2f%%" % (self.total_time * 1000.0, self.total_time_relative * 100.0))
 
         # gather "graph" of node instances
         #imgui.text("")
@@ -1187,12 +1193,13 @@ node_specs = list(filter(lambda s: not s.options["virtual"], node_specs))
 editor = NodeEditor(node_specs)
 
 editor_time = 0.0
+imgui_render_time = 0.0
 processing_time = 0.0
 time_count = 0
 
 @window.event
 def on_draw(event):
-    global editor_time, processing_time, time_count
+    global editor_time, imgui_render_time, processing_time, time_count
 
     # evaluate nodes
     start = time.time()
@@ -1207,18 +1214,20 @@ def on_draw(event):
     imgui.new_frame()
 
     editor.show()
+    editor_time += time.time() - start
 
+    start = time.time()
     imgui.render()
     draw = imgui.get_draw_data()
     imgui_renderer.render(draw)
-
-    editor_time += time.time() - start
+    imgui_render_time += time.time() - start
 
     # performance stats
     time_count += 1
-    if time_count >= 30:
-        editor.timing_callback(editor_time / time_count, processing_time / time_count)
+    if time_count >= 60:
+        editor.timing_callback(editor_time / time_count, imgui_render_time / time_count, processing_time / time_count)
         editor_time = 0.0
+        imgui_render_time = 0.0
         processing_time = 0.0
         time_count = 0
 
