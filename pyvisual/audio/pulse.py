@@ -8,6 +8,7 @@ import ctypes
 import time
 import sys
 import threading
+from collections import OrderedDict
 
 from pyvisual.audio.pulseaudio import *
 
@@ -17,7 +18,16 @@ class PulseAudioContext(threading.Thread):
         self._mainloop = None
         self._mainloop_api = None
         self._context = None
+
+        self._stream_buffer_attr = pa_buffer_attr()
+        self._stream_buffer_attr.fragsize = 1024
+        self._stream_buffer_attr.maxlength = -1
         self._stream = None
+
+        self._sinks = OrderedDict()
+        self._current_sink_index = -1
+        self._set_current_sink_index = -1
+        self._set_sink_index = None
 
         self._todo = []
         self._todo_index = []
@@ -25,6 +35,27 @@ class PulseAudioContext(threading.Thread):
         self._sample_rate = sample_rate
         self._block_size = block_size
         self._process_block = process_block
+
+    @property
+    def sinks(self):
+        return self._sinks
+
+    @property
+    def current_sink_index(self):
+        return self._current_sink_index
+    @current_sink_index.setter
+    def current_sink_index(self, index):
+        assert self._stream is not None
+        assert index in self._sinks
+
+        print("Connecting stream to sink %d" % index)
+        self._set_sink_index = index
+        pa_stream_disconnect(self._stream)
+        #status = pa_stream_connect_record(self._stream, bytes(self._sinks[index], "ascii"), ctypes.pointer(self._stream_buffer_attr), PA_STREAM_ADJUST_LATENCY)
+        #print(status)
+        #print(pa_strerror(status))
+        #assert status == 0
+        #self._current_sink_index = index
 
     def _quit(self, ret):
         self._mainloop_api.contents.quit(self._mainloop_api, ret)
@@ -34,34 +65,52 @@ class PulseAudioContext(threading.Thread):
         if state == PA_CONTEXT_READY:
             print("Connected!")
 
-            sample_spec = pa_sample_spec()
-            sample_spec.format = PA_SAMPLE_FLOAT32LE
-            sample_spec.rate = self._sample_rate
-            sample_spec.channels = 1
+            self._request_sinks()
+            self._create_stream()
 
-            self._stream = pa_stream_new(context, bytes("Test", "ascii"), ctypes.pointer(sample_spec), None)
-
-            def stream_state_callback(stream, userdata):
-                self._stream_state_callback(stream, userdata)
-            self._stream_state_callback_stub = pa_stream_notify_cb_t(stream_state_callback)
-            pa_stream_set_state_callback(self._stream, self._stream_state_callback_stub, None)
-
-            def stream_read_callback(stream, length, userdata):
-                self._stream_read_callback(stream, length, userdata)
-            self._stream_read_callback_stub = pa_stream_request_cb_t(stream_read_callback)
-            pa_stream_set_read_callback(self._stream, self._stream_read_callback_stub, ctypes.c_void_p(0xdeadbeef))
-
-            buffer_attr = pa_buffer_attr()
-            buffer_attr.fragsize = 1024
-            buffer_attr.maxlength = -1
-            pa_stream_connect_record(self._stream, None, ctypes.pointer(buffer_attr), PA_STREAM_ADJUST_LATENCY)
-
-            #quit(0)
         if state == PA_CONTEXT_TERMINATED:
             print("Disconnected!")
         if state == PA_CONTEXT_FAILED:
             print("Unable to connect!")
             self._quit(1)
+
+    def _request_sinks(self):
+        self._sinks = OrderedDict()
+
+        def sink_input_info_callback(context, sink_input_info, eol, userdata):
+            self._sink_input_info_callback(context, sink_input_info, eol, userdata)
+        self._sink_input_info_callback_stub = pa_sink_input_info_cb_t(sink_input_info_callback)
+        pa_context_get_sink_input_info_list(self._context, self._sink_input_info_callback_stub, None)
+
+    def _create_stream(self):
+        sample_spec = pa_sample_spec()
+        sample_spec.format = PA_SAMPLE_FLOAT32LE
+        sample_spec.rate = self._sample_rate
+        sample_spec.channels = 1
+
+        self._stream = pa_stream_new(self._context, bytes("Test", "ascii"), ctypes.pointer(sample_spec), None)
+
+        def stream_state_callback(stream, userdata):
+            self._stream_state_callback(stream, userdata)
+        self._stream_state_callback_stub = pa_stream_notify_cb_t(stream_state_callback)
+        pa_stream_set_state_callback(self._stream, self._stream_state_callback_stub, None)
+
+        def stream_read_callback(stream, length, userdata):
+            self._stream_read_callback(stream, length, userdata)
+        self._stream_read_callback_stub = pa_stream_request_cb_t(stream_read_callback)
+        pa_stream_set_read_callback(self._stream, self._stream_read_callback_stub, None)
+
+        device = None
+        if self._set_sink_index is not None:
+            device = bytes(self.sinks[self._set_sink_index], "ascii")
+            print("Setting device %s" % device)
+        pa_stream_connect_record(self._stream, device, ctypes.pointer(self._stream_buffer_attr), PA_STREAM_ADJUST_LATENCY)
+
+    def _sink_input_info_callback(self, context, sink_input_info, eol, userdata):
+        if eol:
+            print("Got sinks: %s" % self._sinks)
+            return
+        self._sinks[sink_input_info.contents.index] = sink_input_info.contents.name.decode("utf-8")
 
     def _stream_state_callback(self, stream, userdata):
         print("Stream callback!")
@@ -70,8 +119,27 @@ class PulseAudioContext(threading.Thread):
             pass
         if state == PA_STREAM_TERMINATED:
             print("Stream terminated!")
+
+            #index = self._set_current_sink_index
+            #if index is None:
+            #    return
+
+            #status = pa_stream_connect_record(self._stream, bytes(self._sinks[index], "ascii"), ctypes.pointer(self._stream_buffer_attr), PA_STREAM_ADJUST_LATENCY)
+            #print(status)
+            #print(pa_strerror(status))
+            #assert status == 0
+            #self._current_sink_index = index
+
+            if self._set_sink_index is not None:
+                self._create_stream()
+                self._set_sink_index = None
+
         if state == PA_STREAM_READY:
             print("Stream created!")
+
+            self._current_sink_index = pa_stream_get_device_index(stream)
+            print("Sink index: %s" % self._current_sink_index)
+
         if state == PA_STREAM_FAILED:
             print("Unable to create stream", pa_strerror(pa_context_errno(self._context)))
             self._quit(1)
