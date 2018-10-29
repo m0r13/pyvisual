@@ -330,7 +330,7 @@ class InputValueHolder(ValueHolder):
         # and the value so we don't have to look it up from the node every time
         self.connected_node = None
         self.connected_value = None
-        self.connection_changed = False
+        self.has_connection_changed = False
     
     @property
     def is_connected(self):
@@ -339,7 +339,7 @@ class InputValueHolder(ValueHolder):
     def connect(self, node, port_id):
         self.connected_node = node
         self.connected_value = node.get_value(port_id)
-        self.connection_changed = True
+        self.has_connection_changed = True
 
     def disconnect(self):
         # make the manual input keep the value when connection is removed
@@ -347,11 +347,11 @@ class InputValueHolder(ValueHolder):
         #    self.manual_value.value = self.connected_value.value
         self.connected_node = None
         self.connected_value = None
-        self.connection_changed = True
+        self.has_connection_changed = True
 
     @property
     def has_changed(self):
-        if self.connection_changed:
+        if self.has_connection_changed:
             return True
         connected_changed = self.connected_value.has_changed if self.connected_value else False
         manual_changed = self.manual_value.has_changed
@@ -359,10 +359,8 @@ class InputValueHolder(ValueHolder):
 
     @has_changed.setter
     def has_changed(self, changed):
-        # TODO hmm this seems like a hack
-        #if not changed:
-        #    self.connection_changed = False
         if not changed:
+            self.has_connection_changed = False
             self.manual_value.has_changed = False
 
     @property

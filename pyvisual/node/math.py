@@ -48,7 +48,7 @@ class Not(Node):
         inputs = [
             {"name" : "v", "dtype" : dtype.bool},
         ]
-        outputs= [
+        outputs = [
             {"name" : "output", "dtype" : dtype.bool},
         ]
         options = {
