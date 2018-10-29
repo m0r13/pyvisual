@@ -4,6 +4,7 @@ import fnmatch
 import pyvisual.node as node_meta
 import pyvisual.node.dtype as dtypes
 from pyvisual import assets
+from PIL import Image
 import time
 import contextlib
 import imgui
@@ -82,7 +83,6 @@ class Button(Widget):
         self.last_active = 0
 
     def _show(self, value, read_only):
-        imgui.push_item_width(WIDGET_WIDTH)
         active = value.value or time.time() - self.last_active < Button.ACTIVE_TIME
         if value.value:
             self.last_active = time.time()
@@ -90,6 +90,7 @@ class Button(Widget):
         if active:
             imgui.push_style_color(imgui.COLOR_BUTTON, 1.0, 0.0, 0.0, 1.0)
             imgui.push_style_color(imgui.COLOR_BUTTON_HOVERED, 1.0, 0.0, 0.0, 1.0)
+        imgui.push_item_width(WIDGET_WIDTH)
         clicked = imgui.button("Click me")
         if active:
             imgui.pop_style_color(2)
@@ -292,5 +293,20 @@ class Texture(Widget):
                 texture_aspect = texture_size[0] / texture_size[1]
                 window_size = imgui.get_content_region_available()
                 imgui.image(texture._handle, window_size[0], window_size[0] / texture_aspect)
+                if imgui.is_item_hovered() and imgui.is_mouse_clicked(1):
+                    # little hack to have first context menu entry under cursor
+                    io = imgui.get_io()
+                    pos = io.mouse_pos
+                    io.mouse_pos = pos[0] - 20, pos[1] - 20
+                    imgui.open_popup("context")
+                    io.mouse_pos = pos
+                if imgui.begin_popup("context"):
+                    if imgui.menu_item("save")[0]:
+                        image = Image.fromarray(texture.get())
+                        name = "%s.png" % (time.strftime("%Y-%m-%d_%H-%M-%S"))
+                        image.save(os.path.join(assets.SCREENSHOT_PATH, name))
+                    imgui.menu_item("texture handle: %s" % texture._handle, None, False, False)
+                    imgui.menu_item("texture shape: %s" % str(texture.shape), None, False, False)
+                    imgui.end_popup()
             imgui.end()
 
