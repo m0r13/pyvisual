@@ -628,7 +628,7 @@ class TransitionTimer(Node):
         ]
 
     def __init__(self):
-        super().__init__()
+        super().__init__(always_evaluate=True)
 
         self.time = scalable_timer()
 
@@ -636,9 +636,15 @@ class TransitionTimer(Node):
         duration = self.get("duration")
         scale = float("inf") if duration == 0.0 else 1.0 / duration
         t = 0.0
+        #if self.get("trigger"):
+        #    self.always_evaluate = True
         if self.get("reverse"):
             t = max(0.0, 1.0 - self.time(scale, self.get("trigger")))
+            #if t < 0.00001:
+            #    self.always_evaluate = False
         else:
             t = min(1.0, self.time(scale, self.get("trigger")))
+            #if t > 1.0 - 0.00001:
+            #    self.always_evaluate = False
         self.set("output", t)
 

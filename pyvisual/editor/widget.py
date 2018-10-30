@@ -95,8 +95,15 @@ class Button(Widget):
         if active:
             imgui.pop_style_color(2)
         imgui.pop_style_color(1)
+        # TODO this might be a problem
+        # events are reset by this widget!
         if not read_only:
-            value.value = 1.0 if clicked else 0.0
+            # set on click
+            if clicked:
+                value.value = 1.0
+            # reset otherwise if still active
+            if not clicked and value.value:
+                value.value = 0.0
 
 class Int(Widget):
     def __init__(self, node, minmax=[float("-inf"), float("inf")]):

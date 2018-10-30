@@ -1,3 +1,4 @@
+import time
 from collections import OrderedDict
 
 def find_node_base(bases):
@@ -136,7 +137,7 @@ class Node(metaclass=NodeMeta):
         self.always_evaluate = always_evaluate
         self.id = -1
         self._evaluated = False
-        self._first_evaluated = False
+        self._last_evaluated = 0.0
 
         self.initial_manual_values = {}
         self.values = {}
@@ -212,7 +213,7 @@ class Node(metaclass=NodeMeta):
     @property
     def needs_evaluation(self):
         # if any input has changed
-        return not self._first_evaluated or self.have_inputs_changed()
+        return self._last_evaluated == 0.0 or self.have_inputs_changed()
 
     @property
     def evaluated(self):
@@ -272,7 +273,7 @@ class Node(metaclass=NodeMeta):
         if not self.evaluated and (self.needs_evaluation or self.always_evaluate):
             self._evaluate()
             self._evaluated = True
-            self._first_evaluated = True
+            self._last_evaluated = time.time()
             return True
         return False
 

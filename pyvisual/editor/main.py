@@ -523,6 +523,11 @@ class Node:
         lower_right = t_add(upper_left, self.size_with_padding)
         with draw_on_channel(draw_list, CHANNEL_NODE_BACKGROUND):
             draw_list.add_rect_filled(upper_left, lower_right, COLOR_NODE_BACKGROUND, 0.0)
+            if self.instance._last_evaluated > time.time() - 0.2:
+                h = imgui.get_text_line_height()
+                a = lower_right[0] - h - self.padding[0], upper_left[1] + self.padding[1]
+                b = lower_right[0] - self.padding[0], upper_left[1] + self.padding[1] + h
+                draw_list.add_rect_filled(a, b, imgui.get_color_u32_rgba(0.0, 0.5, 0.0, 0.5))
 
         # draw content of node
         # (set_cursor_pos is window coordinates)
