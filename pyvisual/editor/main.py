@@ -909,8 +909,7 @@ class NodeEditor:
             def filter_nodes(text):
                 for i, spec in enumerate(self.node_specs):
                     label = spec.name
-                    if spec.options["category"]:
-                        label += " (%s)" % spec.options["category"]
+                    label += " (%s)" % spec.module_name
                     if not is_substring_partly(text.lower(), label.lower()):
                         continue
                     yield label, spec

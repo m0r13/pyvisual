@@ -57,6 +57,10 @@ class NodeSpec:
         self.options = dict(options)
 
     @property
+    def module_name(self):
+        return self.cls.__module__.replace("pyvisual.node.", "")
+
+    @property
     def name(self):
         return self.cls.__name__
 

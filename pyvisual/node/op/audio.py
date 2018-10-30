@@ -1,76 +1,12 @@
 from pyvisual.node.base import Node
 from pyvisual.node import dtype
-from pyvisual.editor import widget
-from pyvisual.audio import pulse, util
+from pyvisual.node.io.audio import AudioData
+from pyvisual.audio import util
 from scipy import signal
 import math
 import time
 import numpy as np
 import imgui
-
-class AudioData:
-    def __init__(self, sample_rate):
-        self.blocks = []
-        self.sample_rate = sample_rate
-
-    def append(self, block):
-        self.blocks.append(block)
-
-    def clear(self):
-        self.blocks = []
-
-class InputPulseAudio(Node):
-    class Meta:
-        outputs = [
-            {"name" : "output", "dtype" : dtype.audio}
-        ]
-        options = {
-            "category" : "audio"
-        }
-
-    def __init__(self):
-        super().__init__(always_evaluate=True)
-
-        self.pulse = pulse.PulseAudioContext(self._process_block, sample_rate=5000, block_size=128)
-        self.output = AudioData(sample_rate=5000)
-        self.next_blocks = []
-        self.blocks = 0
-
-    def _process_block(self, block):
-        self.next_blocks.append(block)
-        self.blocks += 1
-
-    def start(self, graph):
-        self.pulse.start()
-
-    def _evaluate(self):
-        self.output.blocks = self.next_blocks
-        self.next_blocks = []
-        self.set("output", self.output)
-
-    def stop(self):
-        self.pulse.stop()
-        self.pulse.join()
-
-    def _show_custom_ui(self):
-        imgui.dummy(0, 10)
-        imgui.text("Sourced %d blocks" % self.blocks)
-
-        sinks = self.pulse.sinks
-        current_sink_index = self.pulse.current_sink_index
-        current_sink_name = sinks.get(current_sink_index, "<unknown>")
-        #print("Unkown sink %s out of %s" % (repr(current_sink_index), sinks))
-
-        imgui.push_item_width(250)
-        if imgui.begin_combo("", current_sink_name):
-            for index, sink_name in sinks.items():
-                is_selected = index == current_sink_index
-                opened, selected = imgui.selectable(sink_name, is_selected)
-                if opened:
-                    self.pulse.current_sink_index = index
-                if is_selected:
-                    imgui.set_item_default_focus()
-            imgui.end_combo()
 
 AUDIO_FILTER_TYPES = ["low", "high"]
 class AudioFilter(Node):
