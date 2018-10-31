@@ -13,6 +13,7 @@ from pyvisual.editor import glumpy_imgui
 
 # TODO the naming here?
 import pyvisual.node as node_meta
+from pyvisual.node.io.texture import Renderer
 import pyvisual.editor.widget as node_widget
 import pyvisual.node.dtype as node_dtype
 from pyvisual.editor.graph import NodeGraph
@@ -83,9 +84,13 @@ def is_substring_partly(substring, string):
                 return True
     return i == len(substring)
 
-COLOR_EDITOR_BACKGROUND = imgui.get_color_u32_rgba(0.1, 0.1, 0.1, 1.0)
-COLOR_EDITOR_GRID = imgui.get_color_u32_rgba(0.3, 0.3, 0.3, 1.0)
-COLOR_NODE_BACKGROUND = imgui.get_color_u32_rgba(0.0, 0.0, 0.0, 1.0)
+def multiply_alpha(color, alpha):
+    # TODO use this instead of lambdas below?
+    pass
+
+COLOR_EDITOR_BACKGROUND = lambda alpha: imgui.get_color_u32_rgba(0.1, 0.1, 0.1, alpha)
+COLOR_EDITOR_GRID = lambda alpha: imgui.get_color_u32_rgba(0.3, 0.3, 0.3, alpha)
+COLOR_NODE_BACKGROUND = lambda alpha: imgui.get_color_u32_rgba(0.0, 0.0, 0.0, alpha)
 COLOR_NODE_ACTIVE_INDICATOR = imgui.get_color_u32_rgba(0.0, 0.5, 0.0, 0.5)
 COLOR_NODE_BORDER = imgui.get_color_u32_rgba(0.7, 0.7, 0.7, 1.0)
 COLOR_NODE_BORDER_HOVERED = imgui.get_color_u32_rgba(1.0, 1.0, 1.0, 0.5)
@@ -225,6 +230,7 @@ class Connection:
             # simple lines
             #draw_list.add_line(p0, p1, color, 2.0)
             # fancy bezier
+            draw_list.add_bezier_curve(p0, b0, b1, p1, imgui.get_color_u32_rgba(0.2, 0.2, 0.2, 0.5), 10.0)
             draw_list.add_bezier_curve(p0, b0, b1, p1, color, 2.0)
             # visualize the control points
             #draw_list.add_circle_filled(b0, 3, imgui.get_color_u32_rgba(0.0, 1.0, 0.0, 1.0))
@@ -529,7 +535,8 @@ class Node:
                 a = lower_right[0] - size + offset, upper_left[1] - offset
                 b = lower_right[0] + offset, upper_left[1] + size - offset
                 draw_list.add_rect_filled(a, b, COLOR_NODE_ACTIVE_INDICATOR)
-            draw_list.add_rect_filled(upper_left, lower_right, COLOR_NODE_BACKGROUND, 0.0)
+                #draw_list.add_rect(a, b, COLOR_NODE_BORDER, 0.0)
+            draw_list.add_rect_filled(upper_left, lower_right, COLOR_NODE_BACKGROUND(self.editor.node_bg_alpha), 0.0)
 
         # draw content of node
         # (set_cursor_pos is window coordinates)
@@ -684,6 +691,12 @@ class NodeEditor:
         self.context_mouse_pos = None
         self.context_search_test = ""
 
+        self.render_node = None
+        self.background_alpha = 0.2
+        self.grid_alpha = 0.0
+        self.node_bg_alpha = 0.75
+        self.node_alpha = 1.0
+
         # performance measurement stuffs
         self.fps = 0.0
         self.editor_time = 0.0
@@ -724,15 +737,20 @@ class NodeEditor:
         self.offset = ui_data.get("offset", (0, 0))
 
     def created_node(self, node, ui_data):
-        #print("created node")
         n = Node(self, node, ui_data)
         self.ui_nodes[node.id] = n
+
+        if isinstance(node, Renderer):
+            self.render_node = node
 
     def removed_node(self, node):
         #print("removed node")
         assert node.id in self.ui_nodes
         n = self.ui_nodes[node.id]
         del self.ui_nodes[node.id]
+
+        if node == self.render_node:
+            self.render_node = None
 
     def created_connection(self, src_node, src_port_id, dst_node, dst_port_id):
         #print("created connection")
@@ -1002,7 +1020,16 @@ class NodeEditor:
 
         # draw grid
         with draw_on_channel(draw_list, CHANNEL_BACKGROUND):
-            draw_list.add_rect_filled(self.pos, t_add(self.pos, self.size), COLOR_EDITOR_BACKGROUND)
+
+            if self.render_node is not None:
+                texture = self.render_node.texture
+                if texture is not None:
+                    handle = texture._handle
+                    # TODO aspect ratio!
+                    draw_list.add_image(handle, self.pos, t_add(self.pos, self.size))
+
+            draw_list.add_rect_filled(self.pos, t_add(self.pos, self.size), COLOR_EDITOR_BACKGROUND(self.background_alpha))
+
             # how does the grid work?
             #   -> find local coords where we see first grid pos
             #   -> build grid from there
@@ -1013,10 +1040,12 @@ class NodeEditor:
             grid_x1 = int(grid_x0 + self.size[0] + grid_size)
             grid_y0 = int(self.offset[1] - (self.offset[1] % grid_size))
             grid_y1 = int(grid_y0 + self.size[1] + grid_size)
+
+            c = COLOR_EDITOR_GRID(self.grid_alpha)
             for x in range(grid_x0, grid_x1, grid_size):
-                draw_list.add_line(self.local_to_screen((x, grid_y0)), self.local_to_screen((x, grid_y1)), COLOR_EDITOR_GRID)
+                draw_list.add_line(self.local_to_screen((x, grid_y0)), self.local_to_screen((x, grid_y1)), c)
             for y in range(grid_y0, grid_y1, grid_size):
-                draw_list.add_line(self.local_to_screen((grid_x0, y)), self.local_to_screen((grid_x1,  y)), COLOR_EDITOR_GRID)
+                draw_list.add_line(self.local_to_screen((grid_x0, y)), self.local_to_screen((grid_x1,  y)), c)
 
         # handle selection
         if self.dragging_selection:
@@ -1032,6 +1061,9 @@ class NodeEditor:
                 draw_list.add_rect(upper_left, lower_right, COLOR_SELECTION_BORDER)
 
         # draw / handle nodes and connections
+        imgui.push_style_var(imgui.STYLE_ALPHA, self.node_alpha)
+        for connection in self.connections:
+            connection.show(draw_list)
         # little hack: to get overlapping nodes and such correct,
         #    render nodes in an order. nodes request a new z-index from the
         #    editor when they got touched and should be in the foreground again
@@ -1050,10 +1082,9 @@ class NodeEditor:
             draw_list.channels_merge()
             draw_list.channels_split(CHANNEL_COUNT)
             draw_list.channels_set_current(CHANNEL_DEFAULT)
-        for connection in self.connections:
-            connection.show(draw_list)
         if self.dragging_connection is not None:
             self.dragging_connection.show(draw_list)
+        imgui.pop_style_var()
 
         # dropping connection to ports is handled by nodes
         # we're checking here if a connection was dropped into nowhere
@@ -1114,70 +1145,59 @@ class NodeEditor:
 
         # navbar is in place
         imgui.dummy(1, 12)
+        pos = imgui.get_cursor_screen_pos()
 
-        if imgui.button("Clear"):
-            self.graph.clear()
+        w, h = imgui.get_window_size()
+        dock_padding = 0
 
-        imgui.same_line()
-        if imgui.button("Save"):
-            imgui.open_popup("save")
-        save_path = node_widget.imgui_pick_file("save", assets.SAVE_PATH)
-        if save_path is not None:
-            f = open(save_path, "w")
-            f.write(self.graph.serialize())
-            f.close()
+        flags = imgui.WINDOW_NO_RESIZE | imgui.WINDOW_ALWAYS_AUTO_RESIZE
+        flags_static = imgui.WINDOW_NO_MOVE | imgui.WINDOW_NO_RESIZE
 
-        imgui.same_line()
-        if imgui.button("Load"):
-            imgui.open_popup("load")
-        load_path = node_widget.imgui_pick_file("load", assets.SAVE_PATH)
-        if load_path is not None:
-            self.graph.load(load_path, append=False)
-        
-        imgui.same_line()
-        if imgui.button("Import"):
-            imgui.open_popup("import")
-        import_path = node_widget.imgui_pick_file("import", assets.SAVE_PATH)
-        if import_path is not None:
-            self.graph.load(import_path, append=True)
+        imgui.set_next_window_position(pos[0] + dock_padding, pos[1] + dock_padding)
+        if imgui.begin("io", False, flags_static):
+            if imgui.button("clear"):
+                self.graph.clear()
 
-        imgui.same_line()
-        imgui.text("fps: %.2f" % self.fps)
-        imgui.text("editor time: %.2f ms ~ %.2f%%" % (self.editor_time * 1000.0, self.editor_time_relative * 100.0))
-        imgui.text("imgui render time: %.2f ms ~ %.2f%%" % (self.imgui_render_time * 1000.0, self.imgui_render_time_relative * 100.0))
-        imgui.text("processing time: %.2f ms ~ %.2f%%" % (self.processing_time * 1000.0, self.processing_time_relative * 100.0))
-        imgui.text("total: %.2f ms ~ %.2f%%" % (self.total_time * 1000.0, self.total_time_relative * 100.0))
+            imgui.same_line()
+            if imgui.button("save"):
+                imgui.open_popup("save")
+            save_path = node_widget.imgui_pick_file("save", assets.SAVE_PATH)
+            if save_path is not None:
+                f = open(save_path, "w")
+                f.write(self.graph.serialize())
+                f.close()
 
-        # gather "graph" of node instances
-        #imgui.text("")
-        #instances, circular = self.node_instances_sorted
-        #num_nodes = len(instances)
-        #num_connections = sum([ sum([ 1 if v.is_connected else 0 for v in node.inputs.values() ]) for node in instances ])
-        #assert num_connections == len(self.connections)
-        #imgui.text("#%d nodes, #%d connections" % (num_nodes, num_connections))
-        #imgui.text("Sorted instances:")
-        #imgui.same_line()
+            imgui.same_line()
+            if imgui.button("load"):
+                imgui.open_popup("load")
+            load_path = node_widget.imgui_pick_file("load", assets.SAVE_PATH)
+            if load_path is not None:
+                self.graph.load(load_path, append=False)
+            
+            imgui.same_line()
+            if imgui.button("import"):
+                imgui.open_popup("import")
+            import_path = node_widget.imgui_pick_file("import", assets.SAVE_PATH)
+            if import_path is not None:
+                self.graph.load(import_path, append=True)
 
-        # evaluate nodes
-        # TODO move this out or so
-        #processing_time = 0.0
-        #if circular:
-        #    # TODO show a warning maybe
-        #    pass
-        #else:
-        #    imgui.text(" -> ".join([ instance.spec.name for instance in instances ]))
-        #
-        #    start = time.time()
-        #    active_instances = set()
-        #    for instance in instances:
-        #        if instance.process():
-        #            active_instances.add(instance)
-        #    for instance in instances:
-        #        instance.evaluated = False
-        #    end = time.time()
-        #    processing_time = end - start
-        #
-        #    imgui.text("Active instances: %d: %s" % (len(active_instances), [ instance.spec.name for instance in active_instances]))
+            imgui.end()
+
+        imgui.set_next_window_position(self.pos[0] + w - 10, pos[1] + dock_padding, imgui.ALWAYS, 1, 0)
+        if imgui.begin("performance", False, flags_static):
+            imgui.text("fps: %.2f" % self.fps)
+            imgui.text("editor time: %.2f ms ~ %.2f%%" % (self.editor_time * 1000.0, self.editor_time_relative * 100.0))
+            imgui.text("imgui render time: %.2f ms ~ %.2f%%" % (self.imgui_render_time * 1000.0, self.imgui_render_time_relative * 100.0))
+            imgui.text("processing time: %.2f ms ~ %.2f%%" % (self.processing_time * 1000.0, self.processing_time_relative * 100.0))
+            imgui.text("total: %.2f ms ~ %.2f%%" % (self.total_time * 1000.0, self.total_time_relative * 100.0))
+            imgui.end()
+
+        if imgui.begin("appearance", False, flags):
+            changed, self.background_alpha = imgui.slider_float("bg alpha", self.background_alpha, 0.0, 1.0)
+            changed, self.grid_alpha = imgui.slider_float("grid alpha", self.grid_alpha, 0.0, 1.0)
+            changed, self.node_alpha = imgui.slider_float("node alpha", self.node_alpha, 0.0, 1.0)
+            changed, self.node_bg_alpha = imgui.slider_float("node bg alpha", self.node_bg_alpha, 0.0, 1.0)
+            imgui.end()
 
         # finish our drawing
         draw_list.channels_merge()

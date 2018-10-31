@@ -114,3 +114,16 @@ class LoadTextures(Node):
         self.set("texture", tt[1])
         self.set("last_texture", self.last_texture)
 
+class Renderer(Node):
+    class Meta:
+        inputs = [
+            {"name" : "texture", "dtype" : dtype.tex2d}
+        ]
+
+    def __init__(self):
+        super().__init__()
+
+        self.texture = None
+
+    def _evaluate(self):
+        self.texture = self.get("texture")
