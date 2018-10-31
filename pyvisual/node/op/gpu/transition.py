@@ -11,6 +11,9 @@ from pyvisual import assets
 from glumpy import gloo, gl, glm
 from PIL import Image
 
+# TODO
+dummy = np.zeros((1, 1, 4), dtype=np.uint8).view(gloo.Texture2D)
+
 class MixTexture(Shader):
     class Meta:
         inputs = [

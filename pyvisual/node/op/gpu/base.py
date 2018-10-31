@@ -72,6 +72,12 @@ class RenderNode(Node):
         fbo.deactivate()
         return fbo.color[0]
 
+def load_shader(path):
+    f = open(path, "r")
+    data = f.read()
+    f.close()
+    return data
+
 # TODO
 dummy = np.zeros((1, 1, 4), dtype=np.uint8).view(gloo.Texture2D)
 class Shader(RenderNode):
@@ -93,15 +99,15 @@ class Shader(RenderNode):
     def __init__(self, vertex, fragment):
         super().__init__()
 
-        self.vertex = vertex
-        self.fragment = fragment
-        self.create_program()
+        self.vertex_watcher = assets.FileWatcher(assets.get_shader_path(vertex))
+        self.fragment_watcher = assets.FileWatcher(assets.get_shader_path(fragment))
+        self.update_program()
 
-    def create_program(self):
-        # TODO also execute this automatically once shader has changed
+    def update_program(self):
+
         try:
-            vertex = assets.load_shader(self.vertex)
-            fragment = assets.load_shader(self.fragment)
+            vertex = load_shader(self.vertex_watcher.path)
+            fragment = load_shader(self.fragment_watcher.path)
 
             self.quad = gloo.Program(vertex, fragment, version="130", count=4)
             self.quad["iPosition"] = [(-1,-1), (-1,+1), (+1,-1), (+1,+1)]
@@ -125,6 +131,12 @@ class Shader(RenderNode):
 
     def set_uniforms(self, program):
         pass
+
+    def evaluate(self):
+        if self.vertex_watcher.has_changed() or self.fragment_watcher.has_changed():
+            self.update_program()
+
+        return super().evaluate()
 
     def _evaluate(self):
         enabled = self.get("enabled")
@@ -187,11 +199,11 @@ class Blend(RenderNode):
     def __init__(self):
         super().__init__()
 
-        vertex = "common/passthrough.vert"
-        fragment = "common/passthrough.frag"
+        vertex_path = assets.get_shader_path("common/passthrough.vert")
+        fragment_path = assets.get_shader_path("common/passthrough.frag")
 
-        vertex = assets.load_shader(vertex)
-        fragment = assets.load_shader(fragment)
+        vertex = load_shader(vertex_path)
+        fragment = load_shader(fragment_path)
         self.quad = gloo.Program(vertex, fragment, version="130", count=4)
         self.quad["iPosition"] = [(-1,-1), (-1,+1), (+1,-1), (+1,+1)]
         self.quad["iTexCoord"] = [( 0, 1), ( 0, 0), ( 1, 1), ( 1, 0)]
