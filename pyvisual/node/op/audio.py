@@ -100,23 +100,6 @@ class SampleAudio(Node):
         block = input_audio.blocks[-1]
         self.set("output", block[-1])
 
-class Gain(Node):
-    class Meta:
-        inputs = [
-            {"name" : "input", "dtype" : dtype.float},
-            {"name" : "gain", "dtype" : dtype.float}
-        ]
-        outputs = [
-            {"name" : "output", "dtype" : dtype.float}
-        ]
-
-    def _evaluate(self):
-        # we could do the gain in db, but linear feels more natural now with plot widget
-        #db = self.get("gain")
-        #gain = 10 ** (db / 20)
-        gain = self.get("gain")
-        self.set("output", self.get("input") * gain)
-
 class VUNormalizer(Node):
     class Meta:
         inputs = [
