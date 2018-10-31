@@ -86,6 +86,7 @@ def is_substring_partly(substring, string):
 COLOR_EDITOR_BACKGROUND = imgui.get_color_u32_rgba(0.1, 0.1, 0.1, 1.0)
 COLOR_EDITOR_GRID = imgui.get_color_u32_rgba(0.3, 0.3, 0.3, 1.0)
 COLOR_NODE_BACKGROUND = imgui.get_color_u32_rgba(0.0, 0.0, 0.0, 1.0)
+COLOR_NODE_ACTIVE_INDICATOR = imgui.get_color_u32_rgba(0.0, 0.5, 0.0, 0.5)
 COLOR_NODE_BORDER = imgui.get_color_u32_rgba(0.7, 0.7, 0.7, 1.0)
 COLOR_NODE_BORDER_HOVERED = imgui.get_color_u32_rgba(1.0, 1.0, 1.0, 0.5)
 COLOR_NODE_BORDER_SELECTED = imgui.get_color_u32_rgba(1.0, 0.697, 0.0, 0.5)
@@ -522,12 +523,13 @@ class Node:
         upper_left = self.editor.local_to_screen(self.actual_pos)
         lower_right = t_add(upper_left, self.size_with_padding)
         with draw_on_channel(draw_list, CHANNEL_NODE_BACKGROUND):
-            draw_list.add_rect_filled(upper_left, lower_right, COLOR_NODE_BACKGROUND, 0.0)
             if self.instance._last_evaluated > time.time() - 0.2:
-                h = imgui.get_text_line_height()
-                a = lower_right[0] - h - self.padding[0], upper_left[1] + self.padding[1]
-                b = lower_right[0] - self.padding[0], upper_left[1] + self.padding[1] + h
-                draw_list.add_rect_filled(a, b, imgui.get_color_u32_rgba(0.0, 0.5, 0.0, 0.5))
+                size = imgui.get_text_line_height()
+                offset = 4
+                a = lower_right[0] - size + offset, upper_left[1] - offset
+                b = lower_right[0] + offset, upper_left[1] + size - offset
+                draw_list.add_rect_filled(a, b, COLOR_NODE_ACTIVE_INDICATOR)
+            draw_list.add_rect_filled(upper_left, lower_right, COLOR_NODE_BACKGROUND, 0.0)
 
         # draw content of node
         # (set_cursor_pos is window coordinates)
