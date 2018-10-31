@@ -224,6 +224,8 @@ class Connection:
         if delta[0] < 0:
             offset_x = min(200, 0.5 * abs(delta[0]))
             offset_y = min(100, abs(delta[1]))
+        if p0[1] > p1[1]:
+            offset_y *= -1.0
         b0 = t_add(p0, (offset_x, offset_y))
         b1 = t_add(p1, (-offset_x, -offset_y))
         with draw_on_channel(draw_list, CHANNEL_CONNECTION):
@@ -484,6 +486,10 @@ class Node:
             text_pos = t_add(connector_center, (10, -size[1] / 2))
         else:
             text_pos = t_add(connector_center, (-10 - size[0], -size[1] / 2))
+
+        padding = (2, 2)
+        size_with_padding = size[0] + 2*padding[0], size[1] + 2*padding[1]
+        draw_list.add_rect_filled(t_sub(text_pos, padding), t_add(text_pos, size_with_padding), COLOR_NODE_BACKGROUND(self.editor.node_bg_alpha * 0.5))
         draw_list.add_text(text_pos, imgui.get_color_u32_rgba(0.7, 0.7, 0.7, 1.0), label)
 
         draw_list.channels_set_current(highlight_channel)
@@ -692,6 +698,7 @@ class NodeEditor:
         self.context_search_test = ""
 
         self.render_node = None
+        self.show_graph_enabled = True
         self.background_alpha = 0.2
         self.grid_alpha = 0.0
         self.node_bg_alpha = 0.75
@@ -981,71 +988,8 @@ class NodeEditor:
 
         #profile.disable()
 
-    def show(self):
-        # create editor window
-        #profile.enable()
-
-        io = imgui.get_io()
-        w, h = io.display_size
-        imgui.set_next_window_position(0, 0)
-        imgui.set_next_window_size(w, h)
-
-        flags = imgui.WINDOW_NO_RESIZE | imgui.WINDOW_NO_MOVE | imgui.WINDOW_NO_TITLE_BAR | imgui.WINDOW_NO_BRING_TO_FRONT_ON_FOCUS | imgui.WINDOW_NO_SCROLLBAR | imgui.WINDOW_NO_SCROLL_WITH_MOUSE
-        expanded, _ = imgui.begin("NodeEditor", False, flags)
-        self.pos = imgui.get_window_position()
-        self.size = imgui.get_window_size()
-        if not expanded:
-            pass
-
-        # main menu bar
-        imgui.begin_main_menu_bar()
-        if imgui.begin_menu("File", True):
-            imgui.menu_item("New", "Ctrl+N", False, True)
-            imgui.menu_item("Open...", "Ctrl+O", False, True)
-            imgui.menu_item("Save", "Ctrl+S", False, True)
-            imgui.menu_item("Save as...", "Shift+Ctrl+S", False, True)
-            imgui.end_menu()
-        imgui.end_main_menu_bar()
-        imgui.begin_main_menu_bar()
-        if imgui.begin_menu("blah", True):
-            imgui.menu_item("New", "Ctrl+N", False, True)
-            imgui.end_menu()
-        imgui.end_main_menu_bar()
-
-        # initialize draw list
-        draw_list = imgui.get_window_draw_list()
-        draw_list.channels_split(CHANNEL_COUNT)
-        draw_list.channels_set_current(CHANNEL_DEFAULT)
-        draw_list.channels_set_current(CHANNEL_DEFAULT)
-
-        # draw grid
-        with draw_on_channel(draw_list, CHANNEL_BACKGROUND):
-
-            if self.render_node is not None:
-                texture = self.render_node.texture
-                if texture is not None:
-                    handle = texture._handle
-                    # TODO aspect ratio!
-                    draw_list.add_image(handle, self.pos, t_add(self.pos, self.size))
-
-            draw_list.add_rect_filled(self.pos, t_add(self.pos, self.size), COLOR_EDITOR_BACKGROUND(self.background_alpha))
-
-            # how does the grid work?
-            #   -> find local coords where we see first grid pos
-            #   -> build grid from there
-            # round n down to nearest divisor d: n - (n % d)
-            # (grid_x0 / grid_y0 in local coordinates btw)
-            grid_size = EDITOR_GRID_SIZE
-            grid_x0 = int(self.offset[0] - (self.offset[0] % grid_size))
-            grid_x1 = int(grid_x0 + self.size[0] + grid_size)
-            grid_y0 = int(self.offset[1] - (self.offset[1] % grid_size))
-            grid_y1 = int(grid_y0 + self.size[1] + grid_size)
-
-            c = COLOR_EDITOR_GRID(self.grid_alpha)
-            for x in range(grid_x0, grid_x1, grid_size):
-                draw_list.add_line(self.local_to_screen((x, grid_y0)), self.local_to_screen((x, grid_y1)), c)
-            for y in range(grid_y0, grid_y1, grid_size):
-                draw_list.add_line(self.local_to_screen((grid_x0, y)), self.local_to_screen((grid_x1,  y)), c)
+    def show_graph(self, draw_list):
+        io = self.io
 
         # handle selection
         if self.dragging_selection:
@@ -1143,10 +1087,68 @@ class NodeEditor:
         if self.dragging_position and imgui.is_mouse_released(0):
             self.dragging_position = False
 
-        # navbar is in place
-        imgui.dummy(1, 12)
-        pos = imgui.get_cursor_screen_pos()
+        # show context
+        self.show_context_menu()
 
+    def show(self):
+        # create editor window
+        #profile.enable()
+
+        io = self.io
+        w, h = io.display_size
+        imgui.set_next_window_position(0, 0)
+        imgui.set_next_window_size(w, h)
+
+        flags = imgui.WINDOW_NO_RESIZE | imgui.WINDOW_NO_MOVE | imgui.WINDOW_NO_TITLE_BAR | imgui.WINDOW_NO_BRING_TO_FRONT_ON_FOCUS | imgui.WINDOW_NO_SCROLLBAR | imgui.WINDOW_NO_SCROLL_WITH_MOUSE
+        expanded, _ = imgui.begin("NodeEditor", False, flags)
+        self.pos = imgui.get_window_position()
+        self.size = imgui.get_window_size()
+        if not expanded:
+            pass
+
+        # initialize draw list
+        draw_list = imgui.get_window_draw_list()
+        draw_list.channels_split(CHANNEL_COUNT)
+        draw_list.channels_set_current(CHANNEL_DEFAULT)
+
+        # draw background
+        with draw_on_channel(draw_list, CHANNEL_BACKGROUND):
+            # renderer output as background image
+            # TODO aspect ratio!
+            # TODO make size, position configurable?
+            if self.render_node is not None:
+                texture = self.render_node.texture
+                if texture is not None:
+                    handle = texture._handle
+                    draw_list.add_image(handle, self.pos, t_add(self.pos, self.size))
+
+            # render background color / grid only if graph is shown
+            if self.show_graph_enabled:
+                draw_list.add_rect_filled(self.pos, t_add(self.pos, self.size), COLOR_EDITOR_BACKGROUND(self.background_alpha))
+
+                # how does the grid work?
+                #   -> find local coords where we see first grid pos
+                #   -> build grid from there
+                # round n down to nearest divisor d: n - (n % d)
+                # (grid_x0 / grid_y0 in local coordinates btw)
+                grid_size = EDITOR_GRID_SIZE
+                grid_x0 = int(self.offset[0] - (self.offset[0] % grid_size))
+                grid_x1 = int(grid_x0 + self.size[0] + grid_size)
+                grid_y0 = int(self.offset[1] - (self.offset[1] % grid_size))
+                grid_y1 = int(grid_y0 + self.size[1] + grid_size)
+
+                c = COLOR_EDITOR_GRID(self.grid_alpha)
+                for x in range(grid_x0, grid_x1, grid_size):
+                    draw_list.add_line(self.local_to_screen((x, grid_y0)), self.local_to_screen((x, grid_y1)), c)
+                for y in range(grid_y0, grid_y1, grid_size):
+                    draw_list.add_line(self.local_to_screen((grid_x0, y)), self.local_to_screen((grid_x1,  y)), c)
+
+        if self.show_graph_enabled:
+            self.show_graph(draw_list)
+
+        draw_list.channels_merge()
+
+        pos = imgui.get_cursor_screen_pos()
         w, h = imgui.get_window_size()
         dock_padding = 0
 
@@ -1193,23 +1195,17 @@ class NodeEditor:
             imgui.end()
 
         if imgui.begin("appearance", False, flags):
+            #changed, _ = imgui.input_int("fps limit", 30)
+            changed, self.show_graph_enabled = imgui.checkbox("show graph", self.show_graph_enabled)
             changed, self.background_alpha = imgui.slider_float("bg alpha", self.background_alpha, 0.0, 1.0)
             changed, self.grid_alpha = imgui.slider_float("grid alpha", self.grid_alpha, 0.0, 1.0)
             changed, self.node_alpha = imgui.slider_float("node alpha", self.node_alpha, 0.0, 1.0)
             changed, self.node_bg_alpha = imgui.slider_float("node bg alpha", self.node_bg_alpha, 0.0, 1.0)
             imgui.end()
 
-        # finish our drawing
-        draw_list.channels_merge()
-
-        # show context
-        self.show_context_menu()
-
         if self.show_test_window:
             imgui.show_test_window()
         imgui.end()
-
-        #profile.disable()
 
 # sort by node categories and then by names
 node_types = node_meta.Node.get_sub_nodes(include_self=False)
