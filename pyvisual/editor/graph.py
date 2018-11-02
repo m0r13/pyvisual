@@ -13,6 +13,9 @@ class NodeGraphListener:
     def removed_node(self, node):
         pass
 
+    def changed_node_ui_data(self, node, ui_data):
+        pass
+
     def created_connection(self, src_node, src_port_id, dst_node, dst_port_id):
         pass
 
@@ -53,13 +56,15 @@ class NodeGraph:
     # serialization
     #
 
-    def serialize(self):
+    def serialize(self, node_filter=lambda node: True):
         # TODO validation!!
 
         nodes = []
         connections = []
 
         for node in self.nodes.values():
+            if not node_filter(node):
+                continue
             node_data = {}
             node_data["id"] = node.id
             node_data["type"] = node.spec.name
@@ -83,6 +88,8 @@ class NodeGraph:
 
         for src_node, outgoing_connections in self.connections_from.items():
             for (src_port_id, dst_node, dst_port_id) in outgoing_connections:
+                if not node_filter(src_node) or not node_filter(dst_node):
+                    continue
                 connection_data = {}
                 connection_data["src_node_id"] = src_node.id
                 connection_data["src_port_id"] = src_port_id
@@ -93,15 +100,23 @@ class NodeGraph:
         data = {"ui_data" : self.ui_data, "nodes" : nodes, "connections" : connections}
         return json.dumps(data, sort_keys=True, indent=4)
 
-    def unserialize(self, data):
+    def unserialize(self, data, as_selected=False, pos_offset=(0, 0), pos_normalize=True):
+        # unserializes nodes/connections that are serialized in data string
+        # as_selected means that new nodes will be selected (other nodes will be unselected)
+        # pos_offset is added to positions of all new nodes
+        # if pos_normalize is true, nodes are moved so that minimum coordinate of all nodes is pos_offset
+        # if pos_normalize is false, pos_offset is just added to positions of all new nodes
+
         # TODO validation!!
 
         data = json.loads(data)
 
-        self.set_ui_data(data.get("ui_data", {}), notify=True)
+        if not as_selected:
+            self.set_ui_data(data.get("ui_data", {}), notify=True)
 
         id_map = {}
         ignore_ids = set()
+        new_nodes = []
         for node_data in data.get("nodes", []):
             assert "id" in node_data
             node_save_id = node_data["id"]
@@ -116,6 +131,7 @@ class NodeGraph:
                 continue
 
             node = self.create_node(spec, node_data["ui_data"])
+            new_nodes.append(node)
             id_map[node_save_id] = node.id
 
             for port_id, port_spec in node_data.get("custom_ports", []):
@@ -135,6 +151,37 @@ class NodeGraph:
                 dtype = port_spec["dtype"]
                 node.initial_manual_values[port_id] = dtype.base_type.unserialize(json_value)
 
+        # handle new nodes being 
+        if as_selected:
+            assert pos_offset is not None
+
+            # find minimum coordinates of all new nodes
+            min_pos = 0, 0
+            if pos_normalize:
+                min_pos = float("inf"), float("inf")
+                for node in new_nodes:
+                    ui_data = self.node_ui_data[node.id]
+                    assert "pos" in ui_data
+                    pos = ui_data["pos"]
+                    min_pos = min(pos[0], min_pos[0]), min(pos[1], min_pos[1])
+
+            # unselect all nodes
+            for node_id, ui_data in self.node_ui_data.items():
+                node = self.nodes[node_id]
+                ui_data = self.node_ui_data[node_id]
+                if ui_data["selected"]:
+                    ui_data["selected"] = False
+                    self.set_node_ui_data(node, ui_data, notify=True)
+
+            # select new nodes and apply position offset
+            for node in new_nodes:
+                ui_data = self.node_ui_data[node.id]
+                pos = ui_data["pos"]
+                pos = -min_pos[0] + pos[0] + pos_offset[0], -min_pos[1] + pos[1] + pos_offset[1]
+                ui_data["pos"] = pos
+                ui_data["selected"] = True
+                self.set_node_ui_data(node, ui_data, notify=True)
+
         for connection_data in data.get("connections", []):
             src_node_id = connection_data["src_node_id"]
             dst_node_id = connection_data["dst_node_id"]
@@ -153,21 +200,46 @@ class NodeGraph:
             dst_node = self.nodes[dst_node_id]
             self.create_connection(src_node, src_port_id, dst_node, dst_port_id)
 
-    def save(self, path):
+    def serialize_selected(self):
+        def node_filter(node):
+            return self.node_ui_data[node.id]["selected"]
+        return self.serialize(node_filter)
+
+    def unserialize_as_selected(self, data, pos_offset=None):
+        self.unserialize(data, as_selected=True, pos_offset=pos_offset)
+
+    def duplicate_selected(self, pos_offset):
+        data = self.serialize_selected()
+        self.unserialize(data, as_selected=True, pos_offset=pos_offset, pos_normalize=False)
+
+    def save_file(self, path):
         data = self.serialize()
 
         f = open(path, "w")
         f.write(data)
         f.close()
 
-    def load(self, path, append=False):
+    def load_file(self, path):
         f = open(path, "r")
         data = f.read()
         f.close()
 
-        if not append:
-            self.clear()
+        self.clear()
         self.unserialize(data)
+
+    def import_file(self, path, pos_offset):
+        f = open(path, "r")
+        data = f.read()
+        f.close()
+
+        self.unserialize(data, as_selected=True, pos_offset=pos_offset)
+
+    def export_file(self, path):
+        data = self.serialize_selected()
+
+        f = open(path, "w")
+        f.write(data)
+        f.close()
 
     #
     # functions for changing node graph
@@ -200,12 +272,17 @@ class NodeGraph:
         for dst_port_id, src_node, src_port_id in set(self.connections_to[node]):
             self.remove_connection(src_node, src_port_id, node, dst_port_id)
         del self.nodes[node.id]
+        del self.node_ui_data[node.id]
 
         for listener in self.listeners:
             listener.removed_node(node)
 
-    def set_node_ui_data(self, node, ui_data):
+    def set_node_ui_data(self, node, ui_data, notify=False):
         self.node_ui_data[node.id] = ui_data
+
+        if notify:
+            for listener in self.listeners:
+                listener.changed_node_ui_data(node, ui_data)
 
     def create_connection(self, src_node, src_port_id, dst_node, dst_port_id):
         input_value = dst_node.get_value(dst_port_id)

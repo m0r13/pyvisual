@@ -287,6 +287,8 @@ class Node:
         #
         self.collapsible = self.spec.options["show_title"]
         self.collapsed = ui_data.get("collapsed", False)
+        self.selected = ui_data.get("selected", False)
+
         # is this node being dragged?
         # note: - for dragging selections of nodes, only the handle (clicked) node is marked as dragging
         #       - all others get dragging_from set
@@ -296,12 +298,12 @@ class Node:
         # where was this node at the beginning of drag operation? (local pos)
         self.dragging_node_start = None
         self.hovered = False
-        self.selected = False
-
-        # trigger update of ui data
-        self.editor.node_ui_state_changed(self)
 
         self.io = imgui.get_io()
+
+        # TODO this is not so nice, have all ui data attributes with setters and call this automatically
+        # trigger update of ui data
+        self.editor.node_ui_state_changed(self)
 
     @property
     def actual_pos(self):
@@ -605,13 +607,16 @@ class Node:
                 # ctrl modifier toggles selection
                 if io.key_ctrl:
                     self.selected = not self.selected
+                    self.editor.node_ui_state_changed(self)
                 # otherwise select only this node
                 else:
                     if not self.selected:
                         for node in self.editor.nodes:
                             node.selected = False
+                            self.editor.node_ui_state_changed(node)
                         self.touch_z_index()
                     self.selected = True
+                    self.editor.node_ui_state_changed(self)
             # handle context menu
             if imgui.is_mouse_clicked(1):
                 # little hack to have first context menu entry under cursor
@@ -696,6 +701,7 @@ class NodeEditor:
         # (for spawning nodes exactly where menu was opened)
         self.context_mouse_pos = None
         self.context_search_test = ""
+        self.graph_clipboard = None
 
         self.render_node = None
         self.show_graph_enabled = True
@@ -720,7 +726,7 @@ class NodeEditor:
         self.key_map = list(self.io.key_map)
 
         if os.path.isfile("session.json"):
-            self.graph.load("session.json")
+            self.graph.load_file("session.json")
 
     @property
     def nodes(self):
@@ -759,6 +765,17 @@ class NodeEditor:
         if node == self.render_node:
             self.render_node = None
 
+    def changed_node_ui_data(self, node, ui_data):
+        #assert node.id in self.ui_nodes
+        if node.id not in self.ui_nodes:
+            return
+
+        n = self.ui_nodes[node.id]
+        if "pos" in ui_data:
+            n.pos = ui_data["pos"]
+        if "selected" in ui_data:
+            n.selected = ui_data["selected"]
+
     def created_connection(self, src_node, src_port_id, dst_node, dst_port_id):
         #print("created connection")
         src_node = self.ui_nodes[src_node.id]
@@ -789,6 +806,7 @@ class NodeEditor:
         ui_data = {}
         ui_data["pos"] = node.pos
         ui_data["collapsed"] = node.collapsed
+        ui_data["selected"] = node.selected
         self.graph.set_node_ui_data(node.instance, ui_data)
 
     #
@@ -898,6 +916,7 @@ class NodeEditor:
             node_start = node.actual_pos
             node_end = t_add(node.actual_pos, node.size_with_padding)
             node.selected = t_overlap(selection_start, selection_end, node_start, node_end)
+            self.node_ui_state_changed(node)
 
     def show_context_menu(self):
         io = self.io
@@ -916,15 +935,16 @@ class NodeEditor:
         if imgui.is_window_hovered() \
                 and (imgui.is_mouse_clicked(1) or is_key_down(key_g)) \
                 and no_node_hovered():
+            context_name = "context_import" if io.key_shift else "context_create_nodes"
             # remember where context menu was opened
             # (to place node there)
             self.context_mouse_pos = io.mouse_pos
-            imgui.open_popup("context")
+            imgui.open_popup(context_name)
             self.context_search_text = ""
             self.context_index = 0
             just_opened_popup = True
 
-        if imgui.begin_popup("context"):
+        if imgui.begin_popup("context_create_nodes"):
             assert self.context_mouse_pos is not None
             # handle when user right-clicked outside of the popup
             # this should close the popup and re-open it at the new position
@@ -982,9 +1002,14 @@ class NodeEditor:
 
             imgui.end_popup()
 
+        import_path = node_widget.imgui_pick_file("context_import", assets.SAVE_PATH)
+        if import_path is not None:
+            offset = self.screen_to_local(self.context_mouse_pos)
+            self.graph.import_file(import_path, pos_offset=offset)
+
         if reopen_popup:
             imgui.close_current_popup()
-            imgui.open_popup("context")
+            imgui.open_popup("context_create_nodes")
 
         #profile.disable()
 
@@ -1059,20 +1084,43 @@ class NodeEditor:
             key_i = glfw.GLFW_KEY_I
             key_escape = key_map[imgui.KEY_ESCAPE]
             key_delete = key_map[imgui.KEY_DELETE]
+            key_c = glfw.GLFW_KEY_C
+            key_v = glfw.GLFW_KEY_V
+            key_f = glfw.GLFW_KEY_F
             is_key_down = lambda key: io.is_key_down(key) and io.get_key_down_duration(key) == 0.0
+
+            # select all nodes
             if is_key_down(key_a):
                 for node in list(self.nodes):
                     node.selected = True
+                    self.node_ui_state_changed(node)
+            # invert selection
             if is_key_down(key_i):
                 for node in list(self.nodes):
                     node.selected = not node.selected
+                    self.node_ui_state_changed(node)
+            # select no nodes
             if is_key_down(key_escape):
                 for node in list(self.nodes):
                     node.selected = False
+                    self.node_ui_state_changed(node)
+            # delete selected nodes
             if is_key_down(key_delete) or is_key_down(key_d):
                 for node in list(self.nodes):
                     if node.selected:
                         self.remove_node(node)
+
+            # copy selected nodes
+            if is_key_down(key_c):
+                self.node_clipboard = self.graph.serialize_selected()
+            # paste copied nodes
+            if is_key_down(key_v):
+                if self.node_clipboard is not None:
+                    offset = self.screen_to_local(io.mouse_pos)
+                    self.graph.unserialize_as_selected(self.node_clipboard, pos_offset=offset)
+            # duplicate selected nodes
+            if is_key_down(key_f):
+                self.graph.duplicate_selected((20, 20))
 
             # handle start dragging position with ctrl+click
             if not self.is_dragging_connection() \
@@ -1165,23 +1213,30 @@ class NodeEditor:
                 imgui.open_popup("save")
             save_path = node_widget.imgui_pick_file("save", assets.SAVE_PATH)
             if save_path is not None:
-                f = open(save_path, "w")
-                f.write(self.graph.serialize())
-                f.close()
+                self.graph.save_file(save_path)
 
             imgui.same_line()
             if imgui.button("load"):
                 imgui.open_popup("load")
             load_path = node_widget.imgui_pick_file("load", assets.SAVE_PATH)
             if load_path is not None:
-                self.graph.load(load_path, append=False)
-            
+                self.graph.load_file(load_path)
+
             imgui.same_line()
             if imgui.button("import"):
                 imgui.open_popup("import")
+            if imgui.is_item_hovered():
+                imgui.set_tooltip("You can also shift+right click to import nodes")
             import_path = node_widget.imgui_pick_file("import", assets.SAVE_PATH)
             if import_path is not None:
-                self.graph.load(import_path, append=True)
+                self.graph.import_file(import_path, self.screen_to_local(io.mouse_pos))
+
+            imgui.same_line()
+            if imgui.button("export"):
+                imgui.open_popup("export")
+            export_path = node_widget.imgui_pick_file("export", assets.SAVE_PATH)
+            if export_path is not None:
+                self.graph.export_file(export_path)
 
             imgui.end()
 
@@ -1262,7 +1317,7 @@ def on_key_press(key, modifier):
     print("Glumpy: Pressed key: %s" % key)
     if key == ord("Q"):
         editor.graph.stop()
-        editor.graph.save("session.json")
+        editor.graph.save_file("session.json")
         profile.dump_stats("profile.stats")
         sys.exit(0)
 
