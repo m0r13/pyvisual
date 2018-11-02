@@ -129,11 +129,12 @@ CHANNEL_BACKGROUND = 0
 CHANNEL_DEFAULT = 1
 CHANNEL_NODE_BACKGROUND = 3
 CHANNEL_NODE = 4
-CHANNEL_CONNECTION = 5
+CHANNEL_CONNECTION1 = 5
+CHANNEL_CONNECTION2 = 6
 CHANNEL_PORT = 2
-CHANNEL_PORT_LABEL = 6
-CHANNEL_SELECTION = 7
-CHANNEL_COUNT = 8
+CHANNEL_PORT_LABEL = 7
+CHANNEL_SELECTION = 8
+CHANNEL_COUNT = 9
 
 EDITOR_GRID_SIZE = 50
 EDITOR_NODE_GRID_SIZE = 5
@@ -228,11 +229,15 @@ class Connection:
             offset_y *= -1.0
         b0 = t_add(p0, (offset_x, offset_y))
         b1 = t_add(p1, (-offset_x, -offset_y))
-        with draw_on_channel(draw_list, CHANNEL_CONNECTION):
+
+        # draw background of connection
+        with draw_on_channel(draw_list, CHANNEL_CONNECTION1):
+            draw_list.add_bezier_curve(p0, b0, b1, p1, imgui.get_color_u32_rgba(0.2, 0.2, 0.2, 0.5), 10.0)
+        # draw actual connection
+        with draw_on_channel(draw_list, CHANNEL_CONNECTION2):
             # simple lines
             #draw_list.add_line(p0, p1, color, 2.0)
             # fancy bezier
-            draw_list.add_bezier_curve(p0, b0, b1, p1, imgui.get_color_u32_rgba(0.2, 0.2, 0.2, 0.5), 10.0)
             draw_list.add_bezier_curve(p0, b0, b1, p1, color, 2.0)
             # visualize the control points
             #draw_list.add_circle_filled(b0, 3, imgui.get_color_u32_rgba(0.0, 1.0, 0.0, 1.0))
@@ -492,7 +497,7 @@ class Node:
         padding = (2, 2)
         size_with_padding = size[0] + 2*padding[0], size[1] + 2*padding[1]
         draw_list.add_rect_filled(t_sub(text_pos, padding), t_add(text_pos, size_with_padding), COLOR_NODE_BACKGROUND(self.editor.node_bg_alpha * 0.5))
-        draw_list.add_text(text_pos, imgui.get_color_u32_rgba(0.7, 0.7, 0.7, 1.0), label)
+        draw_list.add_text(text_pos, imgui.get_color_u32_rgba(0.8, 0.8, 0.8, 1.0), label)
 
         draw_list.channels_set_current(highlight_channel)
         # port highlight drawing
