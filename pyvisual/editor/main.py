@@ -94,7 +94,7 @@ COLOR_NODE_BACKGROUND = lambda alpha: imgui.get_color_u32_rgba(0.0, 0.0, 0.0, al
 COLOR_NODE_ACTIVE_INDICATOR = imgui.get_color_u32_rgba(0.0, 0.5, 0.0, 0.5)
 COLOR_NODE_BORDER = imgui.get_color_u32_rgba(0.7, 0.7, 0.7, 1.0)
 COLOR_NODE_BORDER_HOVERED = imgui.get_color_u32_rgba(1.0, 1.0, 1.0, 0.5)
-COLOR_NODE_BORDER_SELECTED = imgui.get_color_u32_rgba(1.0, 0.697, 0.0, 0.5)
+COLOR_NODE_BORDER_SELECTED = imgui.get_color_u32_rgba(1.0 * 0.75, 0.697 * 0.75, 0.0, 0.8)
 
 COLOR_PORT_HIGHLIGHT_POSITIVE = imgui.get_color_u32_rgba(0.0, 0.5, 0.0, 1.0)
 COLOR_PORT_HIGHLIGHT_POSITIVE_ACTIVE = imgui.get_color_u32_rgba(0.5, 0.5, 0.0, 1.0)
@@ -961,7 +961,7 @@ class NodeEditor:
             # set keyboard focus only once
             if not imgui.is_any_item_active():
                 imgui.set_keyboard_focus_here()
-            imgui.push_item_width(200)
+            imgui.push_item_width(250)
             changed, self.context_search_text = imgui.input_text("", self.context_search_text, 255, imgui.INPUT_TEXT_ENTER_RETURNS_TRUE)
 
             def filter_nodes(text):
@@ -982,7 +982,7 @@ class NodeEditor:
 
             self.context_index = max(0, min(len(entries) - 1, self.context_index))
             selected = self.context_index
-            imgui.listbox_header("", 200, 200)
+            imgui.listbox_header("", 250, 300)
             for i, (label, spec) in enumerate(entries):
                 imgui.push_id(i)
                 is_selected = selected == 0

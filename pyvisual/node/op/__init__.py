@@ -1,2 +1,2 @@
-from . import transform, audio, generate, gpu, value
+from . import audio, event, generate, gpu, transform, value
 
