@@ -9,6 +9,88 @@ import numpy as np
 import math
 import time
 
+#
+# Base operation nodes
+#
+
+class Latch(Node):
+    class Meta:
+        inputs = [
+            {"name" : "enabled", "dtype" : dtype.bool, "dtype_args" : {"default" : True}}
+        ]
+        options = {
+            "virtual" : True
+        }
+
+    def _evaluate(self):
+        if self.get("enabled"):
+            self.set("output", self.get("input"))
+
+class Lambda(Node):
+    class Meta:
+        inputs = [
+            {"name" : "lambda", "dtype" : dtype.str, "dtype_args" : {"default" : "x"}, "hide" : True},
+        ]
+        options = {
+            "virtual" : True,
+        }
+
+    def __init__(self):
+        super().__init__()
+
+        self.function = lambda x: x
+        self.function_text = None
+        self.text_changed = False
+        self.compiles = True
+
+        self.error = False
+        self.last_try = 0
+
+    def process_result(self, result):
+        return result
+
+    def _evaluate(self):
+        try:
+            self.set("output", self.process_result(self.function(self.get("input"))))
+        except:
+            self.error = True
+
+    def _show_custom_ui(self):
+        first_run = False
+        if self.function_text is None:
+            self.function_text = self.get("lambda")
+            first_run = True
+
+        imgui.dummy(1, 5)
+        imgui.text("lambda x:")
+        imgui.push_item_width(208)
+        changed, text = imgui.input_text("", self.function_text, 255, imgui.INPUT_TEXT_ENTER_RETURNS_TRUE)
+        self.get_input("lambda").manual_value.value = self.function_text
+        if changed or first_run or (self.error and time.time() - self.last_try > 1.0):
+            self.last_try = time.time()
+            try:
+                function = eval("lambda x: %s" % self.function_text)
+                self.function = function
+                self.text_changed = False
+                self.compiles = True
+                self.error = False
+            except:
+                self.compiles = False
+        else:
+            if text != self.function_text:
+                self.text_changed = True
+        self.function_text = text
+        if not self.compiles:
+            imgui.text("Compilation error.")
+        elif self.error:
+            imgui.text("Runtime error.")
+        else:
+            imgui.text("Lambda compiled." + (" (changed)" if self.text_changed else ""))
+
+#
+# Bool operations
+#
+
 class Or(Node):
     class Meta:
         inputs = [
@@ -59,7 +141,9 @@ class Not(Node):
         v = self.get("v")
         self.set("output", 0.0 if v else 1.0)
 
-# TODO maybe Compare and Threshold can combined somehow or so?
+#
+# Float operations
+#
 
 COMPARE_MODES = ["v0 < v1", "v0 <= v1", "v0 > v1", "v0 >= v1"]
 class Compare(Node):
@@ -114,20 +198,6 @@ class Edge(Node):
         self.set("combined", last_value < threshold and value >= threshold or last_value > threshold and value <= threshold)
         self.last_value = value
 
-# TODO naming?
-class Latch(Node):
-    class Meta:
-        inputs = [
-            {"name" : "enabled", "dtype" : dtype.bool, "dtype_args" : {"default" : True}}
-        ]
-        options = {
-            "virtual" : True
-        }
-
-    def _evaluate(self):
-        if self.get("enabled"):
-            self.set("output", self.get("input"))
-
 class FloatLatch(Latch):
     class Meta:
         inputs = [
@@ -135,19 +205,6 @@ class FloatLatch(Latch):
         ]
         outputs = [
             {"name" : "output", "dtype" : dtype.float}
-        ]
-        options = {
-            "virtual" : False,
-            "category" : "math"
-        }
-
-class ColorLatch(Latch):
-    class Meta:
-        inputs = [
-            {"name" : "input", "dtype" : dtype.color}
-        ]
-        outputs = [
-            {"name" : "output", "dtype" : dtype.color}
         ]
         options = {
             "virtual" : False,
@@ -238,67 +295,6 @@ class BinaryOpFloat(Node):
         b = self.get("b")
         self.set("out", self.OPS[op](a, b))
 
-class Lambda(Node):
-    class Meta:
-        inputs = [
-            {"name" : "lambda", "dtype" : dtype.str, "dtype_args" : {"default" : "x"}, "hide" : True},
-        ]
-        options = {
-            "virtual" : True,
-        }
-
-    def __init__(self):
-        super().__init__()
-
-        self.function = lambda x: x
-        self.function_text = None
-        self.text_changed = False
-        self.compiles = True
-
-        self.error = False
-        self.last_try = 0
-
-    def process_result(self, result):
-        return result
-
-    def _evaluate(self):
-        try:
-            self.set("output", self.process_result(self.function(self.get("input"))))
-        except:
-            self.error = True
-
-    def _show_custom_ui(self):
-        first_run = False
-        if self.function_text is None:
-            self.function_text = self.get("lambda")
-            first_run = True
-
-        imgui.dummy(1, 5)
-        imgui.text("lambda x:")
-        imgui.push_item_width(208)
-        changed, text = imgui.input_text("", self.function_text, 255, imgui.INPUT_TEXT_ENTER_RETURNS_TRUE)
-        self.get_input("lambda").manual_value.value = self.function_text
-        if changed or first_run or (self.error and time.time() - self.last_try > 1.0):
-            self.last_try = time.time()
-            try:
-                function = eval("lambda x: %s" % self.function_text)
-                self.function = function
-                self.text_changed = False
-                self.compiles = True
-                self.error = False
-            except:
-                self.compiles = False
-        else:
-            if text != self.function_text:
-                self.text_changed = True
-        self.function_text = text
-        if not self.compiles:
-            imgui.text("Compilation error.")
-        elif self.error:
-            imgui.text("Runtime error.")
-        else:
-            imgui.text("Lambda compiled." + (" (changed)" if self.text_changed else ""))
-
 class FloatLambda(Lambda):
     class Meta:
         inputs = [
@@ -310,6 +306,23 @@ class FloatLambda(Lambda):
         options = {
             "category" : "math",
             "virtual" : False
+        }
+
+#
+# Color operations
+#
+
+class ColorLatch(Latch):
+    class Meta:
+        inputs = [
+            {"name" : "input", "dtype" : dtype.color}
+        ]
+        outputs = [
+            {"name" : "output", "dtype" : dtype.color}
+        ]
+        options = {
+            "virtual" : False,
+            "category" : "math"
         }
 
 class ColorLambda(Lambda):
@@ -329,28 +342,4 @@ class ColorLambda(Lambda):
         if not isinstance(result, np.ndarray) or result.shape != (4,):
             raise RuntimeError("Invalid result. Must be (4,) array.")
         return result.astype(np.float32)
-
-from pyvisual.audio import analyzer
-class Plot(Node):
-    class Meta:
-        inputs = [
-            {"name" : "input", "dtype" : dtype.float},
-            {"name" : "min", "dtype" : dtype.float, "dtype_args" : {"default" : 0.0}},
-            {"name" : "max", "dtype" : dtype.float, "dtype_args" : {"default" : 1.0}},
-            {"name" : "time", "dtype" : dtype.float, "dtype_args" : {"default" : 5.0}},
-        ]
-        options = {
-            "category" : "math",
-            "virtual" : False
-        }
-
-    def __init__(self):
-        super().__init__(always_evaluate=True)
-        self.buffer = analyzer.RingBuffer(5*60)
-
-    def _evaluate(self):
-        self.buffer.append(self.get("input"))
-
-    def _show_custom_ui(self):
-        imgui.plot_lines("", self.buffer.contents, float(self.get("min")), float(self.get("max")), (200, 50))
 
