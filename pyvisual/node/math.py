@@ -353,3 +353,4 @@ class Plot(Node):
 
     def _show_custom_ui(self):
         imgui.plot_lines("", self.buffer.contents, float(self.get("min")), float(self.get("max")), (200, 50))
+

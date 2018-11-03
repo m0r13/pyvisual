@@ -19,6 +19,7 @@ def numpy_serializer(dtype=np.float32):
 
 base_float = BaseType("float", lambda value: value, lambda json_value: json_value)
 base_str = BaseType("str", lambda value: value, lambda json_value: json_value)
+base_vec2 = BaseType("vec2", *numpy_serializer())
 base_vec4 = BaseType("vec4", *numpy_serializer())
 base_mat4 = BaseType("mat4", *numpy_serializer())
 base_tex2d = BaseType("tex2d", *dummy_serializer())
@@ -32,12 +33,13 @@ int = Type("int", base_float, lambda: 0.0)
 float = Type("float", base_float, lambda: 0.0)
 str = Type("str", base_str, lambda: "")
 assetpath = Type("assetpath", base_str, lambda: "")
+vec2 = Type("vec2", base_vec2, lambda: np.array([0.0, 0.0], dtype=np.float32))
 color = Type("color", base_vec4, lambda: np.array([0.0, 0.0, 0.0, 1.0], dtype=np.float32))
 mat4 = Type("mat4", base_mat4, lambda: np.eye(4, dtype=np.float32))
 tex2d = Type("tex2d", base_tex2d, lambda: None)
 audio = Type("audio", base_audio, lambda: None)
 
 dtypes = {}
-for dtype in (bool, event, int, float, str, assetpath, color, mat4, tex2d, audio):
+for dtype in (bool, event, int, float, str, assetpath, vec2, color, mat4, tex2d, audio):
     dtypes[dtype.name] = dtype
 

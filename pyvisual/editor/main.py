@@ -114,6 +114,7 @@ _white = imgui.get_color_u32_rgba(0.7, 0.7, 0.7, 1.0)
 _colors = {
     node_dtype.base_float : _green,
     node_dtype.base_str : _white,
+    node_dtype.base_vec2 : _red,
     node_dtype.base_vec4 : _red,
     node_dtype.base_mat4 : _purpol,
     node_dtype.base_tex2d : _light_blue,
@@ -586,7 +587,7 @@ class Node:
         # some bounds for hovering / selection highlighting
         # and check if we're actually hovered
         padding_hover = (4, 4)
-        padding_selection = (6, 6)
+        padding_selection = (4, 4)
         upper_left = self.editor.local_to_screen(self.actual_pos)
         upper_left_hover = t_sub(upper_left, padding_hover)
         upper_left_selection = t_sub(upper_left, padding_selection)
@@ -666,7 +667,7 @@ class Node:
             if self.hovered:
                 draw_list.add_rect(upper_left_hover, lower_right_hover, COLOR_NODE_BORDER_HOVERED, 0.0)
             if self.selected:
-                draw_list.add_rect(upper_left_selection, lower_right_selection, COLOR_NODE_BORDER_SELECTED, 0.0)
+                draw_list.add_rect(upper_left_selection, lower_right_selection, COLOR_NODE_BORDER_SELECTED, 0.0, 0xF, 3.0)
 
         imgui.pop_id()
         imgui.set_cursor_pos(old_cursor_pos)

@@ -87,6 +87,27 @@ class OutputColor(Node):
             "show_title" : False
         }
 
+class Float2Vec2(Node):
+    class Meta:
+        inputs = [
+            {"name" : "x", "dtype" : dtype.float, "dtype_args" : {}},
+            {"name" : "y", "dtype" : dtype.float, "dtype_args" : {}},
+        ]
+        outputs = [
+            {"name" : "vec2", "dtype" : dtype.vec2},
+        ]
+        options = {
+            "category" : "conversion",
+            "show_title" : True
+        }
+
+    def _evaluate(self):
+        self.set("vec2", np.array([
+            self.get("x"),
+            self.get("y")
+        ], dtype=np.float32))
+
+
 class Float2Color(Node):
     class Meta:
         inputs = [

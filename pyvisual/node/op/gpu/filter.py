@@ -142,3 +142,23 @@ class ScanlinesFine(Shader):
         for name in ("time", "count", "noiseAmount", "linesAmount"):
             program[name] = self.get(name)
 
+class ChromaticAberration(Shader):
+    class Meta:
+        inputs = [
+            {"name" : "uRedOffset", "dtype" : dtype.vec2},
+            {"name" : "uGreenOffset", "dtype" : dtype.vec2},
+            {"name" : "uBlueOffset", "dtype" : dtype.vec2},
+        ]
+        options = {
+            "virtual" : False,
+            "category" : "shader"
+        }
+
+    def __init__(self):
+        super().__init__("common/passthrough.vert", "post/chromaticaberration.frag")
+
+    def set_uniforms(self, program):
+        input_texture = self.get("input")
+        input_texture.wrapping = gl.GL_MIRRORED_REPEAT
+        for name in ("uRedOffset", "uGreenOffset", "uBlueOffset"):
+            program[name] = self.get(name)

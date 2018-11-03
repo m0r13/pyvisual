@@ -82,7 +82,7 @@ class SwipeMixTexture(MixTexture):
         program["uDirection"] = (self.get("x"), self.get("y"))
 
 # TODO node restructuring
-from pyvisual.node.generate import scalable_timer
+from pyvisual.node.op.generate import scalable_timer
 class TransitionTimer(Node):
     class Meta:
         inputs = [
