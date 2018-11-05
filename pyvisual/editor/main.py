@@ -359,6 +359,10 @@ class Node:
 
         if port_spec["hide"]:
             return
+        if port_spec["dummy"]:
+            # 6 == frame padding * 2
+            imgui.dummy(1, imgui.get_text_line_height() + 6)
+            return
         name = port_spec["name"]
         dtype = port_spec["dtype"]
         is_input = node_meta.is_input(port_id)

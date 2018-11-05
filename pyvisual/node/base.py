@@ -41,6 +41,7 @@ def prepare_port_spec(port_spec, is_input):
     port_spec.setdefault("widgets", [])
     port_spec.setdefault("default", None)
     port_spec.setdefault("hide", False)
+    port_spec.setdefault("dummy", False)
 
     if is_input:
         port_spec.setdefault("manual_input", True)
@@ -180,6 +181,30 @@ class Node(metaclass=NodeMeta):
         p.update(self.custom_input_ports)
         p.update(self.custom_output_ports)
         return p
+
+    def set_custom_inputs(self, port_specs):
+        self.custom_input_ports = OrderedDict()
+        for port_spec in port_specs:
+            prepare_port_spec(port_spec, True)
+            port_id = "i_%s" % port_spec["name"]
+            self.custom_input_ports[port_id] = port_spec
+        self.update_ports()
+
+    def set_custom_outputs(self, port_specs):
+        self.custom_output_ports = OrderedDict()
+        for port_spec in port_specs:
+            prepare_port_spec(port_spec, False)
+            port_id = "o_%s" % port_spec["name"]
+            self.custom_output_ports[port_id] = port_spec
+        self.update_ports()
+
+    def yield_custom_input_values(self):
+        for port_id in self.custom_input_ports.keys():
+            yield port_id, self.get_value(port_id)
+
+    def yield_custom_output_values(self):
+        for port_id in self.custom_output_ports.keys():
+            yield port_id, self.get_value(port_id)
 
     @classmethod
     def get_sub_nodes(cls, include_self=True):

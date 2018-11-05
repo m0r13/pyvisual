@@ -155,34 +155,6 @@ class Color2Float(Node):
         self.set("b", color[2])
         self.set("a", color[3])
 
-class Test(Node):
-    class Meta:
-        inputs = [
-            {"name" : "number", "dtype" : dtype.int, "dtype_args" : {"range" : [0, float("inf")]}},
-            {"name" : "checkbox", "dtype" : dtype.bool},
-        ]
-        outputs = [
-        ]
-
-    def _update_custom_ports(self):
-        self.custom_input_ports = OrderedDict()
-        if self.get("checkbox"):
-            port_spec = {"name" : "test", "dtype" : dtype.str}
-            prepare_port_spec(port_spec, True)
-            self.custom_input_ports["i_name"] = port_spec
-
-        self.custom_output_ports = OrderedDict()
-        for i in range(int(self.get("number"))):
-            name = "output%d" % i
-            port_spec = {"name" : name, "dtype" : dtype.float, "manual_input" : True}
-            prepare_port_spec(port_spec, False)
-            self.custom_output_ports["o_%s" % name] = port_spec
-        self.update_ports()
-
-    def _evaluate(self):
-        if self.have_inputs_changed("number", "checkbox"):
-            self._update_custom_ports()
-
 
 # TODO where to put vars to?
 
