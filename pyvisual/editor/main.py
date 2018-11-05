@@ -1097,6 +1097,7 @@ class NodeEditor:
             key_c = glfw.GLFW_KEY_C
             key_v = glfw.GLFW_KEY_V
             key_f = glfw.GLFW_KEY_F
+            key_x = glfw.GLFW_KEY_X
             is_key_down = lambda key: io.is_key_down(key) and io.get_key_down_duration(key) == 0.0
 
             # select all nodes
@@ -1128,6 +1129,12 @@ class NodeEditor:
                 if self.node_clipboard is not None:
                     offset = self.screen_to_local(io.mouse_pos)
                     self.graph.unserialize_as_selected(self.node_clipboard, pos_offset=offset)
+            # cut selected nodes
+            if is_key_down(key_x):
+                self.node_clipboard = self.graph.serialize_selected()
+                for node in list(self.nodes):
+                    if node.selected:
+                        self.remove_node(node)
             # duplicate selected nodes
             if is_key_down(key_f):
                 self.graph.duplicate_selected((20, 20))
