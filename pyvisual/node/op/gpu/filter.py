@@ -162,3 +162,24 @@ class ChromaticAberration(Shader):
         input_texture.wrapping = gl.GL_MIRRORED_REPEAT
         for name in ("uRedOffset", "uGreenOffset", "uBlueOffset"):
             program[name] = self.get(name)
+
+class GaussBlurPass(Shader):
+    class Meta:
+        inputs = [
+            {"name" : "uSigma", "dtype" : dtype.float, "dtype_args" : {"default" : 3}},
+            {"name" : "uDirection", "dtype" : dtype.vec2, "dtype_args" : {"default" : np.float32([1, 0])}},
+        ]
+        options = {
+            "virtual" : False,
+            "category" : "shader"
+        }
+
+    def __init__(self):
+        super().__init__("common/passthrough.vert", "post/gauss_blur.frag")
+
+    def set_uniforms(self, program):
+        input_texture = self.get("input")
+        input_texture.wrapping = gl.GL_MIRRORED_REPEAT
+        for name in ("uSigma", "uDirection"):
+            program[name] = self.get(name)
+

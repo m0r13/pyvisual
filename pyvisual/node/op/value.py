@@ -308,6 +308,25 @@ class FloatLambda(Lambda):
             "virtual" : False
         }
 
+class RotatedVec2(Node):
+    class Meta:
+        inputs = [
+            {"name" : "length", "dtype" : dtype.float, "dtype_args" : {"default" : 1.0}},
+            {"name" : "angle", "dtype" : dtype.float},
+        ]
+        outputs = [
+            {"name" : "output", "dtype" : dtype.vec2}
+        ]
+
+    def _evaluate(self):
+        angle = math.radians(self.get("angle"))
+        cos = math.cos(angle)
+        sin = math.sin(angle)
+        v = np.float32([self.get("length"), 0])
+        rot = np.float32([[cos, -sin],
+                          [sin, cos]])
+        self.set("output", v.dot(rot))
+
 #
 # Color operations
 #

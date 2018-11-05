@@ -107,7 +107,6 @@ class Float2Vec2(Node):
             self.get("y")
         ], dtype=np.float32))
 
-
 class Float2Color(Node):
     class Meta:
         inputs = [
@@ -131,6 +130,25 @@ class Float2Color(Node):
             self.get("b"),
             self.get("a")
         ], dtype=np.float32))
+
+class Vec22Float(Node):
+    class Meta:
+        inputs = [
+            {"name" : "input", "dtype" : dtype.vec2},
+        ]
+        outputs = [
+            {"name" : "x", "dtype" : dtype.float},
+            {"name" : "y", "dtype" : dtype.float},
+        ]
+        options = {
+            "category" : "conversion",
+            "show_title" : True
+        }
+
+    def _evaluate(self):
+        vec = self.get("input")
+        self.set("x", vec[0])
+        self.set("y", vec[1])
 
 class Color2Float(Node):
     class Meta:
