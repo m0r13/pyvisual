@@ -17,7 +17,18 @@ def numpy_serializer(dtype=np.float32):
         return np.array(json_data, dtype=dtype)
     return serialize, unserialize
 
-base_float = BaseType("float", lambda value: value, lambda json_value: json_value)
+def float_serializer():
+    # backup original python float type!
+    _float = float
+    # it seemed to happen somehow that some value was of type 'bool_'
+    # sooo just make it a float just in case
+    def serialize(value):
+        return _float(value)
+    def unserialize(json_value):
+        return _float(json_value)
+    return serialize, unserialize
+
+base_float = BaseType("float", *float_serializer())
 base_str = BaseType("str", lambda value: value, lambda json_value: json_value)
 base_vec2 = BaseType("vec2", *numpy_serializer())
 base_vec4 = BaseType("vec4", *numpy_serializer())
