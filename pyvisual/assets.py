@@ -21,7 +21,7 @@ def glob_paths(wildcard):
     return paths
 
 class FileWatcher:
-    CHECK_INTERVAL = 1
+    CHECK_INTERVAL = 1.0
 
     def __init__(self, path):
         self.path = path

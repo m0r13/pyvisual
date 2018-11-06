@@ -163,6 +163,25 @@ class ChromaticAberration(Shader):
         for name in ("uRedOffset", "uGreenOffset", "uBlueOffset"):
             program[name] = self.get(name)
 
+class HSVAdjust(Shader):
+    class Meta:
+        inputs = [
+            {"name" : "uHue", "dtype" : dtype.float, "dtype_args" : {"default" : 0.0}},
+            {"name" : "uSaturation", "dtype" : dtype.float, "dtype_args" : {"default" : 1.0, "range" : [0, float("inf")]}},
+            {"name" : "uValue", "dtype" : dtype.float, "dtype_args" : {"default" : 1.0, "range" : [0, float("inf")]}}
+        ]
+        outputs = [
+        ]
+
+    def __init__(self):
+        super().__init__("common/passthrough.vert", "post/hsv_adjust.frag")
+
+    def set_uniforms(self, program):
+        input_texture = self.get("input")
+        input_texture.wrapping = gl.GL_MIRRORED_REPEAT
+        for name in ("uHue", "uSaturation", "uValue"):
+            program[name] = self.get(name)
+
 class GaussBlurPass(Shader):
     class Meta:
         inputs = [

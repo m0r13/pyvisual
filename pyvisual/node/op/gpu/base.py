@@ -87,6 +87,7 @@ class Shader(RenderNode):
             {"name" : "transformUV", "dtype" : dtype.mat4},
             {"name" : "sizeref", "dtype" : dtype.tex2d},
             {"name" : "input", "dtype" : dtype.tex2d},
+            {"name" : "force_change", "dtype" : dtype.float, "hide" : True},
         ]
         outputs = [
             {"name" : "enabled", "dtype" : dtype.bool, "dtype_args" : {"default" : 1.0}},
@@ -123,6 +124,10 @@ class Shader(RenderNode):
             self.quad.draw(gl.GL_TRIANGLE_STRIP)
 
             self.shader_error = None
+
+            # TODO maybe let node base class have method for this
+            # force re-rendering of this node by changing at least one input
+            self.get_input("force_change").value = 42.0
         except Exception as e:
             self.quad = None
             self.shader_error = traceback.format_exc()
