@@ -140,7 +140,7 @@
             "manual_values": {
                 "i_next": 0.0,
                 "i_shuffle": 1.0,
-                "i_wildcard": "/home/moritz/dev/visual/pyvisual/pyvisual/assets/image/vapor/*/*.jpg",
+                "i_wildcard": "image/vapor/*/*.jpg",
                 "o_last_texture": "",
                 "o_next": 0.0,
                 "o_texture": ""
@@ -226,7 +226,7 @@
             "custom_ports": [],
             "id": 3,
             "manual_values": {
-                "i_path": "/home/moritz/dev/visual/pyvisual/pyvisual/assets/image/common/mask/common/rombus.png",
+                "i_path": "image/mask/common/rombus.png",
                 "o_output": ""
             },
             "type": "LoadTexture",

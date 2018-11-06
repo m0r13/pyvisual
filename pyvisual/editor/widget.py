@@ -247,7 +247,7 @@ class AssetPath(Widget):
 
         path = imgui_pick_file("select_file", assets.ASSET_PATH + "/" + self.prefix)
         if path is not None:
-            value.value = path
+            value.value = os.path.relpath(path, assets.ASSET_PATH)
 
 class Texture(Widget):
     def __init__(self, node):

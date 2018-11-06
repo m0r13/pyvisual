@@ -104,7 +104,6 @@ class Shader(RenderNode):
         self.update_program()
 
     def update_program(self):
-
         try:
             vertex = load_shader(self.vertex_watcher.path)
             fragment = load_shader(self.fragment_watcher.path)
@@ -181,7 +180,7 @@ class Shader(RenderNode):
 
     def _show_custom_context(self):
         if imgui.menu_item("reload shaders")[0]:
-            self.create_program()
+            self.update_program()
 
 class Blend(RenderNode):
     class Meta:

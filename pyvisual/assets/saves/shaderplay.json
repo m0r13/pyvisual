@@ -1120,7 +1120,7 @@
             "custom_ports": [],
             "id": 36,
             "manual_values": {
-                "i_path": "/home/moritz/dev/visual/pyvisual/pyvisual/assets/image/tartuvhs/Tartu.jpg",
+                "i_path": "image/tartuvhs/Tartu.jpg",
                 "o_output": ""
             },
             "type": "LoadTexture",
@@ -2015,7 +2015,7 @@
             "manual_values": {
                 "i_next": 0.0,
                 "i_shuffle": 1.0,
-                "i_wildcard": "/home/moritz/dev/visual/pyvisual/pyvisual/assets/image/tartuvhs/*.jpg",
+                "i_wildcard": "image/tartuvhs/*.jpg",
                 "o_last_texture": "",
                 "o_next": 0.0,
                 "o_texture": ""
@@ -2103,7 +2103,7 @@
             "manual_values": {
                 "i_next": 0.0,
                 "i_shuffle": 1.0,
-                "i_wildcard": "/home/moritz/dev/visual/pyvisual/pyvisual/assets/image/common/mask/common/*.png",
+                "i_wildcard": "image/common/mask/common/*.png",
                 "o_last_texture": "",
                 "o_next": 0.0,
                 "o_texture": ""
@@ -2124,7 +2124,7 @@
             "manual_values": {
                 "i_next": 0.0,
                 "i_shuffle": 1.0,
-                "i_wildcard": "/home/moritz/dev/visual/pyvisual/pyvisual/assets/image/tartuvhs/*.jpg",
+                "i_wildcard": "image/tartuvhs/*.jpg",
                 "o_last_texture": "",
                 "o_next": 0.0,
                 "o_texture": ""

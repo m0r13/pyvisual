@@ -138,7 +138,7 @@
             "custom_ports": [],
             "id": 61,
             "manual_values": {
-                "i_path": "/home/moritz/dev/visual/pyvisual/pyvisual/assets/image/test/maxresdefault.jpg",
+                "i_path": "image/test/maxresdefault.jpg",
                 "o_output": ""
             },
             "type": "LoadTexture",

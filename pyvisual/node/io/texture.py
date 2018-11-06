@@ -35,7 +35,7 @@ class LoadTexture(Node):
 
         texture = None
         try:
-            texture = np.array(Image.open(path)).view(gloo.Texture2D)
+            texture = np.array(Image.open(os.path.join(assets.ASSET_PATH, path))).view(gloo.Texture2D)
         except Exception as e:
             self.set("output", None)
             self.status = str(e)
@@ -49,7 +49,7 @@ class LoadTexture(Node):
     def _show_custom_ui(self):
         if self.status:
             imgui.dummy(1, 5)
-            imgui.text("Error. (?)")
+            imgui.text_colored("Error. (?)", 1.0, 0.0, 0.0)
             if imgui.is_item_hovered():
                 imgui.set_tooltip(self.status)
 
