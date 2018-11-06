@@ -180,7 +180,7 @@ def imgui_pick_file(name, base_path, wildcard="*"):
         imgui.end_popup()
 
 def _imgui_pick_file_menu(base_path, wildcard="*"):
-    MAX_FILE_DISPLAY_LENGTH = 100
+    MAX_FILE_DISPLAY_LENGTH = 60
 
     try:
         entries = []
@@ -201,7 +201,7 @@ def _imgui_pick_file_menu(base_path, wildcard="*"):
         for not_is_dir, name in sorted(entries):
             display_name = name
             if len(display_name) > MAX_FILE_DISPLAY_LENGTH:
-                display_name = display_name[:MAX_FILE_DISPLAY_LENGTH/2] + "..." + display_name[-MAX_FILE_DISPLAY_LENGTH/2:]
+                display_name = display_name[:MAX_FILE_DISPLAY_LENGTH//2] + "..." + display_name[-MAX_FILE_DISPLAY_LENGTH//2:]
 
             if not not_is_dir:
                 if imgui.begin_menu(display_name):
