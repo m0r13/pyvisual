@@ -198,6 +198,14 @@ class NodeGraph:
 
             src_node = self.nodes[src_node_id]
             dst_node = self.nodes[dst_node_id]
+            if src_port_id not in src_node.ports:
+                print("### Warning: Ignoring connection %s (node #%d) -> %s (node #%d) because source port %s does not exist." \
+                        % (src_port_id, src_node_id, dst_port_id, dst_node_id, src_port_id))
+                continue
+            if dst_port_id not in dst_node.ports:
+                print("### Warning: Ignoring connection %s (node #%d) -> %s (node #%d) because destination port %s does not exist." \
+                        % (src_port_id, src_node_id, dst_port_id, dst_node_id, dst_port_id))
+                continue
             self.create_connection(src_node, src_port_id, dst_node, dst_port_id)
 
     def serialize_selected(self):
