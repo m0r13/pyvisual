@@ -90,7 +90,7 @@ class NodeSpec:
         self.cls = child_spec.cls
         self.inputs = self.inputs + child_spec.inputs
         self.outputs = self.outputs + child_spec.outputs
-        self.options.update(child_spec.options)
+        self.options = child_spec.options
 
     def __repr__(self):
         return "NodeSpec(cls=%s, inputs=%s, outputs=%s, options=%s)" % (self.cls, self.inputs, self.outputs, self.options)
