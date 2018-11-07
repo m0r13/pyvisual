@@ -4,14 +4,24 @@ uniform float uRadius;
 uniform vec2 uRadiusFactor;
 uniform float uSoftness;
 uniform float uIntensity;
+uniform float uDistanceOrder;
 
 in vec2 TexCoord0;
 
 out vec4 oFragColor;
 
+float minkowski(vec2 a, vec2 b, float p) {
+    return pow(pow(abs(a.x - b.x), p) + pow(abs(a.y - b.y), p), 1.0 / p);
+}
+
 void main() {
     vec2 radiusAdjust = vec2(uRadius, uRadius) * uRadiusFactor;
-    float d = length((vec2(0.5, 0.5) - TexCoord0) * radiusAdjust) * 2.0;
+
+    // position uv coordinates around (0.5, 0.5)
+    vec2 offset = vec2(0.5, 0.5);
+    vec2 center = vec2(0.5, 0.5) - offset;
+    vec2 uv = TexCoord0 - offset;
+    float d = minkowski(center, uv * radiusAdjust, uDistanceOrder) * 2.0;
 
     // prevent math errors
     float softness = max(0.0001, uSoftness);

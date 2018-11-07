@@ -207,6 +207,7 @@ class Vignette(Shader):
         inputs = [
             {"name" : "uRadius", "dtype" : dtype.float, "dtype_args" : {"default" : 1.0}},
             {"name" : "uRadiusFactor", "dtype" : dtype.vec2, "dtype_args" : {"default" : np.float32([1.0, 1.0])}},
+            {"name" : "uDistanceOrder", "dtype" : dtype.float, "dtype_args" : {"default" : 2.0, "range" : [0.0, float("inf")]}},
             {"name" : "uSoftness", "dtype" : dtype.float, "dtype_args" : {"default" : 0.35, "range" : [0.0, float("inf")]}},
             {"name" : "uIntensity", "dtype" : dtype.float, "dtype_args" : {"default" : 0.5, "range" : [0.0, 1.0]}},
         ]
@@ -221,5 +222,5 @@ class Vignette(Shader):
     def set_uniforms(self, program):
         input_texture = self.get("input")
         input_texture.wrapping = gl.GL_MIRRORED_REPEAT
-        for name in ("uRadius", "uRadiusFactor", "uSoftness", "uIntensity"):
+        for name in ("uRadius", "uRadiusFactor", "uDistanceOrder", "uSoftness", "uIntensity"):
             program[name] = self.get(name)
