@@ -185,7 +185,7 @@ class HSVAdjust(Shader):
 class GaussBlurPass(Shader):
     class Meta:
         inputs = [
-            {"name" : "uSigma", "dtype" : dtype.float, "dtype_args" : {"default" : 3}},
+            {"name" : "uSigma", "dtype" : dtype.float, "dtype_args" : {"default" : 3.0, "range" : [0.00001, float("inf")]}},
             {"name" : "uDirection", "dtype" : dtype.vec2, "dtype_args" : {"default" : np.float32([1, 0])}},
         ]
         options = {
