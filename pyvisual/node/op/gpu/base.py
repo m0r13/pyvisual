@@ -104,6 +104,8 @@ class Shader(RenderNode):
         self.fragment_watcher = assets.FileWatcher(assets.get_shader_path(fragment))
         self.update_program()
 
+        self.input_texture = None
+
     def update_program(self):
         try:
             vertex = load_shader(self.vertex_watcher.path)
@@ -149,16 +151,21 @@ class Shader(RenderNode):
             self.set("output", self.get("input"))
             return
 
-        input_texture = self.get("input")
-        # TODO what to do?!
-        if input_texture is None:
-            self.set("output", None)
-            return
-
+        self.input_texture = self.get("input")
         sizeref = self.get("sizeref")
+        # TODO what to do?!
+        if self.input_texture is None:
+            # if there is no input texture, there must be a sizeref texture at least
+            # input texture is empty texture then
+            # useful for shaders that generate some image data
+            if sizeref is None:
+                self.set("output", None)
+                return
+            self.input_texture = dummy
+
         if sizeref is None:
-            sizeref = input_texture
-        texture_size = input_texture.shape[:2][::-1]
+            sizeref = self.input_texture
+        texture_size = self.input_texture.shape[:2][::-1]
         target_size = sizeref.shape[:2][::-1]
         def do_render():
             custom_model = np.eye(4, dtype=np.float32)
@@ -166,9 +173,9 @@ class Shader(RenderNode):
             self.quad["uModelViewProjection"] = np.dot(model, np.dot(view, projection))
             self.quad["uTextureSize"] = texture_size
             self.quad["uTransformUV"] = np.dot(texture, self.get("transformUV"))
-            input_texture.interpolation = gl.GL_LINEAR
-            input_texture.wrapping = gl.GL_CLAMP_TO_BORDER
-            self.quad["uInputTexture"] = input_texture
+            self.input_texture.interpolation = gl.GL_LINEAR
+            self.input_texture.wrapping = gl.GL_CLAMP_TO_BORDER
+            self.quad["uInputTexture"] = self.input_texture
             self.set_uniforms(self.quad)
             self.quad.draw(gl.GL_TRIANGLE_STRIP)
 

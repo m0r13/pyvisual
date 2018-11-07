@@ -1,2 +1,2 @@
-from . import base, mask, transition, filter
+from . import base, mask, transition, filter, generate
 

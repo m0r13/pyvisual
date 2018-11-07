@@ -56,7 +56,7 @@ class SampleTexture(Shader):
         interpolation_mode = int(self.get("interpolation"))
         if interpolation_mode < 0 or interpolation_mode >= len(INTERPOLATION_MODES):
             interpolation_mode = 0
-        input_texture = self.get("input")
+        input_texture = self.input_texture
         input_texture.wrapping = WRAPPING_MODES_GL[wrapping_mode]
         input_texture.interpolation = INTERPOLATION_MODES_GL[interpolation_mode]
 
@@ -92,7 +92,7 @@ class PolarMirror(Shader):
         super().__init__("common/passthrough.vert", "post/mirror_polar.frag")
 
     def set_uniforms(self, program):
-        input_texture = self.get("input")
+        input_texture = self.input_texture
         input_texture.wrapping = gl.GL_MIRRORED_REPEAT
         program["uAxisAngle"] = self.get("axis_angle")
         program["uAngleOffset"] = self.get("angle")
@@ -115,7 +115,7 @@ class Slices(Shader):
         super().__init__("common/passthrough.vert", "post/slices.frag")
 
     def set_uniforms(self, program):
-        input_texture = self.get("input")
+        input_texture = self.input_texture
         input_texture.wrapping = gl.GL_MIRRORED_REPEAT
         for name in ("slices", "offset", "timeH", "timeV"):
             program[name] = self.get(name)
@@ -137,7 +137,7 @@ class ScanlinesFine(Shader):
         super().__init__("common/passthrough.vert", "post/scanlinesfine.frag")
 
     def set_uniforms(self, program):
-        input_texture = self.get("input")
+        input_texture = self.input_texture
         input_texture.wrapping = gl.GL_MIRRORED_REPEAT
         for name in ("time", "count", "noiseAmount", "linesAmount"):
             program[name] = self.get(name)
@@ -158,7 +158,7 @@ class ChromaticAberration(Shader):
         super().__init__("common/passthrough.vert", "post/chromaticaberration.frag")
 
     def set_uniforms(self, program):
-        input_texture = self.get("input")
+        input_texture = self.input_texture
         input_texture.wrapping = gl.GL_MIRRORED_REPEAT
         for name in ("uRedOffset", "uGreenOffset", "uBlueOffset"):
             program[name] = self.get(name)
@@ -177,7 +177,7 @@ class HSVAdjust(Shader):
         super().__init__("common/passthrough.vert", "post/hsv_adjust.frag")
 
     def set_uniforms(self, program):
-        input_texture = self.get("input")
+        input_texture = self.input_texture
         input_texture.wrapping = gl.GL_MIRRORED_REPEAT
         for name in ("uHue", "uSaturation", "uValue"):
             program[name] = self.get(name)
@@ -197,7 +197,7 @@ class GaussBlurPass(Shader):
         super().__init__("common/passthrough.vert", "post/gauss_blur.frag")
 
     def set_uniforms(self, program):
-        input_texture = self.get("input")
+        input_texture = self.input_texture
         input_texture.wrapping = gl.GL_MIRRORED_REPEAT
         for name in ("uSigma", "uDirection"):
             program[name] = self.get(name)
@@ -220,7 +220,7 @@ class Vignette(Shader):
         super().__init__("common/passthrough.vert", "post/vignette.frag")
 
     def set_uniforms(self, program):
-        input_texture = self.get("input")
+        input_texture = self.input_texture
         input_texture.wrapping = gl.GL_MIRRORED_REPEAT
         for name in ("uRadius", "uRadiusFactor", "uDistanceOrder", "uSoftness", "uIntensity"):
             program[name] = self.get(name)
