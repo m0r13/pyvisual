@@ -1,4 +1,5 @@
 import random
+import time
 from pyvisual.node.base import Node
 from pyvisual.node import dtype
 from collections import OrderedDict
@@ -11,6 +12,38 @@ def weighted_random(weights):
         if v < 0:
             return i
     return -1
+
+class TimerEvent(Node):
+    class Meta:
+        inputs = [
+            {"name" : "enabled", "dtype" : dtype.bool, "dtype_args" : {"default" : True}},
+            {"name" : "min", "dtype" : dtype.float, "dtype_args" : {"default" : 1, "range" : [0.00001, float("inf")]}},
+            {"name" : "max", "dtype" : dtype.float, "dtype_args" : {"default" : 1, "range" : [0.00001, float("inf")]}},
+        ]
+        outputs = [
+            {"name" : "out", "dtype" : dtype.event},
+        ]
+
+    def __init__(self):
+        super().__init__(always_evaluate=True)
+
+        self._next_event = None
+
+    def _evaluate(self):
+        t = time.time()
+        if self.get("enabled") and self._next_event is not None and t > self._next_event:
+            self._next_event = None
+            self.set("out", True)
+        else:
+            self.set("out", False)
+
+        if not self.get("enabled"):
+            self._next_event = None
+        if self._next_event is None:
+            min_interval = self.get("min")
+            max_interval = self.get("max")
+            alpha = random.random()
+            self._next_event = t + min_interval * (1.0-alpha) + max_interval * alpha
 
 class EveryNEvent(Node):
     class Meta:
@@ -33,6 +66,8 @@ class EveryNEvent(Node):
             if self._counter >= self.get("every_n"):
                 self.set("out", True)
                 self._counter = 0
+            else:
+                self.set("out", False)
         else:
             self.set("out", False)
 

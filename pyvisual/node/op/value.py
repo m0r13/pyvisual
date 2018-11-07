@@ -186,7 +186,7 @@ class Edge(Node):
         }
 
     def __init__(self):
-        super().__init__()
+        super().__init__(always_evaluate=True)
         self.last_value = 0.0
 
     def _evaluate(self):
@@ -294,6 +294,42 @@ class BinaryOpFloat(Node):
         a = self.get("a")
         b = self.get("b")
         self.set("out", self.OPS[op](a, b))
+
+class Counter(Node):
+    class Meta:
+        inputs = [
+            {"name" : "offset", "dtype" : dtype.float},
+            {"name" : "op", "dtype" : dtype.int, "dtype_args" : {"choices" : list(BINARY_OPS.keys())}},
+            {"name" : "operand", "dtype" : dtype.float, "dtype_args" : {"default" : 1.0}},
+            {"name" : "operate", "dtype" : dtype.event},
+            {"name" : "reset", "dtype" : dtype.event},
+            {"name" : "reset_value", "dtype" : dtype.float, "dtype_args" : {"default" : 0.0}},
+        ]
+        outputs = [
+            {"name" : "out", "dtype" : dtype.float}
+        ]
+
+    OPS = list(BINARY_OPS.values())
+
+    def __init__(self):
+        super().__init__()
+
+        self._value = 0.0
+
+    def _evaluate(self):
+        if self.get("reset"):
+            self._value = self.get("reset_value")
+
+        if self.get("operate"):
+            op = int(self.get("op"))
+            if op < 0 or op >= len(self.OPS):
+                op = 0
+
+            a = self._value
+            b = self.get("operand")
+            self._value = self.OPS[op](a, b)
+
+        self.set("out", self.get("offset") + self._value)
 
 class FloatLambda(Lambda):
     class Meta:
