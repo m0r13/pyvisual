@@ -59,6 +59,7 @@ class LoadTextures(Node):
             {"name" : "wildcard", "dtype" : dtype.assetpath, "dtype_args" : {"prefix" : "image"}},
             {"name" : "next", "dtype" : dtype.event},
             {"name" : "shuffle", "dtype" : dtype.bool, "dtype_args" : {"default" : 1.0}},
+            {"name" : "current", "dtype" : dtype.str, "hide" : True},
         ]
         outputs = [
             {"name" : "texture", "dtype" : dtype.tex2d},
@@ -72,13 +73,15 @@ class LoadTextures(Node):
     def __init__(self):
         super().__init__()
 
+        # available textures as tuples (path, glumpy-texture)
+        # glumpy-textures are None until loaded for the first time
         self.textures = []
         self.index = 0
 
         self.last_texture = None
 
     def _load_texture(self, path):
-        texture = np.array(Image.open(path)).view(gloo.Texture2D)
+        texture = np.array(Image.open(os.path.join(assets.ASSET_PATH, path))).view(gloo.Texture2D)
         texture.activate()
         texture.deactivate()
         return texture
@@ -88,15 +91,19 @@ class LoadTextures(Node):
             self.textures = []
             self.index = 0
             wildcard = self.get("wildcard")
+            current = self.get("current")
             if wildcard:
-                for path in assets.glob_paths(wildcard):
-                    self.textures.append([os.path.join(assets.ASSET_PATH, path), None])
+                for i, path in enumerate(assets.glob_paths(wildcard)):
+                    if path == current:
+                        self.index = i
+                    self.textures.append([path, None])
 
         if len(self.textures) == 0:
             self.set("texture", None)
             self.set("last_texture", None)
             return
 
+        self.set("next", self.get("next"))
         if self.get("next"):
             shuffle = self.get("shuffle")
             self.last_texture = self.textures[self.index][1]
@@ -104,8 +111,10 @@ class LoadTextures(Node):
                 self.index = (self.index + random.randint(1, len(self.textures) - 1)) % len(self.textures)
             else:
                 self.index = (self.index + 1) % len(self.textures)
+
             print(self.index, self.textures[self.index][0])
-        self.set("next", self.get("next"))
+            name = self.textures[self.index][0]
+            self.get_input("current").value = name
 
         tt = self.textures[self.index]
         if tt[1] is None:
