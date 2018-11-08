@@ -298,7 +298,6 @@ class BinaryOpFloat(Node):
 class Counter(Node):
     class Meta:
         inputs = [
-            {"name" : "offset", "dtype" : dtype.float},
             {"name" : "op", "dtype" : dtype.int, "dtype_args" : {"choices" : list(BINARY_OPS.keys())}},
             {"name" : "operand", "dtype" : dtype.float, "dtype_args" : {"default" : 1.0}},
             {"name" : "operate", "dtype" : dtype.event},
@@ -329,7 +328,7 @@ class Counter(Node):
             b = self.get("operand")
             self._value = self.OPS[op](a, b)
 
-        self.set("out", self.get("offset") + self._value)
+        self.set("out", self._value)
 
 class FloatLambda(Lambda):
     class Meta:
