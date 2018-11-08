@@ -1,5 +1,6 @@
 import time
 import math
+import random
 from collections import OrderedDict
 from pyvisual.node.base import Node
 from pyvisual.node import dtype
@@ -89,3 +90,41 @@ class Time(Node):
         self._time += dt * self.get("factor")
         self._last_time = t
         self.set("output", self._time)
+
+def random_float(a, b):
+    alpha = random.random()
+    value = a * (1.0-alpha) + b * alpha
+    return value
+
+class RandomFloat(Node):
+    class Meta:
+        inputs = [
+            {"name" : "generate", "dtype" : dtype.event},
+            {"name" : "min", "dtype" : dtype.float, "dtype_args" : {"default" : 1.0}},
+            {"name" : "max", "dtype" : dtype.float, "dtype_args" : {"default" : 1.0}},
+            {"name" : "mod", "dtype" : dtype.float, "dtype_args" : {"default" : 1.0}},
+        ]
+        outputs = [
+            {"name" : "output", "dtype" : dtype.float}
+        ]
+        options = {
+            "category" : "generate",
+            "show_title" : True
+        }
+
+    def _evaluate(self):
+        if self.get("generate"):
+            min_value = self.get("min")
+            max_value = self.get("max")
+            mod = self.get("mod")
+
+            value = float("nan")
+            if mod < 0.00001:
+                value = random_float(min_value, max_value)
+            else:
+                n = (max_value - min_value) / mod
+                v = random.randint(0, int(n))
+                value = min_value + v * mod
+
+            self.set("output", value)
+

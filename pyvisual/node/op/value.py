@@ -343,6 +343,10 @@ class FloatLambda(Lambda):
             "virtual" : False
         }
 
+#
+# Vec2 operations
+#
+
 class RotatedVec2(Node):
     class Meta:
         inputs = [
