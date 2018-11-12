@@ -17,6 +17,8 @@ def scalable_timer():
     _last_time = time.time()
     _time = 0.0
     def _timer(scale, reset=False):
+        if math.isnan(scale):
+            return 0
         nonlocal _last_time, _time
         t = time.time()
         if reset:
@@ -57,7 +59,7 @@ class LFO(Node):
         if length == 0:
             self.set("output", float("nan"))
             return
-        t = self.timer(1.0 / self.get("length"), False)
+        t = self.timer(1.0 / length, False)
         value = LFO.OSCILLATORS[generator](t, 1.0 + 0.0 * self.get("length"), self.get("phase"))
         value = self.get("min") + value * (self.get("max") - self.get("min"))
         self.set("output", value)

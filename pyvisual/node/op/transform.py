@@ -20,6 +20,23 @@ class Scale(Node):
                               [0.0, 0.0, 0.0, 1.0]], dtype=np.float32).T
         self.set("output", transform)
 
+class UniformScale(Node):
+    class Meta:
+        inputs = [
+            {"name" : "xy", "dtype" : dtype.float, "dtype_args" : {"default" : 1.0}},
+        ]
+        outputs = [
+            {"name" : "output", "dtype" : dtype.mat4},
+        ]
+
+    def _evaluate(self):
+        xy = self.get("xy")
+        transform = np.array([[xy, 0.0, 0.0, 0.0],
+                              [0.0, xy, 0.0, 0.0],
+                              [0.0, 0.0, 1.0, 0.0],
+                              [0.0, 0.0, 0.0, 1.0]], dtype=np.float32).T
+        self.set("output", transform)
+
 class Rotate(Node):
     class Meta:
         inputs = [

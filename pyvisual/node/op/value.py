@@ -194,7 +194,7 @@ class Edge(Node):
         value = self.get("value")
         threshold = self.get("threshold")
         self.set("rising", last_value < threshold and value >= threshold)
-        self.set("falling", last_value > threshold and value <= threshold)
+        self.set("falling", last_value >= threshold and value < threshold)
         self.set("combined", last_value < threshold and value >= threshold or last_value > threshold and value <= threshold)
         self.last_value = value
 
@@ -211,7 +211,7 @@ class FloatLatch(Latch):
             "category" : "math"
         }
 
-class BlendFloat(Node):
+class MixFloat(Node):
     class Meta:
         inputs = [
             {"name" : "a", "dtype" : dtype.float},
@@ -293,7 +293,10 @@ class BinaryOpFloat(Node):
 
         a = self.get("a")
         b = self.get("b")
-        self.set("out", self.OPS[op](a, b))
+        try:
+            self.set("out", self.OPS[op](a, b))
+        except ZeroDivisionError:
+            self.set("out", float("nan"))
 
 class Counter(Node):
     class Meta:
