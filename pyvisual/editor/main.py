@@ -828,6 +828,10 @@ class NodeEditor:
         self.nodes_z_index += 1
         return i
 
+    def is_key_down(self, key):
+        io = self.io
+        return io.is_key_down(key) and io.get_key_down_duration(key) == 0.0
+
     def remove_node(self, node):
         #print("editor: remove node")
         self.graph.remove_node(node.instance)
@@ -935,7 +939,6 @@ class NodeEditor:
         key_up_arrow = key_map[imgui.KEY_UP_ARROW]
         key_down_arrow = key_map[imgui.KEY_DOWN_ARROW]
         key_escape = key_map[imgui.KEY_ESCAPE]
-        is_key_down = lambda key: io.is_key_down(key) and io.get_key_down_duration(key) == 0.0
 
         just_opened_popup = False
         reopen_popup = False
@@ -943,7 +946,7 @@ class NodeEditor:
         # context menu
         no_node_hovered = lambda: not any(map(lambda n: n.hovered, self.nodes))
         if imgui.is_window_hovered() \
-                and (imgui.is_mouse_clicked(1) or is_key_down(key_g)) \
+                and (imgui.is_mouse_clicked(1) or self.is_key_down(key_g)) \
                 and no_node_hovered():
             context_name = "context_import" if io.key_shift else "context_create_nodes"
             # remember where context menu was opened
@@ -977,11 +980,11 @@ class NodeEditor:
                     yield label, spec
             entries = list(filter_nodes(self.context_search_text))
 
-            if is_key_down(key_up_arrow):
+            if self.is_key_down(key_up_arrow):
                 self.context_index -= 1
-            if is_key_down(key_down_arrow):
+            if self.is_key_down(key_down_arrow):
                 self.context_index += 1
-            if is_key_down(key_escape):
+            if self.is_key_down(key_escape):
                 imgui.close_current_popup()
 
             self.context_index = max(0, min(len(entries) - 1, self.context_index))
@@ -1003,9 +1006,9 @@ class NodeEditor:
                 imgui.text("Nothing found.")
             imgui.listbox_footer()
             imgui.separator()
-            clicked, self.show_test_window = imgui.menu_item("show demo window", None, self.show_test_window)
-            if clicked:
-                imgui.set_window_focus("ImGui Demo")
+            #clicked, self.show_test_window = imgui.menu_item("show demo window", None, self.show_test_window)
+            #if clicked:
+            #    imgui.set_window_focus("ImGui Demo")
             if imgui.menu_item("reset offset")[0]:
                 self.offset = (0, 0)
                 self.ui_state_changed()
@@ -1098,45 +1101,44 @@ class NodeEditor:
             key_v = glfw.GLFW_KEY_V
             key_f = glfw.GLFW_KEY_F
             key_x = glfw.GLFW_KEY_X
-            is_key_down = lambda key: io.is_key_down(key) and io.get_key_down_duration(key) == 0.0
 
             # select all nodes
-            if is_key_down(key_a):
+            if self.is_key_down(key_a):
                 for node in list(self.nodes):
                     node.selected = True
                     self.node_ui_state_changed(node)
             # invert selection
-            if is_key_down(key_i):
+            if self.is_key_down(key_i):
                 for node in list(self.nodes):
                     node.selected = not node.selected
                     self.node_ui_state_changed(node)
             # select no nodes
-            if is_key_down(key_escape):
+            if self.is_key_down(key_escape):
                 for node in list(self.nodes):
                     node.selected = False
                     self.node_ui_state_changed(node)
             # delete selected nodes
-            if is_key_down(key_delete) or is_key_down(key_d):
+            if self.is_key_down(key_delete) or self.is_key_down(key_d):
                 for node in list(self.nodes):
                     if node.selected:
                         self.remove_node(node)
 
             # copy selected nodes
-            if is_key_down(key_c):
+            if self.is_key_down(key_c):
                 self.node_clipboard = self.graph.serialize_selected()
             # paste copied nodes
-            if is_key_down(key_v):
+            if self.is_key_down(key_v):
                 if self.node_clipboard is not None:
                     offset = self.screen_to_local(io.mouse_pos)
                     self.graph.unserialize_as_selected(self.node_clipboard, pos_offset=offset)
             # cut selected nodes
-            if is_key_down(key_x):
+            if self.is_key_down(key_x):
                 self.node_clipboard = self.graph.serialize_selected()
                 for node in list(self.nodes):
                     if node.selected:
                         self.remove_node(node)
             # duplicate selected nodes
-            if is_key_down(key_f):
+            if self.is_key_down(key_f):
                 self.graph.duplicate_selected((20, 20))
 
             # handle start dragging position with ctrl+click
@@ -1211,6 +1213,9 @@ class NodeEditor:
         if self.show_graph_enabled:
             self.show_graph(draw_list)
 
+        if self.is_key_down(glfw.GLFW_KEY_F3):
+            self.show_graph_enabled = not self.show_graph_enabled
+
         draw_list.channels_merge()
 
         pos = imgui.get_cursor_screen_pos()
@@ -1269,6 +1274,7 @@ class NodeEditor:
         if imgui.begin("appearance", False, flags):
             #changed, _ = imgui.input_int("fps limit", 30)
             changed, self.show_graph_enabled = imgui.checkbox("show graph", self.show_graph_enabled)
+            changed, self.show_test_window = imgui.checkbox("show test window", self.show_test_window)
             changed, self.background_alpha = imgui.slider_float("bg alpha", self.background_alpha, 0.0, 1.0)
             changed, self.grid_alpha = imgui.slider_float("grid alpha", self.grid_alpha, 0.0, 1.0)
             changed, self.node_alpha = imgui.slider_float("node alpha", self.node_alpha, 0.0, 1.0)
