@@ -29,6 +29,7 @@ class Mask(Shader):
         mask = self.get("mask")
         if mask is None:
             mask = dummy
+        # TODO interpolation/wrapping?
         program["uMaskTexture"] = mask
 
 class DualMask(Shader):
@@ -52,6 +53,7 @@ class DualMask(Shader):
         mask = self.get("mask")
         if mask is None:
             mask = dummy
+        # TODO interpolation/wrapping?
         program["uInputTexture1"] = foreground
         program["uMaskTexture"] = mask
 

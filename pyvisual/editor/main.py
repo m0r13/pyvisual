@@ -527,6 +527,34 @@ class Node:
 
         return interacted
 
+    def show_context_ports(self, ports):
+        for i, (port_id, port_spec) in enumerate(ports):
+            widget = self.get_widget(port_id)
+            if widget is None:
+                continue
+            imgui.push_id(i)
+
+            # determine value associated with this port
+            value = self.instance.get_value(port_id)
+            # and whether we can change it
+            read_only = False
+            if node_meta.is_input(port_id):
+                # we can change value of input port only if nothing is connected
+                # otherwise it's a read-only widget that just shows the value for the user
+                if isinstance(value, node_meta.InputValueHolder):
+                    if value.is_connected:
+                        read_only = True
+                    else:
+                        value = value.manual_value
+
+            text_start = imgui.get_cursor_screen_pos()
+            imgui.text(port_spec["name"])
+
+            imgui.set_cursor_screen_pos((text_start[0] + 100, text_start[1]))
+            widget.show(value, read_only=read_only or not port_spec["manual_input"])
+
+            imgui.pop_id()
+
     def show(self, draw_list, interaction_allowed):
         io = self.io
         interacted = False
@@ -569,8 +597,9 @@ class Node:
         if self.spec.options["show_title"]:
             imgui.text(self.spec.name)
         if not self.collapsed:
-            inputs = list(filter(lambda port: not port[1]["hide"], self.instance.input_ports.items()))
-            outputs = list(filter(lambda port: not port[1]["hide"], self.instance.output_ports.items()))
+            port_filter = lambda port: not port[1]["hide"] and port[1]["group"] == "default"
+            inputs = list(filter(port_filter, self.instance.input_ports.items()))
+            outputs = list(filter(port_filter, self.instance.output_ports.items()))
 
             if len(inputs):
                 imgui.begin_group()
@@ -652,7 +681,22 @@ class Node:
             if imgui.menu_item("expand..." if self.collapsed else "collaps...")[0]:
                 self.collapsed = not self.collapsed
             imgui.separator()
+
+            additional_filter = lambda port: not port[1]["hide"] and port[1]["group"] == "additional"
+            inputs = list(filter(additional_filter, self.instance.input_ports.items()))
+            outputs = list(filter(additional_filter, self.instance.output_ports.items()))
+
+            if len(inputs) > 0:
+                imgui.text("additional inputs")
+                self.show_context_ports(inputs)
+                imgui.separator()
+            if len(outputs) > 0:
+                imgui.text("additional outputs")
+                self.show_context_ports(outputs)
+                imgui.separator()
+
             self.instance._show_custom_context()
+
             imgui.separator()
             imgui.menu_item("class %s" % str(self.spec.cls), None, False, False)
             imgui.menu_item("node #%d" % self.window_id, None, False, False)

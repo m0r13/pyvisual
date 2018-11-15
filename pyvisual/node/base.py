@@ -42,6 +42,7 @@ def prepare_port_spec(port_spec, is_input):
     port_spec.setdefault("default", None)
     port_spec.setdefault("hide", False)
     port_spec.setdefault("dummy", False)
+    port_spec.setdefault("group", "default")
 
     if is_input:
         port_spec.setdefault("manual_input", True)

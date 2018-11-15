@@ -80,12 +80,20 @@ def load_shader(path):
 
 # TODO
 dummy = np.zeros((1, 1, 4), dtype=np.uint8).view(gloo.Texture2D)
+
+WRAPPING_MODES = ["repeat", "mirrored repeat", "clamp to edge", "clamp to border"]
+WRAPPING_MODES_GL = [gl.GL_REPEAT, gl.GL_MIRRORED_REPEAT, gl.GL_CLAMP_TO_EDGE, gl.GL_CLAMP_TO_BORDER]
+INTERPOLATION_MODES = ["nearest", "linear"]
+INTERPOLATION_MODES_GL = [gl.GL_NEAREST, gl.GL_LINEAR]
+
 class Shader(RenderNode):
     class Meta:
         inputs = [
             {"name" : "enabled", "dtype" : dtype.bool, "dtype_args" : {"default" : 1.0}},
             {"name" : "transformUV", "dtype" : dtype.mat4},
             {"name" : "sizeref", "dtype" : dtype.tex2d},
+            {"name" : "wrapping", "dtype" : dtype.int, "dtype_args" : {"default" : 1, "choices" : WRAPPING_MODES}, "group" : "additional"},
+            {"name" : "interpolation", "dtype" : dtype.int, "dtype_args" : {"default" : 1, "choices" : INTERPOLATION_MODES}, "group" : "additional"},
             {"name" : "input", "dtype" : dtype.tex2d},
             {"name" : "force_change", "dtype" : dtype.float, "hide" : True},
         ]
@@ -105,6 +113,18 @@ class Shader(RenderNode):
         self.update_program()
 
         self.input_texture = None
+
+    @property
+    def wrapping(self):
+        mode = int(self.get("wrapping"))
+        mode = max(0, min(len(WRAPPING_MODES), mode))
+        return WRAPPING_MODES_GL[mode]
+
+    @property
+    def interpolation(self):
+        mode = int(self.get("interpolation"))
+        mode = max(0, min(len(INTERPOLATION_MODES), mode))
+        return INTERPOLATION_MODES_GL[mode]
 
     def update_program(self):
         try:
@@ -173,8 +193,8 @@ class Shader(RenderNode):
             self.quad["uModelViewProjection"] = np.dot(model, np.dot(view, projection))
             self.quad["uTextureSize"] = texture_size
             self.quad["uTransformUV"] = np.dot(texture, self.get("transformUV"))
-            self.input_texture.interpolation = gl.GL_LINEAR
-            self.input_texture.wrapping = gl.GL_CLAMP_TO_BORDER
+            self.input_texture.interpolation = self.interpolation
+            self.input_texture.wrapping = self.wrapping
             self.quad["uInputTexture"] = self.input_texture
             self.set_uniforms(self.quad)
             self.quad.draw(gl.GL_TRIANGLE_STRIP)
