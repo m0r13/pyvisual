@@ -352,7 +352,7 @@ class Node:
             return self.editor.local_to_screen((x, y))
         return self.editor.local_to_screen(self.port_positions[port_id])
 
-    def show_port(self, draw_list, port_id, port_spec):
+    def show_port(self, draw_list, interaction_allowed, port_id, port_spec):
         #profile.enable()
 
         io = self.io
@@ -432,8 +432,9 @@ class Node:
         if is_input:
             assert len(connections) in (0, 1), "but is %d: %s" % (len(connections), connections)
 
-        hovered_port = imgui.is_window_hovered() and t_between(port_start, port_end, io.mouse_pos)
-        hovered_connector = imgui.is_window_hovered() and t_between(connector_start, connector_end, io.mouse_pos)
+        hoverable = imgui.is_window_hovered() and interaction_allowed
+        hovered_port = hoverable and t_between(port_start, port_end, io.mouse_pos)
+        hovered_connector = hoverable and t_between(connector_start, connector_end, io.mouse_pos)
         hovered = hovered_connector or hovered_port
 
         # decide port bullet color
@@ -514,16 +515,21 @@ class Node:
 
         #profile.disable()
 
-    def show_ports(self, draw_list, ports):
+    def show_ports(self, draw_list, interaction_allowed, ports):
         io = self.io
+        interacted = False
 
         imgui.begin_group()
         for port_id, port_spec in ports:
-            self.show_port(draw_list, port_id, port_spec)
+            if self.show_port(draw_list, interaction_allowed, port_id, port_spec):
+                interacted = True
         imgui.end_group()
 
-    def show(self, draw_list):
+        return interacted
+
+    def show(self, draw_list, interaction_allowed):
         io = self.io
+        interacted = False
 
         imgui.push_id(self.window_id)
         old_cursor_pos = imgui.get_cursor_pos()
@@ -568,7 +574,8 @@ class Node:
 
             if len(inputs):
                 imgui.begin_group()
-                self.show_ports(draw_list, inputs)
+                if self.show_ports(draw_list, interaction_allowed, inputs):
+                    interacted = True
                 imgui.end_group()
                 # TODO hacked layout
                 if len(outputs) or self.spec.name == "Plot":
@@ -576,7 +583,8 @@ class Node:
 
             if len(outputs):
                 imgui.begin_group()
-                self.show_ports(draw_list, outputs)
+                if self.show_ports(draw_list, interaction_allowed, outputs):
+                    interacted = True
                 imgui.end_group()
 
             # show custom node ui
@@ -598,7 +606,9 @@ class Node:
         lower_right = t_add(upper_left, self.size_with_padding)
         lower_right_hover = t_add(lower_right, padding_hover)
         lower_right_selection = t_add(lower_right, padding_selection)
-        self.hovered = imgui.is_window_hovered() and t_between(upper_left_selection, lower_right_selection, io.mouse_pos)
+
+        hoverable = interaction_allowed and imgui.is_window_hovered()
+        self.hovered = hoverable and t_between(upper_left_selection, lower_right_selection, io.mouse_pos)
 
         # handle clicks / scrolling on the node
         if not self.editor.is_dragging_connection() and self.hovered and not imgui.is_any_item_active():
@@ -613,7 +623,7 @@ class Node:
                     self.touch_z_index()
                     self.editor.node_ui_state_changed(self)
             # handle selection
-            if imgui.is_mouse_clicked(0):
+            if imgui.is_mouse_clicked(0) and not io.key_shift:
                 # ctrl modifier toggles selection
                 if io.key_ctrl:
                     self.selected = not self.selected
@@ -649,7 +659,7 @@ class Node:
             imgui.end_popup()
 
         # handle clicking the node once it's selected as dragging
-        if self.hovered and imgui.is_mouse_clicked(0) and not io.key_ctrl \
+        if self.hovered and imgui.is_mouse_clicked(0) and not io.key_shift \
                 and self.selected and not self.editor.is_dragging_connection():
             # mark this node as being dragged
             self.dragging = True
@@ -675,6 +685,8 @@ class Node:
 
         imgui.pop_id()
         imgui.set_cursor_pos(old_cursor_pos)
+
+        return interacted
 
 class NodeEditor:
     def __init__(self, node_specs):
@@ -1049,6 +1061,7 @@ class NodeEditor:
         # little hack: to get overlapping nodes and such correct,
         #    render nodes in an order. nodes request a new z-index from the
         #    editor when they got touched and should be in the foreground again
+        interaction_allowed = not io.key_shift
         for node in sorted(self.nodes, key=lambda n: n.z_index):
             # simple culling
             node_start = self.local_to_screen(node.actual_pos)
@@ -1057,7 +1070,13 @@ class NodeEditor:
                 continue
 
             with draw_on_channel(draw_list, CHANNEL_NODE):
-                node.show(draw_list)
+                if not interaction_allowed:
+                    imgui.push_item_flag(imgui.ITEM_DISABLED, True)
+                interacted = node.show(draw_list, interaction_allowed)
+                if not interaction_allowed:
+                    imgui.pop_item_flag()
+                interaction_allowed = interaction_allowed and not interacted
+
             # TODO
             # unfortunately we have to merge and split the draw list multiple times for that
             # maybe there is a better way
@@ -1080,7 +1099,7 @@ class NodeEditor:
         # and that no node is being dragged
         no_node_dragging = lambda: not any([ node.dragging for node in self.nodes])
         if imgui.is_window_hovered() and not self.is_dragging_connection() \
-                and imgui.is_mouse_clicked(0) and not io.key_ctrl \
+                and imgui.is_mouse_clicked(0) and not io.key_shift \
                 and no_node_dragging():
             self.dragging_selection = True
             self.selection_start = self.screen_to_local(io.mouse_pos)
@@ -1141,9 +1160,9 @@ class NodeEditor:
             if self.is_key_down(key_f):
                 self.graph.duplicate_selected((20, 20))
 
-            # handle start dragging position with ctrl+click
+            # handle start dragging position with shift+click
             if not self.is_dragging_connection() \
-                    and io.key_ctrl and imgui.is_mouse_clicked(0):
+                    and io.key_shift and imgui.is_mouse_clicked(0):
                 self.dragging_position = True
         # update position
         if self.dragging_position:
