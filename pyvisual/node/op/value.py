@@ -1,13 +1,13 @@
+import imgui
+import numpy as np
+import time
 from collections import OrderedDict
+from scipy import signal
+
 from pyvisual.node.base import Node
 from pyvisual.node import dtype
 from pyvisual.editor import widget
-import imgui
-
-# as test for lambdas
-import numpy as np
-import math
-import time
+from pyvisual.audio import util
 
 #
 # Base operation nodes
@@ -345,6 +345,49 @@ class FloatLambda(Lambda):
             "category" : "math",
             "virtual" : False
         }
+
+class LowpassFloat(Node):
+    class Meta:
+        inputs = [
+            {"name" : "input", "dtype" : dtype.float},
+            {"name" : "order", "dtype" : dtype.int, "dtype_args" : {"default" : 2, "range" : [0, float("inf")]}},
+            # TODO fps automatically!
+            {"name" : "cutoff", "dtype" : dtype.float, "dtype_args" : {"default" : 2.5, "range" : [0.00001, 60.0 / 2.0 - 0.00001]}},
+        ]
+        outputs = [
+            {"name" : "output", "dtype" : dtype.float},
+        ]
+
+    def __init__(self):
+        super().__init__(always_evaluate=True)
+
+        self._filter = self._create_filter(self.get("order"), self.get("cutoff"))
+        self.status = None
+
+    def _create_filter(self, order, cutoff):
+        try:
+            filter = util.Filter(signal.butter, order, cutoff, 60, {"btype" : "low", "analog" : False})
+            self.status = None
+            return filter
+        except ValueError as e:
+            self.status = str(e)
+
+    def _evaluate(self):
+        if self.have_inputs_changed("order", "cutoff"):
+            self._filter = self._create_filter(self.get("order"), self.get("cutoff"))
+
+        value = self.get("input")
+        if self._filter:
+            self.set("output", self._filter.process(np.array([value]))[0])
+        else:
+            self.set("output", value)
+
+    def _show_custom_ui(self):
+        if self.status:
+            imgui.dummy(1, 5)
+            imgui.text_colored("Error. (?)", 1.0, 0.0, 0.0)
+            if imgui.is_item_hovered():
+                imgui.set_tooltip(self.status)
 
 #
 # Vec2 operations
