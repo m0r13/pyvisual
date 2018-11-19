@@ -17,7 +17,7 @@ void main() {
     // float angle = radians(atan(texCoords.y, texCoords.x)) + 3.141595;
     float angle = atan(texCoords.y, texCoords.x) + 3.141595;
 
-    float modAngle = radians(360) / uSegmentCount;
+    float modAngle = radians(360.0) / uSegmentCount;
     angle = mod(angle + radians(uAxisAngle), modAngle);
     if (angle > modAngle / 2) {
         angle = modAngle - angle;

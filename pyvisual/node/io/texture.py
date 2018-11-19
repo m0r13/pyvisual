@@ -41,6 +41,7 @@ class LoadTexture(Node):
             self.status = str(e)
             return
 
+        # seems to be required here for nvidia
         texture.activate()
         texture.deactivate()
         self.status = None
@@ -82,8 +83,9 @@ class LoadTextures(Node):
 
     def _load_texture(self, path):
         texture = np.array(Image.open(os.path.join(assets.ASSET_PATH, path))).view(gloo.Texture2D)
-        texture.activate()
-        texture.deactivate()
+        # seems to be forbidden here for nvidia?
+        #texture.activate()
+        #texture.deactivate()
         return texture
 
     def _evaluate(self):
