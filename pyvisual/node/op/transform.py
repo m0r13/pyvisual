@@ -8,12 +8,21 @@ class Scale(Node):
         inputs = [
             {"name" : "x", "dtype" : dtype.float, "dtype_args" : {"default" : 1.0}},
             {"name" : "y", "dtype" : dtype.float, "dtype_args" : {"default" : 1.0}},
+            {"name" : "uniform", "dtype" : dtype.bool, "dtype_args" : {"default" : True}, "group" : "additional"},
         ]
         outputs = [
             {"name" : "output", "dtype" : dtype.mat4},
         ]
 
     def _evaluate(self):
+        uniform = self.get("uniform")
+        input_x = self.get_input("x")
+        input_y = self.get_input("y")
+        if uniform and input_x.has_changed:
+            input_y.value = input_x.value
+        elif uniform and input_y.has_changed:
+            input_x.value = input_y.value
+
         transform = np.array([[self.get("x"), 0.0, 0.0, 0.0],
                               [0.0, self.get("y"), 0.0, 0.0],
                               [0.0, 0.0, 1.0, 0.0],
