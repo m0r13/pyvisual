@@ -1,6 +1,7 @@
 from pyvisual.node.base import Node
 from pyvisual.node import dtype
 from pyvisual.node.io.audio import AudioData
+from pyvisual.node.op.module import Module
 from pyvisual.audio import util
 from scipy import signal
 import math
@@ -227,3 +228,9 @@ class BeatAnalyzer(Node):
         self.set("beat_running", self.is_beat_running)
         self.set("bpm", self.current_bpm)
 
+class BeatDetection(Module):
+    class Meta:
+        pass
+
+    def __init__(self):
+        super().__init__("BeatDetection.json")

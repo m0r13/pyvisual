@@ -322,8 +322,12 @@ class NodeGraph:
     # selection management
 
     #
+    # public methods
     #
-    #
+
+    @property
+    def instances(self):
+        return self.nodes.values()
 
     @property
     def sorted_instances(self):
@@ -347,15 +351,22 @@ class NodeGraph:
             dfs(instance)
         return sorted_instances, circular
 
-    def evaluate(self):
+    def evaluate(self, reset_instances=True):
         instances, _ = self.sorted_instances
         active_instances = set()
         for instance in instances:
             if instance.evaluate():
                 active_instances.add(instance)
-        for instance in instances:
-            instance.evaluated = False
+        # reset evaluation status and set all inputs/outputs unchanged!
+        # if you want to evaluate outputs (for example Module node wants this),
+        # pass reset_instances=False and call reset_instances() later manually
+        if reset_instances:
+            self.reset_instances()
         return active_instances
+
+    def reset_instances(self):
+        for instance in self.instances:
+            instance.evaluated = False
 
     def stop(self):
         for instance in self.nodes.values():

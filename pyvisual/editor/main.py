@@ -279,6 +279,7 @@ class Node:
 
         self.port_positions = {}
         self.widgets = {}
+        self.widget_port_specs = {}
         self.connections = defaultdict(lambda: [])
 
         #
@@ -333,12 +334,20 @@ class Node:
         self.connections[port_id].remove(connection)
 
     def get_widget(self, port_id):
+        # TODO performance? also editor could handle this better maybe
+        if port_id in self.widget_port_specs:
+            port_spec = self.instance.ports[port_id]
+            old_port_spec = self.widget_port_specs[port_id]
+            if old_port_spec != port_spec:
+                del self.widgets[port_id]
+
         if not port_id in self.widgets:
             assert port_id in self.instance.ports, "Port %s must be in instance ports" % port_id
             port_spec = self.instance.ports[port_id]
             dtype = port_spec["dtype"]
             dtype_args = port_spec["dtype_args"]
             self.widgets[port_id] = node_widget.create_widget(dtype, dtype_args, self)
+            self.widget_port_specs[port_id] = dict(port_spec)
         return self.widgets[port_id]
 
     def get_port_position(self, port_id):

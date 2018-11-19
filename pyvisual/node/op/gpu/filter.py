@@ -5,6 +5,7 @@ import random
 import imgui
 from pyvisual.node.base import Node
 from pyvisual.node.op.gpu.base import Shader
+from pyvisual.node.op.module import Module
 from pyvisual.node import dtype
 from pyvisual.editor import widget
 from pyvisual import assets
@@ -184,6 +185,13 @@ class GaussBlurPass(Shader):
         input_texture.wrapping = gl.GL_MIRRORED_REPEAT
         for name in ("uSigma", "uDirection"):
             program[name] = self.get(name)
+
+class GaussBlur(Module):
+    class Meta:
+        pass
+
+    def __init__(self):
+        super().__init__("GaussBlur.json")
 
 class Vignette(Shader):
     class Meta:

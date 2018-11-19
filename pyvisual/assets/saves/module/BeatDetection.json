@@ -1,0 +1,1117 @@
+{
+    "connections": [
+        {
+            "dst_node_id": 19,
+            "dst_port_id": "i_test_value",
+            "src_node_id": 0,
+            "src_port_id": "o_output"
+        },
+        {
+            "dst_node_id": 2,
+            "dst_port_id": "i_input",
+            "src_node_id": 1,
+            "src_port_id": "o_output"
+        },
+        {
+            "dst_node_id": 3,
+            "dst_port_id": "i_input",
+            "src_node_id": 2,
+            "src_port_id": "o_output"
+        },
+        {
+            "dst_node_id": 4,
+            "dst_port_id": "i_input",
+            "src_node_id": 3,
+            "src_port_id": "o_output"
+        },
+        {
+            "dst_node_id": 16,
+            "dst_port_id": "i_a",
+            "src_node_id": 4,
+            "src_port_id": "o_output"
+        },
+        {
+            "dst_node_id": 25,
+            "dst_port_id": "i_value",
+            "src_node_id": 5,
+            "src_port_id": "o_output"
+        },
+        {
+            "dst_node_id": 17,
+            "dst_port_id": "i_value",
+            "src_node_id": 5,
+            "src_port_id": "o_output"
+        },
+        {
+            "dst_node_id": 12,
+            "dst_port_id": "i_input",
+            "src_node_id": 8,
+            "src_port_id": "o_output"
+        },
+        {
+            "dst_node_id": 11,
+            "dst_port_id": "i_input",
+            "src_node_id": 8,
+            "src_port_id": "o_output"
+        },
+        {
+            "dst_node_id": 22,
+            "dst_port_id": "i_value",
+            "src_node_id": 8,
+            "src_port_id": "o_output"
+        },
+        {
+            "dst_node_id": 21,
+            "dst_port_id": "i_value",
+            "src_node_id": 7,
+            "src_port_id": "o_beat_running"
+        },
+        {
+            "dst_node_id": 9,
+            "dst_port_id": "i_input",
+            "src_node_id": 7,
+            "src_port_id": "o_beat_running"
+        },
+        {
+            "dst_node_id": 10,
+            "dst_port_id": "i_input",
+            "src_node_id": 7,
+            "src_port_id": "o_bpm"
+        },
+        {
+            "dst_node_id": 20,
+            "dst_port_id": "i_value",
+            "src_node_id": 7,
+            "src_port_id": "o_bpm"
+        },
+        {
+            "dst_node_id": 6,
+            "dst_port_id": "i_input",
+            "src_node_id": 15,
+            "src_port_id": "o_output"
+        },
+        {
+            "dst_node_id": 8,
+            "dst_port_id": "i_input",
+            "src_node_id": 15,
+            "src_port_id": "o_output"
+        },
+        {
+            "dst_node_id": 8,
+            "dst_port_id": "i_beat_on",
+            "src_node_id": 14,
+            "src_port_id": "o_output"
+        },
+        {
+            "dst_node_id": 7,
+            "dst_port_id": "i_beat_on",
+            "src_node_id": 14,
+            "src_port_id": "o_output"
+        },
+        {
+            "dst_node_id": 5,
+            "dst_port_id": "i_v0",
+            "src_node_id": 16,
+            "src_port_id": "o_out"
+        },
+        {
+            "dst_node_id": 29,
+            "dst_port_id": "i_value",
+            "src_node_id": 16,
+            "src_port_id": "o_out"
+        },
+        {
+            "dst_node_id": 18,
+            "dst_port_id": "i_input",
+            "src_node_id": 16,
+            "src_port_id": "o_out"
+        },
+        {
+            "dst_node_id": 30,
+            "dst_port_id": "i_value",
+            "src_node_id": 16,
+            "src_port_id": "o_out"
+        },
+        {
+            "dst_node_id": 13,
+            "dst_port_id": "i_input",
+            "src_node_id": 16,
+            "src_port_id": "o_out"
+        },
+        {
+            "dst_node_id": 26,
+            "dst_port_id": "i_value",
+            "src_node_id": 17,
+            "src_port_id": "o_rising"
+        },
+        {
+            "dst_node_id": 27,
+            "dst_port_id": "i_value",
+            "src_node_id": 17,
+            "src_port_id": "o_falling"
+        },
+        {
+            "dst_node_id": 1,
+            "dst_port_id": "i_input",
+            "src_node_id": 19,
+            "src_port_id": "o_value"
+        },
+        {
+            "dst_node_id": 16,
+            "dst_port_id": "i_b",
+            "src_node_id": 23,
+            "src_port_id": "o_value"
+        },
+        {
+            "dst_node_id": 28,
+            "dst_port_id": "i_input",
+            "src_node_id": 24,
+            "src_port_id": "o_value"
+        },
+        {
+            "dst_node_id": 5,
+            "dst_port_id": "i_v1",
+            "src_node_id": 24,
+            "src_port_id": "o_value"
+        }
+    ],
+    "nodes": [
+        {
+            "custom_ports": [],
+            "id": 0,
+            "manual_values": {
+                "o_output": ""
+            },
+            "type": "InputPulseAudio",
+            "ui_data": {
+                "collapsed": false,
+                "pos": [
+                    -1710.0,
+                    -46.0
+                ],
+                "selected": false
+            }
+        },
+        {
+            "custom_ports": [],
+            "id": 1,
+            "manual_values": {
+                "i_cutoff": 50.0,
+                "i_input": "",
+                "i_order": 2.0,
+                "i_type": 0.0,
+                "o_output": ""
+            },
+            "type": "AudioFilter",
+            "ui_data": {
+                "collapsed": false,
+                "pos": [
+                    -1234.0,
+                    260.0
+                ],
+                "selected": false
+            }
+        },
+        {
+            "custom_ports": [],
+            "id": 2,
+            "manual_values": {
+                "i_input": "",
+                "o_output": ""
+            },
+            "type": "AbsAudio",
+            "ui_data": {
+                "collapsed": true,
+                "pos": [
+                    -1149.0,
+                    453.0
+                ],
+                "selected": false
+            }
+        },
+        {
+            "custom_ports": [],
+            "id": 3,
+            "manual_values": {
+                "i_cutoff": 2.5,
+                "i_input": "",
+                "i_order": 2.0,
+                "i_type": 0.0,
+                "o_output": ""
+            },
+            "type": "AudioFilter",
+            "ui_data": {
+                "collapsed": false,
+                "pos": [
+                    -1161.0,
+                    498.0
+                ],
+                "selected": false
+            }
+        },
+        {
+            "custom_ports": [],
+            "id": 4,
+            "manual_values": {
+                "i_input": "",
+                "o_output": 0.0
+            },
+            "type": "SampleAudio",
+            "ui_data": {
+                "collapsed": true,
+                "pos": [
+                    -1152.0,
+                    661.0
+                ],
+                "selected": false
+            }
+        },
+        {
+            "custom_ports": [],
+            "id": 5,
+            "manual_values": {
+                "i_mode": 2.0,
+                "i_v0": 0.0,
+                "i_v1": 0.25999999046325684,
+                "o_output": 0.0
+            },
+            "type": "Compare",
+            "ui_data": {
+                "collapsed": false,
+                "pos": [
+                    -532.0,
+                    671.0
+                ],
+                "selected": false
+            }
+        },
+        {
+            "custom_ports": [],
+            "id": 6,
+            "manual_values": {
+                "i_input": 0.0
+            },
+            "type": "Plot",
+            "ui_data": {
+                "collapsed": false,
+                "pos": [
+                    310.0,
+                    146.0
+                ],
+                "selected": false
+            }
+        },
+        {
+            "custom_ports": [],
+            "id": 7,
+            "manual_values": {
+                "i_beat_on": 0.0,
+                "o_beat_running": 1.0,
+                "o_bpm": 0.0
+            },
+            "type": "BeatAnalyzer",
+            "ui_data": {
+                "collapsed": false,
+                "pos": [
+                    470.0,
+                    586.0
+                ],
+                "selected": false
+            }
+        },
+        {
+            "custom_ports": [],
+            "id": 8,
+            "manual_values": {
+                "i_beat_on": 0.0,
+                "i_input": 0.0,
+                "i_max": 0.9,
+                "i_min": 0.5,
+                "o_output": 0.0
+            },
+            "type": "VUNormalizer",
+            "ui_data": {
+                "collapsed": false,
+                "pos": [
+                    440.0,
+                    361.0
+                ],
+                "selected": false
+            }
+        },
+        {
+            "custom_ports": [],
+            "id": 9,
+            "manual_values": {
+                "i_input": 0.0,
+                "i_name": "beat_running"
+            },
+            "type": "SetFloatVar",
+            "ui_data": {
+                "collapsed": false,
+                "pos": [
+                    745.0,
+                    497.0
+                ],
+                "selected": false
+            }
+        },
+        {
+            "custom_ports": [],
+            "id": 10,
+            "manual_values": {
+                "i_input": 0.0,
+                "i_name": "bpm"
+            },
+            "type": "SetFloatVar",
+            "ui_data": {
+                "collapsed": false,
+                "pos": [
+                    770.0,
+                    656.0
+                ],
+                "selected": false
+            }
+        },
+        {
+            "custom_ports": [],
+            "id": 11,
+            "manual_values": {
+                "i_input": 0.0,
+                "i_name": "low_vu"
+            },
+            "type": "SetFloatVar",
+            "ui_data": {
+                "collapsed": false,
+                "pos": [
+                    803.0,
+                    355.0
+                ],
+                "selected": false
+            }
+        },
+        {
+            "custom_ports": [],
+            "id": 12,
+            "manual_values": {
+                "i_input": 0.0
+            },
+            "type": "Plot",
+            "ui_data": {
+                "collapsed": false,
+                "pos": [
+                    762.0,
+                    138.0
+                ],
+                "selected": false
+            }
+        },
+        {
+            "custom_ports": [],
+            "id": 13,
+            "manual_values": {
+                "i_input": 0.0,
+                "i_name": "beat_value"
+            },
+            "type": "SetFloatVar",
+            "ui_data": {
+                "collapsed": false,
+                "pos": [
+                    -672.0,
+                    576.0
+                ],
+                "selected": false
+            }
+        },
+        {
+            "custom_ports": [],
+            "id": 14,
+            "manual_values": {
+                "i_name": "",
+                "o_output": 0.0
+            },
+            "type": "GetFloatVar",
+            "ui_data": {
+                "collapsed": false,
+                "pos": [
+                    32.0,
+                    427.0
+                ],
+                "selected": false
+            }
+        },
+        {
+            "custom_ports": [],
+            "id": 15,
+            "manual_values": {
+                "i_name": "beat_value",
+                "o_output": 0.0
+            },
+            "type": "GetFloatVar",
+            "ui_data": {
+                "collapsed": false,
+                "pos": [
+                    25.0,
+                    351.0
+                ],
+                "selected": false
+            }
+        },
+        {
+            "custom_ports": [],
+            "id": 16,
+            "manual_values": {
+                "i_a": 0.0,
+                "i_b": 5.199999809265137,
+                "i_op": 2.0,
+                "o_out": 0.0
+            },
+            "type": "BinaryOpFloat",
+            "ui_data": {
+                "collapsed": false,
+                "pos": [
+                    -961.0,
+                    613.0
+                ],
+                "selected": false
+            }
+        },
+        {
+            "custom_ports": [],
+            "id": 17,
+            "manual_values": {
+                "i_threshold": 1.0,
+                "i_value": 0.0,
+                "o_combined": 0.0,
+                "o_falling": 0.0,
+                "o_rising": 0.0
+            },
+            "type": "Edge",
+            "ui_data": {
+                "collapsed": false,
+                "pos": [
+                    -274.0,
+                    816.0
+                ],
+                "selected": false
+            }
+        },
+        {
+            "custom_ports": [],
+            "id": 18,
+            "manual_values": {
+                "i_input": 0.0,
+                "i_max": 1.0,
+                "i_min": 0.0,
+                "i_time": 5.0
+            },
+            "type": "Plot",
+            "ui_data": {
+                "collapsed": false,
+                "pos": [
+                    -774.0,
+                    186.0
+                ],
+                "selected": false
+            }
+        },
+        {
+            "custom_ports": [
+                [
+                    "i_default_value",
+                    {
+                        "default": null,
+                        "dtype": "audio",
+                        "dtype_args": {},
+                        "dummy": false,
+                        "group": "default",
+                        "hide": false,
+                        "manual_input": true,
+                        "name": "default_value",
+                        "widgets": []
+                    }
+                ],
+                [
+                    "i_test_value",
+                    {
+                        "default": null,
+                        "dtype": "audio",
+                        "dtype_args": {},
+                        "dummy": false,
+                        "group": "default",
+                        "hide": false,
+                        "manual_input": true,
+                        "name": "test_value",
+                        "widgets": []
+                    }
+                ],
+                [
+                    "o_value",
+                    {
+                        "default": null,
+                        "dtype": "audio",
+                        "dtype_args": {},
+                        "dummy": false,
+                        "group": "default",
+                        "hide": false,
+                        "manual_input": true,
+                        "name": "value",
+                        "widgets": []
+                    }
+                ]
+            ],
+            "id": 19,
+            "manual_values": {
+                "i_default_value": "",
+                "i_dtype": 10.0,
+                "i_name": "audio",
+                "i_test_value": "",
+                "o_value": ""
+            },
+            "type": "ModuleInput",
+            "ui_data": {
+                "collapsed": false,
+                "pos": [
+                    -1377.0,
+                    71.0
+                ],
+                "selected": false
+            }
+        },
+        {
+            "custom_ports": [
+                [
+                    "i_value",
+                    {
+                        "default": null,
+                        "dtype": "float",
+                        "dtype_args": {},
+                        "dummy": false,
+                        "group": "default",
+                        "hide": false,
+                        "manual_input": true,
+                        "name": "value",
+                        "widgets": []
+                    }
+                ],
+                [
+                    "o_test_value",
+                    {
+                        "default": null,
+                        "dtype": "float",
+                        "dtype_args": {},
+                        "dummy": false,
+                        "group": "default",
+                        "hide": false,
+                        "manual_input": true,
+                        "name": "test_value",
+                        "widgets": []
+                    }
+                ]
+            ],
+            "id": 20,
+            "manual_values": {
+                "i_dtype": 3.0,
+                "i_name": "bpm",
+                "i_value": 0.0,
+                "o_test_value": 0.0
+            },
+            "type": "ModuleOutput",
+            "ui_data": {
+                "collapsed": true,
+                "pos": [
+                    971.0,
+                    621.0
+                ],
+                "selected": false
+            }
+        },
+        {
+            "custom_ports": [
+                [
+                    "i_value",
+                    {
+                        "default": null,
+                        "dtype": "bool",
+                        "dtype_args": {},
+                        "dummy": false,
+                        "group": "default",
+                        "hide": false,
+                        "manual_input": true,
+                        "name": "value",
+                        "widgets": []
+                    }
+                ],
+                [
+                    "o_test_value",
+                    {
+                        "default": null,
+                        "dtype": "bool",
+                        "dtype_args": {},
+                        "dummy": false,
+                        "group": "default",
+                        "hide": false,
+                        "manual_input": true,
+                        "name": "test_value",
+                        "widgets": []
+                    }
+                ]
+            ],
+            "id": 21,
+            "manual_values": {
+                "i_dtype": 0.0,
+                "i_name": "beat_running",
+                "i_value": 0.0,
+                "o_test_value": 1.0
+            },
+            "type": "ModuleOutput",
+            "ui_data": {
+                "collapsed": true,
+                "pos": [
+                    877.0,
+                    506.0
+                ],
+                "selected": false
+            }
+        },
+        {
+            "custom_ports": [
+                [
+                    "i_value",
+                    {
+                        "default": null,
+                        "dtype": "float",
+                        "dtype_args": {},
+                        "dummy": false,
+                        "group": "default",
+                        "hide": false,
+                        "manual_input": true,
+                        "name": "value",
+                        "widgets": []
+                    }
+                ],
+                [
+                    "o_test_value",
+                    {
+                        "default": null,
+                        "dtype": "float",
+                        "dtype_args": {},
+                        "dummy": false,
+                        "group": "default",
+                        "hide": false,
+                        "manual_input": true,
+                        "name": "test_value",
+                        "widgets": []
+                    }
+                ]
+            ],
+            "id": 22,
+            "manual_values": {
+                "i_dtype": 3.0,
+                "i_name": "low_vu",
+                "i_value": 0.0,
+                "o_test_value": 0.0
+            },
+            "type": "ModuleOutput",
+            "ui_data": {
+                "collapsed": true,
+                "pos": [
+                    983.0,
+                    374.0
+                ],
+                "selected": false
+            }
+        },
+        {
+            "custom_ports": [
+                [
+                    "i_default_value",
+                    {
+                        "default": null,
+                        "dtype": "float",
+                        "dtype_args": {},
+                        "dummy": false,
+                        "group": "default",
+                        "hide": false,
+                        "manual_input": true,
+                        "name": "default_value",
+                        "widgets": []
+                    }
+                ],
+                [
+                    "i_test_value",
+                    {
+                        "default": null,
+                        "dtype": "float",
+                        "dtype_args": {},
+                        "dummy": false,
+                        "group": "default",
+                        "hide": false,
+                        "manual_input": true,
+                        "name": "test_value",
+                        "widgets": []
+                    }
+                ],
+                [
+                    "o_value",
+                    {
+                        "default": null,
+                        "dtype": "float",
+                        "dtype_args": {},
+                        "dummy": false,
+                        "group": "default",
+                        "hide": false,
+                        "manual_input": true,
+                        "name": "value",
+                        "widgets": []
+                    }
+                ]
+            ],
+            "id": 23,
+            "manual_values": {
+                "i_default_value": 0.0,
+                "i_dtype": 3.0,
+                "i_name": "gain",
+                "i_test_value": 3.2699999809265137,
+                "o_value": 3.2699999809265137
+            },
+            "type": "ModuleInput",
+            "ui_data": {
+                "collapsed": false,
+                "pos": [
+                    -1338.0,
+                    724.0
+                ],
+                "selected": false
+            }
+        },
+        {
+            "custom_ports": [
+                [
+                    "i_default_value",
+                    {
+                        "default": null,
+                        "dtype": "float",
+                        "dtype_args": {},
+                        "dummy": false,
+                        "group": "default",
+                        "hide": false,
+                        "manual_input": true,
+                        "name": "default_value",
+                        "widgets": []
+                    }
+                ],
+                [
+                    "i_test_value",
+                    {
+                        "default": null,
+                        "dtype": "float",
+                        "dtype_args": {},
+                        "dummy": false,
+                        "group": "default",
+                        "hide": false,
+                        "manual_input": true,
+                        "name": "test_value",
+                        "widgets": []
+                    }
+                ],
+                [
+                    "o_value",
+                    {
+                        "default": null,
+                        "dtype": "float",
+                        "dtype_args": {},
+                        "dummy": false,
+                        "group": "default",
+                        "hide": false,
+                        "manual_input": true,
+                        "name": "value",
+                        "widgets": []
+                    }
+                ]
+            ],
+            "id": 24,
+            "manual_values": {
+                "i_default_value": 0.0,
+                "i_dtype": 3.0,
+                "i_name": "threshold",
+                "i_test_value": 0.3199999928474426,
+                "o_value": 0.3199999928474426
+            },
+            "type": "ModuleInput",
+            "ui_data": {
+                "collapsed": false,
+                "pos": [
+                    -895.0,
+                    795.0
+                ],
+                "selected": false
+            }
+        },
+        {
+            "custom_ports": [
+                [
+                    "i_value",
+                    {
+                        "default": null,
+                        "dtype": "bool",
+                        "dtype_args": {},
+                        "dummy": false,
+                        "group": "default",
+                        "hide": false,
+                        "manual_input": true,
+                        "name": "value",
+                        "widgets": []
+                    }
+                ],
+                [
+                    "o_test_value",
+                    {
+                        "default": null,
+                        "dtype": "bool",
+                        "dtype_args": {},
+                        "dummy": false,
+                        "group": "default",
+                        "hide": false,
+                        "manual_input": true,
+                        "name": "test_value",
+                        "widgets": []
+                    }
+                ]
+            ],
+            "id": 25,
+            "manual_values": {
+                "i_dtype": 0.0,
+                "i_name": "beat_on",
+                "i_value": 0.0,
+                "o_test_value": 0.0
+            },
+            "type": "ModuleOutput",
+            "ui_data": {
+                "collapsed": true,
+                "pos": [
+                    -257.0,
+                    632.0
+                ],
+                "selected": false
+            }
+        },
+        {
+            "custom_ports": [
+                [
+                    "i_value",
+                    {
+                        "default": null,
+                        "dtype": "bool",
+                        "dtype_args": {},
+                        "dummy": false,
+                        "group": "default",
+                        "hide": false,
+                        "manual_input": true,
+                        "name": "value",
+                        "widgets": []
+                    }
+                ],
+                [
+                    "o_test_value",
+                    {
+                        "default": null,
+                        "dtype": "bool",
+                        "dtype_args": {},
+                        "dummy": false,
+                        "group": "default",
+                        "hide": false,
+                        "manual_input": true,
+                        "name": "test_value",
+                        "widgets": []
+                    }
+                ]
+            ],
+            "id": 26,
+            "manual_values": {
+                "i_dtype": 0.0,
+                "i_name": "beat_rising",
+                "i_value": 0.0,
+                "o_test_value": 0.0
+            },
+            "type": "ModuleOutput",
+            "ui_data": {
+                "collapsed": true,
+                "pos": [
+                    66.0,
+                    806.0
+                ],
+                "selected": false
+            }
+        },
+        {
+            "custom_ports": [
+                [
+                    "i_value",
+                    {
+                        "default": null,
+                        "dtype": "bool",
+                        "dtype_args": {},
+                        "dummy": false,
+                        "group": "default",
+                        "hide": false,
+                        "manual_input": true,
+                        "name": "value",
+                        "widgets": []
+                    }
+                ],
+                [
+                    "o_test_value",
+                    {
+                        "default": null,
+                        "dtype": "bool",
+                        "dtype_args": {},
+                        "dummy": false,
+                        "group": "default",
+                        "hide": false,
+                        "manual_input": true,
+                        "name": "test_value",
+                        "widgets": []
+                    }
+                ]
+            ],
+            "id": 27,
+            "manual_values": {
+                "i_dtype": 0.0,
+                "i_name": "beat_falling",
+                "i_value": 0.0,
+                "o_test_value": 0.0
+            },
+            "type": "ModuleOutput",
+            "ui_data": {
+                "collapsed": true,
+                "pos": [
+                    68.0,
+                    890.0
+                ],
+                "selected": false
+            }
+        },
+        {
+            "custom_ports": [],
+            "id": 28,
+            "manual_values": {
+                "i_input": 0.0,
+                "i_max": 1.0,
+                "i_min": 0.0,
+                "i_time": 5.0
+            },
+            "type": "Plot",
+            "ui_data": {
+                "collapsed": false,
+                "pos": [
+                    -405.0,
+                    187.0
+                ],
+                "selected": false
+            }
+        },
+        {
+            "custom_ports": [
+                [
+                    "i_value",
+                    {
+                        "default": null,
+                        "dtype": "float",
+                        "dtype_args": {},
+                        "dummy": false,
+                        "group": "default",
+                        "hide": false,
+                        "manual_input": true,
+                        "name": "value",
+                        "widgets": []
+                    }
+                ],
+                [
+                    "o_test_value",
+                    {
+                        "default": null,
+                        "dtype": "float",
+                        "dtype_args": {},
+                        "dummy": false,
+                        "group": "default",
+                        "hide": false,
+                        "manual_input": true,
+                        "name": "test_value",
+                        "widgets": []
+                    }
+                ]
+            ],
+            "id": 29,
+            "manual_values": {
+                "i_dtype": 3.0,
+                "i_name": "test",
+                "i_value": 0.0,
+                "o_test_value": 0.0
+            },
+            "type": "ModuleOutput",
+            "ui_data": {
+                "collapsed": true,
+                "pos": [
+                    -710.0,
+                    381.0
+                ],
+                "selected": false
+            }
+        },
+        {
+            "custom_ports": [
+                [
+                    "i_value",
+                    {
+                        "default": null,
+                        "dtype": "float",
+                        "dtype_args": {},
+                        "dummy": false,
+                        "group": "default",
+                        "hide": false,
+                        "manual_input": true,
+                        "name": "value",
+                        "widgets": []
+                    }
+                ],
+                [
+                    "o_test_value",
+                    {
+                        "default": null,
+                        "dtype": "float",
+                        "dtype_args": {},
+                        "dummy": false,
+                        "group": "default",
+                        "hide": false,
+                        "manual_input": true,
+                        "name": "test_value",
+                        "widgets": []
+                    }
+                ]
+            ],
+            "id": 30,
+            "manual_values": {
+                "i_dtype": 3.0,
+                "i_name": "beat_value",
+                "i_value": 0.0,
+                "o_test_value": 0.0
+            },
+            "type": "ModuleOutput",
+            "ui_data": {
+                "collapsed": false,
+                "pos": [
+                    -447.0,
+                    463.0
+                ],
+                "selected": false
+            }
+        }
+    ],
+    "ui_data": {
+        "offset": [
+            -1813.0,
+            -146.0
+        ]
+    }
+}

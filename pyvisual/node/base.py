@@ -183,20 +183,35 @@ class Node(metaclass=NodeMeta):
         p.update(self.custom_output_ports)
         return p
 
-    def set_custom_inputs(self, port_specs):
-        self.custom_input_ports = OrderedDict()
+    def _prepare_ports(self, port_specs, old_ports, is_input):
+        # returns ordered dict with port_id => port_spec
+
+        # TODO stuff around old_ports is hacky
+        # removes all input/output ports whose base dtype has changed
+        # because we want to remove them only when they have really changed
+        # otherwise the value would be lost
+        # keeping the values might be intended. maybe it's not after all?
+
+        ports = OrderedDict()
         for port_spec in port_specs:
             prepare_port_spec(port_spec, True)
-            port_id = "i_%s" % port_spec["name"]
-            self.custom_input_ports[port_id] = port_spec
+            port_id = ("i_%s" if is_input else "o_%s") % port_spec["name"]
+            if port_id in old_ports:
+                old_port_spec = old_ports[port_id]
+                if old_port_spec["dtype"].base_type != port_spec["dtype"].base_type:
+                    if port_id in self.values:
+                        del self.values[port_id]
+            ports[port_id] = port_spec
+        return ports
+
+    def set_custom_inputs(self, port_specs):
+        # TODO see _prepare_ports
+        self.custom_input_ports = self._prepare_ports(port_specs, self.custom_input_ports, True)
         self.update_ports()
 
     def set_custom_outputs(self, port_specs):
-        self.custom_output_ports = OrderedDict()
-        for port_spec in port_specs:
-            prepare_port_spec(port_spec, False)
-            port_id = "o_%s" % port_spec["name"]
-            self.custom_output_ports[port_id] = port_spec
+        # TODO see _prepare_ports
+        self.custom_output_ports = self._prepare_ports(port_specs, self.custom_output_ports, False)
         self.update_ports()
 
     def yield_custom_input_values(self):
@@ -255,7 +270,7 @@ class Node(metaclass=NodeMeta):
         self._evaluated = evaluated
 
     def _create_value(self, port_id):
-        assert port_id in self.ports
+        assert port_id in self.ports, "Port %s not found" % port_id 
         port_spec = self.ports[port_id]
         is_input = port_id.startswith("i_")
 
@@ -328,6 +343,10 @@ class ValueHolder:
     @property
     def value(self):
         raise NotImplementedError()
+
+    def copy_to(self, value):
+        if self.has_changed:
+            value.value = self.value
 
 class SettableValueHolder(ValueHolder):
     def __init__(self, default_value):

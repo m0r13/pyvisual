@@ -1,2 +1,2 @@
-from . import value, audio, texture, util
+from . import value, audio, texture, util, module
 
