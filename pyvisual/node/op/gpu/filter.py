@@ -211,7 +211,22 @@ class Vignette(Shader):
         super().__init__("common/passthrough.vert", "post/vignette.frag")
 
     def set_uniforms(self, program):
-        input_texture = self.input_texture
-        input_texture.wrapping = gl.GL_MIRRORED_REPEAT
         for name in ("uRadius", "uRadiusFactor", "uDistanceOrder", "uSoftness", "uIntensity"):
             program[name] = self.get(name)
+
+class MaskZoom(Shader):
+    class Meta:
+        inputs = [
+            {"name" : "uMask", "dtype" : dtype.tex2d},
+            {"name" : "uScale0", "dtype" : dtype.float, "dtype_args" : {"default" : 1.0}},
+            {"name" : "uScale1", "dtype" : dtype.float, "dtype_args" : {"default" : 1.0}},
+        ]
+
+    def __init__(self):
+        super().__init__("common/passthrough.vert", "post/maskzoom.frag")
+
+    def set_uniforms(self, program):
+        for name in ("uMask", "uScale0", "uScale1"):
+            program[name] = self.get(name)
+
+

@@ -10,7 +10,7 @@ out vec4 oFragColor;
 
 void main() {
     vec2 texCoords = (TexCoord0 - vec2(0.5)) * 2.0;
-    //texCoords.x *= 1920.0 / 1080.0;
+    texCoords.x *= 1920.0 / 1080.0;
 
     float radius = length(texCoords);
     // this was an accident: interesting WTF
