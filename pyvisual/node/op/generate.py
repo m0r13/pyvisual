@@ -64,10 +64,39 @@ class LFO(Node):
         value = self.get("min") + value * (self.get("max") - self.get("min"))
         self.set("output", value)
 
+class PWM(Node):
+    class Meta:
+        inputs = [
+            {"name" : "length", "dtype" : dtype.float, "dtype_args" : {"default" : 1.0, "range" : [0.000001, float("inf")]}},
+            {"name" : "value", "dtype" : dtype.float, "dtype_args" : {"default" : 0.5, "range" : [0.0, 1.0]}},
+            {"name" : "min", "dtype" : dtype.float, "dtype_args" : {"default" : 0.0}},
+            {"name" : "max", "dtype" : dtype.float, "dtype_args" : {"default" : 1.0}},
+        ]
+        outputs = [
+            {"name" : "output", "dtype" : dtype.float}
+        ]
+
+    def __init__(self):
+        super().__init__(always_evaluate=True)
+
+        self._timer = scalable_timer()
+
+    def _evaluate(self):
+        length = self.get("length")
+        if length == 0:
+            self.set("output", float("nan"))
+            return
+        t = self._timer(1.0 / length, False)
+        if t % 1.0 < self.get("value"):
+            self.set("output", self.get("max"))
+        else:
+            self.set("output", self.get("min"))
+
 class Time(Node):
     class Meta:
         inputs = [
             {"name" : "factor", "dtype" : dtype.float, "dtype_args" : {"default" : 1.0}},
+            {"name" : "mod", "dtype" : dtype.float, "dtype_args" : {"default" : 0.0}, "group" : "additional"},
             {"name" : "reset", "dtype" : dtype.event}
         ]
         outputs = [
@@ -91,7 +120,14 @@ class Time(Node):
         dt = t - self._last_time
         self._time += dt * self.get("factor")
         self._last_time = t
-        self.set("output", self._time)
+
+        mod = self.get("mod")
+        if mod > 0.00001:
+            # round time to mod
+            value = self._time - (self._time % mod)
+            self.set("output", value)
+        else:
+            self.set("output", self._time)
 
 def random_float(a, b):
     alpha = random.random()
@@ -102,7 +138,7 @@ class RandomFloat(Node):
     class Meta:
         inputs = [
             {"name" : "generate", "dtype" : dtype.event},
-            {"name" : "min", "dtype" : dtype.float, "dtype_args" : {"default" : 1.0}},
+            {"name" : "min", "dtype" : dtype.float, "dtype_args" : {"default" : 0.0}},
             {"name" : "max", "dtype" : dtype.float, "dtype_args" : {"default" : 1.0}},
             {"name" : "mod", "dtype" : dtype.float, "dtype_args" : {"default" : 1.0}},
         ]

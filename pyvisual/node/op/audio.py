@@ -105,6 +105,7 @@ class VUNormalizer(Node):
     class Meta:
         inputs = [
             {"name" : "input", "dtype" : dtype.float},
+            {"name" : "offset", "dtype" : dtype.float, "dtype_args" : {"default" : 0.0}},
             {"name" : "beat_on", "dtype" : dtype.bool},
             {"name" : "min", "dtype" : dtype.float, "dtype_args" : {"default" : 0.5}},
             {"name" : "max", "dtype" : dtype.float, "dtype_args" : {"default" : 0.9}},
@@ -124,7 +125,7 @@ class VUNormalizer(Node):
 
     def evaluate(self):
         beat_on = self.get("beat_on")
-        vu_norm = self.get("input") * self._factor
+        vu_norm = (self.get("input") - self.get("offset")) * self._factor
         self.set("output", vu_norm)
 
         min_vu = self.get("min")
