@@ -1038,11 +1038,14 @@ class NodeEditor:
 
             def filter_nodes(text):
                 for i, spec in enumerate(self.node_specs):
-                    label = spec.name
-                    label += " (%s)" % spec.module_name
-                    if not is_substring_partly(text.lower(), label.lower()):
-                        continue
-                    yield label, spec
+                    label = "%s (%s)" % (spec.name, spec.module_name)
+                    if is_substring_partly(text.lower(), label.lower()):
+                        yield label, spec, {}
+
+                    for name, preset_values in spec.cls.get_presets(self.graph):
+                        label = "%s: %s (%s)" % (spec.name, name, spec.module_name)
+                        if is_substring_partly(text.lower(), label.lower()):
+                            yield label, spec, preset_values
             entries = list(filter_nodes(self.context_search_text))
 
             if self.is_key_down(key_up_arrow):
@@ -1055,14 +1058,14 @@ class NodeEditor:
             self.context_index = max(0, min(len(entries) - 1, self.context_index))
             selected = self.context_index
             imgui.listbox_header("", 250, 300)
-            for i, (label, spec) in enumerate(entries):
+            for i, (label, spec, preset_values) in enumerate(entries):
                 imgui.push_id(i)
                 is_selected = selected == 0
                 imgui.selectable(label, is_selected)
                 if imgui.is_item_clicked() or (is_selected and changed):
                     pos = self.screen_to_local(self.context_mouse_pos)
                     #self.nodes.append(Node(self, spec, pos=pos))
-                    self.graph.create_node(spec, {"pos" : pos})
+                    self.graph.create_node(spec, values=preset_values, ui_data={"pos" : pos})
                     # TODO it would be nice to set the mouse position back to where the node is now
                     imgui.close_current_popup()
                 imgui.pop_id()

@@ -130,7 +130,7 @@ class NodeGraph:
                 ignore_ids.add(node_save_id)
                 continue
 
-            node = self.create_node(spec, node_data["ui_data"])
+            node = self.create_node(spec, ui_data=node_data["ui_data"])
             new_nodes.append(node)
             id_map[node_save_id] = node.id
 
@@ -259,9 +259,12 @@ class NodeGraph:
             for listener in self.listeners:
                 listener.changed_ui_data(ui_data)
 
-    def create_node(self, spec, ui_data):
+    def create_node(self, spec, values={}, ui_data={}):
         node = spec.instantiate_node()
         node.id = self._assign_node_id()
+        # TODO maybe move this to extra function
+        for port_id, value in values.items():
+            node.get_value(port_id).value = value
         node.start(self)
 
         self.nodes[node.id] = node

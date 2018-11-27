@@ -336,6 +336,13 @@ class Node(metaclass=NodeMeta):
         # called only when that context menu is visible
         pass
 
+    @classmethod
+    def get_presets(cls, graph):
+        # to be implemented by child node
+        # should return list of tuples (name, values)
+        #   (values as dictionary port_id => manual value)
+        return []
+
 class ValueHolder:
     @property
     def has_changed(self):

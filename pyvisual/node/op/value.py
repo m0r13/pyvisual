@@ -236,6 +236,10 @@ UNARY_OPS = OrderedDict(
     oneminus=lambda x: 1.0 - x,
 )
 
+UNARY_OP_PRESETS = [
+    (name, {"i_op" : i}) for i, name in enumerate(UNARY_OPS.keys())
+]
+
 class UnaryOpFloat(Node):
     class Meta:
         inputs = [
@@ -259,6 +263,10 @@ class UnaryOpFloat(Node):
         x = self.get("x")
         self.set("out", self.OPS[op](x))
 
+    @classmethod
+    def get_presets(cls, graph):
+        return UNARY_OP_PRESETS
+
 BINARY_OPS = OrderedDict(
     add=lambda a, b: a + b,
     sub=lambda a, b: a - b,
@@ -270,6 +278,10 @@ BINARY_OPS = OrderedDict(
 
     divmod=lambda a, b: a - (a % b)
 )
+
+BINARY_OP_PRESETS = [
+    (name, {"i_op" : i}) for i, name in enumerate(BINARY_OPS.keys())
+]
 
 class BinaryOpFloat(Node):
     class Meta:
@@ -298,6 +310,10 @@ class BinaryOpFloat(Node):
             self.set("out", self.OPS[op](a, b))
         except ZeroDivisionError:
             self.set("out", float("nan"))
+
+    @classmethod
+    def get_presets(cls, graph):
+        return BINARY_OP_PRESETS
 
 class Counter(Node):
     class Meta:

@@ -275,6 +275,13 @@ class GetFloatVar(Node):
             return sub_nodes + [self.connected_node]
         return sub_nodes
 
+    @classmethod
+    def get_presets(cls, graph):
+        presets = []
+        for node in SetFloatVar.instances.get(graph, []):
+            presets.append((node.name, {"i_name" : node.name}))
+        return presets
+
     def start(self, graph):
         self.graph = graph
 
