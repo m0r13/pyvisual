@@ -72,12 +72,6 @@ class RenderNode(Node):
         fbo.deactivate()
         return fbo.color[0]
 
-def load_shader(path):
-    f = open(path, "r")
-    data = f.read()
-    f.close()
-    return data
-
 # TODO
 dummy = np.zeros((1, 1, 4), dtype=np.uint8).view(gloo.Texture2D)
 
@@ -128,8 +122,8 @@ class Shader(RenderNode):
 
     def update_program(self):
         try:
-            vertex = load_shader(self.vertex_watcher.path)
-            fragment = load_shader(self.fragment_watcher.path)
+            vertex = assets.load_shader(path=self.vertex_watcher.path)
+            fragment = assets.load_shader(path=self.fragment_watcher.path)
 
             self.quad = gloo.Program(vertex, fragment, version="130", count=4)
             self.quad["iPosition"] = [(-1,-1), (-1,+1), (+1,-1), (+1,+1)]
@@ -233,8 +227,8 @@ class Blend(RenderNode):
         vertex_path = assets.get_shader_path("common/passthrough.vert")
         fragment_path = assets.get_shader_path("common/passthrough.frag")
 
-        vertex = load_shader(vertex_path)
-        fragment = load_shader(fragment_path)
+        vertex = assets.load_shader(vertex_path)
+        fragment = assets.load_shader(fragment_path)
         self.quad = gloo.Program(vertex, fragment, version="130", count=4)
         self.quad["iPosition"] = [(-1,-1), (-1,+1), (+1,-1), (+1,+1)]
         self.quad["iTexCoord"] = [( 0, 1), ( 0, 0), ( 1, 1), ( 1, 0)]
