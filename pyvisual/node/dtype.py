@@ -35,6 +35,7 @@ base_vec4 = BaseType("vec4", *numpy_serializer())
 base_mat4 = BaseType("mat4", *numpy_serializer())
 base_tex2d = BaseType("tex2d", *dummy_serializer())
 base_audio = BaseType("audio", *dummy_serializer())
+base_midi = BaseType("midi", *dummy_serializer())
 
 Type = namedtuple("DType", ["name", "base_type", "default"])
 
@@ -49,8 +50,9 @@ color = Type("color", base_vec4, lambda: np.array([0.0, 0.0, 0.0, 1.0], dtype=np
 mat4 = Type("mat4", base_mat4, lambda: np.eye(4, dtype=np.float32))
 tex2d = Type("tex2d", base_tex2d, lambda: None)
 audio = Type("audio", base_audio, lambda: None)
+midi = Type("midi", base_midi, lambda: [])
 
 dtypes = {}
-for dtype in (bool, event, int, float, str, assetpath, vec2, color, mat4, tex2d, audio):
+for dtype in (bool, event, int, float, str, assetpath, vec2, color, mat4, tex2d, audio, midi):
     dtypes[dtype.name] = dtype
 

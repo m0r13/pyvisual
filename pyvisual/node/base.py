@@ -1,4 +1,5 @@
 import time
+import copy
 from collections import OrderedDict
 
 def find_node_base(bases):
@@ -77,12 +78,12 @@ class NodeSpec:
     @property
     def input_ports(self):
         for port_spec in self.inputs:
-            yield port_id(port_spec, True), port_spec
+            yield port_id(port_spec, True), copy.deepcopy(port_spec)
 
     @property
     def output_ports(self):
         for port_spec in self.outputs:
-            yield port_id(port_spec, False), port_spec
+            yield port_id(port_spec, False), copy.deepcopy(port_spec)
 
     def instantiate_node(self):
         return self.cls()
@@ -182,6 +183,10 @@ class Node(metaclass=NodeMeta):
         p.update(self.custom_input_ports)
         p.update(self.custom_output_ports)
         return p
+
+    def get_port(self, port_id):
+        assert port_id in self.ports
+        return self.ports[port_id]
 
     def _prepare_ports(self, port_specs, old_ports, is_input):
         # returns ordered dict with port_id => port_spec
