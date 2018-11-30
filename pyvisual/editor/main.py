@@ -1242,11 +1242,13 @@ class NodeEditor:
         imgui.set_next_window_size(w, h)
 
         flags = imgui.WINDOW_NO_RESIZE | imgui.WINDOW_NO_MOVE | imgui.WINDOW_NO_TITLE_BAR | imgui.WINDOW_NO_BRING_TO_FRONT_ON_FOCUS | imgui.WINDOW_NO_SCROLLBAR | imgui.WINDOW_NO_SCROLL_WITH_MOUSE
+        imgui.push_style_var(imgui.STYLE_WINDOW_BORDERSIZE, 0.0)
         expanded, _ = imgui.begin("NodeEditor", False, flags)
         self.pos = imgui.get_window_position()
         self.size = imgui.get_window_size()
         if not expanded:
-            pass
+            imgui.pop_style_var(1)
+            return
 
         # initialize draw list
         draw_list = imgui.get_window_draw_list()
@@ -1359,6 +1361,8 @@ class NodeEditor:
         if self.show_test_window:
             imgui.show_test_window()
         imgui.end()
+
+        imgui.pop_style_var(1)
 
 # sort by node categories and then by names
 node_types = node_meta.Node.get_sub_nodes(include_self=False)
