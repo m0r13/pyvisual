@@ -41,9 +41,9 @@ class LoadTexture(Node):
             self.status = str(e)
             return
 
-        # seems to be required here for nvidia
-        texture.activate()
-        texture.deactivate()
+        # seems to be required like this for nvidia (no activate/deactivate)
+        #texture.activate()
+        #texture.deactivate()
         self.status = None
         self.set("output", texture)
 
