@@ -1,12 +1,10 @@
-uniform sampler2D uInputTexture;
-uniform float slices;
-uniform float offset;
-uniform float timeH;
-uniform float timeV;
+#define DONT_SAMPLE_FRAGMENT
+#include <filter/basefilter.frag>
 
-in vec2 TexCoord0;
-
-out vec4 oFragColor;
+uniform float slices; // {"default" : 3.0}
+uniform float offset; // {"default" : 100.0}
+uniform float timeH; // {"default" : 0.0}
+uniform float timeV; // {"default" : 0.0}
 
 float steppedVal(float v, float steps){
     return floor(v*steps)/steps;
@@ -23,12 +21,11 @@ float noise1d(float p){
 }
 
 const float TWO_PI = 6.283185307179586;
-void main() {
-    vec2 uv = TexCoord0;
-    float n = noise1d(uv.y * slices + timeH * timeV * 3.0);
+vec4 filterFrag(vec2 uv, vec4 _) {
+    float n = noise1d(uv.y * slices + /*timeH **/ timeV * 3.0);
     float ns = steppedVal(fract(n  ),slices) + 2.0;
     float nsr = random1d(ns);
     vec2 uvn = uv;
     uvn.x += nsr * sin(timeH * TWO_PI + nsr * 20.0) * offset / textureSize(uInputTexture, 0).x;
-    gl_FragColor = texture2D(uInputTexture, uvn);
+    return texture2D(uInputTexture, uvn);
 }

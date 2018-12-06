@@ -276,7 +276,9 @@ BINARY_OPS = OrderedDict(
     min=lambda a, b: min(a, b),
     max=lambda a, b: max(a, b),
 
-    divmod=lambda a, b: a - (a % b)
+    divmod=lambda a, b: a - (a % b),
+
+    pow=lambda a, b: a**b
 )
 
 BINARY_OP_PRESETS = [

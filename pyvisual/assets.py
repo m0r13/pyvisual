@@ -2,6 +2,7 @@
 import os
 import glob
 import time
+import json
 
 ASSET_PATH = os.path.join(os.path.dirname(os.path.abspath(__file__)), "assets")
 SHADER_PATH = os.path.join(ASSET_PATH, "shader")
@@ -20,9 +21,6 @@ def get_shader_path(name):
 class ShaderError(ValueError):
     pass
 
-def read_shader(path):
-    return open(get_shader_path(path), "r").read()
-
 def preprocess_shader(source):
     # we could use a path as context here,
     # but let's just work with global paths everywhere for now
@@ -40,7 +38,7 @@ def preprocess_shader(source):
         if not line.startswith(prefix) or not line.endswith(suffix):
             raise ShaderError("Invalid #include line " + line)
         path = line[len(prefix):-len(suffix)]
-        shader = preprocess_shader(read_shader(path))
+        shader = preprocess_shader(load_shader(path=path))
         lines.extend(shader.split("\n"))
 
     return "\n".join(lines)
@@ -52,7 +50,7 @@ def load_shader(path=None, source=None):
         raise ValueError("A path xor source must be provided.")
 
     if path is not None:
-        source = read_shader(path)
+        source = open(get_shader_path(path), "r").read()
     source = preprocess_shader(source)
 
     return source
@@ -64,26 +62,99 @@ def parse_shader_uniforms(vertex_source, fragment_source):
             line = line.strip()
             if not line.startswith("uniform"):
                 continue
+
+            comment = None
             if "//" in line:
-                line = line[:line.find("//")]
+                comment_index = line.find("//")
+                comment = line[comment_index+2:].strip()
+                line = line[:comment_index]
+
             parts = line.split(" ")
             if len(parts) < 3:
                 continue
+            # extract opengl uniform type and uniform name
             gltype = parts[1]
             # remove trailing ";"
             name = parts[2][:-1]
-            uniforms.append((gltype, name))
+
+            # in case there is a // comment after the uniform definition
+            # attempt to parse json object after this
+            kwargs = {}
+            if comment and comment.startswith("{") and comment.endswith("}"):
+                kwargs = json.loads(comment)
+
+            # uniform is then opengl type, name, and other kw arguments
+            uniforms.append((gltype, name, kwargs))
         return uniforms
 
-    # TODO, should be okay for now
-    # just take uniforms from fragment source
-    # if there are more in vertex source, add them to the end
-    uniforms = parse_uniforms(fragment_source)
-    for uniform in parse_uniforms(vertex_source):
-        if uniform not in uniforms:
-            uniforms.append(uniform)
-
+    # we assume that vertex/fragment shader don't share any uniforms
+    uniforms = parse_uniforms(vertex_source) + parse_uniforms(fragment_source)
     return uniforms
+
+class ShaderSource:
+    @property
+    def data(self):
+        raise NotImplementedError()
+    @property
+    def has_changed(self):
+        raise NotImplementedError()
+
+class FileShaderSource(ShaderSource):
+    def __init__(self, path):
+        self._path = path
+        self._watcher = FileWatcher(path)
+
+    @property
+    def data(self):
+        return load_shader(path=self._path)
+
+    @property
+    def has_changed(self):
+        return self._watcher.has_changed()
+
+class StaticShaderSource(ShaderSource):
+    def __init__(self):
+        self._data = ""
+        self._changed = False
+    
+    @property
+    def data(self):
+        return self._data
+    @data.setter
+    def data(self, data):
+        self._data = data
+        self._changed = True
+
+    @property
+    def has_changed(self):
+        changed = self._changed
+        self._changed = False
+        return changed
+
+class CustomDefineShaderSource(ShaderSource):
+    def __init__(self, source, defines=set()):
+        self._source = source
+        self._defines = set(defines)
+        self._has_changed = False
+
+    def set(self, define, enabled):
+        if not enabled:
+            self._defines.discard(define)
+        else:
+            self._defines.add(define)
+        self._has_changed = True
+
+    @property
+    def data(self):
+        defines = "\n".join([ "#define %s" % define for define in self._defines ])
+        data = defines + "\n" + self._source.data
+        return data
+
+    @property
+    def has_changed(self):
+        changed = self._source.has_changed or self._has_changed
+        self._has_changed = False
+        return changed
 
 def glob_paths(wildcard):
     paths = []

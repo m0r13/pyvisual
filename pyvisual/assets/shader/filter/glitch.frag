@@ -1,23 +1,12 @@
-#version 150
-
-/**
-* Example Fragment Shader
-* Sets the color and alpha of the pixel by setting gl_FragColor
-*/
+#include <filter/basefilter.frag>
 
 // Set the precision for data types used in this shader
 precision highp float;
 precision highp int;
 
 uniform float time;
-
-uniform sampler2D uInputTexture;
 uniform float amount;
 uniform float speed;
-
-in vec2 TexCoord0;
-
-out vec4 oFragColor;
 
 float random1d(float n){
     return fract(sin(n) * 43758.5453);
@@ -34,10 +23,10 @@ float insideRange(float v, float bottom, float top) {
 float rand(vec2 co){
     return fract(sin(dot(co.xy ,vec2(12.9898,78.233))) * 43758.5453);
 }
-void main() {
-    vec2 uv = TexCoord0;
+
+vec4 filterFrag(vec2 uv, vec4 frag) {
     float sTime = floor(time * speed * 6.0 * 24.0);
-    vec3 inCol = texture2D(uInputTexture, uv).rgb;
+    vec3 inCol = frag.rgb;
     vec3 outCol = inCol;
     float maxOffset = amount/2.0;
     vec2 uvOff;
@@ -65,5 +54,6 @@ void main() {
     } else{
         outCol.b = texture2D(uInputTexture, uvOff).b;
     }
-    gl_FragColor = vec4(outCol,1.0);
+    return vec4(outCol,1.0);
 }
+

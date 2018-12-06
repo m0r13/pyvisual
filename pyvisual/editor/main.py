@@ -338,7 +338,8 @@ class Node:
         if port_id in self.widget_port_specs:
             port_spec = self.instance.ports[port_id]
             old_port_spec = self.widget_port_specs[port_id]
-            if old_port_spec != port_spec:
+            # compare only dtype for now
+            if old_port_spec["dtype"] != port_spec["dtype"]:
                 del self.widgets[port_id]
 
         if not port_id in self.widgets:
@@ -439,7 +440,9 @@ class Node:
         connections = self.connections[port_id]
         # constraint: make sure there is maximum one connection per input
         if is_input:
-            assert len(connections) in (0, 1), "but is %d: %s" % (len(connections), connections)
+            # but actually there can be two connections on an input
+            # when a new connection is dragged in place
+            assert len(connections) <= 2, "but is %d: %s" % (len(connections), connections)
 
         hoverable = imgui.is_window_hovered() and interaction_allowed
         hovered_port = hoverable and t_between(port_start, port_end, io.mouse_pos)
@@ -475,9 +478,9 @@ class Node:
         if hovered_connector and deleteable and not is_dragging_connection:
             imgui.set_tooltip("Delete connection")
             if imgui.is_mouse_clicked(0):
-                self.editor.remove_connection(connections[0])
+                ### self.editor.remove_connection(connections[0])
                 # little tweak: start dragging a new connection once a connection is deleted
-                self.editor.drag_connection(self, port_id)
+                self.editor.drag_connection(self, port_id, remove_connection=connections[0])
         elif hovered and is_dragging_connection and is_connection_droppable:
             highlight_channel = CHANNEL_NODE_BACKGROUND
             highlight_color = COLOR_PORT_HIGHLIGHT_POSITIVE_ACTIVE
@@ -559,7 +562,7 @@ class Node:
             text_start = imgui.get_cursor_screen_pos()
             imgui.text(port_spec["name"])
 
-            imgui.set_cursor_screen_pos((text_start[0] + 100, text_start[1]))
+            imgui.set_cursor_screen_pos((text_start[0] + 150, text_start[1]))
             widget.show(value, read_only=read_only or not port_spec["manual_input"])
 
             imgui.pop_id()
@@ -767,6 +770,8 @@ class NodeEditor:
         # if user is dragging a connection: this is the ui connection object
         self.dragging_connection = None
         self.dragging_target_port_type = None
+        # there can be a connection that should be deleted after dragging new connection
+        self.dragging_connection_to_remove = None
         # whether user is dragging position
         self.dragging_position = False
         # whether user is making a selection
@@ -906,11 +911,12 @@ class NodeEditor:
         c = connection
         self.graph.remove_connection(c.src_node.instance, c.src_port_id, c.dst_node.instance, c.dst_port_id)
 
-    def drag_connection(self, node, port_id):
+    def drag_connection(self, node, port_id, remove_connection=None):
+        # remove_connection can be a connection that should be removed after dragging this connection
         assert self.dragging_connection is None
-        #print("Start dragging connection")
         self.dragging_connection = Connection.create(self, node, port_id)
         self.dragging_target_port_type = not node_meta.is_input(port_id)
+        self.dragging_connection_to_remove = remove_connection
 
     def is_dragging_connection(self):
         return self.dragging_connection is not None
@@ -928,7 +934,7 @@ class NodeEditor:
         # constraint: only one connection per input
         if node_meta.is_input(port_id) and len(node.connections[port_id]) != 0:
             return False
-        
+
         port_spec = node.instance.ports[port_id]
         connection = self.dragging_connection
         other_port_spec = None
@@ -941,6 +947,10 @@ class NodeEditor:
     def drop_connection(self, node, port_id):
         assert self.is_dragging_connection()
         assert self.is_connection_droppable(node, port_id)
+
+        if self.dragging_connection_to_remove is not None:
+            self.remove_connection(self.dragging_connection_to_remove)
+            self.dragging_connection_to_remove = None
 
         # connect ui nodes
         connection = self.dragging_connection
@@ -1149,6 +1159,9 @@ class NodeEditor:
             self.dragging_connection.disconnect()
             #self.connections.remove(self.dragging_connection)
             self.dragging_connection = None
+            if self.dragging_connection_to_remove is not None:
+                self.remove_connection(self.dragging_connection_to_remove)
+            self.dragging_connection_to_remove = None
 
         # handle a starting selection
         # it's important that ctrl is not pressed (ctrl is for dragging position)

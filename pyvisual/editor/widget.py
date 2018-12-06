@@ -142,7 +142,7 @@ class Float(Widget):
         self.clamper = clamper(minmax)
 
     def _show(self, value, read_only):
-        imgui.push_item_width(WIDGET_WIDTH)
+        imgui.push_item_width(WIDGET_WIDTH * 0.75)
         changed, v = imgui.drag_float("", value.value,
                 change_speed=0.01, min_value=self.minmax[0], max_value=self.minmax[1], format="%0.4f")
         if changed and not read_only:

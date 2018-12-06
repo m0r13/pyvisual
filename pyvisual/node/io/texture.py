@@ -54,6 +54,10 @@ class LoadTexture(Node):
             if imgui.is_item_hovered():
                 imgui.set_tooltip(self.status)
 
+    def _show_custom_context(self):
+        if imgui.button("Reload texture"):
+            self.get_input("path").value = self.get("path")
+
 class LoadTextures(Node):
     class Meta:
         inputs = [

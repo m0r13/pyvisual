@@ -1,15 +1,12 @@
-#version 150
-uniform sampler2D uInputTexture;
-uniform float uAxisAngle;
-uniform float uAngleOffset;
-uniform float uSegmentCount;
+#define DONT_SAMPLE_FRAGMENT
+#include <filter/basefilter.frag>
 
-in vec2 TexCoord0;
+uniform float uAxisAngle; // {"alias" : "axis_angle"}
+uniform float uAngleOffset; // {"alias" : "angle"}
+uniform float uSegmentCount; // {"alias" : "segments", "default" : 5, "range" : [0, Infinity]}
 
-out vec4 oFragColor;
-
-void main() {
-    vec2 texCoords = (TexCoord0 - vec2(0.5)) * 2.0;
+vec4 filterFrag(vec2 uv, vec4 _) {
+    vec2 texCoords = (uv - vec2(0.5)) * 2.0;
     texCoords.x *= 1920.0 / 1080.0;
 
     float radius = length(texCoords);
@@ -33,9 +30,7 @@ void main() {
     //texCoords.x /= 1920.0 / 1080.0;
     texCoords = (texCoords + vec2(1.0)) / 2.0;
 
-    //oFragColor = vec4(vec3(texCoords.x), 1.0);
-    vec4 frag1 = texture2D(uInputTexture, TexCoord0);
     vec4 frag2 = texture2D(uInputTexture, texCoords);
-    oFragColor = vec4(frag2.r, frag2.g, frag2.b, 1.0);
+    return vec4(frag2.r, frag2.g, frag2.b, 1.0);
 }
 

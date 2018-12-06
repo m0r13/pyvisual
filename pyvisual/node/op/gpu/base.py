@@ -80,15 +80,17 @@ WRAPPING_MODES_GL = [gl.GL_REPEAT, gl.GL_MIRRORED_REPEAT, gl.GL_CLAMP_TO_EDGE, g
 INTERPOLATION_MODES = ["nearest", "linear"]
 INTERPOLATION_MODES_GL = [gl.GL_NEAREST, gl.GL_LINEAR]
 
-class Shader(RenderNode):
+# it's called BaseShader to keep compatibility with some nodes
+# might be changeable soon
+class BaseShader(RenderNode):
     class Meta:
         inputs = [
             {"name" : "enabled", "dtype" : dtype.bool, "dtype_args" : {"default" : 1.0}},
             {"name" : "transformUV", "dtype" : dtype.mat4},
             {"name" : "sizeref", "dtype" : dtype.tex2d},
+            {"name" : "input", "dtype" : dtype.tex2d},
             {"name" : "wrapping", "dtype" : dtype.int, "dtype_args" : {"default" : 1, "choices" : WRAPPING_MODES}, "group" : "additional"},
             {"name" : "interpolation", "dtype" : dtype.int, "dtype_args" : {"default" : 1, "choices" : INTERPOLATION_MODES}, "group" : "additional"},
-            {"name" : "input", "dtype" : dtype.tex2d},
             {"name" : "force_change", "dtype" : dtype.float, "hide" : True},
         ]
         outputs = [
@@ -99,11 +101,20 @@ class Shader(RenderNode):
             "virtual" : True
         }
 
-    def __init__(self, vertex, fragment):
+    def __init__(self, vertex_source, fragment_source, handle_uniforms=False):
         super().__init__()
 
-        self.vertex_watcher = assets.FileWatcher(assets.get_shader_path(vertex))
-        self.fragment_watcher = assets.FileWatcher(assets.get_shader_path(fragment))
+        self.quad = None
+        self.shader_error = None
+        # mapping of inputs to program uniforms (if uniforms should be handled)
+        # returned by _parse_uniform_inputs, set when building program
+        self.input_uniform_mapping = []
+
+        self.vertex_source = vertex_source
+        self.fragment_source = fragment_source
+        # whenever to parse shader sources, generate node inputs and
+        # set uniforms during evaluation
+        self.handle_uniforms = handle_uniforms
         self.update_program()
 
         self.input_texture = None
@@ -120,10 +131,65 @@ class Shader(RenderNode):
         mode = max(0, min(len(INTERPOLATION_MODES), mode))
         return INTERPOLATION_MODES_GL[mode]
 
+    def _parse_uniform_inputs(self, vertex_source, fragment_source):
+        # returns these two lists
+        # list of tuples (input port name, uniform name, dtype)
+        input_uniform_mapping = []
+        # port_specs suitable to set as custom input ports
+        input_ports = []
+
+        gl2dtype = {
+            "int" : dtype.int,
+            "float" : dtype.float,
+            "vec2" : dtype.vec2,
+            "vec4" : dtype.color,
+            "mat4" : dtype.mat4,
+            "sampler2D" : dtype.tex2d,
+        }
+
+        uniforms = assets.parse_shader_uniforms(vertex_source, fragment_source)
+        for gltype, name, kwargs in uniforms:
+            if not gltype in gl2dtype:
+                raise RuntimeError("Unsupported glsl data type '%s' as node port input" % gltype)
+
+            if kwargs.get("skip", False):
+                continue
+
+            uniform_name = name
+            input_name = kwargs.get("alias", name)
+            port_spec = {"name" : input_name, "dtype" : gl2dtype[gltype]}
+
+            dtype_args = {}
+            if port_spec["dtype"] == dtype.int and "choices" in kwargs:
+                dtype_args["choices"] = kwargs["choices"]
+            if "default" in kwargs:
+                dtype_args["default"] = port_spec["dtype"].base_type.unserialize(kwargs["default"])
+            if "range" in kwargs:
+                dtype_args["range"] = kwargs["range"]
+            port_spec["dtype_args"] = dtype_args
+
+            input_uniform_mapping.append((input_name, uniform_name, port_spec["dtype"]))
+            input_ports.append(port_spec)
+
+        return input_uniform_mapping, input_ports
+
+    def _process_uniform_inputs(self, port_specs):
+        # called when uniforms of shader are parsed
+        # and node inputs are generated from these
+        # you can override this method in a subclass (for example Filter)
+        pass
+
     def update_program(self):
         try:
-            vertex = assets.load_shader(path=self.vertex_watcher.path)
-            fragment = assets.load_shader(path=self.fragment_watcher.path)
+            vertex = self.vertex_source.data
+            fragment = self.fragment_source.data
+            if not vertex or not fragment:
+                print("### Warning: Empty vertex/fragment shader of node %s #%d" % (self, self.id))
+                self.quad = None
+                self.shader_error = "Empty vertex/fragment shader"
+                return
+
+            input_uniform_mapping, input_ports = self._parse_uniform_inputs(vertex, fragment)
 
             self.quad = gloo.Program(vertex, fragment, version="130", count=4)
             self.quad["iPosition"] = [(-1,-1), (-1,+1), (+1,-1), (+1,+1)]
@@ -140,6 +206,10 @@ class Shader(RenderNode):
             self.quad.draw(gl.GL_TRIANGLE_STRIP)
 
             self.shader_error = None
+            if self.handle_uniforms:
+                self.input_uniform_mapping = input_uniform_mapping
+                self._process_uniform_inputs(input_ports)
+                self.set_custom_inputs(input_ports)
 
             # TODO maybe let node base class have method for this
             # force re-rendering of this node by changing at least one input
@@ -148,12 +218,17 @@ class Shader(RenderNode):
             self.quad = None
             self.shader_error = traceback.format_exc()
             traceback.print_exc()
+            print("Error happened in class %s, node %d" % (self, self.id))
 
     def set_uniforms(self, program):
-        pass
+        for input_name, uniform_name, dt in self.input_uniform_mapping:
+            value = self.get(input_name)
+            if dt == dtype.tex2d and value is None:
+                value = dummy
+            program[uniform_name] = value
 
     def evaluate(self):
-        if self.vertex_watcher.has_changed() or self.fragment_watcher.has_changed():
+        if self.vertex_source.has_changed or self.fragment_source.has_changed:
             self.update_program()
 
         return super().evaluate()
@@ -207,6 +282,18 @@ class Shader(RenderNode):
     def _show_custom_context(self):
         if imgui.menu_item("reload shaders")[0]:
             self.update_program()
+
+class Shader(BaseShader):
+    class Meta:
+        options = {
+            "virtual" : True
+        }
+
+    def __init__(self, vertex, fragment):
+        vertex_path = assets.get_shader_path(vertex)
+        fragment_path = assets.get_shader_path(fragment)
+
+        super().__init__(assets.FileShaderSource(vertex_path), assets.FileShaderSource(fragment_path))
 
 class Blend(RenderNode):
     class Meta:

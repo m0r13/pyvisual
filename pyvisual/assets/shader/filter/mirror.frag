@@ -1,12 +1,8 @@
-#version 150
-uniform sampler2D uInputTexture;
-uniform int uMode;
+#include <filter/basefilter.frag>
 
-in vec2 TexCoord0;
+uniform int uMode; // {"default" : 1, "choices" : ["passthrough", "1", "2", "3"]}
 
-out vec4 oFragColor;
-
-void main() {
+vec4 filterFrag(vec2 uv, vec4 frag) {
     vec2 texCoords = TexCoord0;
 
     // uMode == 0 is just passthrough
@@ -31,6 +27,6 @@ void main() {
         }
     }
 
-    oFragColor = texture2D(uInputTexture, texCoords);
+    return texture2D(uInputTexture, texCoords);
 }
 

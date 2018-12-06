@@ -1164,7 +1164,7 @@
                 "i_b": 0.9399999976158142,
                 "o_output": 2.009999990463257
             },
-            "type": "BlendFloat",
+            "type": "MixFloat",
             "ui_data": {
                 "collapsed": false,
                 "pos": [
@@ -1852,7 +1852,7 @@
                 "i_b": 0.0,
                 "o_output": 30.0
             },
-            "type": "BlendFloat",
+            "type": "MixFloat",
             "ui_data": {
                 "collapsed": false,
                 "pos": [

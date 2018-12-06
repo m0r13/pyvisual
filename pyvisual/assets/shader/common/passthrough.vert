@@ -1,8 +1,8 @@
 #version 150
 
-uniform mat4 uModelViewProjection;
-uniform vec2 uTextureSize;
-uniform mat4 uTransformUV;
+uniform mat4 uModelViewProjection; // {"skip" : true}
+uniform vec2 uTextureSize; // {"skip" : true}
+uniform mat4 uTransformUV; // {"skip" : true, "alias" : "transformUV"}
 
 in vec2 iPosition;
 in vec2 iTexCoord;

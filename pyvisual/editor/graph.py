@@ -25,6 +25,9 @@ class NodeGraphListener:
 # prepare for serialization
 def format_port_spec(port_spec):
     port_spec = dict(port_spec)
+    dtype_args = port_spec.get("dtype_args", {})
+    if "default" in dtype_args:
+        dtype_args["default"] = port_spec["dtype"].base_type.serialize(dtype_args["default"])
     port_spec["dtype"] = port_spec["dtype"].name
     return port_spec
 
@@ -33,6 +36,9 @@ def unformat_port_spec(port_spec):
     dtype_name = port_spec["dtype"]
     port_spec["dtype"] = dtype.dtypes.get(dtype_name, None)
     assert port_spec["dtype"] is not None, "Unable to find dtype of name %s" % dtype_name
+    dtype_args = port_spec.get("dtype_args", {})
+    if "default" in dtype_args:
+        dtype_args["default"] = port_spec["dtype"].base_type.unserialize(dtype_args["default"])
     return port_spec
 
 class NodeGraph:
