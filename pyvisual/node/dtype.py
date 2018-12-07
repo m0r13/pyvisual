@@ -12,6 +12,11 @@ def dummy_serializer():
 
 def numpy_serializer(dtype=np.float32):
     def serialize(value):
+        # TODO
+        # errors happened here, somewhere there is a list instead of a numpy array
+        # probably some manual or default value of some port
+        if isinstance(a, list):
+            return a
         return value.tolist()
     def unserialize(json_data):
         return np.array(json_data, dtype=dtype)
