@@ -5,6 +5,10 @@
 // https://www.shadertoy.com/view/4sfGWX
 //
 
+// change by me (m0r13)
+// enable if it's okay for audience
+// #define NSFW
+
 uniform sampler2D uInputTexture;
 uniform float uTime;
 
@@ -129,10 +133,12 @@ void getMaterialColor( const int material, in vec2 uv, const float decorationHas
 			col = mix( col, COL(2.,11.,74.), onRect(uv, vec2(22.,22.), vec2(42.,42.)));		
 			col = mix( col, COL(9.,44.,185.)*(0.95+0.1*br), onRect(uv, vec2(22.,23.), vec2(42.,40.)));
 			col = addBevel( uv, vec2(22.,23.), vec2(42.,40.), 1., 0.2, -1., 1., col);
+			#ifdef NSFW
 			col = mix( col, mix(COL(2.,11.,74.), COL(3.,25.,122.), (uv.x-26.)/3.), onRect(uv, vec2(26.,23.), vec2(29.,29.)));
 			col = mix( col, mix(COL(2.,11.,74.), COL(3.,25.,122.), (uv.y-34.)/2.), onRect(uv, vec2(22.,34.), vec2(29.,36.)));
 			col = mix( col, mix(COL(2.,11.,74.), COL(3.,25.,122.), (uv.y-27.)/2.), onRect(uv, vec2(35.,27.), vec2(42.,29.)));
 			col = mix( col, mix(COL(2.,11.,74.), COL(3.,25.,122.), (uv.y-34.)/8.), onRect(uv, vec2(35.,34.), vec2(38.,42.)));
+			#endif
 		}
 	}
 // wooden wall
@@ -255,11 +261,13 @@ void getMaterialColor( const int material, in vec2 uv, const float decorationHas
 		fgcol = mix( fgcol, COL(0.,0.,0.), onCircleLine( uv, vec2(32.,30.), 11. ) );	
 		fgcol = mix( fgcol, COL(0.,0.,0.), onCircleLine( uv, vec2(32.,30.), 9. ) );
 		
+		#ifdef NSFW
 		vec2 uvr = vec2( (uvc.x-uvc.y)*0.7071, (uvc.y+uvc.x)*0.7071)*sign( uvc.x+0.5 );
 		fgcol = mix( fgcol, COL(72.,72.,72.), onRect( uvr, vec2(-1.,-1.), vec2(1.,4.) ) );
 		fgcol = mix( fgcol, COL(72.,72.,72.), onRect( uvr, vec2(-4.2, 4.2), vec2(1.,6.15) ) );
 		fgcol = mix( fgcol, COL(72.,72.,72.), onRect( uvr, vec2(-1.,-1.), vec2(4.,1.) ) );
 		fgcol = mix( fgcol, COL(72.,72.,72.), onRect( uvr, vec2( 4.2,-1.), vec2(6.15,4.2) ) );
+		#endif
 	
 		fgcol *= (0.8+0.2*sin( uv.x*0.4+2.7 ));
 		fgcol *= (0.8+0.2*clamp( 0.5*(uv.y-7.), 0., 1.));

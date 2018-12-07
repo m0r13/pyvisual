@@ -15,7 +15,7 @@ def numpy_serializer(dtype=np.float32):
         # TODO
         # errors happened here, somewhere there is a list instead of a numpy array
         # probably some manual or default value of some port
-        if isinstance(a, list):
+        if isinstance(value, list):
             return a
         return value.tolist()
     def unserialize(json_data):
