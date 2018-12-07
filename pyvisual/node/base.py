@@ -241,25 +241,28 @@ class Node(metaclass=NodeMeta):
     def input_nodes(self):
         nodes = set()
         for port_id, value in self.values.items():
-            if is_input(port_id) and value.is_connected:
+            #if is_input(port_id) and value.is_connected:
+            if port_id[:2] == "i_" and value.is_connected:
                 nodes.add(value.connected_node)
         return nodes
 
-    def have_inputs_changed(self, *port_names):
-        if len(port_names) == 0:
-            port_names = []
-            for port_id in self.input_ports.keys():
-                # TODO
-                port_names.append(port_id[2:])
+    def have_any_inputs_changed(self):
+        for port_id in self.input_ports.keys():
+            if self.get_input(port_id[2:]).has_changed:
+                return True
+        return False
 
+    def have_inputs_changed(self, *port_names):
+        assert len(port_names) != 0, "Use have_any_inputs_changed instead"
         for port_name in port_names:
             if self.get_input(port_name).has_changed:
                 return True
+        return False
 
     @property
     def needs_evaluation(self):
         # if any input has changed
-        return self._last_evaluated == 0.0 or self.have_inputs_changed()
+        return self._last_evaluated == 0.0 or self.have_any_inputs_changed()
 
     @property
     def evaluated(self):

@@ -1,5 +1,9 @@
 #!/usr/bin/env python3
 
+import OpenGL
+#OpenGL.ERROR_CHECKING = False
+#OpenGL.ERROR_ON_COPY = True
+
 import os
 import sys
 import time
@@ -231,18 +235,24 @@ class Connection:
         b0 = t_add(p0, (offset_x, offset_y))
         b1 = t_add(p1, (-offset_x, -offset_y))
 
+        # remember old draw channel
+        channel = draw_list.channels_current
+
         # draw background of connection
-        with draw_on_channel(draw_list, CHANNEL_CONNECTION1):
-            draw_list.add_bezier_curve(p0, b0, b1, p1, imgui.get_color_u32_rgba(0.2, 0.2, 0.2, 0.5), 10.0)
+        draw_list.channels_set_current(CHANNEL_CONNECTION1)
+        draw_list.add_bezier_curve(p0, b0, b1, p1, imgui.get_color_u32_rgba(0.2, 0.2, 0.2, 0.5), 10.0)
+
         # draw actual connection
-        with draw_on_channel(draw_list, CHANNEL_CONNECTION2):
-            # simple lines
-            #draw_list.add_line(p0, p1, color, 2.0)
-            # fancy bezier
-            draw_list.add_bezier_curve(p0, b0, b1, p1, color, 2.0)
-            # visualize the control points
-            #draw_list.add_circle_filled(b0, 3, imgui.get_color_u32_rgba(0.0, 1.0, 0.0, 1.0))
-            #draw_list.add_circle_filled(b1, 3, imgui.get_color_u32_rgba(0.0, 0.0, 1.0, 1.0))
+        draw_list.channels_set_current(CHANNEL_CONNECTION2)
+        # simple lines
+        #draw_list.add_line(p0, p1, color, 2.0)
+        # fancy bezier
+        draw_list.add_bezier_curve(p0, b0, b1, p1, color, 2.0)
+        # to visualize the control points
+        #draw_list.add_circle_filled(b0, 3, imgui.get_color_u32_rgba(0.0, 1.0, 0.0, 1.0))
+        #draw_list.add_circle_filled(b1, 3, imgui.get_color_u32_rgba(0.0, 0.0, 1.0, 1.0))
+
+        draw_list.channels_set_current(channel)
 
     def is_end(self, node, port_id):
         return (self.src_node == node and self.src_port_id == port_id) \
@@ -287,6 +297,7 @@ class Node:
         #
         self.padding = 5, 5
         self.pos = ui_data.get("pos", (0, 0))
+        # self.actual_pos
         self.size = 10, 10
 
         #
@@ -313,12 +324,17 @@ class Node:
         self.editor.node_ui_state_changed(self)
 
     @property
-    def actual_pos(self):
+    def pos(self):
+        return self._pos
+    @pos.setter
+    def pos(self, pos):
+        self._pos = pos
+
         # local pos with node grid applied
         if EDITOR_NODE_GRID_SIZE > 1.0:
-            return round_next(self.pos[0], EDITOR_NODE_GRID_SIZE), round_next(self.pos[1], EDITOR_NODE_GRID_SIZE)
+            self.actual_pos = round_next(self.pos[0], EDITOR_NODE_GRID_SIZE), round_next(self.pos[1], EDITOR_NODE_GRID_SIZE)
         else:
-            return self.pos
+            self.actual_pos = self.pos
 
     @property
     def size_with_padding(self):
@@ -418,7 +434,8 @@ class Node:
         connector_radius = 5.0
         connector_thickness = 2.0
         connector_center = self.editor.local_to_screen((x, y))
-        self.port_positions[port_id] = self.editor.screen_to_local(connector_center)
+        # port position is in local coordinates
+        self.port_positions[port_id] = (x, y)
 
         # find connector bounds for hovering
         # they are a bit bigger than the actual connector
@@ -574,6 +591,8 @@ class Node:
         imgui.push_id(self.window_id)
         old_cursor_pos = imgui.get_cursor_pos()
 
+        actual_pos = self.actual_pos
+
         # calculate position of drag operation first
         # TODO: this causes a frame delay for nodes that are rendered before this
         # maybe it's fixable without too much effort
@@ -590,7 +609,7 @@ class Node:
                     self.editor.node_ui_state_changed(node)
 
         # draw background
-        upper_left = self.editor.local_to_screen(self.actual_pos)
+        upper_left = self.editor.local_to_screen(actual_pos)
         lower_right = t_add(upper_left, self.size_with_padding)
         with draw_on_channel(draw_list, CHANNEL_NODE_BACKGROUND):
             if self.instance._last_evaluated > time.time() - 0.2:
@@ -604,7 +623,7 @@ class Node:
 
         # draw content of node
         # (set_cursor_pos is window coordinates)
-        imgui.set_cursor_pos(self.editor.local_to_window(t_add(self.actual_pos, self.padding)))
+        imgui.set_cursor_pos(self.editor.local_to_window(t_add(actual_pos, self.padding)))
         imgui.begin_group()
         if self.spec.options["show_title"]:
             imgui.text(self.spec.name)
@@ -641,7 +660,7 @@ class Node:
         # and check if we're actually hovered
         padding_hover = (4, 4)
         padding_selection = (4, 4)
-        upper_left = self.editor.local_to_screen(self.actual_pos)
+        upper_left = self.editor.local_to_screen(actual_pos)
         upper_left_hover = t_sub(upper_left, padding_hover)
         upper_left_selection = t_sub(upper_left, padding_selection)
         lower_right = t_add(upper_left, self.size_with_padding)
