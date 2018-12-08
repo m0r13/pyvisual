@@ -145,6 +145,7 @@ class Node(metaclass=NodeMeta):
         self.initial_manual_values = {}
         self.values = {}
 
+        self.input_nodes = set()
         self.base_input_ports = OrderedDict(self.spec.input_ports)
         self.base_output_ports = OrderedDict(self.spec.output_ports)
         self.custom_input_ports = OrderedDict()
@@ -227,29 +228,18 @@ class Node(metaclass=NodeMeta):
         for port_id in self.custom_output_ports.keys():
             yield port_id, self.get_value(port_id)
 
-    @classmethod
-    def get_sub_nodes(cls, include_self=True):
-        nodes = []
-        for node in NodeMeta.node_types:
-            if not include_self and node == cls:
-                continue
-            if issubclass(node, cls):
-                nodes.append(node)
-        return nodes
-
-    @property
-    def input_nodes(self):
-        nodes = set()
+    def update_input_nodes(self):
+        self.input_nodes = set()
         for port_id, value in self.values.items():
             #if is_input(port_id) and value.is_connected:
             if port_id[:2] == "i_" and value.is_connected:
-                nodes.add(value.connected_node)
-        return nodes
+                self.input_nodes.add(value.connected_node)
 
     def have_any_inputs_changed(self):
-        for port_id in self.input_ports.keys():
-            if self.get_input(port_id[2:]).has_changed:
-                return True
+        for port_id, value in self.values.items():
+            if port_id[:2] == "i_":
+                if value.has_changed:
+                    return True
         return False
 
     def have_inputs_changed(self, *port_names):
@@ -319,7 +309,7 @@ class Node(metaclass=NodeMeta):
     def evaluate(self):
         # update a node
         # return if node needed update
-        if not self.evaluated and (self.needs_evaluation or self.always_evaluate):
+        if not self.evaluated and (self.always_evaluate or self.needs_evaluation):
             self._evaluate()
             self._evaluated = True
             self._last_evaluated = time.time()
@@ -343,6 +333,16 @@ class Node(metaclass=NodeMeta):
         # called from ui-node to add custom entries in nodes context menu
         # called only when that context menu is visible
         pass
+
+    @classmethod
+    def get_sub_nodes(cls, include_self=True):
+        nodes = []
+        for node in NodeMeta.node_types:
+            if not include_self and node == cls:
+                continue
+            if issubclass(node, cls):
+                nodes.append(node)
+        return nodes
 
     @classmethod
     def get_presets(cls, graph):

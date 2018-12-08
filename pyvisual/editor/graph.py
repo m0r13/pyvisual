@@ -305,6 +305,7 @@ class NodeGraph:
         input_value = dst_node.get_value(dst_port_id)
         assert input_value.connected_node is None
         input_value.connect(src_node, src_port_id)
+        dst_node.update_input_nodes()
 
         self.connections_from[src_node].add((src_port_id, dst_node, dst_port_id))
         self.connections_to[dst_node].add((dst_port_id, src_node, src_port_id))
@@ -316,6 +317,7 @@ class NodeGraph:
         input_value = dst_node.get_value(dst_port_id)
         assert input_value.connected_node == src_node
         input_value.disconnect()
+        dst_node.update_input_nodes()
 
         self.connections_from[src_node].remove((src_port_id, dst_node, dst_port_id))
         self.connections_to[dst_node].remove((dst_port_id, src_node, src_port_id))

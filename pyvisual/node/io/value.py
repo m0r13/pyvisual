@@ -240,7 +240,11 @@ class SetFloatVar(Node):
         assert self.graph is not None
 
         self.stopped = True
-        SetFloatVar.instances[self.graph].remove(self)
+        # seemed to happen once. dunno why, not so bad
+        try:
+            SetFloatVar.instances[self.graph].remove(self)
+        except KeyError:
+            pass
 
 class GetFloatVar(Node):
     class Meta:
