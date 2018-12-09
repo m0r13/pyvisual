@@ -115,7 +115,10 @@ class BaseShader(RenderNode):
         # whenever to parse shader sources, generate node inputs and
         # set uniforms during evaluation
         self.handle_uniforms = handle_uniforms
-        self.update_program()
+        # don't initialize program here, but at first evaluation
+        # because saved input values are not available yet here
+        # or maybe there is a better way?
+        #self.update_program()
 
         self.input_texture = None
 
@@ -228,7 +231,7 @@ class BaseShader(RenderNode):
             program[uniform_name] = value
 
     def evaluate(self):
-        if self.vertex_source.has_changed or self.fragment_source.has_changed:
+        if self.vertex_source.has_changed or self.fragment_source.has_changed or self._last_evaluated == 0.0:
             self.update_program()
 
         return super().evaluate()
