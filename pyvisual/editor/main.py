@@ -1120,7 +1120,7 @@ class NodeEditor:
             #    imgui.set_window_focus("ImGui Demo")
             if imgui.menu_item("update node types")[0]:
                 pyvisual.node.op.gpu.filter.load_filter_classes()
-                self.update_available_node()
+                self.update_available_nodes()
             if imgui.menu_item("reset offset")[0]:
                 self.offset = (0, 0)
                 self.ui_state_changed()
