@@ -3,6 +3,9 @@ from pyvisual.node.base import Node
 from pyvisual.node import dtype
 from pyvisual.audio import pulse, util
 
+DEFAULT_SAMPLE_RATE = 5000
+DEFAULT_BLOCK_SIZE = 64
+
 class AudioData:
     def __init__(self, sample_rate):
         self.blocks = []
@@ -26,8 +29,11 @@ class InputPulseAudio(Node):
     def __init__(self):
         super().__init__(always_evaluate=True)
 
-        self.pulse = pulse.PulseAudioContext(self._process_block, sample_rate=5000, block_size=128)
-        self.output = AudioData(sample_rate=5000)
+        sr = DEFAULT_SAMPLE_RATE
+        bs = DEFAULT_BLOCK_SIZE
+
+        self.pulse = pulse.PulseAudioContext(self._process_block, sample_rate=sr, block_size=bs)
+        self.output = AudioData(sample_rate=sr)
         self.next_blocks = []
         self.blocks = 0
 

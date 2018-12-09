@@ -29,7 +29,6 @@ profile = cProfile.Profile()
 # create window / opengl context already here
 # imgui seems to cause problems otherwise with imgui.get_color_u32_rgba without context
 window = app.Window()
-app.clock.get_default().set_fps_limit(30)
 imgui_renderer = glumpy_imgui.GlumpyGlfwRenderer(window, True)
 
 # utilities
@@ -1439,7 +1438,7 @@ def on_draw(event):
 
     # performance stats
     time_count += 1
-    if time_count >= 60:
+    if time_count >= 60*2:
         editor.timing_callback(editor_time / time_count, imgui_render_time / time_count, processing_time / time_count)
         editor_time = 0.0
         imgui_render_time = 0.0

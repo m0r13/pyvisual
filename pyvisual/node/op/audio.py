@@ -1,6 +1,6 @@
 from pyvisual.node.base import Node
 from pyvisual.node import dtype
-from pyvisual.node.io.audio import AudioData
+from pyvisual.node.io.audio import AudioData, DEFAULT_SAMPLE_RATE
 from pyvisual.node.op.module import Module
 from pyvisual.audio import util
 from scipy import signal
@@ -13,10 +13,11 @@ AUDIO_FILTER_TYPES = ["low", "high"]
 class AudioFilter(Node):
     class Meta:
         inputs = [
+            {"name" : "enabled", "dtype" : dtype.bool, "dtype_args" : {"default" : True}},
             {"name" : "input", "dtype" : dtype.audio},
             {"name" : "type", "dtype" : dtype.int, "dtype_args" : {"choices" : AUDIO_FILTER_TYPES}},
             {"name" : "order", "dtype" : dtype.int, "dtype_args" : {"default" : 5, "range" : [1, 10]}},
-            {"name" : "cutoff", "dtype" : dtype.float, "dtype_args" : {"default" : 1000.0, "range" : [0.0, 20000.0]}}
+            {"name" : "cutoff", "dtype" : dtype.float, "dtype_args" : {"default" : 1000.0, "range" : [0.0001, DEFAULT_SAMPLE_RATE / 2.0]}}
         ]
         outputs = [
             {"name" : "output", "dtype" : dtype.audio}
@@ -29,30 +30,62 @@ class AudioFilter(Node):
         super().__init__()
 
         self.filter = None
+        # contains error message if there is a problem
+        self.filter_status = None
         self.output = None
 
-    def _create_filter(self, sample_rate):
+    def build_filter(self, sample_rate):
         filter_type = int(self.get("type"))
         if not filter_type in (0, 1):
             filter_type = 0
         btype = AUDIO_FILTER_TYPES[filter_type]
-        return util.Filter(signal.butter, self.get("order"), self.get("cutoff"), sample_rate, {"btype" : btype, "analog" : False})
+        order = self.get("order")
+        cutoff = self.get("cutoff")
+        try:
+            self.filter = util.Filter(signal.butter, order, cutoff, sample_rate, {"btype" : btype, "analog" : False})
+            self.filter_status = None
+        except ValueError as e:
+            self.filter = None
+            self.filter_status = str(e)
+            self.filter_status += "\n"
+            self.filter_status += "\nFilter type: %s" % btype
+            self.filter_status += "\nOrder: %f" % order
+            self.filter_status += "\nCutoff: %f" % cutoff
+            self.filter_status += "\nSamplerate: %f" % sample_rate
 
     def _evaluate(self):
         input_audio = self.get("input")
+
         if input_audio is None:
             self.set("output", None)
             return
-        if self.filter is None or self.output is None \
+
+        if ((self.filter is None or self.output is None) and self.filter_status is None) \
                 or self.have_inputs_changed("type", "order", "cutoff") \
-                or self.output.sample_rate != input_audio.sample_rate:
-            self.filter = self._create_filter(sample_rate=input_audio.sample_rate)
+                or self.output.sample_rate != input_audio.sample_rate \
+                or self._last_evaluated == 0.0:
+            self.build_filter(sample_rate=input_audio.sample_rate)
             self.output = AudioData(sample_rate=input_audio.sample_rate)
+
+        if self.filter is None:
+            self.set("output", None)
+            return
+
+        if not self.get("enabled"):
+            self.set("output", input_audio)
+            return
 
         self.output.clear()
         for block in input_audio.blocks:
             self.output.append(self.filter.process(block))
         self.set("output", self.output)
+
+    def _show_custom_ui(self):
+        if self.filter_status is not None:
+            imgui.dummy(1, 5)
+            imgui.text_colored("Filter error. (?)", 1.0, 0.0, 0.0)
+            if imgui.is_item_hovered():
+                imgui.set_tooltip(self.filter_status)
 
 class AbsAudio(Node):
     class Meta:
