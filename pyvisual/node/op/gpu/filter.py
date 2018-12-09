@@ -1,4 +1,5 @@
 import math
+import os
 import numpy as np
 import traceback
 import random
@@ -59,24 +60,26 @@ class GeneratedFilter(Filter):
     def __init__(self):
         super().__init__(self.VERTEX, self.FRAGMENT)
 
-filters = [
-    ("Glitch", "filter/glitch.frag"),
-    ("SampleTexture", "filter/passthrough.frag"),
-    ("Mirror", "filter/mirror.frag"),
-    ("PolarMirror", "filter/mirror_polar.frag"),
-    ("Slices", "filter/slices.frag"),
-    ("ScanlinesFine", "filter/scanlines_fine.frag"),
-    ("ChromaticAberration", "filter/chromatic_aberration.frag"),
-    ("HSVAdjust", "filter/hsv_adjust.frag"),
-    ("GaussBlurPass", "filter/gauss_blur.frag"),
-    ("Vignette", "filter/vignette.frag"),
-    ("MaskZoom", "filter/maskzoom.frag"),
-    ("Invert", "filter/invert.frag"),
-]
+def load_filter_classes():
+    module = __name__
+    g = globals()
+    for path in assets.glob_paths("shader/filter/*.frag"):
+        name = os.path.basename(path).replace(".frag", "")
+        if name == "basefilter":
+            continue
+        if name in g:
+            if isinstance(g[name], GeneratedFilter):
+                print("### Warning: Seems that filter class name %s in module %s is already" % (name, module))
+            else:
+                # filter class already exist, no need to recreate it for now
+                continue
+        fragment_path = path.replace("shader" + os.path.sep, "")
+        attrs = {"FRAGMENT" : fragment_path, "Meta" : GeneratedFilterMeta, "__module__" : module}
+        filter_class = type(name, (GeneratedFilter,), attrs)
+        g[name] = filter_class
+        del filter_class
 
-filter_classes = []
-for name, fragment_path in filters:
-    filter_classes.append(type(name, (GeneratedFilter,), {"FRAGMENT" : fragment_path, "Meta" : GeneratedFilterMeta}))
+load_filter_classes()
 
 class GaussBlur(Module):
     class Meta:

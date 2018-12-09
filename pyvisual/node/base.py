@@ -20,7 +20,7 @@ class NodeMeta(type):
         cls = super().__new__(meta, name, bases, dct)
         cls.spec = NodeSpec.from_cls(cls)
         meta.node_types.append(cls)
-        print("Registered node type: %s" % cls)
+        #print("Registered node type: %s" % cls)
         return cls
 
 def port_id(port_spec, is_input):
@@ -335,7 +335,7 @@ class Node(metaclass=NodeMeta):
         pass
 
     @classmethod
-    def get_sub_nodes(cls, include_self=True):
+    def get_subclass_nodes(cls, include_self=True):
         nodes = []
         for node in NodeMeta.node_types:
             if not include_self and node == cls:
