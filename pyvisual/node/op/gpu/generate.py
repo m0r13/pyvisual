@@ -100,6 +100,7 @@ def process_glslsandbox(source):
     source = source.replace("time", "uTime")
     source = source.replace("uniform vec2 resolution", "vec2 resolution")
     source = source.replace("mediump", "highp")
+    source = source.replace("#extension", "//#extension")
     source = source.replace(main, MAIN)
     source = source.replace("gl_FragCoord", "(vec2(TexCoord0.x, 1.0 - TexCoord0.y) * resolution)")
     source = source.replace("gl_FragColor", "oFragColor")
