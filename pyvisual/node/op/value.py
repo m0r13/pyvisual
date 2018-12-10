@@ -40,53 +40,48 @@ class Lambda(Node):
         super().__init__()
 
         self.function = lambda x: x
-        self.function_text = None
-        self.text_changed = False
-        self.compiles = True
-
-        self.error = False
-        self.last_try = 0
+        self.compile_error = None
+        self.run_error = None
 
     def process_result(self, result):
         return result
 
+    def build_lambda(self):
+        try:
+            function = eval("lambda x: %s" % self.get("lambda"))
+            self.function = function
+            self.compile_error = None
+        except Exception as e:
+            self.compile_error = str(e)
+
     def _evaluate(self):
+        if self.have_inputs_changed("lambda"):
+            self.build_lambda()
+
         try:
             self.set("output", self.process_result(self.function(self.get("input"))))
-        except:
-            self.error = True
+            self.run_error = None
+        except Exception as e:
+            self.run_error = str(e)
 
     def _show_custom_ui(self):
-        first_run = False
-        if self.function_text is None:
-            self.function_text = self.get("lambda")
-            first_run = True
-
         imgui.dummy(1, 5)
         imgui.text("lambda x:")
         imgui.push_item_width(208)
-        changed, text = imgui.input_text("", self.function_text, 255, imgui.INPUT_TEXT_ENTER_RETURNS_TRUE)
-        self.get_input("lambda").manual_value.value = self.function_text
-        if changed or first_run or (self.error and time.time() - self.last_try > 1.0):
-            self.last_try = time.time()
-            try:
-                function = eval("lambda x: %s" % self.function_text)
-                self.function = function
-                self.text_changed = False
-                self.compiles = True
-                self.error = False
-            except:
-                self.compiles = False
+        changed, text = imgui.input_text("", self.get("lambda"), 255, imgui.INPUT_TEXT_ENTER_RETURNS_TRUE)
+        if changed:
+            self.get_input("lambda").value = text
+
+        if self.compile_error is not None:
+            imgui.text_colored("Compilation error. (?)", 1.0, 0.0, 0.0)
+            if imgui.is_item_hovered():
+                imgui.set_tooltip(self.compile_error)
+        elif self.run_error is not None:
+            imgui.text_colored("Runtime error. (?)", 1.0, 0.0, 0.0)
+            if imgui.is_item_hovered():
+                imgui.set_tooltip(self.runtime_error)
         else:
-            if text != self.function_text:
-                self.text_changed = True
-        self.function_text = text
-        if not self.compiles:
-            imgui.text("Compilation error.")
-        elif self.error:
-            imgui.text("Runtime error.")
-        else:
-            imgui.text("Lambda compiled." + (" (changed)" if self.text_changed else ""))
+            imgui.text("Lambda compiled.")
 
 #
 # Bool operations
