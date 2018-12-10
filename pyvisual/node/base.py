@@ -301,7 +301,13 @@ class Node(metaclass=NodeMeta):
     def get(self, name):
         return self.get_input(name).value
     def set(self, name, value):
-        self.get_output(name).value = value
+        output = self.get_output(name)
+        # cache numeric values
+        if isinstance(value, (float, int, bool)):
+            if abs(output.value - value) > 10e-6:
+                output.value = value
+        else:
+            output.value = value
 
     def start(self, graph):
         pass
