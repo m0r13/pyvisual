@@ -1,9 +1,3 @@
-#include <filter/basefilter.frag>
-
-uniform float uHue; // {"default" : 0.0}
-uniform float uSaturation; // {"default" : 1.0, "range" : [0.0, Infinity]}
-uniform float uValue; // {"default" : 1.0, "range" : [0.0, Infinity]}
-
 // From: http://lolengine.net/blog/2013/07/27/rgb-to-hsv-in-glsl
 
 // All components are in the range [0…1], including hue.
@@ -24,15 +18,5 @@ vec3 hsv2rgb(vec3 c)
     vec4 K = vec4(1.0, 2.0 / 3.0, 1.0 / 3.0, 3.0);
     vec3 p = abs(fract(c.xxx + K.xyz) * 6.0 - K.www);
     return c.z * mix(K.xxx, clamp(p - K.xxx, 0.0, 1.0), c.y);
-}
-
-vec4 filterFrag(vec2 uv, vec4 frag) {
-    vec3 hsv = rgb2hsv(frag.rgb);
-    hsv.r += uHue;
-    hsv.g = clamp(hsv.g * uSaturation, 0.0, 1.0);
-    hsv.b = clamp(hsv.b * uValue, 0.0, 1.0);
-    vec3 rgb = hsv2rgb(hsv);
-
-    return vec4(rgb, frag.a);
 }
 

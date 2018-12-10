@@ -22,6 +22,7 @@ import pyvisual.editor.widget as node_widget
 import pyvisual.node.dtype as node_dtype
 from pyvisual.editor.graph import NodeGraph
 from pyvisual import assets
+import pyvisual
 
 import cProfile
 profile = cProfile.Profile()
@@ -763,9 +764,10 @@ class Node:
         return interacted
 
 class NodeEditor:
-    def __init__(self, node_specs):
-        # available nodes for this editor
-        self.node_specs = node_specs
+    def __init__(self, base_node=node_meta.Node):
+        self.base_node = base_node
+        self.node_specs = []
+        self.update_available_nodes()
 
         self.graph = NodeGraph()
         self.graph.listeners.append(self)
@@ -826,9 +828,16 @@ class NodeEditor:
         if os.path.isfile("session.json"):
             self.graph.load_file("session.json")
 
-    @property
-    def nodes(self):
-        return self.ui_nodes.values()
+    def update_available_nodes(self):
+        # sort by node categories and then by names
+        node_types = self.base_node.get_subclass_nodes(include_self=False)
+        node_types.sort(key=lambda n: n.spec.name)
+        node_types.sort(key=lambda n: n.spec.options["category"])
+
+        # TODO think about naming
+        #   ui nodes vs. node instances vs. node types
+        node_specs = [ n.spec for n in node_types ]
+        self.node_specs = list(filter(lambda s: not s.options["virtual"], node_specs))
 
     #
     # coordinate conversions
@@ -910,6 +919,10 @@ class NodeEditor:
     #
     # editor api functions used by nodes, connections and editor itself
     #
+
+    @property
+    def nodes(self):
+        return self.ui_nodes.values()
 
     def touch_z_index(self):
         i = self.nodes_z_index
@@ -1105,6 +1118,9 @@ class NodeEditor:
             #clicked, self.show_test_window = imgui.menu_item("show demo window", None, self.show_test_window)
             #if clicked:
             #    imgui.set_window_focus("ImGui Demo")
+            if imgui.menu_item("update node types")[0]:
+                pyvisual.node.op.gpu.filter.load_filter_classes()
+                self.update_available_nodes()
             if imgui.menu_item("reset offset")[0]:
                 self.offset = (0, 0)
                 self.ui_state_changed()
@@ -1395,16 +1411,7 @@ class NodeEditor:
 
         imgui.pop_style_var(1)
 
-# sort by node categories and then by names
-node_types = node_meta.Node.get_sub_nodes(include_self=False)
-node_types.sort(key=lambda n: n.spec.name)
-node_types.sort(key=lambda n: n.spec.options["category"])
-
-# TODO think about naming
-#   ui nodes vs. node instances vs. node types
-node_specs = [ n.spec for n in node_types ]
-node_specs = list(filter(lambda s: not s.options["virtual"], node_specs))
-editor = NodeEditor(node_specs)
+editor = NodeEditor()
 
 editor_time = 0.0
 imgui_render_time = 0.0

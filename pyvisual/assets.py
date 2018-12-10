@@ -12,6 +12,12 @@ SCREENSHOT_PATH = os.path.join(ASSET_PATH, "screenshots")
 os.makedirs(SAVE_PATH, exist_ok=True)
 os.makedirs(SCREENSHOT_PATH, exist_ok=True)
 
+def glob_paths(wildcard):
+    paths = []
+    for path in glob.glob(os.path.join(ASSET_PATH, wildcard)):
+        paths.append(os.path.relpath(path, ASSET_PATH))
+    return paths
+
 def get_shader_path(name):
     path = os.path.join(SHADER_PATH, name)
     if not path.startswith(os.path.abspath(SHADER_PATH) + os.sep):
@@ -155,12 +161,6 @@ class CustomDefineShaderSource(ShaderSource):
         changed = self._source.has_changed or self._has_changed
         self._has_changed = False
         return changed
-
-def glob_paths(wildcard):
-    paths = []
-    for path in glob.glob(os.path.join(ASSET_PATH, wildcard)):
-        paths.append(os.path.relpath(path, ASSET_PATH))
-    return paths
 
 class FileWatcher:
     CHECK_INTERVAL = 1.0
