@@ -1,6 +1,7 @@
 import time
 import math
 import random
+import numpy as np
 from collections import OrderedDict
 from pyvisual.node.base import Node
 from pyvisual.node import dtype
@@ -165,4 +166,44 @@ class RandomFloat(Node):
                 value = min_value + v * mod
 
             self.set("output", value)
+
+# TODO maybe also allow other time distributions
+class GlitchTimer(Node):
+    class Meta:
+        inputs = [
+            {"name" : "on_min", "dtype" : dtype.float, "dtype_args" : {"default" : 0.1}},
+            {"name" : "on_max", "dtype" : dtype.float, "dtype_args" : {"default" : 1.0}},
+            {"name" : "on_scale", "dtype" : dtype.float, "dtype_args" : {"default" : 0.5}},
+            {"name" : "off_min", "dtype" : dtype.float, "dtype_args" : {"default" : 0.1}},
+            {"name" : "off_max", "dtype" : dtype.float, "dtype_args" : {"default" : 1.0}},
+            {"name" : "off_scale", "dtype" : dtype.float, "dtype_args" : {"default" : 0.5}},
+        ]
+        outputs = [
+            {"name" : "output", "dtype" : dtype.float}
+        ]
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(always_evaluate=True, *args, **kwargs)
+
+        self._status = 0.0
+        self._next_switch = 0
+
+    def _evaluate(self):
+        t = time.time()
+
+        old_status = self._status
+        if self._next_switch < t:
+            def sample_time(a, b, scale):
+                if scale < 10e-6:
+                    return np.random.uniform(low=a, high=b)
+                else:
+                    alpha = np.random.exponential(scale=scale)
+                    return (1.0 - alpha) * a + alpha * b
+            if not self._status:
+                self._next_switch = t + sample_time(self.get("on_min"), self.get("on_max"), self.get("on_scale"))
+            else:
+                self._next_switch = t + sample_time(self.get("off_min"), self.get("off_max"), self.get("off_scale"))
+            self._status = 1.0 - self._status
+
+        self.set("output", float(self._status))
 
