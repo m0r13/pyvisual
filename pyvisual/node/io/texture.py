@@ -35,16 +35,16 @@ class LoadTexture(Node):
 
         texture = None
         try:
-            texture = np.array(Image.open(os.path.join(assets.ASSET_PATH, path))).view(gloo.Texture2D)
+            data = np.array(Image.open(os.path.join(assets.ASSET_PATH, path)))
+            texture = data.view(gloo.Texture2D)
+            self.status = None
         except Exception as e:
             self.set("output", None)
             self.status = str(e)
             return
 
-        # seems to be required like this for nvidia (no activate/deactivate)
-        #texture.activate()
-        #texture.deactivate()
-        self.status = None
+        texture.activate()
+        texture.deactivate()
         self.set("output", texture)
 
     def _show_custom_ui(self):
@@ -56,7 +56,7 @@ class LoadTexture(Node):
 
     def _show_custom_context(self):
         if imgui.button("Reload texture"):
-            self.get_input("path").value = self.get("path")
+            self.force_evaluate()
 
 class LoadTextures(Node):
     class Meta:
@@ -87,9 +87,8 @@ class LoadTextures(Node):
 
     def _load_texture(self, path):
         texture = np.array(Image.open(os.path.join(assets.ASSET_PATH, path))).view(gloo.Texture2D)
-        # seems to be forbidden here for nvidia?
-        #texture.activate()
-        #texture.deactivate()
+        texture.activate()
+        texture.deactivate()
         return texture
 
     def _evaluate(self):
@@ -118,7 +117,7 @@ class LoadTextures(Node):
             else:
                 self.index = (self.index + 1) % len(self.textures)
 
-            print(self.index, self.textures[self.index][0])
+            #print(self.index, self.textures[self.index][0])
             name = self.textures[self.index][0]
             self.get_input("current").value = name
 

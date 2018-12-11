@@ -141,6 +141,7 @@ class Node(metaclass=NodeMeta):
         self.id = -1
         self._evaluated = False
         self._last_evaluated = 0.0
+        self._force_evaluate = False
 
         self.initial_manual_values = {}
         self.values = {}
@@ -252,7 +253,7 @@ class Node(metaclass=NodeMeta):
     @property
     def needs_evaluation(self):
         # if any input has changed
-        return self._last_evaluated == 0.0 or self.have_any_inputs_changed()
+        return self._last_evaluated == 0.0 or self._force_evaluate or self.have_any_inputs_changed()
 
     @property
     def evaluated(self):
@@ -308,6 +309,8 @@ class Node(metaclass=NodeMeta):
                 output.value = value
         else:
             output.value = value
+    def force_evaluate(self):
+        self._force_evaluate = True
 
     def start(self, graph):
         pass
@@ -316,6 +319,7 @@ class Node(metaclass=NodeMeta):
         # update a node
         # return if node needed update
         if not self.evaluated and (self.always_evaluate or self.needs_evaluation):
+            self._force_evaluate = False
             self._evaluate()
             self._evaluated = True
             self._last_evaluated = time.time()
