@@ -62,6 +62,13 @@ class Wolfenstein(Shader):
     def set_uniforms(self, program):
         program["uTime"] = self.get("uTime")
 
+class TimeMaskFormTest(Shader):
+    class Meta:
+        pass
+
+    def __init__(self):
+        super().__init__("common/passthrough.vert", "generate/glslsandbox/form.frag", handle_uniforms=True)
+
 def download_glslsandbox(shader_id):
     assert shader_id is not None
     url = "http://glslsandbox.com/item/%s" % shader_id

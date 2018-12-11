@@ -292,11 +292,11 @@ class Shader(BaseShader):
             "virtual" : True
         }
 
-    def __init__(self, vertex, fragment):
+    def __init__(self, vertex, fragment, **kwargs):
         vertex_path = assets.get_shader_path(vertex)
         fragment_path = assets.get_shader_path(fragment)
 
-        super().__init__(assets.FileShaderSource(vertex_path), assets.FileShaderSource(fragment_path))
+        super().__init__(assets.FileShaderSource(vertex_path), assets.FileShaderSource(fragment_path), **kwargs)
 
 class Blend(RenderNode):
     class Meta:
