@@ -142,6 +142,7 @@ class BaseShader(RenderNode):
         input_ports = []
 
         gl2dtype = {
+            "bool" : dtype.bool,
             "int" : dtype.int,
             "float" : dtype.float,
             "vec2" : dtype.vec2,

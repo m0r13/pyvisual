@@ -1,9 +1,10 @@
+#define DONT_SAMPLE_FRAGMENT
 #include <filter/basefilter.frag>
 
 uniform int uMode; // {"default" : 1, "choices" : ["passthrough", "1", "2", "3"]}
 
 vec4 filterFrag(vec2 uv, vec4 frag) {
-    vec2 texCoords = TexCoord0;
+    vec2 texCoords = uv;
 
     // uMode == 0 is just passthrough
     if (uMode == 1) {
