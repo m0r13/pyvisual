@@ -12,12 +12,29 @@ uniform float uMaskTimeD1; // {"alias" : "time_d1", "default" : 0.0}
 in vec2 TexCoord0;
 out vec4 oFragColor;
 
-vec4 generateFrag(vec2, float);
+vec2 pyvisualUV;
+float pyvisualTime;
+vec2 pyvisualResolution;
+vec4 pyvisualOutColor;
+
+void generateFrag();
 
 void main( ) {
     vec2 uv = TexCoord0;
+#ifdef ENABLE_TIME_MASK
     float mask = texture2D(uTimeMaskTexture, uv).r;
     float time = uTime + mix(uMaskTimeD0, uMaskTimeD1, mask);
-    oFragColor = generateFrag(uv, time);
+#else
+    float time = uTime;
+#endif
+    // it's a bit difficult with shaders doing things like
+    // #define time (time * 10.0)
+    // thus we can't replace time to pyvisualTime and then do
+    // pyvisualTime = ... somewhere after that definition
+    pyvisualUV = uv;
+    pyvisualTime = time;
+    pyvisualResolution = textureSize(uInputTexture, 0).xy;
+    generateFrag();
+    oFragColor = pyvisualOutColor;
 }
 

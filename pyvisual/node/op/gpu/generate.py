@@ -62,12 +62,34 @@ class Wolfenstein(Shader):
     def set_uniforms(self, program):
         program["uTime"] = self.get("uTime")
 
-class TimeMaskFormTest(Shader):
+class TimeMaskedGenerate(BaseShader):
     class Meta:
-        pass
+        inputs = [
+            {"name" : "enable_time_mask", "dtype" : dtype.bool, "dtype_args" : {"default" : False}, "group" : "additional"},
+        ]
+        options = {
+            "virtual" : True
+        }
 
-    def __init__(self):
-        super().__init__("common/passthrough.vert", "generate/glslsandbox/form.frag", handle_uniforms=True)
+    def __init__(self, fragment_source):
+        vertex_path = assets.get_shader_path("common/passthrough.vert")
+        vertex_source = assets.FileShaderSource(vertex_path)
+        fragment_source = assets.CustomDefineShaderSource(fragment_source)
+        fragment_source.set("ENABLE_TIME_MASK", False)
+
+        super().__init__(vertex_source, fragment_source, handle_uniforms=True)
+
+    def _process_uniform_inputs(self, port_specs):
+        # like in Filter class
+        for port_spec in port_specs:
+            if port_spec["name"] in ("time_mask", "time_d0", "time_d1"):
+                port_spec["hide"] = not self.get("enable_time_mask")
+
+    def _evaluate(self):
+        if self.have_inputs_changed("enable_time_mask"):
+            self.fragment_source.set("ENABLE_TIME_MASK", self.get("enable_time_mask"))
+
+        super()._evaluate()
 
 def download_glslsandbox(shader_id):
     assert shader_id is not None
@@ -82,18 +104,13 @@ def download_glslsandbox(shader_id):
     return code
 
 BEGIN = """
-uniform sampler2D uInputTexture; // {"skip" : true}
-uniform float uTime; // {"alias" : "time"}
-
-in vec2 TexCoord0;
-out vec4 oFragColor;
-
+#include <generate/base_time_mask.frag>
 """
 
 MAIN = """
 
-void main() {
-    resolution = textureSize(uInputTexture, 0).xy;
+void generateFrag() {
+
 """
 
 def process_glslsandbox(source):
@@ -104,20 +121,22 @@ def process_glslsandbox(source):
     main = match.group()
 
     source = source.replace("uniform float time;", "")
-    source = source.replace("time", "uTime")
-    source = source.replace("uniform vec2 resolution", "vec2 resolution")
-    source = source.replace("mediump", "highp")
+    source = source.replace("time", "pyvisualTime")
+    #source = source.replace("uv", "pyvisualUV")
+    source = source.replace("uniform vec2 resolution", "")
+    #source = source.replace("mediump", "highp")
     source = source.replace("#extension", "//#extension")
     source = source.replace(main, MAIN)
-    source = source.replace("gl_FragCoord", "(vec2(TexCoord0.x, 1.0 - TexCoord0.y) * resolution)")
-    source = source.replace("gl_FragColor", "oFragColor")
+    source = source.replace("resolution", "pyvisualResolution")
+    source = source.replace("gl_FragCoord", "(vec2(pyvisualUV.x, 1.0 - pyvisualUV.y) * pyvisualResolution)")
+    source = source.replace("gl_FragColor", "pyvisualOutColor")
     # add this at last because I don't want to replace anything
     # in the header part (like "time")
     source = BEGIN + source
 
     return source
 
-class GLSLSandbox(BaseShader):
+class GLSLSandbox(TimeMaskedGenerate):
     class Meta:
         inputs = [
             {"name" : "id", "dtype" : dtype.str, "group" : "additional"},
@@ -125,25 +144,26 @@ class GLSLSandbox(BaseShader):
         ]
 
     def __init__(self):
-        vertex_path = assets.get_shader_path("common/passthrough.vert")
-        vertex_source = assets.FileShaderSource(vertex_path)
-        fragment_source = assets.StaticShaderSource()
-
-        super().__init__(vertex_source, fragment_source, handle_uniforms=True)
+        # we have to store it additionally
+        # because it gets wrapped by a fragment source with define switches
+        self._glsl_fragment_source = assets.StaticShaderSource()
+        super().__init__(self._glsl_fragment_source)
 
     def _evaluate(self):
         if self._last_evaluated == 0.0:
             fragment_source = self.get("fragment_source")
             if fragment_source:
-                self.fragment_source.data = fragment_source
-
-        if self.have_inputs_changed("id"):
+                self._glsl_fragment_source.data = assets.load_shader(source=fragment_source)
+        elif self.have_inputs_changed("id"):
             shader_id = self.get("id")
             if shader_id:
                 fragment_source = download_glslsandbox(shader_id)
                 fragment_source = process_glslsandbox(fragment_source)
                 self.get_input("fragment_source").value = fragment_source
-                self.fragment_source.data = fragment_source
+                # assets.load_shader is important!
+                # preprocesses includes etc.
+                # also we don't want preprocessed includes in the stored fragment sources
+                self._glsl_fragment_source.data = assets.load_shader(source=fragment_source)
 
         super()._evaluate()
 
@@ -168,6 +188,6 @@ class GLSLSandbox(BaseShader):
         path = node_widget.imgui_pick_file("save_fragment", base_path)
         if path is not None:
             f = open(path, "w")
-            f.write(self.fragment_source.data)
+            f.write(self.get("fragment_source"))
             f.close()
 

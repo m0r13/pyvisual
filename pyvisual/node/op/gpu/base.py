@@ -183,17 +183,19 @@ class BaseShader(RenderNode):
         pass
 
     def update_program(self):
+        vertex = self.vertex_source.data
+        fragment = self.fragment_source.data
+
+        # TODO this check if shaders are not empty is very rudimentary!
+        if not vertex or not fragment or not "void main" in fragment:
+            print("### Warning: Empty vertex/fragment shader of node %s #%d" % (self, self.id))
+            self.quad = None
+            self.shader_error = "Empty vertex/fragment shader"
+            return
+
+        input_uniform_mapping, input_ports = self._parse_uniform_inputs(vertex, fragment)
+
         try:
-            vertex = self.vertex_source.data
-            fragment = self.fragment_source.data
-            if not vertex or not fragment:
-                print("### Warning: Empty vertex/fragment shader of node %s #%d" % (self, self.id))
-                self.quad = None
-                self.shader_error = "Empty vertex/fragment shader"
-                return
-
-            input_uniform_mapping, input_ports = self._parse_uniform_inputs(vertex, fragment)
-
             self.quad = gloo.Program(vertex, fragment, version="130", count=4)
             self.quad["iPosition"] = [(-1,-1), (-1,+1), (+1,-1), (+1,+1)]
             self.quad["iTexCoord"] = [( 0, 1), ( 0, 0), ( 1, 1), ( 1, 0)]
