@@ -179,3 +179,9 @@ class FileWatcher:
                 return True
         return False
 
+    def read(self):
+        f = open(self.path)
+        data = f.read()
+        f.close()
+        return data
+
