@@ -734,11 +734,12 @@ class Node:
             imgui.end_popup()
 
         # handle clicking the node once it's selected as dragging
-        if self.hovered and imgui.is_mouse_clicked(0) and not io.key_shift \
+        if self.hovered and imgui.is_mouse_clicked(0) and not io.key_shift and interaction_allowed \
                 and self.selected and not self.editor.is_dragging_connection():
             # mark this node as being dragged
             self.dragging = True
             self.dragging_mouse_start = io.mouse_pos
+            interacted = True
             # set for all selected nodes where they were at beginning of dragging
             for node in self.editor.nodes:
                 if node.selected:
