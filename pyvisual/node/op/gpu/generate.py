@@ -144,26 +144,41 @@ class GLSLSandbox(TimeMaskedGenerate):
         ]
 
     def __init__(self):
-        # we have to store it additionally
-        # because it gets wrapped by a fragment source with define switches
-        self._glsl_fragment_source = assets.StaticShaderSource()
-        super().__init__(self._glsl_fragment_source)
+        # we store fragment source on our own
+        # because it gets wrapped by another fragment source with define switches
+        self._base_fragment_source = assets.StaticShaderSource()
+
+        # it's possible to export the current shader and watch that file for changes
+        # that way you can edit it and changes are loaded back
+        self._reference_file_watcher = None
+
+        super().__init__(self._base_fragment_source)
+
+    def _export_fragment(self, path):
+        f = open(path, "w")
+        f.write(self.get("fragment_source"))
+        f.close()
+
+    def _set_fragment(self, source):
+        # source is meant to be actual shader source code
+        # which is not yet preprocessed
+        self.get_input("fragment_source").value = source
+        self._base_fragment_source.data = assets.load_shader(source=source)
 
     def _evaluate(self):
         if self._last_evaluated == 0.0:
             fragment_source = self.get("fragment_source")
             if fragment_source:
-                self._glsl_fragment_source.data = assets.load_shader(source=fragment_source)
+                self._set_fragment(fragment_source)
         elif self.have_inputs_changed("id"):
             shader_id = self.get("id")
             if shader_id:
                 fragment_source = download_glslsandbox(shader_id)
                 fragment_source = process_glslsandbox(fragment_source)
-                self.get_input("fragment_source").value = fragment_source
-                # assets.load_shader is important!
-                # preprocesses includes etc.
-                # also we don't want preprocessed includes in the stored fragment sources
-                self._glsl_fragment_source.data = assets.load_shader(source=fragment_source)
+                self._set_fragment(fragment_source)
+        elif self._reference_file_watcher is not None \
+                and self._reference_file_watcher.has_changed():
+            self._set_fragment(self._reference_file_watcher.read())
 
         super()._evaluate()
 
@@ -181,13 +196,18 @@ class GLSLSandbox(TimeMaskedGenerate):
             clipboard.copy(url)
 
         imgui.same_line()
-        if imgui.button("save fragment shader"):
+        if imgui.button("save fragment"):
             imgui.open_popup("save_fragment")
-
         base_path = os.path.join(assets.SHADER_PATH, "generate")
-        path = node_widget.imgui_pick_file("save_fragment", base_path)
-        if path is not None:
-            f = open(path, "w")
-            f.write(self.get("fragment_source"))
-            f.close()
+        save_path = node_widget.imgui_pick_file("save_fragment", base_path)
+        if save_path is not None:
+            self._export_fragment(save_path)
+
+        imgui.same_line()
+        if imgui.button("reference as file"):
+            imgui.open_popup("reference_fragment")
+        reference_path = node_widget.imgui_pick_file("reference_fragment", base_path)
+        if reference_path is not None:
+            self._export_fragment(reference_path)
+            self._reference_file_watcher = assets.FileWatcher(reference_path)
 
