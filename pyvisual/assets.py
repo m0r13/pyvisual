@@ -172,11 +172,15 @@ class FileWatcher:
     def has_changed(self):
         t = time.time()
         if t - self.CHECK_INTERVAL > self.last_check:
-            last_change = os.path.getmtime(self.path)
-            changed = last_change > self.last_check
+            last_check = self.last_check
             self.last_check = t
-            if changed:
-                return True
+            try:
+                last_change = os.path.getmtime(self.path)
+                return last_change > last_check
+            except FileNotFoundError:
+                # might happen sometimes that a file doesn't exist anymore for a moment
+                # when it is saved. dunno why
+                return False
         return False
 
     def read(self):
