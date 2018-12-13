@@ -808,12 +808,20 @@ class NodeEditor:
         self.context_search_test = ""
         self.graph_clipboard = None
 
+        # appearance options
         self.render_node = None
         self.show_graph_enabled = True
+        self.show_test_window = False
+        self.hide_after_seconds = -1
         self.background_alpha = 0.2
         self.grid_alpha = 0.0
         self.node_bg_alpha = 0.75
         self.node_alpha = 1.0
+
+        # appearance states
+        self.last_mouse_pos = None
+        self.last_mouse_pos_changed = 0
+        self.show_windows = True
 
         # performance measurement stuffs
         self.fps = 0.0
@@ -825,7 +833,6 @@ class NodeEditor:
         self.processing_time_relative = 0.0
         self.total_time = 0.0
         self.total_time_relative = 0.0
-        self.show_test_window = False
 
         self.io = imgui.get_io()
         self.key_map = list(self.io.key_map)
@@ -1347,73 +1354,85 @@ class NodeEditor:
 
         draw_list.channels_merge()
 
-        pos = imgui.get_cursor_screen_pos()
-        w, h = imgui.get_window_size()
-        dock_padding = 0
+        if self.show_windows or self.show_graph_enabled:
+            pos = imgui.get_cursor_screen_pos()
+            w, h = imgui.get_window_size()
+            dock_padding = 0
 
-        flags = imgui.WINDOW_NO_RESIZE | imgui.WINDOW_ALWAYS_AUTO_RESIZE
-        flags_static = imgui.WINDOW_NO_MOVE | imgui.WINDOW_NO_RESIZE
+            flags = imgui.WINDOW_NO_RESIZE | imgui.WINDOW_ALWAYS_AUTO_RESIZE
+            flags_static = imgui.WINDOW_NO_MOVE | imgui.WINDOW_NO_RESIZE
 
-        imgui.set_next_window_position(pos[0] + dock_padding, pos[1] + dock_padding)
-        if imgui.begin("io", False, flags_static):
-            if imgui.button("clear"):
-                self.graph.clear()
+            imgui.set_next_window_position(pos[0] + dock_padding, pos[1] + dock_padding)
+            if imgui.begin("io", False, flags_static):
+                if imgui.button("clear"):
+                    self.graph.clear()
 
-            imgui.same_line()
-            if imgui.button("save"):
-                imgui.open_popup("save")
-            save_path = node_widget.imgui_pick_file("save", assets.SAVE_PATH)
-            if save_path is not None:
-                self.graph.save_file(save_path)
+                imgui.same_line()
+                if imgui.button("save"):
+                    imgui.open_popup("save")
+                save_path = node_widget.imgui_pick_file("save", assets.SAVE_PATH)
+                if save_path is not None:
+                    self.graph.save_file(save_path)
 
-            imgui.same_line()
-            if imgui.button("load"):
-                imgui.open_popup("load")
-            load_path = node_widget.imgui_pick_file("load", assets.SAVE_PATH)
-            if load_path is not None:
-                self.graph.load_file(load_path)
+                imgui.same_line()
+                if imgui.button("load"):
+                    imgui.open_popup("load")
+                load_path = node_widget.imgui_pick_file("load", assets.SAVE_PATH)
+                if load_path is not None:
+                    self.graph.load_file(load_path)
 
-            imgui.same_line()
-            if imgui.button("import"):
-                imgui.open_popup("import")
-            if imgui.is_item_hovered():
-                imgui.set_tooltip("You can also shift+right click to import nodes")
-            import_path = node_widget.imgui_pick_file("import", assets.SAVE_PATH)
-            if import_path is not None:
-                self.graph.import_file(import_path, self.screen_to_local(io.mouse_pos))
+                imgui.same_line()
+                if imgui.button("import"):
+                    imgui.open_popup("import")
+                if imgui.is_item_hovered():
+                    imgui.set_tooltip("You can also shift+right click to import nodes")
+                import_path = node_widget.imgui_pick_file("import", assets.SAVE_PATH)
+                if import_path is not None:
+                    self.graph.import_file(import_path, self.screen_to_local(io.mouse_pos))
 
-            imgui.same_line()
-            if imgui.button("export"):
-                imgui.open_popup("export")
-            export_path = node_widget.imgui_pick_file("export", assets.SAVE_PATH)
-            if export_path is not None:
-                self.graph.export_file(export_path)
+                imgui.same_line()
+                if imgui.button("export"):
+                    imgui.open_popup("export")
+                export_path = node_widget.imgui_pick_file("export", assets.SAVE_PATH)
+                if export_path is not None:
+                    self.graph.export_file(export_path)
 
-            imgui.end()
+                imgui.end()
 
-        imgui.set_next_window_position(self.pos[0] + w - 10, pos[1] + dock_padding, imgui.ALWAYS, 1, 0)
-        if imgui.begin("performance", False, flags_static):
-            imgui.text("fps: %.2f" % self.fps)
-            imgui.text("editor time: %.2f ms ~ %.2f%%" % (self.editor_time * 1000.0, self.editor_time_relative * 100.0))
-            imgui.text("imgui render time: %.2f ms ~ %.2f%%" % (self.imgui_render_time * 1000.0, self.imgui_render_time_relative * 100.0))
-            imgui.text("processing time: %.2f ms ~ %.2f%%" % (self.processing_time * 1000.0, self.processing_time_relative * 100.0))
-            imgui.text("total: %.2f ms ~ %.2f%%" % (self.total_time * 1000.0, self.total_time_relative * 100.0))
-            imgui.end()
+            imgui.set_next_window_position(self.pos[0] + w - 10, pos[1] + dock_padding, imgui.ALWAYS, 1, 0)
+            if imgui.begin("performance", False, flags_static):
+                imgui.text("fps: %.2f" % self.fps)
+                imgui.text("editor time: %.2f ms ~ %.2f%%" % (self.editor_time * 1000.0, self.editor_time_relative * 100.0))
+                imgui.text("imgui render time: %.2f ms ~ %.2f%%" % (self.imgui_render_time * 1000.0, self.imgui_render_time_relative * 100.0))
+                imgui.text("processing time: %.2f ms ~ %.2f%%" % (self.processing_time * 1000.0, self.processing_time_relative * 100.0))
+                imgui.text("total: %.2f ms ~ %.2f%%" % (self.total_time * 1000.0, self.total_time_relative * 100.0))
+                imgui.end()
 
-        if imgui.begin("appearance", False, flags):
-            #changed, _ = imgui.input_int("fps limit", 30)
-            changed, self.show_graph_enabled = imgui.checkbox("show graph", self.show_graph_enabled)
-            changed, self.show_test_window = imgui.checkbox("show test window", self.show_test_window)
-            changed, self.background_alpha = imgui.slider_float("bg alpha", self.background_alpha, 0.0, 1.0)
-            changed, self.grid_alpha = imgui.slider_float("grid alpha", self.grid_alpha, 0.0, 1.0)
-            changed, self.node_alpha = imgui.slider_float("node alpha", self.node_alpha, 0.0, 1.0)
-            changed, self.node_bg_alpha = imgui.slider_float("node bg alpha", self.node_bg_alpha, 0.0, 1.0)
-            imgui.end()
+            if imgui.begin("appearance", False, flags):
+                #changed, _ = imgui.input_int("fps limit", 30)
+                changed, self.show_graph_enabled = imgui.checkbox("show graph", self.show_graph_enabled)
+                changed, self.show_test_window = imgui.checkbox("show test window", self.show_test_window)
+                changed, self.hide_after_seconds = imgui.input_int("hide after n seconds", self.hide_after_seconds, 5, 60)
+                changed, self.background_alpha = imgui.slider_float("bg alpha", self.background_alpha, 0.0, 1.0)
+                changed, self.grid_alpha = imgui.slider_float("grid alpha", self.grid_alpha, 0.0, 1.0)
+                changed, self.node_alpha = imgui.slider_float("node alpha", self.node_alpha, 0.0, 1.0)
+                changed, self.node_bg_alpha = imgui.slider_float("node bg alpha", self.node_bg_alpha, 0.0, 1.0)
+                imgui.end()
 
-        if self.show_test_window:
-            imgui.show_test_window()
+            if self.show_test_window:
+                imgui.show_test_window()
+
+        # check if mouse wasn't moved and we should hide windows after some time
+        mouse_pos = io.mouse_pos
+        t = time.time()
+        if self.last_mouse_pos != mouse_pos:
+            self.last_mouse_pos = mouse_pos
+            self.last_mouse_pos_changed = t
+            self.show_windows = True
+        if self.hide_after_seconds != -1 and t - self.last_mouse_pos_changed > self.hide_after_seconds:
+            self.show_windows = False
+
         imgui.end()
-
         imgui.pop_style_var(1)
 
 editor = NodeEditor()
