@@ -3,7 +3,7 @@
 
 uniform float uAxisAngle; // {"alias" : "axis_angle"}
 uniform float uAngleOffset; // {"alias" : "angle"}
-uniform float uSegmentCount; // {"alias" : "segments", "default" : 5, "range" : [0, Infinity]}
+uniform int uSegmentCount; // {"alias" : "segments", "default" : 5, "range" : [0, Infinity]}
 
 vec4 filterFrag(vec2 uv, vec4 _) {
     vec2 texCoords = (uv - vec2(0.5)) * 2.0;

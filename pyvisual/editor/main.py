@@ -397,8 +397,11 @@ class Node:
         imgui.push_id(port_id)
         imgui.begin_group()
 
-        # screen coordinates
+        # screen coordinates here
+        # extra padding is additional padding that is added to port hover areas
+        extra_padding = 2
         port_start = imgui.get_cursor_screen_pos()
+        port_start = (port_start[0] - extra_padding, port_start[1] - extra_padding)
 
         # show port input/output widget (if enabled)
         widget = self.get_widget(port_id)
@@ -424,6 +427,7 @@ class Node:
         # got the area our port takes up now
         # from port_start to port_end (both screen coordinates)
         port_end = imgui.get_item_rect_max()
+        port_end = (port_end[0] + extra_padding, port_end[1] + extra_padding)
 
         # calculate position and size of port connector
         size = imgui.get_item_rect_size()
