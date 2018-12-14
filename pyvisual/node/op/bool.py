@@ -70,3 +70,28 @@ class ChooseBool(Node):
 
             for i, (_, output) in enumerate(self.yield_custom_output_values()):
                 output.value = enabled[i]
+
+class HoldBool(Node):
+    class Meta:
+        inputs = [
+            {"name" : "input", "dtype" : dtype.event},
+            {"name" : "duration", "dtype" : dtype.float, "dtype_args" : {"default" : 0.2, "range" : [0.0, float("inf")]}},
+        ]
+        outputs = [
+            {"name" : "output", "dtype" : dtype.bool},
+        ]
+
+    def __init__(self):
+        super().__init__(always_evaluate=True)
+
+        self._next_off = 0
+
+    def _evaluate(self):
+        t = time.time()
+        i = self.get("input")
+        if i:
+            self._next_off = t + self.get("duration")
+            self.set("output", True)
+        else:
+            if t > self._next_off:
+                self.set("output", False)

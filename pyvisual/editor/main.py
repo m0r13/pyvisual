@@ -812,7 +812,7 @@ class NodeEditor:
         self.render_node = None
         self.show_graph_enabled = True
         self.show_test_window = False
-        self.hide_after_seconds = -1
+        self.hide_after_seconds = 5
         self.background_alpha = 0.2
         self.grid_alpha = 0.0
         self.node_bg_alpha = 0.75
@@ -1351,6 +1351,7 @@ class NodeEditor:
 
         if self.is_key_down(glfw.GLFW_KEY_F3):
             self.show_graph_enabled = not self.show_graph_enabled
+            self.last_mouse_pos_changed = time.time()
 
         draw_list.channels_merge()
 
@@ -1409,7 +1410,6 @@ class NodeEditor:
                 imgui.end()
 
             if imgui.begin("appearance", False, flags):
-                #changed, _ = imgui.input_int("fps limit", 30)
                 changed, self.show_graph_enabled = imgui.checkbox("show graph", self.show_graph_enabled)
                 changed, self.show_test_window = imgui.checkbox("show test window", self.show_test_window)
                 changed, self.hide_after_seconds = imgui.input_int("hide after n seconds", self.hide_after_seconds, 5, 60)
