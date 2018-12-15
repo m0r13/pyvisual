@@ -49,7 +49,8 @@ class EveryNEvent(Node):
     class Meta:
         inputs = [
             {"name" : "event", "dtype" : dtype.event},
-            {"name" : "every_n", "dtype" : dtype.int, "dtype_args" : {"default" : 1, "range" : [1, float("inf")]}}
+            {"name" : "every_n", "dtype" : dtype.int, "dtype_args" : {"default" : 1, "range" : [1, float("inf")]}},
+            {"name" : "p", "dtype" : dtype.float, "dtype_args" : {"default" : 1, "range" : [0.0, 1.0]}},
         ]
         outputs = [
             {"name" : "out", "dtype" : dtype.event}
@@ -64,7 +65,7 @@ class EveryNEvent(Node):
         if self.get("event"):
             self._counter += 1
             if self._counter >= self.get("every_n"):
-                self.set("out", True)
+                self.set("out", random.random() <= self.get("p"))
                 self._counter = 0
             else:
                 self.set("out", False)
