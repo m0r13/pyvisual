@@ -3,6 +3,8 @@
 uniform float uBrightness; // {"default" : 0.5}
 uniform float uTheta;
 
+uniform float uLightTheta;
+
 #include <lib/noise3D.glsl>
 
 const float PI = 3.1415952;
@@ -21,6 +23,34 @@ float fbm(vec3 p) {
         frequency *= lacunarity + float(i) / 100.0;
     }
     return min(1.0, f);
+}
+
+float fbm2(vec3 p) {
+    const int octaves = 4;
+    float gain = 0.9;
+    float lacunarity = 2.0;
+    
+    float f = 0.0;
+    float frequency = 1.0;
+    float amplitude = 0.5;
+    for (int i = 0; i < octaves; i++) {
+        f += snoise(p * frequency) * amplitude;
+        amplitude *= gain;
+        frequency *= lacunarity + float(i) / 100.0;
+    }
+    return min(1.0, f);
+}
+
+float to01(float theta) {
+    return (theta + PI) / (2.0 * PI);
+}
+
+float to2pi(float theta) {
+    return theta * 2.0 * PI - PI;
+}
+
+float norm(float theta) {
+    return to2pi(mod(to01(theta), 1.0));
 }
 
 void generateFrag() {
@@ -53,8 +83,8 @@ void generateFrag() {
         // was 0.2
         v = uBrightness;
 
-        float dd = d - mod(d, 1.0 / 500.0);
-        float ddd = d - mod(d, 1.0 / 10.0);
+        float dd = d - mod(d, 1.0 / 250.0);
+        float ddd = d - mod(d, 1.0 / 50.0);
         // this makes leadin/out groove have one brightness each without noise
         vec3 p = vec3(clamp(d, main, leadout_groove), pyvisualTime * 0.1, 0.0);
         float noise = fbm(p);
@@ -77,14 +107,22 @@ void generateFrag() {
         float randomOffset = snoise(vec3(dd * 10.0, 0.0, 0.0));
         float grooveDist = theta * U;
         float groovePosition = randomOffset + grooveDist * 0.1;
-        float grooveRandom = snoise(vec3(ddd * 4.8, mod(groovePosition * 100.0, 5.0), 0.0));
+        vec3 pGroove = vec3(ddd * 4.8, mod(groovePosition * 100.0, 5.0), 0.0);
+        float grooveRandom = snoise(pGroove);
 
         float steps = 2.0;
         float grooveNoise = grooveRandom - mod(grooveRandom, 1.0 / steps);
 
         //v = grooveNoise;
         // was 0.8 - 1.0
-        v *= mix(0.8, 1.0, grooveRandom);
+        v *= mix(0.6, 0.8, grooveRandom);
+
+        float actualTheta = norm(atan(uv.y, uv.x));
+        float lightTheta = uLightTheta;
+        vec3 pLight = vec3(d * 4.8, lightTheta * 2.0, 0.0);
+        float lightchange = fbm2(pLight);
+
+        v += pow(1.0 - smoothstep(0, mix(0.25, 0.4, lightchange), abs(norm(actualTheta + lightTheta))), 2.0) * 0.5;
         pyvisualOutColor = vec4(vec3(v), 1.0);
     } else {
         pyvisualOutColor = vec4(1.0);
