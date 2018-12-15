@@ -213,7 +213,7 @@ class SetFloatVar(Node):
     def start(self, graph):
         self.graph = graph
         self.stopped = False
-        SetFloatVar.instances[graph].add(self)
+        SetFloatVar.instances[graph.parent].add(self)
 
     def _show_custom_ui(self):
         imgui.push_item_width(widget.WIDGET_WIDTH)
@@ -230,7 +230,7 @@ class SetFloatVar(Node):
     def _evaluate(self):
         if self.have_inputs_changed("name"):
             name = self.name
-            for node in SetFloatVar.instances[self.graph]:
+            for node in SetFloatVar.instances[self.graph.parent]:
                 if node != self and node.valid and node.name == name:
                     self.duplicate = True
                     return
@@ -242,7 +242,7 @@ class SetFloatVar(Node):
         self.stopped = True
         # seemed to happen once. dunno why, not so bad
         try:
-            SetFloatVar.instances[self.graph].remove(self)
+            SetFloatVar.instances[self.graph.parent].remove(self)
         except KeyError:
             pass
 
@@ -282,7 +282,7 @@ class GetFloatVar(Node):
     @classmethod
     def get_presets(cls, graph):
         presets = []
-        for node in SetFloatVar.instances.get(graph, []):
+        for node in SetFloatVar.instances.get(graph.parent, []):
             presets.append((node.name, {"i_name" : node.name}))
         return presets
 
@@ -305,7 +305,7 @@ class GetFloatVar(Node):
             self.connected_node = None
             if not name:
                 return
-            for node in SetFloatVar.instances[self.graph]:
+            for node in SetFloatVar.instances[self.graph.parent]:
                 if node.valid and node.name == name:
                     self.connected_node = node
                     break
@@ -318,7 +318,7 @@ class GetFloatVar(Node):
         if self.connected_node is not None:
             preview = self.connected_node.name
         if imgui.begin_combo("", preview):
-            nodes = SetFloatVar.instances[self.graph]
+            nodes = SetFloatVar.instances[self.graph.parent]
 
             is_selected = self.connected_node is None
             opened, selected = imgui.selectable("<none>", is_selected)

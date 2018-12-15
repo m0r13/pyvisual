@@ -4,22 +4,22 @@ import pyvisual.node.base as node_meta
 from pyvisual.node import dtype
 
 class NodeGraphListener:
-    def changed_ui_data(self, ui_data):
+    def changed_ui_data(self, graph, ui_data):
         pass
 
-    def created_node(self, node, ui_data):
+    def created_node(self, graph, node, ui_data):
         pass
 
-    def removed_node(self, node):
+    def removed_node(self, graph, node):
         pass
 
-    def changed_node_ui_data(self, node, ui_data):
+    def changed_node_ui_data(self, graph, node, ui_data):
         pass
 
-    def created_connection(self, src_node, src_port_id, dst_node, dst_port_id):
+    def created_connection(self, graph, src_node, src_port_id, dst_node, dst_port_id):
         pass
 
-    def removed_connection(self, src_node, src_port_id, dst_node, dst_port_id):
+    def removed_connection(self, graph, src_node, src_port_id, dst_node, dst_port_id):
         pass
 
 # prepare for serialization
@@ -41,8 +41,77 @@ def unformat_port_spec(port_spec):
         dtype_args["default"] = port_spec["dtype"].base_type.unserialize(dtype_args["default"])
     return port_spec
 
-class NodeGraph:
+class Graph:
     def __init__(self):
+        self.parent = self
+
+    @property
+    def instances(self):
+        # each graph must have some sort of collection of nodes
+        raise NotImplementedError()
+
+    @property
+    def sorted_instances(self):
+        instances = self.instances
+        visited_instances = set()
+        sorted_instances = list()
+        circular = False
+
+        def dfs(instance):
+            nonlocal visited_instances, circular
+            if instance in visited_instances:
+                return
+            visited_instances.add(instance)
+            for instance_before in instance.input_nodes:
+                #if instance_before in visited_instances:
+                #    circular = True
+                dfs(instance_before)
+            sorted_instances.append(instance)
+
+        for instance in instances:
+            dfs(instance)
+        return sorted_instances, circular
+
+    def evaluate(self, reset_instances=True):
+        instances, _ = self.sorted_instances
+        active_instances = set()
+        for instance in instances:
+            if instance.evaluate():
+                active_instances.add(instance)
+        # reset evaluation status and set all inputs/outputs unchanged!
+        # if you want to evaluate outputs (for example Module node wants this),
+        # pass reset_instances=False and call reset_instances() later manually
+        if reset_instances:
+            self.reset_instances()
+        return active_instances
+
+    def reset_instances(self):
+        for instance in self.instances:
+            instance.evaluated = False
+
+    def stop(self):
+        for instance in self.instances:
+            instance.stop()
+
+class RootGraph(Graph):
+    def __init__(self, graphs):
+        super().__init__()
+
+        self.graphs = graphs
+        for graph in self.graphs:
+            graph.parent = self
+
+    @property
+    def instances(self):
+        instances = []
+        for graph in self.graphs:
+            instances.extend(graph.instances)
+        return instances
+
+class NodeGraph(Graph):
+    def __init__(self):
+        super().__init__()
+
         self.listeners = []
 
         self.ui_data = {}
@@ -263,7 +332,7 @@ class NodeGraph:
         self.ui_data = ui_data
         if notify:
             for listener in self.listeners:
-                listener.changed_ui_data(ui_data)
+                listener.changed_ui_data(self, ui_data)
 
     def create_node(self, spec, values={}, ui_data={}):
         node = spec.instantiate_node()
@@ -276,7 +345,7 @@ class NodeGraph:
         self.nodes[node.id] = node
         self.node_ui_data[node.id] = ui_data
         for listener in self.listeners:
-            listener.created_node(node, ui_data)
+            listener.created_node(self, node, ui_data)
         return node
 
     def remove_node(self, node):
@@ -292,14 +361,14 @@ class NodeGraph:
         del self.node_ui_data[node.id]
 
         for listener in self.listeners:
-            listener.removed_node(node)
+            listener.removed_node(self, node)
 
     def set_node_ui_data(self, node, ui_data, notify=False):
         self.node_ui_data[node.id] = ui_data
 
         if notify:
             for listener in self.listeners:
-                listener.changed_node_ui_data(node, ui_data)
+                listener.changed_node_ui_data(self, node, ui_data)
 
     def create_connection(self, src_node, src_port_id, dst_node, dst_port_id):
         input_value = dst_node.get_value(dst_port_id)
@@ -311,7 +380,7 @@ class NodeGraph:
         self.connections_to[dst_node].add((dst_port_id, src_node, src_port_id))
 
         for listener in self.listeners:
-            listener.created_connection(src_node, src_port_id, dst_node, dst_port_id)
+            listener.created_connection(self, src_node, src_port_id, dst_node, dst_port_id)
 
     def remove_connection(self, src_node, src_port_id, dst_node, dst_port_id):
         input_value = dst_node.get_value(dst_port_id)
@@ -323,7 +392,7 @@ class NodeGraph:
         self.connections_to[dst_node].remove((dst_port_id, src_node, src_port_id))
 
         for listener in self.listeners:
-            listener.removed_connection(src_node, src_port_id, dst_node, dst_port_id)
+            listener.removed_connection(self, src_node, src_port_id, dst_node, dst_port_id)
 
     def clear(self):
         for instance in list(self.nodes.values()):
@@ -339,46 +408,3 @@ class NodeGraph:
     @property
     def instances(self):
         return self.nodes.values()
-
-    @property
-    def sorted_instances(self):
-        instances = list(self.nodes.values())
-        visited_instances = set()
-        sorted_instances = list()
-        circular = False
-
-        def dfs(instance):
-            nonlocal visited_instances, circular
-            if instance in visited_instances:
-                return
-            visited_instances.add(instance)
-            for instance_before in instance.input_nodes:
-                #if instance_before in visited_instances:
-                #    circular = True
-                dfs(instance_before)
-            sorted_instances.append(instance)
-
-        for instance in instances:
-            dfs(instance)
-        return sorted_instances, circular
-
-    def evaluate(self, reset_instances=True):
-        instances, _ = self.sorted_instances
-        active_instances = set()
-        for instance in instances:
-            if instance.evaluate():
-                active_instances.add(instance)
-        # reset evaluation status and set all inputs/outputs unchanged!
-        # if you want to evaluate outputs (for example Module node wants this),
-        # pass reset_instances=False and call reset_instances() later manually
-        if reset_instances:
-            self.reset_instances()
-        return active_instances
-
-    def reset_instances(self):
-        for instance in self.instances:
-            instance.evaluated = False
-
-    def stop(self):
-        for instance in self.nodes.values():
-            instance.stop()
