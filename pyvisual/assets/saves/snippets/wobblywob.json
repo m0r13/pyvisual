@@ -1,112 +1,124 @@
 {
     "connections": [
         {
-            "dst_node_id": 74,
-            "dst_port_id": "i_input",
-            "src_node_id": 62,
-            "src_port_id": "o_output"
-        },
-        {
-            "dst_node_id": 71,
-            "dst_port_id": "i_input",
-            "src_node_id": 62,
-            "src_port_id": "o_output"
-        },
-        {
-            "dst_node_id": 63,
+            "dst_node_id": 90,
             "dst_port_id": "i_sizeref",
-            "src_node_id": 62,
+            "src_node_id": 89,
             "src_port_id": "o_output"
         },
         {
-            "dst_node_id": 64,
+            "dst_node_id": 98,
             "dst_port_id": "i_input",
-            "src_node_id": 63,
+            "src_node_id": 89,
             "src_port_id": "o_output"
         },
         {
-            "dst_node_id": 64,
+            "dst_node_id": 101,
+            "dst_port_id": "i_input",
+            "src_node_id": 89,
+            "src_port_id": "o_output"
+        },
+        {
+            "dst_node_id": 91,
+            "dst_port_id": "i_input",
+            "src_node_id": 90,
+            "src_port_id": "o_output"
+        },
+        {
+            "dst_node_id": 91,
             "dst_port_id": "i_uRadiusFactor",
-            "src_node_id": 65,
+            "src_node_id": 92,
             "src_port_id": "o_vec2"
         },
         {
-            "dst_node_id": 69,
+            "dst_node_id": 96,
             "dst_port_id": "i_input",
-            "src_node_id": 68,
+            "src_node_id": 95,
             "src_port_id": "o_output"
         },
         {
-            "dst_node_id": 60,
+            "dst_node_id": 87,
             "dst_port_id": "i_texture",
-            "src_node_id": 69,
+            "src_node_id": 96,
             "src_port_id": "o_output"
         },
         {
-            "dst_node_id": 69,
+            "dst_node_id": 96,
             "dst_port_id": "i_uRedOffset",
-            "src_node_id": 70,
+            "src_node_id": 97,
             "src_port_id": "o_vec2"
         },
         {
-            "dst_node_id": 71,
+            "dst_node_id": 98,
             "dst_port_id": "i_time",
-            "src_node_id": 61,
+            "src_node_id": 88,
             "src_port_id": "o_output"
         },
         {
-            "dst_node_id": 68,
+            "dst_node_id": 95,
             "dst_port_id": "i_input",
-            "src_node_id": 71,
+            "src_node_id": 98,
             "src_port_id": "o_output"
         },
         {
-            "dst_node_id": 71,
+            "dst_node_id": 98,
             "dst_port_id": "i_mouse",
-            "src_node_id": 72,
+            "src_node_id": 99,
             "src_port_id": "o_vec2"
         },
         {
-            "dst_node_id": 72,
+            "dst_node_id": 99,
             "dst_port_id": "i_x",
-            "src_node_id": 73,
+            "src_node_id": 100,
             "src_port_id": "o_output"
         },
         {
-            "dst_node_id": 74,
-            "dst_port_id": "i_transformUV",
-            "src_node_id": 75,
+            "dst_node_id": 108,
+            "dst_port_id": "i_t1",
+            "src_node_id": 102,
             "src_port_id": "o_output"
         },
         {
-            "dst_node_id": 74,
+            "dst_node_id": 101,
             "dst_port_id": "i_uTime",
-            "src_node_id": 76,
+            "src_node_id": 103,
             "src_port_id": "o_output"
         },
         {
-            "dst_node_id": 77,
+            "dst_node_id": 104,
             "dst_port_id": "i_input",
-            "src_node_id": 74,
+            "src_node_id": 101,
             "src_port_id": "o_output"
         },
         {
-            "dst_node_id": 71,
+            "dst_node_id": 98,
             "dst_port_id": "i_time_mask",
-            "src_node_id": 77,
+            "src_node_id": 104,
             "src_port_id": "o_output"
         },
         {
-            "dst_node_id": 77,
+            "dst_node_id": 104,
             "dst_port_id": "i_uResolution",
-            "src_node_id": 78,
+            "src_node_id": 105,
             "src_port_id": "o_vec2"
+        },
+        {
+            "dst_node_id": 95,
+            "dst_port_id": "i_uHue",
+            "src_node_id": 106,
+            "src_port_id": "o_output"
+        },
+        {
+            "dst_node_id": 101,
+            "dst_port_id": "i_transformUV",
+            "src_node_id": 108,
+            "src_port_id": "o_output"
         }
     ],
     "nodes": [
         {
             "custom_ports": [],
-            "id": 60,
+            "id": 87,
             "manual_values": {
                 "i_texture": ""
             },
@@ -122,12 +134,12 @@
         },
         {
             "custom_ports": [],
-            "id": 61,
+            "id": 88,
             "manual_values": {
                 "i_factor": 0.47999998927116394,
                 "i_mod": 0.0,
                 "i_reset": 0.0,
-                "o_output": 237.26674274355133
+                "o_output": 257.27138348598845
             },
             "type": "Time",
             "ui_data": {
@@ -141,7 +153,7 @@
         },
         {
             "custom_ports": [],
-            "id": 62,
+            "id": 89,
             "manual_values": {
                 "i_path": "image/test/gradient.png",
                 "o_output": ""
@@ -158,7 +170,7 @@
         },
         {
             "custom_ports": [],
-            "id": 63,
+            "id": 90,
             "manual_values": {
                 "i_enabled": 1.0,
                 "i_force_change": 42.0,
@@ -368,7 +380,7 @@
                     }
                 ]
             ],
-            "id": 64,
+            "id": 91,
             "manual_values": {
                 "i_advanced_filtering": 0.0,
                 "i_enabled": 1.0,
@@ -434,7 +446,7 @@
         },
         {
             "custom_ports": [],
-            "id": 65,
+            "id": 92,
             "manual_values": {
                 "i_x": 1.590000033378601,
                 "i_y": 1.0,
@@ -455,7 +467,7 @@
         },
         {
             "custom_ports": [],
-            "id": 66,
+            "id": 93,
             "manual_values": {
                 "i_path": "image/test/gradient.png",
                 "o_output": ""
@@ -472,7 +484,7 @@
         },
         {
             "custom_ports": [],
-            "id": 67,
+            "id": 94,
             "manual_values": {
                 "i_off_max": 3.5899999141693115,
                 "i_off_min": 0.1,
@@ -486,8 +498,8 @@
             "ui_data": {
                 "collapsed": false,
                 "pos": [
-                    2116.0,
-                    -73.0
+                    2191.0,
+                    -166.0
                 ],
                 "selected": false
             }
@@ -610,17 +622,53 @@
                     }
                 ]
             ],
-            "id": 68,
+            "id": 95,
             "manual_values": {
                 "i_advanced_filtering": 0.0,
-                "i_enabled": 0.0,
+                "i_enabled": 1.0,
+                "i_filter_bg": [
+                    0.0,
+                    0.0,
+                    0.0,
+                    0.0
+                ],
+                "i_filter_mask": "",
+                "i_filter_mode": 2.0,
                 "i_force_change": 42.0,
                 "i_input": "",
+                "i_interpolation": 1.0,
                 "i_sizeref": "",
-                "i_uHue": 0.0,
-                "i_uSaturation": 0.0,
+                "i_transformUV": [
+                    [
+                        1.0,
+                        0.0,
+                        0.0,
+                        0.0
+                    ],
+                    [
+                        0.0,
+                        1.0,
+                        0.0,
+                        0.0
+                    ],
+                    [
+                        0.0,
+                        0.0,
+                        1.0,
+                        0.0
+                    ],
+                    [
+                        0.0,
+                        0.0,
+                        0.0,
+                        1.0
+                    ]
+                ],
+                "i_uHue": 1.1299999952316284,
+                "i_uSaturation": 1.0,
                 "i_uValue": 1.0,
-                "o_enabled": 0.0,
+                "i_wrapping": 1.0,
+                "o_enabled": 1.0,
                 "o_output": ""
             },
             "type": "HSVAdjust",
@@ -737,7 +785,7 @@
                     }
                 ]
             ],
-            "id": 69,
+            "id": 96,
             "manual_values": {
                 "i_advanced_filtering": 0.0,
                 "i_enabled": 0.0,
@@ -763,7 +811,7 @@
         },
         {
             "custom_ports": [],
-            "id": 70,
+            "id": 97,
             "manual_values": {
                 "i_x": 5.0,
                 "i_y": 0.0,
@@ -859,7 +907,7 @@
                     }
                 ]
             ],
-            "id": 71,
+            "id": 98,
             "manual_values": {
                 "i_enable_time_mask": 1.0,
                 "i_enabled": 1.0,
@@ -919,12 +967,12 @@
         },
         {
             "custom_ports": [],
-            "id": 72,
+            "id": 99,
             "manual_values": {
                 "i_x": 0.07000000029802322,
                 "i_y": 0.0,
                 "o_vec2": [
-                    0.840347409248352,
+                    0.6045632362365723,
                     0.0
                 ]
             },
@@ -940,14 +988,14 @@
         },
         {
             "custom_ports": [],
-            "id": 73,
+            "id": 100,
             "manual_values": {
                 "i_length": 120.0,
                 "i_max": 1.0,
                 "i_min": 0.0,
                 "i_phase": 0.0,
                 "i_type": 3.0,
-                "o_output": 0.8403473975100061
+                "o_output": 0.60456323263966
             },
             "type": "LFO",
             "ui_data": {
@@ -961,7 +1009,7 @@
         },
         {
             "custom_ports": [],
-            "id": 74,
+            "id": 101,
             "manual_values": {
                 "i_enabled": 1.0,
                 "i_force_change": 42.0,
@@ -1041,7 +1089,7 @@
         },
         {
             "custom_ports": [],
-            "id": 75,
+            "id": 102,
             "manual_values": {
                 "i_uniform": 1.0,
                 "i_x": 1.4199999570846558,
@@ -1077,20 +1125,20 @@
             "ui_data": {
                 "collapsed": false,
                 "pos": [
-                    877.0,
-                    353.0
+                    914.0,
+                    172.0
                 ],
                 "selected": false
             }
         },
         {
             "custom_ports": [],
-            "id": 76,
+            "id": 103,
             "manual_values": {
                 "i_factor": 0.10000000149011612,
                 "i_mod": 0.0,
                 "i_reset": 0.0,
-                "o_output": 49.42962658151463
+                "o_output": 53.59748183485081
             },
             "type": "Time",
             "ui_data": {
@@ -1199,7 +1247,7 @@
                     }
                 ]
             ],
-            "id": 77,
+            "id": 104,
             "manual_values": {
                 "i_advanced_filtering": 0.0,
                 "i_enabled": 1.0,
@@ -1262,7 +1310,7 @@
         },
         {
             "custom_ports": [],
-            "id": 78,
+            "id": 105,
             "manual_values": {
                 "i_x": 8.779999732971191,
                 "i_y": 1000.0,
@@ -1280,12 +1328,126 @@
                 ],
                 "selected": false
             }
+        },
+        {
+            "custom_ports": [],
+            "id": 106,
+            "manual_values": {
+                "i_length": 500.0,
+                "i_max": 1.0,
+                "i_min": 0.0,
+                "i_phase": 0.0,
+                "i_type": 1.0,
+                "o_output": 0.7070179654687689
+            },
+            "type": "LFO",
+            "ui_data": {
+                "collapsed": false,
+                "pos": [
+                    2060.0,
+                    80.0
+                ],
+                "selected": false
+            }
+        },
+        {
+            "custom_ports": [],
+            "id": 108,
+            "manual_values": {
+                "i_t1": [
+                    [
+                        1.0,
+                        0.0,
+                        0.0,
+                        0.0
+                    ],
+                    [
+                        0.0,
+                        1.0,
+                        0.0,
+                        0.0
+                    ],
+                    [
+                        0.0,
+                        0.0,
+                        1.0,
+                        0.0
+                    ],
+                    [
+                        0.0,
+                        0.0,
+                        0.0,
+                        1.0
+                    ]
+                ],
+                "i_t2": [
+                    [
+                        1.0,
+                        0.0,
+                        0.0,
+                        0.0
+                    ],
+                    [
+                        0.0,
+                        1.0,
+                        0.0,
+                        0.0
+                    ],
+                    [
+                        0.0,
+                        0.0,
+                        1.0,
+                        0.0
+                    ],
+                    [
+                        0.0,
+                        0.0,
+                        0.0,
+                        1.0
+                    ]
+                ],
+                "o_output": [
+                    [
+                        1.4199999570846558,
+                        0.0,
+                        0.0,
+                        0.0
+                    ],
+                    [
+                        0.0,
+                        1.4199999570846558,
+                        0.0,
+                        0.0
+                    ],
+                    [
+                        0.0,
+                        0.0,
+                        1.0,
+                        0.0
+                    ],
+                    [
+                        0.0,
+                        0.0,
+                        0.0,
+                        1.0
+                    ]
+                ]
+            },
+            "type": "Dot",
+            "ui_data": {
+                "collapsed": false,
+                "pos": [
+                    1057.0,
+                    258.0
+                ],
+                "selected": false
+            }
         }
     ],
     "ui_data": {
         "offset": [
-            661.0,
-            -104.0
+            458.0,
+            -311.0
         ]
     }
 }

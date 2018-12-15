@@ -7,17 +7,14 @@ uniform float uSoftness; // {"default" : 0.06}
 uniform float uShadeContrast; // {"default" : 0.55}
 
 uniform vec2 uOffset;
-uniform float uTest;
-uniform 
 
 float fbm(vec3 p) {
     float f = 0.0;
     float frequency = 1.0; // 1.0
     float amplitude = 0.5; // 0.5
-    float lsomething = uTest;
     for (int i = 0; i < 4; i++) {
         f += snoise(p * frequency) * amplitude;
-        amplitude *= lsomething;
+        amplitude *= 0.5;
         frequency *= 2.0 + float(i) / 100.0;
     }
     return min(1.0, f);

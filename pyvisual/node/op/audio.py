@@ -204,7 +204,7 @@ class BeatAnalyzer(Node):
         ]
 
     def __init__(self):
-        super().__init__()
+        super().__init__(always_evaluate=True)
 
         self.last_beat_on = False
 
