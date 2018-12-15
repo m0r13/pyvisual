@@ -1,0 +1,758 @@
+{
+    "connections": [
+        {
+            "dst_node_id": 8,
+            "dst_port_id": "i_input",
+            "src_node_id": 0,
+            "src_port_id": "o_output"
+        },
+        {
+            "dst_node_id": 0,
+            "dst_port_id": "i_input",
+            "src_node_id": 2,
+            "src_port_id": "o_output"
+        },
+        {
+            "dst_node_id": 4,
+            "dst_port_id": "i_factor",
+            "src_node_id": 3,
+            "src_port_id": "o_output"
+        },
+        {
+            "dst_node_id": 0,
+            "dst_port_id": "i_uTheta",
+            "src_node_id": 4,
+            "src_port_id": "o_output"
+        },
+        {
+            "dst_node_id": 6,
+            "dst_port_id": "i_input",
+            "src_node_id": 5,
+            "src_port_id": "o_output"
+        },
+        {
+            "dst_node_id": 7,
+            "dst_port_id": "i_input",
+            "src_node_id": 6,
+            "src_port_id": "o_output"
+        },
+        {
+            "dst_node_id": 7,
+            "dst_port_id": "i_filter_mask",
+            "src_node_id": 8,
+            "src_port_id": "o_output"
+        },
+        {
+            "dst_node_id": 1,
+            "dst_port_id": "i_texture",
+            "src_node_id": 7,
+            "src_port_id": "o_output"
+        },
+        {
+            "dst_node_id": 0,
+            "dst_port_id": "i_transformUV",
+            "src_node_id": 9,
+            "src_port_id": "o_output"
+        }
+    ],
+    "nodes": [
+        {
+            "custom_ports": [
+                [
+                    "i_time",
+                    {
+                        "default": null,
+                        "dtype": "float",
+                        "dtype_args": {},
+                        "dummy": false,
+                        "group": "default",
+                        "hide": false,
+                        "manual_input": true,
+                        "name": "time",
+                        "widgets": []
+                    }
+                ],
+                [
+                    "i_time_mask",
+                    {
+                        "default": null,
+                        "dtype": "tex2d",
+                        "dtype_args": {},
+                        "dummy": false,
+                        "group": "default",
+                        "hide": true,
+                        "manual_input": true,
+                        "name": "time_mask",
+                        "widgets": []
+                    }
+                ],
+                [
+                    "i_time_d0",
+                    {
+                        "default": null,
+                        "dtype": "float",
+                        "dtype_args": {
+                            "default": 0.0
+                        },
+                        "dummy": false,
+                        "group": "default",
+                        "hide": true,
+                        "manual_input": true,
+                        "name": "time_d0",
+                        "widgets": []
+                    }
+                ],
+                [
+                    "i_time_d1",
+                    {
+                        "default": null,
+                        "dtype": "float",
+                        "dtype_args": {
+                            "default": 0.0
+                        },
+                        "dummy": false,
+                        "group": "default",
+                        "hide": true,
+                        "manual_input": true,
+                        "name": "time_d1",
+                        "widgets": []
+                    }
+                ],
+                [
+                    "i_uBrightness",
+                    {
+                        "default": null,
+                        "dtype": "float",
+                        "dtype_args": {
+                            "default": 0.5
+                        },
+                        "dummy": false,
+                        "group": "default",
+                        "hide": false,
+                        "manual_input": true,
+                        "name": "uBrightness",
+                        "widgets": []
+                    }
+                ],
+                [
+                    "i_uTheta",
+                    {
+                        "default": null,
+                        "dtype": "float",
+                        "dtype_args": {},
+                        "dummy": false,
+                        "group": "default",
+                        "hide": false,
+                        "manual_input": true,
+                        "name": "uTheta",
+                        "widgets": []
+                    }
+                ]
+            ],
+            "id": 0,
+            "manual_values": {
+                "i_enable_time_mask": 0.0,
+                "i_enabled": 1.0,
+                "i_force_change": 42.0,
+                "i_input": "",
+                "i_interpolation": 1.0,
+                "i_sizeref": "",
+                "i_time": 15.119999885559082,
+                "i_time_d0": 0.0,
+                "i_time_d1": 0.0,
+                "i_time_mask": "",
+                "i_transformUV": [
+                    [
+                        1.0,
+                        0.0,
+                        0.0,
+                        0.0
+                    ],
+                    [
+                        0.0,
+                        1.0,
+                        0.0,
+                        0.0
+                    ],
+                    [
+                        0.0,
+                        0.0,
+                        1.0,
+                        0.0
+                    ],
+                    [
+                        0.0,
+                        0.0,
+                        0.0,
+                        1.0
+                    ]
+                ],
+                "i_uBrightness": 0.3100000023841858,
+                "i_uTheta": 0.0,
+                "i_wrapping": 1.0,
+                "o_enabled": 1.0,
+                "o_output": ""
+            },
+            "type": "Vinyl",
+            "ui_data": {
+                "collapsed": false,
+                "pos": [
+                    3072.0,
+                    448.0
+                ],
+                "selected": false
+            }
+        },
+        {
+            "custom_ports": [],
+            "id": 1,
+            "manual_values": {
+                "i_texture": ""
+            },
+            "type": "Renderer",
+            "ui_data": {
+                "collapsed": false,
+                "pos": [
+                    3995.0,
+                    713.0
+                ],
+                "selected": false
+            }
+        },
+        {
+            "custom_ports": [],
+            "id": 2,
+            "manual_values": {
+                "i_path": "image/dummy/1080p.png",
+                "o_output": ""
+            },
+            "type": "LoadTexture",
+            "ui_data": {
+                "collapsed": false,
+                "pos": [
+                    2323.0,
+                    548.0
+                ],
+                "selected": false
+            }
+        },
+        {
+            "custom_ports": [],
+            "id": 3,
+            "manual_values": {
+                "i_input": 33.0,
+                "i_lambda": "3.14159 * 2 / 60.0 * x",
+                "o_output": 3.455749
+            },
+            "type": "FloatLambda",
+            "ui_data": {
+                "collapsed": false,
+                "pos": [
+                    2373.0,
+                    713.0
+                ],
+                "selected": false
+            }
+        },
+        {
+            "custom_ports": [],
+            "id": 4,
+            "manual_values": {
+                "i_factor": 1.0,
+                "i_mod": 0.0,
+                "i_reset": 0.0,
+                "o_output": 28.40074983257174
+            },
+            "type": "Time",
+            "ui_data": {
+                "collapsed": true,
+                "pos": [
+                    2638.0,
+                    788.0
+                ],
+                "selected": false
+            }
+        },
+        {
+            "custom_ports": [],
+            "id": 5,
+            "manual_values": {
+                "i_path": "image/tartuvhs/startup-hub-tartu-estonia.jpg",
+                "o_output": ""
+            },
+            "type": "LoadTexture",
+            "ui_data": {
+                "collapsed": false,
+                "pos": [
+                    2672.0,
+                    970.0
+                ],
+                "selected": false
+            }
+        },
+        {
+            "custom_ports": [
+                [
+                    "i_filter_mask",
+                    {
+                        "default": null,
+                        "dtype": "tex2d",
+                        "dtype_args": {},
+                        "dummy": false,
+                        "group": "default",
+                        "hide": true,
+                        "manual_input": true,
+                        "name": "filter_mask",
+                        "widgets": []
+                    }
+                ],
+                [
+                    "i_filter_mode",
+                    {
+                        "default": null,
+                        "dtype": "int",
+                        "dtype_args": {
+                            "choices": [
+                                "input",
+                                "mask",
+                                "filtered",
+                                "input_filtered_masked",
+                                "input_masked",
+                                "filtered_masked"
+                            ],
+                            "default": 2.0
+                        },
+                        "dummy": false,
+                        "group": "default",
+                        "hide": true,
+                        "manual_input": true,
+                        "name": "filter_mode",
+                        "widgets": []
+                    }
+                ],
+                [
+                    "i_filter_bg",
+                    {
+                        "default": null,
+                        "dtype": "color",
+                        "dtype_args": {
+                            "default": [
+                                0.0,
+                                0.0,
+                                0.0,
+                                0.0
+                            ]
+                        },
+                        "dummy": false,
+                        "group": "default",
+                        "hide": true,
+                        "manual_input": true,
+                        "name": "filter_bg",
+                        "widgets": []
+                    }
+                ],
+                [
+                    "i_uMode",
+                    {
+                        "default": null,
+                        "dtype": "int",
+                        "dtype_args": {
+                            "choices": [
+                                "difference",
+                                "overlay",
+                                "grain merge",
+                                "exclusion",
+                                "hsv hue",
+                                "hsv saturation",
+                                "hsv value"
+                            ]
+                        },
+                        "dummy": false,
+                        "group": "default",
+                        "hide": false,
+                        "manual_input": true,
+                        "name": "uMode",
+                        "widgets": []
+                    }
+                ],
+                [
+                    "i_uColor",
+                    {
+                        "default": null,
+                        "dtype": "color",
+                        "dtype_args": {},
+                        "dummy": false,
+                        "group": "default",
+                        "hide": false,
+                        "manual_input": true,
+                        "name": "uColor",
+                        "widgets": []
+                    }
+                ]
+            ],
+            "id": 6,
+            "manual_values": {
+                "i_advanced_filtering": 0.0,
+                "i_enabled": 1.0,
+                "i_filter_bg": [
+                    0.0,
+                    0.0,
+                    0.0,
+                    0.0
+                ],
+                "i_filter_mask": "",
+                "i_filter_mode": 2.0,
+                "i_force_change": 42.0,
+                "i_input": "",
+                "i_interpolation": 1.0,
+                "i_sizeref": "",
+                "i_transformUV": [
+                    [
+                        1.0,
+                        0.0,
+                        0.0,
+                        0.0
+                    ],
+                    [
+                        0.0,
+                        1.0,
+                        0.0,
+                        0.0
+                    ],
+                    [
+                        0.0,
+                        0.0,
+                        1.0,
+                        0.0
+                    ],
+                    [
+                        0.0,
+                        0.0,
+                        0.0,
+                        1.0
+                    ]
+                ],
+                "i_uColor": [
+                    0.0,
+                    0.5760869979858398,
+                    1.0,
+                    1.0
+                ],
+                "i_uMode": 0.0,
+                "i_wrapping": 1.0,
+                "o_enabled": 1.0,
+                "o_output": ""
+            },
+            "type": "OverlayColor",
+            "ui_data": {
+                "collapsed": false,
+                "pos": [
+                    3206.0,
+                    825.0
+                ],
+                "selected": false
+            }
+        },
+        {
+            "custom_ports": [
+                [
+                    "i_filter_mask",
+                    {
+                        "default": null,
+                        "dtype": "tex2d",
+                        "dtype_args": {},
+                        "dummy": false,
+                        "group": "default",
+                        "hide": false,
+                        "manual_input": true,
+                        "name": "filter_mask",
+                        "widgets": []
+                    }
+                ],
+                [
+                    "i_filter_mode",
+                    {
+                        "default": null,
+                        "dtype": "int",
+                        "dtype_args": {
+                            "choices": [
+                                "input",
+                                "mask",
+                                "filtered",
+                                "input_filtered_masked",
+                                "input_masked",
+                                "filtered_masked"
+                            ],
+                            "default": 2.0
+                        },
+                        "dummy": false,
+                        "group": "default",
+                        "hide": false,
+                        "manual_input": true,
+                        "name": "filter_mode",
+                        "widgets": []
+                    }
+                ],
+                [
+                    "i_filter_bg",
+                    {
+                        "default": null,
+                        "dtype": "color",
+                        "dtype_args": {
+                            "default": [
+                                0.0,
+                                0.0,
+                                0.0,
+                                0.0
+                            ]
+                        },
+                        "dummy": false,
+                        "group": "default",
+                        "hide": false,
+                        "manual_input": true,
+                        "name": "filter_bg",
+                        "widgets": []
+                    }
+                ]
+            ],
+            "id": 7,
+            "manual_values": {
+                "i_advanced_filtering": 1.0,
+                "i_enabled": 1.0,
+                "i_filter_bg": [
+                    0.0,
+                    0.0,
+                    0.0,
+                    0.0
+                ],
+                "i_filter_mask": "",
+                "i_filter_mode": 5.0,
+                "i_force_change": 42.0,
+                "i_input": "",
+                "i_interpolation": 1.0,
+                "i_sizeref": "",
+                "i_transformUV": [
+                    [
+                        1.0,
+                        0.0,
+                        0.0,
+                        0.0
+                    ],
+                    [
+                        0.0,
+                        1.0,
+                        0.0,
+                        0.0
+                    ],
+                    [
+                        0.0,
+                        0.0,
+                        1.0,
+                        0.0
+                    ],
+                    [
+                        0.0,
+                        0.0,
+                        0.0,
+                        1.0
+                    ]
+                ],
+                "i_wrapping": 1.0,
+                "o_enabled": 1.0,
+                "o_output": ""
+            },
+            "type": "SampleTexture",
+            "ui_data": {
+                "collapsed": false,
+                "pos": [
+                    3530.0,
+                    850.0
+                ],
+                "selected": false
+            }
+        },
+        {
+            "custom_ports": [
+                [
+                    "i_filter_mask",
+                    {
+                        "default": null,
+                        "dtype": "tex2d",
+                        "dtype_args": {},
+                        "dummy": false,
+                        "group": "default",
+                        "hide": true,
+                        "manual_input": true,
+                        "name": "filter_mask",
+                        "widgets": []
+                    }
+                ],
+                [
+                    "i_filter_mode",
+                    {
+                        "default": null,
+                        "dtype": "int",
+                        "dtype_args": {
+                            "choices": [
+                                "input",
+                                "mask",
+                                "filtered",
+                                "input_filtered_masked",
+                                "input_masked",
+                                "filtered_masked"
+                            ],
+                            "default": 2.0
+                        },
+                        "dummy": false,
+                        "group": "default",
+                        "hide": true,
+                        "manual_input": true,
+                        "name": "filter_mode",
+                        "widgets": []
+                    }
+                ],
+                [
+                    "i_filter_bg",
+                    {
+                        "default": null,
+                        "dtype": "color",
+                        "dtype_args": {
+                            "default": [
+                                0.0,
+                                0.0,
+                                0.0,
+                                0.0
+                            ]
+                        },
+                        "dummy": false,
+                        "group": "default",
+                        "hide": true,
+                        "manual_input": true,
+                        "name": "filter_bg",
+                        "widgets": []
+                    }
+                ],
+                [
+                    "i_uTest",
+                    {
+                        "default": null,
+                        "dtype": "float",
+                        "dtype_args": {},
+                        "dummy": false,
+                        "group": "default",
+                        "hide": false,
+                        "manual_input": true,
+                        "name": "uTest",
+                        "widgets": []
+                    }
+                ]
+            ],
+            "id": 8,
+            "manual_values": {
+                "i_advanced_filtering": 0.0,
+                "i_enabled": 1.0,
+                "i_filter_bg": [
+                    0.0,
+                    0.0,
+                    0.0,
+                    0.0
+                ],
+                "i_filter_mask": "",
+                "i_filter_mode": 2.0,
+                "i_force_change": 42.0,
+                "i_input": "",
+                "i_interpolation": 1.0,
+                "i_sizeref": "",
+                "i_transformUV": [
+                    [
+                        1.0,
+                        0.0,
+                        0.0,
+                        0.0
+                    ],
+                    [
+                        0.0,
+                        1.0,
+                        0.0,
+                        0.0
+                    ],
+                    [
+                        0.0,
+                        0.0,
+                        1.0,
+                        0.0
+                    ],
+                    [
+                        0.0,
+                        0.0,
+                        0.0,
+                        1.0
+                    ]
+                ],
+                "i_uTest": 0.0,
+                "i_wrapping": 1.0,
+                "o_enabled": 1.0,
+                "o_output": ""
+            },
+            "type": "Invert",
+            "ui_data": {
+                "collapsed": false,
+                "pos": [
+                    3336.0,
+                    595.0
+                ],
+                "selected": false
+            }
+        },
+        {
+            "custom_ports": [],
+            "id": 9,
+            "manual_values": {
+                "i_uniform": 1.0,
+                "i_x": 1.0399999618530273,
+                "i_y": 1.0399999618530273,
+                "o_output": [
+                    [
+                        1.0399999618530273,
+                        0.0,
+                        0.0,
+                        0.0
+                    ],
+                    [
+                        0.0,
+                        1.0399999618530273,
+                        0.0,
+                        0.0
+                    ],
+                    [
+                        0.0,
+                        0.0,
+                        1.0,
+                        0.0
+                    ],
+                    [
+                        0.0,
+                        0.0,
+                        0.0,
+                        1.0
+                    ]
+                ]
+            },
+            "type": "Scale",
+            "ui_data": {
+                "collapsed": false,
+                "pos": [
+                    2804.0,
+                    295.0
+                ],
+                "selected": false
+            }
+        }
+    ],
+    "ui_data": {
+        "offset": [
+            2356.0,
+            184.0
+        ]
+    }
+}
