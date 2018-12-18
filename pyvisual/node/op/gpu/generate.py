@@ -184,11 +184,19 @@ class GLSLSandbox(TimeMaskedGenerate):
         self._base_fragment_source.data = assets.load_shader(source=source)
 
     def _evaluate(self):
+        # TODO this is a little hack
+        # if fragment source gets loaded in first evaluation
+        # id-input wouldn't be checked in elif
+        # value wouldn't be created yet... only in next evaluation
+        # and then it would count as changed
+        # and (possibly modified) fragment source would be downloaded again / overwritten
+        shader_id_changed = self.have_inputs_changed("id")
+
         if self._last_evaluated == 0.0:
             fragment_source = self.get("fragment_source")
             if fragment_source:
                 self._set_fragment(fragment_source)
-        elif self.have_inputs_changed("id"):
+        elif shader_id_changed:
             shader_id = self.get("id")
             if shader_id:
                 fragment_source = download_glslsandbox(shader_id)

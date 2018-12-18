@@ -333,7 +333,7 @@ class Counter(Node):
         self._value = 0.0
 
     def _evaluate(self):
-        if self.get("reset"):
+        if self.get("reset") or self._last_evaluated == 0.0:
             self._value = self.get("reset_value")
 
         if self.get("operate"):
