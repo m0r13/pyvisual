@@ -122,6 +122,9 @@ class NodeGraph(Graph):
         self.connections_from = defaultdict(lambda: set())
         self.connections_to = defaultdict(lambda: set())
 
+    def add_listener(self, listener):
+        self.listeners.append(listener)
+
     def _assign_node_id(self):
         i = self.node_id_counter
         self.node_id_counter += 1
@@ -325,8 +328,12 @@ class NodeGraph(Graph):
         f.close()
 
     #
-    # functions for changing node graph
+    # functions for accessing node graph
     #
+
+    @property
+    def instances(self):
+        return self.nodes.values()
 
     def set_ui_data(self, ui_data, notify=False):
         self.ui_data = ui_data
@@ -399,12 +406,3 @@ class NodeGraph(Graph):
             self.remove_node(instance)
         self.node_ui_counter = 0
 
-    # selection management
-
-    #
-    # public methods
-    #
-
-    @property
-    def instances(self):
-        return self.nodes.values()

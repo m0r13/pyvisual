@@ -20,7 +20,7 @@ import pyvisual.node as node_meta
 from pyvisual.node.io.texture import Renderer
 import pyvisual.editor.widget as node_widget
 import pyvisual.node.dtype as node_dtype
-from pyvisual.editor.graph import RootGraph, NodeGraph
+from pyvisual.editor.graph import RootGraph, NodeGraph, NodeGraphListener
 from pyvisual import assets
 import pyvisual
 
@@ -167,9 +167,9 @@ def draw_on_channel(draw_list, channel):
 
     draw_list.channels_set_current(old_channel)
 
-class Connection:
-    def __init__(self, editor, src_node, src_port_id, dst_node, dst_port_id):
-        self.editor = editor
+class UIConnection:
+    def __init__(self, ui_graph, src_node, src_port_id, dst_node, dst_port_id):
+        self.ui_graph = ui_graph
         self.src_node = src_node
         self.src_port_id = src_port_id
         self.dst_node = dst_node
@@ -200,7 +200,7 @@ class Connection:
         # is connected when both sides are on a node
         connected = not isinstance(self.src_node, MouseDummyNode) \
                 and not isinstance(self.dst_node, MouseDummyNode)
-        dragging_connection = self.editor.is_dragging_connection()
+        dragging_connection = self.ui_graph.is_dragging_connection()
 
         color = None
         if dragging_connection and connected:
@@ -216,9 +216,9 @@ class Connection:
         # remove itself when input/output port doesn't exist
         # (in case one was a custom port and got removed by the node itself)
         # actually the nodes should somehow trigger the connection removal itself
-        if (isinstance(self.src_node, Node) and not self.src_port_id in self.src_node.instance.ports) \
-                or (isinstance(self.dst_node, Node) and not self.dst_port_id in self.dst_node.instance.ports):
-            self.editor.remove_connection(self)
+        if (isinstance(self.src_node, UINode) and not self.src_port_id in self.src_node.instance.ports) \
+                or (isinstance(self.dst_node, UINode) and not self.dst_port_id in self.dst_node.instance.ports):
+            self.ui_graph.remove_connection(self)
             return
 
         p0 = self.src_node.get_port_position(self.src_port_id)
@@ -261,10 +261,10 @@ class Connection:
     @staticmethod
     def create(editor, node, port_id):
         if node_meta.is_input(port_id):
-            return Connection(editor, dst_node=node, dst_port_id=port_id,
+            return UIConnection(editor, dst_node=node, dst_port_id=port_id,
                     src_node=MouseDummyNode(), src_port_id=None)
         else:
-            return Connection(editor, src_node=node, src_port_id=port_id,
+            return UIConnection(editor, src_node=node, src_port_id=port_id,
                     dst_node=MouseDummyNode(), dst_port_id=None)
 
 class MouseDummyNode:
@@ -276,22 +276,25 @@ class MouseDummyNode:
     def get_port_position(self, port_id):
         return imgui.get_io().mouse_pos
 
-class Node:
+class UINode:
+    
     id_counter = 0
-    def __init__(self, editor, graph, instance, ui_data):
-        self.editor = editor
-        self.graph = graph
+
+    def __init__(self, ui_graph, instance, ui_data):
+        self.ui_graph = ui_graph
         self.instance = instance
         self.spec = instance.spec
 
-        self.window_id = Node.id_counter
-        self.z_index = editor.touch_z_index()
-        Node.id_counter += 1
+        # id for imgui-rendered node
+        self.window_id = UINode.id_counter
+        UINode.id_counter += 1
+        self.z_index = 0
+        self.touch_z_index()
 
         self.port_positions = {}
         self.widgets = {}
         self.widget_port_specs = {}
-        self.connections = defaultdict(lambda: [])
+        self.ui_connections = defaultdict(lambda: [])
 
         #
         # size information of node (everything in local position)
@@ -318,11 +321,11 @@ class Node:
         self.dragging_node_start = None
         self.hovered = False
 
-        self.io = imgui.get_io()
-
         # TODO this is not so nice, have all ui data attributes with setters and call this automatically
         # trigger update of ui data
-        self.editor.node_ui_state_changed(self)
+        self.ui_graph.update_node_ui_state(self)
+
+        self.io = imgui.get_io()
 
     @property
     def pos(self):
@@ -342,13 +345,13 @@ class Node:
         return t_add(self.size, t_mul(self.padding, 2))
 
     def touch_z_index(self):
-        self.z_index = self.editor.touch_z_index()
+        self.z_index = self.ui_graph.touch_z_index()
 
     def attach_connection(self, port_id, connection):
-        self.connections[port_id].append(connection)
+        self.ui_connections[port_id].append(connection)
 
     def detach_connection(self, port_id, connection):
-        self.connections[port_id].remove(connection)
+        self.ui_connections[port_id].remove(connection)
 
     def get_widget(self, port_id):
         # TODO performance? also editor could handle this better maybe
@@ -376,8 +379,8 @@ class Node:
             pos = self.actual_pos
             x = pos[0] if node_meta.is_input(port_id) else pos[0]+self.size[0]+self.padding[0]*2
             y = pos[1] + (self.size[1] + self.padding[1] * 2) / 2
-            return self.editor.local_to_screen((x, y))
-        return self.editor.local_to_screen(self.port_positions[port_id])
+            return self.ui_graph.local_to_screen((x, y))
+        return self.ui_graph.local_to_screen(self.port_positions[port_id])
 
     def show_port(self, draw_list, interaction_allowed, port_id, port_spec):
         #profile.enable()
@@ -435,10 +438,10 @@ class Node:
         x = self.actual_pos[0]
         if not is_input:
             x += self.size[0] + self.padding[0]*2
-        y = self.editor.screen_to_local(port_start)[1] + size[1] / 2
+        y = self.ui_graph.screen_to_local(port_start)[1] + size[1] / 2
         connector_radius = 5.0
         connector_thickness = 2.0
-        connector_center = self.editor.local_to_screen((x, y))
+        connector_center = self.ui_graph.local_to_screen((x, y))
         # port position is in local coordinates
         self.port_positions[port_id] = (x, y)
 
@@ -453,13 +456,13 @@ class Node:
             connector_end = connector_start[0] + 30, port_end[1]
 
         # state of port / connector
-        is_dragging_connection = self.editor.is_dragging_connection()
+        is_dragging_connection = self.ui_graph.is_dragging_connection()
         is_connection_droppable = False
         if is_dragging_connection:
-            is_connection_droppable = self.editor.is_connection_droppable(self, port_id)
+            is_connection_droppable = self.ui_graph.is_connection_droppable(self, port_id)
         # whether this port is part of a dragging connection
-        is_connection_source = self.editor.is_dragging_connection_source(self, port_id)
-        connections = self.connections[port_id]
+        is_connection_source = self.ui_graph.is_dragging_connection_source(self, port_id)
+        connections = self.ui_connections[port_id]
         # constraint: make sure there is maximum one connection per input
         if is_input:
             # but actually there can be two connections on an input
@@ -500,19 +503,19 @@ class Node:
         if hovered_connector and deleteable and not is_dragging_connection:
             imgui.set_tooltip("Delete connection")
             if imgui.is_mouse_clicked(0):
-                ### self.editor.remove_connection(connections[0])
+                ### self.ui_graph.remove_connection(connections[0])
                 # little tweak: start dragging a new connection once a connection is deleted
-                self.editor.drag_connection(self, port_id, remove_connection=connections[0])
+                self.ui_graph.drag_connection(self, port_id, remove_connection=connections[0])
         elif hovered and is_dragging_connection and is_connection_droppable:
             highlight_channel = CHANNEL_NODE_BACKGROUND
             highlight_color = COLOR_PORT_HIGHLIGHT_POSITIVE_ACTIVE
             imgui.set_tooltip("Drop connection")
             if imgui.is_mouse_released(0):
-                self.editor.drop_connection(self, port_id)
+                self.ui_graph.drop_connection(self, port_id)
         elif not is_dragging_connection and hovered_connector:
             imgui.set_tooltip("Create connection")
             if imgui.is_mouse_clicked(0):
-                self.editor.drag_connection(self, port_id)
+                self.ui_graph.drag_connection(self, port_id)
 
         old_channel = draw_list.channels_current
 
@@ -536,7 +539,8 @@ class Node:
 
         padding = (2, 2)
         size_with_padding = size[0] + 2*padding[0], size[1] + 2*padding[1]
-        draw_list.add_rect_filled(t_sub(text_pos, padding), t_add(text_pos, size_with_padding), COLOR_NODE_BACKGROUND(self.editor.node_bg_alpha * 0.5))
+        alpha = self.ui_graph.ui_graph_data.node_bg_alpha
+        draw_list.add_rect_filled(t_sub(text_pos, padding), t_add(text_pos, size_with_padding), COLOR_NODE_BACKGROUND(alpha * 0.5))
         draw_list.add_text(text_pos, imgui.get_color_u32_rgba(0.8, 0.8, 0.8, 1.0), label)
 
         draw_list.channels_set_current(highlight_channel)
@@ -605,16 +609,16 @@ class Node:
             assert self.selected
             assert self.dragging_mouse_start is not None
             delta = t_sub(self.dragging_mouse_start, io.mouse_pos)
-            for node in self.editor.nodes:
+            for node in self.ui_graph.nodes:
                 if node.selected:
                     if node != self:
                         assert not node.dragging, "Only one node may execute drag operation"
                     # pos = old pos + delta
                     node.pos = t_sub(node.dragging_node_start, delta)
-                    self.editor.node_ui_state_changed(node)
+                    self.ui_graph.update_node_ui_state(node)
 
         # draw background
-        upper_left = self.editor.local_to_screen(actual_pos)
+        upper_left = self.ui_graph.local_to_screen(actual_pos)
         lower_right = t_add(upper_left, self.size_with_padding)
         with draw_on_channel(draw_list, CHANNEL_NODE_BACKGROUND):
             if self.instance._last_evaluated > time.time() - 0.2:
@@ -624,11 +628,12 @@ class Node:
                 b = lower_right[0] + offset, upper_left[1] + size - offset
                 draw_list.add_rect_filled(a, b, COLOR_NODE_ACTIVE_INDICATOR)
                 #draw_list.add_rect(a, b, COLOR_NODE_BORDER, 0.0)
-            draw_list.add_rect_filled(upper_left, lower_right, COLOR_NODE_BACKGROUND(self.editor.node_bg_alpha), 0.0)
+            alpha = self.ui_graph.ui_graph_data.node_bg_alpha
+            draw_list.add_rect_filled(upper_left, lower_right, COLOR_NODE_BACKGROUND(alpha), 0.0)
 
         # draw content of node
         # (set_cursor_pos is window coordinates)
-        imgui.set_cursor_pos(self.editor.local_to_window(t_add(actual_pos, self.padding)))
+        imgui.set_cursor_pos(self.ui_graph.local_to_window(t_add(actual_pos, self.padding)))
         imgui.begin_group()
         if self.spec.options["show_title"]:
             imgui.text(self.spec.name)
@@ -665,7 +670,7 @@ class Node:
         # and check if we're actually hovered
         padding_hover = (4, 4)
         padding_selection = (4, 4)
-        upper_left = self.editor.local_to_screen(actual_pos)
+        upper_left = self.ui_graph.local_to_screen(actual_pos)
         upper_left_hover = t_sub(upper_left, padding_hover)
         upper_left_selection = t_sub(upper_left, padding_selection)
         lower_right = t_add(upper_left, self.size_with_padding)
@@ -676,32 +681,32 @@ class Node:
         self.hovered = hoverable and t_between(upper_left_selection, lower_right_selection, io.mouse_pos)
 
         # handle clicks / scrolling on the node
-        if not self.editor.is_dragging_connection() and self.hovered and not imgui.is_any_item_active():
+        if not self.ui_graph.is_dragging_connection() and self.hovered and not imgui.is_any_item_active():
             # handle collapsing/expanding
             if self.collapsible:
                 if self.collapsed and io.mouse_wheel < 0:
                     self.collapsed = False
                     self.touch_z_index()
-                    self.editor.node_ui_state_changed(self)
+                    self.ui_graph.update_node_ui_state(self)
                 elif not self.collapsed and io.mouse_wheel > 0:
                     self.collapsed = True
                     self.touch_z_index()
-                    self.editor.node_ui_state_changed(self)
+                    self.ui_graph.update_node_ui_state(self)
             # handle selection
             if imgui.is_mouse_clicked(0) and not io.key_shift:
                 # ctrl modifier toggles selection
                 if io.key_ctrl:
                     self.selected = not self.selected
-                    self.editor.node_ui_state_changed(self)
+                    self.ui_graph.update_node_ui_state(self)
                 # otherwise select only this node
                 else:
                     if not self.selected:
-                        for node in self.editor.nodes:
+                        for node in self.ui_graph.nodes:
                             node.selected = False
-                            self.editor.node_ui_state_changed(node)
+                            self.ui_graph.update_node_ui_state(node)
                         self.touch_z_index()
                     self.selected = True
-                    self.editor.node_ui_state_changed(self)
+                    self.ui_graph.update_node_ui_state(self)
             # handle context menu
             if imgui.is_mouse_clicked(1):
                 # little hack to have first context menu entry under cursor
@@ -713,7 +718,7 @@ class Node:
         # draw context menu (if opened)
         if imgui.begin_popup("context"):
             if imgui.menu_item("delete")[0]:
-                self.editor.remove_node(self)
+                self.ui_graph.remove_node(self)
             if imgui.menu_item("expand..." if self.collapsed else "collaps...")[0]:
                 self.collapsed = not self.collapsed
             imgui.separator()
@@ -740,20 +745,20 @@ class Node:
 
         # handle clicking the node once it's selected as dragging
         if self.hovered and imgui.is_mouse_clicked(0) and not io.key_shift and interaction_allowed \
-                and self.selected and not self.editor.is_dragging_connection():
+                and self.selected and not self.ui_graph.is_dragging_connection():
             # mark this node as being dragged
             self.dragging = True
             self.dragging_mouse_start = io.mouse_pos
             interacted = True
             # set for all selected nodes where they were at beginning of dragging
-            for node in self.editor.nodes:
+            for node in self.ui_graph.nodes:
                 if node.selected:
                     node.dragging_node_start = node.actual_pos
         # stop dragging once mouse is released again
         if self.dragging and imgui.is_mouse_released(0):
             self.dragging = False
             self.dragging_mouse_start = None
-            for node in self.editor.nodes:
+            for node in self.ui_graph.nodes:
                 node.dragging_node_start = None
 
         # draw border(s)
@@ -769,42 +774,49 @@ class Node:
 
         return interacted
 
-# TODO
-# ideally have some sort of graph renderer / interactor
-# move that stuff out of editor to be able to handle multiple graphs at same time
-class UIData:
-    def __init__(self):
-        self.offset = (0, 0)
-        self.ui_nodes = {}
-        self.connections = []
-
-class NodeEditor:
-    def __init__(self, base_node=node_meta.Node):
+# data that needs to be shared across rendered ui graphs
+class UIGraphData:
+    def __init__(self, base_node):
+        # information about which node types are available
         self.base_node = base_node
         self.node_specs = []
         self.update_available_nodes()
 
-        self.session_graph = NodeGraph()
-        self.session_graph.listeners.append(self)
-        self.background_graph = NodeGraph()
-        self.background_graph.listeners.append(self)
+        # shared clipboard among graphs
+        self.graph_clipboard = None
 
-        self.graph_names = ["session", "beat detection"]
-        self.graphs = [self.session_graph, self.background_graph]
-        self.graphs_index = 0
-        self.current_graph = self.graphs[self.graphs_index]
-        self.root_graph = RootGraph(graphs=self.graphs)
+        # shared style information
+        self.background_alpha = 0.2
+        self.grid_alpha = 0.0
+        self.node_bg_alpha = 0.75
+        self.node_alpha = 1.0
 
-        # collection of ui nodes/connections
-        #self.nodes = []
+    def update_available_nodes(self):
+        # sort by node categories and then by names
+        node_types = self.base_node.get_subclass_nodes(include_self=False)
+        node_types.sort(key=lambda n: n.spec.name)
+        node_types.sort(key=lambda n: n.spec.options["category"])
+
+        self.node_specs = [ n.spec for n in node_types if not n.spec.options["virtual"] ]
+
+class UIGraph(NodeGraphListener):
+    def __init__(self, graph, ui_graph_data):
+        self.graph = graph
+        self.graph.add_listener(self)
+
+        self.ui_offset = (0, 0)
+        self.ui_nodes = {}
+        self.ui_connections = []
+        self.ui_graph_data = ui_graph_data
+
+        # current z index
+        # gets incremented each time node is created / bumped to foreground
         self.nodes_z_index = 0
 
         # window position in screen space
-        self.pos = (0, 0)
-        self.size = (1, 1)
-
-        self.ui_data = defaultdict(lambda: UIData())
-        self.current_ui_data = self.ui_data[self.current_graph]
+        # set in each call to show
+        self.pos = None
+        self.size = None
 
         # interaction state
         # if user is dragging a connection: this is the ui connection object
@@ -821,65 +833,22 @@ class NodeEditor:
         # (for spawning nodes exactly where menu was opened)
         self.context_mouse_pos = None
         self.context_search_test = ""
-        self.graph_clipboard = None
-
-        # appearance options
-        self.render_node = None
-        self.show_graph_enabled = True
-        self.show_test_window = False
-        self.hide_after_seconds = 5
-        self.background_alpha = 0.2
-        self.grid_alpha = 0.0
-        self.node_bg_alpha = 0.75
-        self.node_alpha = 1.0
-
-        # appearance states
-        self.last_mouse_pos = None
-        self.last_mouse_pos_changed = 0
-        self.show_windows = True
-
-        # performance measurement stuffs
-        self.fps = 0.0
-        self.editor_time = 0.0
-        self.editor_time_relative = 0.0
-        self.imgui_render_time = 0.0
-        self.imgui_render_time_relative = 0.0
-        self.processing_time = 0.0
-        self.processing_time_relative = 0.0
-        self.total_time = 0.0
-        self.total_time_relative = 0.0
 
         self.io = imgui.get_io()
         self.key_map = list(self.io.key_map)
-
-        if os.path.isfile("session.json"):
-            self.session_graph.load_file("session.json")
-        if os.path.isfile("background.json"):
-            self.background_graph.load_file("background.json")
-
-    def update_available_nodes(self):
-        # sort by node categories and then by names
-        node_types = self.base_node.get_subclass_nodes(include_self=False)
-        node_types.sort(key=lambda n: n.spec.name)
-        node_types.sort(key=lambda n: n.spec.options["category"])
-
-        # TODO think about naming
-        #   ui nodes vs. node instances vs. node types
-        node_specs = [ n.spec for n in node_types ]
-        self.node_specs = list(filter(lambda s: not s.options["virtual"], node_specs))
-
+    
     #
     # coordinate conversions
     #
+    
     def local_to_window(self, pos):
-        assert self.current_ui_data == self.ui_data[self.current_graph]
-        offset = self.current_ui_data.offset
+        offset = self.ui_offset
         return pos[0] - offset[0], pos[1] - offset[1]
     def local_to_screen(self, pos):
-        offset = self.current_ui_data.offset
+        offset = self.ui_offset
         return self.pos[0] + pos[0] - offset[0], self.pos[1] + pos[1] - offset[1]
     def screen_to_local(self, pos):
-        offset = self.current_ui_data.offset
+        offset = self.ui_offset
         return pos[0] - self.pos[0] + offset[0], pos[1] - self.pos[1] + offset[1]
 
     #
@@ -887,88 +856,66 @@ class NodeEditor:
     #
 
     def changed_ui_data(self, graph, ui_data):
-        # this should only come from current graph
-        # let's keep it here as a sanity check
-        print("UI data changed:", graph == self.current_graph, ui_data)
-        self.ui_data[graph].offset = ui_data.get("offset", (0, 0))
+        self.ui_offset = ui_data.get("offset", (0, 0))
 
     def created_node(self, graph, node, ui_data):
-        print("Created node:", graph == self.current_graph, node.spec.name, ui_data)
-
-        n = Node(self, graph, node, ui_data)
-        
-        ui_nodes = self.ui_data[graph].ui_nodes
-        ui_nodes[node.id] = n
-
-        if isinstance(node, Renderer):
-            self.render_node = node
+        ui_node = UINode(self, node, ui_data)
+        self.ui_nodes[node.id] = ui_node
 
     def removed_node(self, graph, node):
-        #print("removed node")
-        ui_nodes = self.ui_data[graph].ui_nodes
-        assert node.id in ui_nodes
-        n = ui_nodes[node.id]
-        del ui_nodes[node.id]
-
-        if node == self.render_node:
-            self.render_node = None
+        assert node.id in self.ui_nodes
+        del self.ui_nodes[node.id]
 
     def changed_node_ui_data(self, graph, node, ui_data):
-        ui_nodes = self.ui_data[graph].ui_nodes
-        if node.id not in ui_nodes:
-            print("hmm?", graph == self.current_graph, node.spec.name, ui_data)
-            return
+        assert node.id in self.ui_nodes
 
-        print(graph == self.current_graph, node.spec.name, ui_data)
-        n = ui_nodes[node.id]
+        ui_node = self.ui_nodes[node.id]
         if "pos" in ui_data:
-            n.pos = ui_data["pos"]
+            ui_node.pos = ui_data["pos"]
         if "selected" in ui_data:
-            n.selected = ui_data["selected"]
+            ui_node.selected = ui_data["selected"]
 
     def created_connection(self, graph, src_node, src_port_id, dst_node, dst_port_id):
-        ui_nodes = self.ui_data[graph].ui_nodes
-        src_node = ui_nodes[src_node.id]
-        dst_node = ui_nodes[dst_node.id]
-
-        connections = self.ui_data[graph].connections
-        connections.append(Connection(self, src_node, src_port_id, dst_node, dst_port_id))
+        src_node = self.ui_nodes[src_node.id]
+        dst_node = self.ui_nodes[dst_node.id]
+        self.ui_connections.append(UIConnection(self, src_node, src_port_id, dst_node, dst_port_id))
 
     def removed_connection(self, graph, src_node, src_port_id, dst_node, dst_port_id):
-        ui_data = self.ui_data[graph]
-        src_node = ui_data.ui_nodes[src_node.id]
-        dst_node = ui_data.ui_nodes[dst_node.id]
+        src_node = self.ui_nodes[src_node.id]
+        dst_node = self.ui_nodes[dst_node.id]
 
-        for c in ui_data.connections:
+        for c in self.ui_connections:
             if (c.src_node, c.src_port_id, c.dst_node, c.dst_port_id) \
                 != (src_node, src_port_id, dst_node, dst_port_id):
                 continue
             c.disconnect()
-            ui_data.connections.remove(c)
+            self.ui_connections.remove(c)
             return
         assert False, "No ui connection found to remove"
 
-    # not called by graph, but by editor
-    def ui_state_changed(self):
-        self.current_graph.set_ui_data({"offset" : self.current_ui_data.offset})
+    #
+    # callbacks from ui nodes / user interaction logic
+    # update state of graph according to changed ui data
+    #
 
-    # not called by graph, but by ui nodes
-    def node_ui_state_changed(self, node):
+    def update_ui_state(self):
+        self.graph.set_ui_data({"offset" : self.ui_offset})
+
+    def update_node_ui_state(self, node):
         # node is a ui node object
         ui_data = {}
         ui_data["pos"] = node.pos
         ui_data["collapsed"] = node.collapsed
         ui_data["selected"] = node.selected
-        # make sure to tell the right graph about this node!!
-        node.graph.set_node_ui_data(node.instance, ui_data)
+        self.graph.set_node_ui_data(node.instance, ui_data)
 
     #
-    # editor api functions used by nodes, connections and editor itself
+    # editor api functions used by ui nodes, connections and user interaction logic
     #
 
     @property
     def nodes(self):
-        return self.current_ui_data.ui_nodes.values()
+        return self.ui_nodes.values()
 
     def touch_z_index(self):
         i = self.nodes_z_index
@@ -980,16 +927,16 @@ class NodeEditor:
         return io.is_key_down(key) and io.get_key_down_duration(key) == 0.0
 
     def remove_node(self, node):
-        self.current_graph.remove_node(node.instance)
+        self.graph.remove_node(node.instance)
 
     def remove_connection(self, connection):
         c = connection
-        self.current_graph.remove_connection(c.src_node.instance, c.src_port_id, c.dst_node.instance, c.dst_port_id)
+        self.graph.remove_connection(c.src_node.instance, c.src_port_id, c.dst_node.instance, c.dst_port_id)
 
     def drag_connection(self, node, port_id, remove_connection=None):
         # remove_connection can be a connection that should be removed after dragging this connection
         assert self.dragging_connection is None
-        self.dragging_connection = Connection.create(self, node, port_id)
+        self.dragging_connection = UIConnection.create(self, node, port_id)
         self.dragging_target_port_type = not node_meta.is_input(port_id)
         self.dragging_connection_to_remove = remove_connection
 
@@ -1007,7 +954,7 @@ class NodeEditor:
         if node_meta.is_input(port_id) != self.dragging_target_port_type:
             return False
         # constraint: only one connection per input
-        if node_meta.is_input(port_id) and len(node.connections[port_id]) != 0:
+        if node_meta.is_input(port_id) and len(node.ui_connections[port_id]) != 0:
             return False
 
         port_spec = node.instance.ports[port_id]
@@ -1039,31 +986,11 @@ class NodeEditor:
         self.dragging_connection = None
 
         c = connection
-        self.current_graph.create_connection(c.src_node.instance, c.src_port_id, c.dst_node.instance, c.dst_port_id)
+        self.graph.create_connection(c.src_node.instance, c.src_port_id, c.dst_node.instance, c.dst_port_id)
 
     #
-    # misc stuff
+    # selection management
     #
-
-    def timing_callback(self, editor_time, imgui_render_time, processing_time):
-        self.fps = app.clock.get_default().get_fps()
-        self.editor_time = editor_time
-        self.editor_time_relative = editor_time / (1.0 / self.fps)
-        self.imgui_render_time = imgui_render_time
-        self.imgui_render_time_relative = imgui_render_time / (1.0 / self.fps)
-        self.processing_time = processing_time
-        self.processing_time_relative = processing_time / (1.0 / self.fps)
-        self.total_time = editor_time + imgui_render_time + processing_time
-        self.total_time_relative = self.total_time / (1.0 / self.fps)
-
-    #
-    # rendering and interaction handling
-    #
-
-    def switch_graphs(self):
-        self.graphs_index = (self.graphs_index + 1) % len(self.graphs)
-        self.current_graph = self.graphs[self.graphs_index]
-        self.current_ui_data = self.ui_data[self.current_graph]
 
     def get_selection(self):
         # returns selection bounds as rect (start, end)
@@ -1085,7 +1012,11 @@ class NodeEditor:
             node_start = node.actual_pos
             node_end = t_add(node.actual_pos, node.size_with_padding)
             node.selected = t_overlap(selection_start, selection_end, node_start, node_end)
-            self.node_ui_state_changed(node)
+            self.update_node_ui_state(node)
+
+    #
+    # actual graph rendering
+    #
 
     def show_context_menu(self):
         io = self.io
@@ -1127,12 +1058,12 @@ class NodeEditor:
             changed, self.context_search_text = imgui.input_text("", self.context_search_text, 255, imgui.INPUT_TEXT_ENTER_RETURNS_TRUE)
 
             def filter_nodes(text):
-                for i, spec in enumerate(self.node_specs):
+                for i, spec in enumerate(self.ui_graph_data.node_specs):
                     label = "%s (%s)" % (spec.name, spec.module_name)
                     if is_substring_partly(text.lower(), label.lower()):
                         yield label, spec, {}
 
-                    for name, preset_values in spec.cls.get_presets(self.current_graph):
+                    for name, preset_values in spec.cls.get_presets(self.graph):
                         label = "%s: %s (%s)" % (spec.name, name, spec.module_name)
                         if is_substring_partly(text.lower(), label.lower()):
                             yield label, spec, preset_values
@@ -1154,8 +1085,7 @@ class NodeEditor:
                 imgui.selectable(label, is_selected)
                 if imgui.is_item_clicked() or (is_selected and changed):
                     pos = self.screen_to_local(self.context_mouse_pos)
-                    #self.nodes.append(Node(self, spec, pos=pos))
-                    self.current_graph.create_node(spec, values=preset_values, ui_data={"pos" : pos})
+                    self.graph.create_node(spec, values=preset_values, ui_data={"pos" : pos})
                     # TODO it would be nice to set the mouse position back to where the node is now
                     imgui.close_current_popup()
                 imgui.pop_id()
@@ -1169,17 +1099,17 @@ class NodeEditor:
             #    imgui.set_window_focus("ImGui Demo")
             if imgui.menu_item("update node types")[0]:
                 pyvisual.node.op.gpu.filter.load_filter_classes()
-                self.update_available_nodes()
+                self.ui_graph_data.update_available_nodes()
             if imgui.menu_item("reset offset")[0]:
-                self.current_ui_data.offset = (0, 0)
-                self.ui_state_changed()
+                self.ui_offset = (0, 0)
+                self.update_ui_state()
 
             imgui.end_popup()
 
         import_path = node_widget.imgui_pick_file("context_import", assets.SAVE_PATH)
         if import_path is not None:
             offset = self.screen_to_local(self.context_mouse_pos)
-            self.current_graph.import_file(import_path, pos_offset=offset)
+            self.graph.import_file(import_path, pos_offset=offset)
 
         if reopen_popup:
             imgui.close_current_popup()
@@ -1187,8 +1117,37 @@ class NodeEditor:
 
         #profile.disable()
 
-    def show_graph(self, draw_list):
+    def show(self, draw_list):
         io = self.io
+
+        # get position and size of window we're rendering graph in
+        self.pos = imgui.get_window_position()
+        self.size = imgui.get_window_size()
+
+        # draw background color / grid
+        with draw_on_channel(draw_list, CHANNEL_BACKGROUND):
+            # draw graph background
+            d = self.ui_graph_data
+            draw_list.add_rect_filled(self.pos, t_add(self.pos, self.size), COLOR_EDITOR_BACKGROUND(d.background_alpha))
+
+            if d.grid_alpha > 0.001:
+                # how does the grid work?
+                #   -> find local coords where we see first grid pos
+                #   -> build grid from there
+                # round n down to nearest divisor d: n - (n % d)
+                # (grid_x0 / grid_y0 in local coordinates btw)
+                offset = self.ui_offset
+                grid_size = EDITOR_GRID_SIZE
+                grid_x0 = int(offset[0] - (offset[0] % grid_size))
+                grid_x1 = int(grid_x0 + self.size[0] + grid_size)
+                grid_y0 = int(offset[1] - (offset[1] % grid_size))
+                grid_y1 = int(grid_y0 + self.size[1] + grid_size)
+
+                c = COLOR_EDITOR_GRID(d.grid_alpha)
+                for x in range(grid_x0, grid_x1, grid_size):
+                    draw_list.add_line(self.local_to_screen((x, grid_y0)), self.local_to_screen((x, grid_y1)), c)
+                for y in range(grid_y0, grid_y1, grid_size):
+                    draw_list.add_line(self.local_to_screen((grid_x0, y)), self.local_to_screen((grid_x1,  y)), c)
 
         # handle selection
         if self.dragging_selection:
@@ -1204,8 +1163,8 @@ class NodeEditor:
                 draw_list.add_rect(upper_left, lower_right, COLOR_SELECTION_BORDER)
 
         # draw / handle nodes and connections
-        imgui.push_style_var(imgui.STYLE_ALPHA, self.node_alpha)
-        for connection in self.current_ui_data.connections:
+        imgui.push_style_var(imgui.STYLE_ALPHA, self.ui_graph_data.node_alpha)
+        for connection in self.ui_connections:
             connection.show(draw_list)
         # little hack: to get overlapping nodes and such correct,
         #    render nodes in an order. nodes request a new z-index from the
@@ -1240,7 +1199,7 @@ class NodeEditor:
         # we're checking here if a connection was dropped into nowhere
         if self.is_dragging_connection() and imgui.is_mouse_released(0):
             self.dragging_connection.disconnect()
-            #self.connections.remove(self.dragging_connection)
+            #self.ui_connections.remove(self.dragging_connection)
             self.dragging_connection = None
             if self.dragging_connection_to_remove is not None:
                 self.remove_connection(self.dragging_connection_to_remove)
@@ -1249,7 +1208,7 @@ class NodeEditor:
         # handle a starting selection
         # it's important that ctrl is not pressed (ctrl is for dragging position)
         # and that no node is being dragged
-        no_node_dragging = lambda: not any([ node.dragging for node in self.nodes])
+        no_node_dragging = lambda: not any([ node.dragging for node in self.nodes ])
         if imgui.is_window_hovered() and not self.is_dragging_connection() \
                 and imgui.is_mouse_clicked(0) and not io.key_shift \
                 and no_node_dragging():
@@ -1277,40 +1236,41 @@ class NodeEditor:
             if self.is_key_down(key_a):
                 for node in list(self.nodes):
                     node.selected = True
-                    self.node_ui_state_changed(node)
+                    self.update_node_ui_state(node)
             # invert selection
             if self.is_key_down(key_i):
                 for node in list(self.nodes):
                     node.selected = not node.selected
-                    self.node_ui_state_changed(node)
+                    self.update_node_ui_state(node)
             # select no nodes
             if self.is_key_down(key_escape):
                 for node in list(self.nodes):
                     node.selected = False
-                    self.node_ui_state_changed(node)
+                    self.update_node_ui_state(node)
             # delete selected nodes
             if self.is_key_down(key_delete) or self.is_key_down(key_d):
                 for node in list(self.nodes):
                     if node.selected:
                         self.remove_node(node)
 
+            d = self.ui_graph_data
             # copy selected nodes
             if self.is_key_down(key_c):
-                self.node_clipboard = self.current_graph.serialize_selected()
+                d.graph_clipboard = self.graph.serialize_selected()
             # paste copied nodes
             if self.is_key_down(key_v):
-                if self.node_clipboard is not None:
+                if d.graph_clipboard is not None:
                     offset = self.screen_to_local(io.mouse_pos)
-                    self.current_graph.unserialize_as_selected(self.node_clipboard, pos_offset=offset)
+                    self.graph.unserialize_as_selected(d.graph_clipboard, pos_offset=offset)
             # cut selected nodes
             if self.is_key_down(key_x):
-                self.node_clipboard = self.current_graph.serialize_selected()
+                d.graph_clipboard = self.graph.serialize_selected()
                 for node in list(self.nodes):
                     if node.selected:
                         self.remove_node(node)
             # duplicate selected nodes
             if self.is_key_down(key_f):
-                self.current_graph.duplicate_selected((20, 20))
+                self.graph.duplicate_selected((20, 20))
 
             # handle start dragging position with shift+click
             if not self.is_dragging_connection() \
@@ -1318,8 +1278,8 @@ class NodeEditor:
                 self.dragging_position = True
         # update position
         if self.dragging_position:
-            self.current_ui_data.offset = t_sub(self.current_ui_data.offset, imgui.get_mouse_drag_delta())
-            self.ui_state_changed()
+            self.ui_offset = t_sub(self.ui_offset, imgui.get_mouse_drag_delta())
+            self.update_ui_state()
             imgui.reset_mouse_drag_delta()
         # end of dragging position
         if self.dragging_position and imgui.is_mouse_released(0):
@@ -1327,6 +1287,91 @@ class NodeEditor:
 
         # show context
         self.show_context_menu()
+
+class NodeEditor(NodeGraphListener):
+    def __init__(self, base_node=node_meta.Node):
+        self.session_graph = NodeGraph()
+        self.background_graph = NodeGraph()
+
+        self.graph_names = ["session", "beat detection"]
+        self.graphs = [self.session_graph, self.background_graph]
+        # need to register as listener in graphs to catch render nodes
+        for graph in self.graphs:
+            graph.add_listener(self)
+
+        self.ui_graph_data = UIGraphData(base_node=base_node)
+        self.ui_graphs = [ UIGraph(g, self.ui_graph_data) for g in self.graphs ]
+        self.current_graph_index = 0
+        self.current_graph = self.graphs[self.current_graph_index]
+        self.current_ui_graph = self.ui_graphs[self.current_graph_index]
+        self.root_graph = RootGraph(graphs=self.graphs)
+
+        # appearance options
+        self.show_graph = True
+        self.show_test_window = False
+        self.hide_after_seconds = 5
+        # rendering nodes caught from graph
+        self.render_nodes = []
+
+        # appearance states
+        self.last_mouse_pos = None
+        self.last_mouse_pos_changed = 0
+        self.show_windows = True
+
+        # performance measurement stuffs
+        self.fps = 0.0
+        self.editor_time = 0.0
+        self.editor_time_relative = 0.0
+        self.imgui_render_time = 0.0
+        self.imgui_render_time_relative = 0.0
+        self.processing_time = 0.0
+        self.processing_time_relative = 0.0
+        self.total_time = 0.0
+        self.total_time_relative = 0.0
+
+        self.io = imgui.get_io()
+        self.key_map = list(self.io.key_map)
+
+        if os.path.isfile("session.json"):
+            self.session_graph.load_file("session.json")
+        if os.path.isfile("background.json"):
+            self.background_graph.load_file("background.json")
+
+    #
+    # misc stuff
+    #
+
+    def timing_callback(self, editor_time, imgui_render_time, processing_time):
+        self.fps = app.clock.get_default().get_fps()
+        self.editor_time = editor_time
+        self.editor_time_relative = editor_time / (1.0 / self.fps)
+        self.imgui_render_time = imgui_render_time
+        self.imgui_render_time_relative = imgui_render_time / (1.0 / self.fps)
+        self.processing_time = processing_time
+        self.processing_time_relative = processing_time / (1.0 / self.fps)
+        self.total_time = editor_time + imgui_render_time + processing_time
+        self.total_time_relative = self.total_time / (1.0 / self.fps)
+
+    def created_node(self, graph, node, ui_data):
+        if isinstance(node, Renderer):
+            self.render_nodes.append(node)
+
+    def removed_node(self, graph, node):
+        if isinstance(node, Renderer):
+            self.render_nodes.remove(node)
+
+    #
+    # rendering and interaction handling
+    #
+
+    def is_key_down(self, key):
+        io = self.io
+        return io.is_key_down(key) and io.get_key_down_duration(key) == 0.0
+
+    def switch_graphs(self):
+        self.current_graph_index = (self.current_graph_index + 1) % len(self.graphs)
+        self.current_graph = self.graphs[self.current_graph_index]
+        self.current_ui_graph = self.ui_graphs[self.current_graph_index]
 
     def show(self):
         # create editor window
@@ -1356,47 +1401,26 @@ class NodeEditor:
             # renderer output as background image
             # TODO aspect ratio!
             # TODO make size, position configurable?
-            if self.render_node is not None:
-                texture = self.render_node.texture
+            # always take render node that was created last
+            if len(self.render_nodes) != 0:
+                texture = self.render_nodes[-1].texture
                 if texture is not None:
                     handle = texture._handle
                     draw_list.add_image(handle, self.pos, t_add(self.pos, self.size))
 
-            # render background color / grid only if graph is shown
-            if self.show_graph_enabled:
-                draw_list.add_rect_filled(self.pos, t_add(self.pos, self.size), COLOR_EDITOR_BACKGROUND(self.background_alpha))
-
-                # how does the grid work?
-                #   -> find local coords where we see first grid pos
-                #   -> build grid from there
-                # round n down to nearest divisor d: n - (n % d)
-                # (grid_x0 / grid_y0 in local coordinates btw)
-                offset = self.current_ui_data.offset
-                grid_size = EDITOR_GRID_SIZE
-                grid_x0 = int(offset[0] - (offset[0] % grid_size))
-                grid_x1 = int(grid_x0 + self.size[0] + grid_size)
-                grid_y0 = int(offset[1] - (offset[1] % grid_size))
-                grid_y1 = int(grid_y0 + self.size[1] + grid_size)
-
-                c = COLOR_EDITOR_GRID(self.grid_alpha)
-                for x in range(grid_x0, grid_x1, grid_size):
-                    draw_list.add_line(self.local_to_screen((x, grid_y0)), self.local_to_screen((x, grid_y1)), c)
-                for y in range(grid_y0, grid_y1, grid_size):
-                    draw_list.add_line(self.local_to_screen((grid_x0, y)), self.local_to_screen((grid_x1,  y)), c)
-
-        if self.show_graph_enabled:
-            self.show_graph(draw_list)
+        if self.show_graph:
+            self.current_ui_graph.show(draw_list)
 
         # make sure to not get triggered when pressing e inside a text field
         if not io.want_capture_keyboard and not io.want_text_input and self.is_key_down(glfw.GLFW_KEY_E):
             self.switch_graphs()
         if self.is_key_down(glfw.GLFW_KEY_F3):
-            self.show_graph_enabled = not self.show_graph_enabled
+            self.show_graph = not self.show_graph
             self.last_mouse_pos_changed = time.time()
 
         draw_list.channels_merge()
 
-        if self.show_windows or self.show_graph_enabled:
+        if self.show_windows or self.show_graph:
             pos = imgui.get_cursor_screen_pos()
             w, h = imgui.get_window_size()
             dock_padding = 0
@@ -1439,7 +1463,7 @@ class NodeEditor:
                 if export_path is not None:
                     self.current_graph.export_file(export_path)
 
-                imgui.text("current graph: %s" % self.graph_names[self.graphs_index])
+                imgui.text("current graph: %s" % self.graph_names[self.current_graph_index])
 
                 imgui.end()
 
@@ -1453,13 +1477,15 @@ class NodeEditor:
                 imgui.end()
 
             if imgui.begin("appearance", False, flags):
-                changed, self.show_graph_enabled = imgui.checkbox("show graph", self.show_graph_enabled)
+                changed, self.show_graph = imgui.checkbox("show graph", self.show_graph)
                 changed, self.show_test_window = imgui.checkbox("show test window", self.show_test_window)
                 changed, self.hide_after_seconds = imgui.input_int("hide after n seconds", self.hide_after_seconds, 5, 60)
-                changed, self.background_alpha = imgui.slider_float("bg alpha", self.background_alpha, 0.0, 1.0)
-                changed, self.grid_alpha = imgui.slider_float("grid alpha", self.grid_alpha, 0.0, 1.0)
-                changed, self.node_alpha = imgui.slider_float("node alpha", self.node_alpha, 0.0, 1.0)
-                changed, self.node_bg_alpha = imgui.slider_float("node bg alpha", self.node_bg_alpha, 0.0, 1.0)
+
+                d = self.ui_graph_data
+                changed, d.background_alpha = imgui.slider_float("bg alpha", d.background_alpha, 0.0, 1.0)
+                changed, d.grid_alpha = imgui.slider_float("grid alpha", d.grid_alpha, 0.0, 1.0)
+                changed, d.node_alpha = imgui.slider_float("node alpha", d.node_alpha, 0.0, 1.0)
+                changed, d.node_bg_alpha = imgui.slider_float("node bg alpha", d.node_bg_alpha, 0.0, 1.0)
                 imgui.end()
 
             if self.show_test_window:
