@@ -4,6 +4,7 @@ uniform float uBrightness; // {"default" : 0.5}
 uniform float uTheta;
 
 uniform float uLightTheta;
+uniform float uLightScale; // {"default" : 1.0}
 
 #include <lib/noise3D.glsl>
 
@@ -122,7 +123,7 @@ void generateFrag() {
         vec3 pLight = vec3(d * 4.8, lightTheta * 2.0, 0.0);
         float lightchange = fbm2(pLight);
 
-        v += pow(1.0 - smoothstep(0, mix(0.25, 0.4, lightchange), abs(norm(actualTheta + lightTheta))), 2.0) * 0.5;
+        v += pow(1.0 - smoothstep(0, mix(0.25, 0.4, lightchange) * uLightScale, abs(norm(actualTheta + lightTheta))), 2.0) * 0.5;
         pyvisualOutColor = vec4(vec3(v), 1.0);
     } else {
         pyvisualOutColor = vec4(1.0);
