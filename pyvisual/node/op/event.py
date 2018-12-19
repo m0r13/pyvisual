@@ -17,6 +17,7 @@ class TimerEvent(Node):
     class Meta:
         inputs = [
             {"name" : "enabled", "dtype" : dtype.bool, "dtype_args" : {"default" : True}},
+            {"name" : "force", "dtype" : dtype.event},
             {"name" : "min", "dtype" : dtype.float, "dtype_args" : {"default" : 1, "range" : [0.00001, float("inf")]}},
             {"name" : "max", "dtype" : dtype.float, "dtype_args" : {"default" : 1, "range" : [0.00001, float("inf")]}},
         ]
@@ -31,7 +32,8 @@ class TimerEvent(Node):
 
     def _evaluate(self):
         t = time.time()
-        if self.get("enabled") and self._next_event is not None and t > self._next_event:
+        if (self.get("enabled") and self._next_event is not None and t > self._next_event) \
+                or self.get("force"):
             self._next_event = None
             self.set("out", True)
         else:
