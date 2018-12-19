@@ -79,7 +79,7 @@ class Lambda(Node):
         elif self.run_error is not None:
             imgui.text_colored("Runtime error. (?)", 1.0, 0.0, 0.0)
             if imgui.is_item_hovered():
-                imgui.set_tooltip(self.runtime_error)
+                imgui.set_tooltip(self.run_error)
         else:
             imgui.text("Lambda compiled.")
 

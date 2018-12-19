@@ -1,6 +1,7 @@
 import time
 import math
 import random
+import noise
 import numpy as np
 from collections import OrderedDict
 from pyvisual.node.base import Node
@@ -166,6 +167,27 @@ class RandomFloat(Node):
                 value = min_value + v * mod
 
             self.set("output", value)
+
+class Noise1D(Node):
+    class Meta:
+        inputs = [
+            {"name" : "x", "dtype" : dtype.float},
+            {"name" : "min", "dtype" : dtype.float, "dtype_args" : {"default" : 0.0}},
+            {"name" : "max", "dtype" : dtype.float, "dtype_args" : {"default" : 1.0}},
+            {"name" : "octaves", "dtype" : dtype.int, "dtype_args" : {"default" : 1}, "group" : "additional"},
+            {"name" : "persistence", "dtype" : dtype.float, "dtype_args" : {"default" : 0.5}, "group" : "additional"},
+            {"name" : "lacunarity", "dtype" : dtype.float, "dtype_args" : {"default" : 2.0}, "group" : "additional"},
+        ]
+        outputs = [
+            {"name" : "output", "dtype" : dtype.float}
+        ]
+
+    def _evaluate(self):
+        octaves = int(self.get("octaves"))
+        persistence = self.get("persistence")
+        lacunarity = self.get("lacunarity")
+        alpha = noise.pnoise1(self.get("x"), octaves=octaves, persistence=persistence, lacunarity=lacunarity) * 0.5 + 0.5
+        self.set("output", (1.0 - alpha) * self.get("min") + alpha * self.get("max"))
 
 # TODO maybe also allow other time distributions
 class GlitchTimer(Node):
