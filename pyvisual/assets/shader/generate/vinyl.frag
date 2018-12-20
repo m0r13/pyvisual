@@ -6,11 +6,15 @@ uniform float uTheta;
 uniform float uLightTheta;
 uniform float uLightScale; // {"default" : 1.0}
 
-#include <lib/noise3D.glsl>
+#include <lib/noise2D.glsl>
 
 const float PI = 3.1415952;
 
-float fbm(vec3 p) {
+float random1D(float x) {
+    return fract(sin(x) * 43758.5453123);
+}
+
+float fbm(vec2 p) {
     const int octaves = 8;
     float gain = 0.75;
     float lacunarity = 2.0;
@@ -26,7 +30,7 @@ float fbm(vec3 p) {
     return min(1.0, f);
 }
 
-float fbm2(vec3 p) {
+float fbm2(vec2 p) {
     const int octaves = 4;
     float gain = 0.9;
     float lacunarity = 2.0;
@@ -87,7 +91,7 @@ void generateFrag() {
         float dd = d - mod(d, 1.0 / 250.0);
         float ddd = d - mod(d, 1.0 / 50.0);
         // this makes leadin/out groove have one brightness each without noise
-        vec3 p = vec3(clamp(d, main, leadout_groove), pyvisualTime * 0.1, 0.0);
+        vec2 p = vec2(clamp(d, main, leadout_groove), pyvisualTime * 0.1);
         float noise = fbm(p);
         // was 0.5 - 1.0
         v *= mix(0.5, 1.0, noise);
@@ -105,10 +109,10 @@ void generateFrag() {
             theta = 1.0 - theta;
         }
 
-        float randomOffset = snoise(vec3(dd * 10.0, 0.0, 0.0));
+        float randomOffset = random1D(dd * 10.0);
         float grooveDist = theta * U;
         float groovePosition = randomOffset + grooveDist * 0.1;
-        vec3 pGroove = vec3(ddd * 4.8, mod(groovePosition * 100.0, 5.0), 0.0);
+        vec2 pGroove = vec2(ddd * 4.8, mod(groovePosition * 100.0, 5.0));
         float grooveRandom = snoise(pGroove);
 
         float steps = 2.0;
@@ -120,7 +124,7 @@ void generateFrag() {
 
         float actualTheta = norm(atan(uv.y, uv.x));
         float lightTheta = uLightTheta;
-        vec3 pLight = vec3(d * 4.8, lightTheta * 2.0, 0.0);
+        vec2 pLight = vec2(d * 4.8, lightTheta * 2.0);
         float lightchange = fbm2(pLight);
 
         v += pow(1.0 - smoothstep(0, mix(0.25, 0.4, lightchange) * uLightScale, abs(norm(actualTheta + lightTheta))), 2.0) * 0.5;
