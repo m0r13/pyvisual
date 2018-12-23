@@ -72,21 +72,32 @@ def t_cull(node_start, node_end):
 def round_next(n, d):
     return n - (n % d)
 
-def is_substring_partly(substring, string):
-    # returns if substring is a substring of string,
+def match_substring_partly(substring, string):
+    # returns (True, n) if substring is a substring of string,
+    # n determines how many characters are skipped in total
     # where characters in string can be skipped
+    # otherwise it returns (False, _)
     # example: "infloat" is in "inputfloat"
 
     # empty substring always contained
     if not substring:
-        return True
-    i = 0
-    for c in string:
-        if c == substring[i]:
-            i += 1
-            if i == len(substring):
-                return True
-    return i == len(substring)
+        return True, 0
+    # index in substring
+    j = 0
+    # number of skipped characters
+    n = 0
+    # last index in string where we found the same character
+    last_match = None
+    for i, c in enumerate(string):
+        if c == substring[j]:
+            # advance one character in substring
+            j += 1
+            if last_match is not None:
+                n += i - last_match - 1
+            last_match = i
+            if j == len(substring):
+                return True, n
+    return j == len(substring), n
 
 def multiply_alpha(color, alpha):
     # TODO use this instead of lambdas below?
@@ -1058,16 +1069,22 @@ class UIGraph(NodeGraphListener):
             changed, self.context_search_text = imgui.input_text("", self.context_search_text, 255, imgui.INPUT_TEXT_ENTER_RETURNS_TRUE)
 
             def filter_nodes(text):
+                filtered = []
                 for i, spec in enumerate(self.ui_graph_data.node_specs):
                     label = "%s (%s)" % (spec.name, spec.module_name)
-                    if is_substring_partly(text.lower(), label.lower()):
-                        yield label, spec, {}
+                    contained, n = match_substring_partly(text.lower(), label.lower())
+                    if contained:
+                        filtered.append((n, (label, spec, {})))
 
                     for name, preset_values in spec.cls.get_presets(self.graph):
                         label = "%s: %s (%s)" % (spec.name, name, spec.module_name)
-                        if is_substring_partly(text.lower(), label.lower()):
-                            yield label, spec, preset_values
-            entries = list(filter_nodes(self.context_search_text))
+                        contained, n = match_substring_partly(text.lower(), label.lower())
+                        if contained:
+                            filtered.append((n, (label, spec, preset_values)))
+                filtered.sort(key = lambda item: item[0])
+                return [ item[1] for item in filtered ]
+
+            entries = filter_nodes(self.context_search_text)
 
             if self.is_key_down(key_up_arrow):
                 self.context_index -= 1
