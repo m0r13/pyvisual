@@ -1,7 +1,9 @@
 import json
+import time
 from collections import defaultdict, OrderedDict
 import pyvisual.node.base as node_meta
 from pyvisual.node import dtype
+from glumpy import gl
 
 class NodeGraphListener:
     def changed_ui_data(self, graph, ui_data):
@@ -44,6 +46,7 @@ def unformat_port_spec(port_spec):
 class Graph:
     def __init__(self):
         self.parent = self
+        self.stats = defaultdict(lambda: [])
 
     @property
     def instances(self):
@@ -72,12 +75,19 @@ class Graph:
             dfs(instance)
         return sorted_instances, circular
 
-    def evaluate(self, reset_instances=True):
+    def evaluate(self, reset_instances=True, record_stats=False):
         instances, _ = self.sorted_instances
         active_instances = set()
         for instance in instances:
+            if record_stats:
+                start = time.time()
             if instance.evaluate():
                 active_instances.add(instance)
+            if record_stats:
+                gl.glFinish()
+                end = time.time()
+                self.stats[instance].append(end - start)
+
         # reset evaluation status and set all inputs/outputs unchanged!
         # if you want to evaluate outputs (for example Module node wants this),
         # pass reset_instances=False and call reset_instances() later manually
@@ -88,6 +98,51 @@ class Graph:
     def reset_instances(self):
         for instance in self.instances:
             instance.evaluated = False
+
+    def get_stats(self):
+        collected_stats = {}
+        total = 0.0
+        for instance, timings in self.stats.items():
+            min_time = min(timings)
+            max_time = max(timings)
+            avg_time = sum(timings) / len(timings)
+            total += avg_time
+            collected_stats[instance] = {"min" : min_time, "max" : max_time, "avg" : avg_time}
+        for instance, values in collected_stats.items():
+            values["rel"] = values["avg"] / total
+
+        def sort_and_cum(collected_stats):
+            grouped_stats = []
+            for key, values in collected_stats.items():
+                grouped_stats.append((key, values))
+            grouped_stats.sort(key = lambda p: p[1]["avg"], reverse=True)
+
+            cum = 1.0
+            for key, values in grouped_stats:
+                cum -= values["rel"]
+                values["cum"] = cum
+            return grouped_stats
+
+        by_instance = sort_and_cum(collected_stats)
+
+        by_node_type = {}
+        def merge_values(values0, values1):
+            return {
+                "min" : min(values0["min"], values1["min"]),
+                "max" : max(values0["max"], values1["max"]),
+                "avg" : values0["avg"] + values1["avg"],
+                "rel" : values0["rel"] + values1["rel"],
+            }
+        for instance, values in collected_stats.items():
+            node_type = instance.spec.name
+            if node_type in by_node_type:
+                by_node_type[node_type] = merge_values(by_node_type[node_type], values)
+            else:
+                by_node_type[node_type] = values
+        by_node_type = sort_and_cum(by_node_type)
+
+        self.stats = defaultdict(lambda: [])
+        return by_instance, by_node_type 
 
     def stop(self):
         for instance in self.instances:
@@ -149,7 +204,11 @@ class NodeGraph(Graph):
             node_data["ui_data"] = self.node_ui_data[node.id]
 
             manual_values = {}
-            for port_id, value in node.values.items():
+            # make sure to catch ALL values
+            # (values are only created when they are needed)
+            # TODO maybe improve this
+            for port_id in node.ports.keys():
+                value = node.get_value(port_id)
                 port_spec = node.ports[port_id]
                 dtype = port_spec["dtype"]
                 if isinstance(value, node_meta.InputValueHolder):

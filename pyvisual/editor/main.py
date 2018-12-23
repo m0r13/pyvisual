@@ -8,6 +8,7 @@ import os
 import sys
 import time
 import contextlib
+import numpy as np
 from collections import defaultdict
 from glumpy import app, gloo, gl
 from glumpy.ext import glfw
@@ -29,7 +30,8 @@ profile = cProfile.Profile()
 
 # create window / opengl context already here
 # imgui seems to cause problems otherwise with imgui.get_color_u32_rgba without context
-window = app.Window()
+external_window = app.Window()
+window = app.Window(context=external_window)
 imgui_renderer = glumpy_imgui.GlumpyGlfwRenderer(window, True)
 
 # utilities
@@ -1325,6 +1327,7 @@ class NodeEditor(NodeGraphListener):
 
         # appearance options
         self.show_graph = True
+        self.show_external_window = False
         self.show_test_window = False
         self.hide_after_seconds = 5
         # rendering nodes caught from graph
@@ -1334,6 +1337,16 @@ class NodeEditor(NodeGraphListener):
         self.last_mouse_pos = None
         self.last_mouse_pos_changed = 0
         self.show_windows = True
+
+        # shader program to render output texture
+        vertex = assets.load_shader(path="common/passthrough.vert")
+        fragment = assets.load_shader(path="common/passthrough.frag")
+        self.texture_program = gloo.Program(vertex, fragment, count=4, version="150")
+        self.texture_program["iPosition"] = [(-1,-1), (-1,+1), (+1,-1), (+1,+1)]
+        self.texture_program["iTexCoord"] = [( 0, 1), ( 0, 0), ( 1, 1), ( 1, 0)]
+        self.texture_program["uModelViewProjection"] = np.eye(4, dtype=np.float32)
+        self.texture_program["uTextureSize"] = np.float32([1.0, 1.0], dtype=np.float32)
+        self.texture_program["uTransformUV"] = np.eye(4, dtype=np.float32)
 
         # performance measurement stuffs
         self.fps = 0.0
@@ -1369,13 +1382,28 @@ class NodeEditor(NodeGraphListener):
         self.total_time = editor_time + imgui_render_time + processing_time
         self.total_time_relative = self.total_time / (1.0 / self.fps)
 
+    # callback methods from graph
+    # to catch render nodes
     def created_node(self, graph, node, ui_data):
         if isinstance(node, Renderer):
             self.render_nodes.append(node)
-
     def removed_node(self, graph, node):
         if isinstance(node, Renderer):
             self.render_nodes.remove(node)
+
+    @property
+    def output_texture(self):
+        if len(self.render_nodes) == 0:
+            return None
+        return self.render_nodes[-1].texture
+
+    def draw_output_texture(self, target_size):
+        texture = self.output_texture
+        if texture is None:
+            return
+
+        self.texture_program["uInputTexture"] = texture
+        self.texture_program.draw(gl.GL_TRIANGLE_STRIP)
 
     #
     # rendering and interaction handling
@@ -1396,16 +1424,26 @@ class NodeEditor(NodeGraphListener):
 
         io = self.io
         w, h = io.display_size
+
+        # some styling and other flags
         imgui.set_next_window_position(0, 0)
         imgui.set_next_window_size(w, h)
-
         flags = imgui.WINDOW_NO_RESIZE | imgui.WINDOW_NO_MOVE | imgui.WINDOW_NO_TITLE_BAR | imgui.WINDOW_NO_BRING_TO_FRONT_ON_FOCUS | imgui.WINDOW_NO_SCROLLBAR | imgui.WINDOW_NO_SCROLL_WITH_MOUSE
+        pop_style_vars = lambda: imgui.pop_style_var(2)
         imgui.push_style_var(imgui.STYLE_WINDOW_BORDERSIZE, 0.0)
+        imgui.push_style_var(imgui.STYLE_FRAME_ROUNDING, 0.0)
+        imgui.push_style_color(imgui.COLOR_WINDOW_BACKGROUND, 0.0, 0.0, 0.0, 0.0)
+
         expanded, _ = imgui.begin("NodeEditor", False, flags)
         self.pos = imgui.get_window_position()
         self.size = imgui.get_window_size()
+
+        # make only editor window have transparent background
+        # thus pop the color from the stack again already
+        imgui.pop_style_color()
+
         if not expanded:
-            imgui.pop_style_var(1)
+            pop_style_vars()
             return
 
         # initialize draw list
@@ -1413,18 +1451,9 @@ class NodeEditor(NodeGraphListener):
         draw_list.channels_split(CHANNEL_COUNT)
         draw_list.channels_set_current(CHANNEL_DEFAULT)
 
-        # draw background
-        with draw_on_channel(draw_list, CHANNEL_BACKGROUND):
-            # renderer output as background image
-            # TODO aspect ratio!
-            # TODO make size, position configurable?
-            # always take render node that was created last
-            if len(self.render_nodes) != 0:
-                texture = self.render_nodes[-1].texture
-                if texture is not None:
-                    handle = texture._handle
-                    draw_list.add_image(handle, self.pos, t_add(self.pos, self.size))
-
+        # show graph
+        # if you're wondering where output texture in background comes from:
+        # it's rendered in the render loop outside of the editor
         if self.show_graph:
             self.current_ui_graph.show(draw_list)
 
@@ -1446,7 +1475,7 @@ class NodeEditor(NodeGraphListener):
             flags_static = imgui.WINDOW_NO_MOVE | imgui.WINDOW_NO_RESIZE
 
             imgui.set_next_window_position(pos[0] + dock_padding, pos[1] + dock_padding)
-            if imgui.begin("io", False, flags_static):
+            if self.show_graph and imgui.begin("io", False, flags_static):
                 if imgui.button("clear"):
                     self.current_graph.clear()
 
@@ -1495,8 +1524,16 @@ class NodeEditor(NodeGraphListener):
 
             if imgui.begin("appearance", False, flags):
                 changed, self.show_graph = imgui.checkbox("show graph", self.show_graph)
+                changed, self.show_external_window = imgui.checkbox("show external window", self.show_external_window)
+                if changed:
+                    if self.show_external_window:
+                        external_window.show()
+                        # only for glfw backend - beware
+                        window.focus()
+                    else:
+                        external_window.hide()
                 changed, self.show_test_window = imgui.checkbox("show test window", self.show_test_window)
-                changed, self.hide_after_seconds = imgui.input_int("hide after n seconds", self.hide_after_seconds, 5, 60)
+                changed, self.hide_after_seconds = imgui.input_int("hide ui after n seconds", self.hide_after_seconds, 5, 60)
 
                 d = self.ui_graph_data
                 changed, d.background_alpha = imgui.slider_float("bg alpha", d.background_alpha, 0.0, 1.0)
@@ -1519,7 +1556,7 @@ class NodeEditor(NodeGraphListener):
             self.show_windows = False
 
         imgui.end()
-        imgui.pop_style_var(1)
+        pop_style_vars()
 
 editor = NodeEditor()
 
@@ -1527,18 +1564,22 @@ editor_time = 0.0
 imgui_render_time = 0.0
 processing_time = 0.0
 time_count = 0
+profile_time_count = 0
+
+PROFILE_STATS = False
 
 @window.event
 def on_draw(event):
-    global editor_time, imgui_render_time, processing_time, time_count
+    global editor_time, imgui_render_time, processing_time, time_count, profile_time_count
 
     # evaluate nodes
     start = time.time()
-    editor.root_graph.evaluate()
+    editor.root_graph.evaluate(record_stats=PROFILE_STATS)
     processing_time += time.time() - start
 
     # render editor
-    gl.glClear(gl.GL_COLOR_BUFFER_BIT)
+    window.clear()
+    editor.draw_output_texture(window.get_size())
 
     start = time.time()
     imgui_renderer.process_inputs()
@@ -1562,9 +1603,29 @@ def on_draw(event):
         processing_time = 0.0
         time_count = 0
 
-@window.event
+    if PROFILE_STATS:
+        profile_time_count += 1
+        if profile_time_count >= 60*5:
+            import tabulate
+            stats_by_instance, stats_by_node_type = editor.root_graph.get_stats()
+            print("=== Performance stats ===")
+            rows = []
+            for node, values in stats_by_node_type[:25]:
+                rows.append([node, "%.2f" % (values["avg"] * 1000000.0), "%.2f%%" % (values["rel"] * 100.0), "%.2f%%" % (values["cum"] * 100.0)])
+            print(tabulate.tabulate(rows, headers=["Node type", "avg time (micros)", "rel time", "inv cum time"]))
+            print("=== ===")
+            profile_time_count = 0
+
+@external_window.event
+def on_resize(width, height):
+    pass
+
+@external_window.event
+def on_draw(event):
+    external_window.clear()
+    editor.draw_output_texture(external_window.get_size())
+
 def on_key_press(key, modifier):
-    print("Glumpy: Pressed key: %s" % key)
     if key == ord("Q"):
         editor.session_graph.save_file("session.json")
         editor.session_graph.stop()
@@ -1572,6 +1633,9 @@ def on_key_press(key, modifier):
         editor.background_graph.stop()
         profile.dump_stats("profile.stats")
         sys.exit(0)
+
+window.event(on_key_press)
+external_window.event(on_key_press)
 
 if __name__ == "__main__":
     window.show()
