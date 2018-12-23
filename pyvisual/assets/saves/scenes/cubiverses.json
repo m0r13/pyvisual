@@ -1,130 +1,130 @@
 {
     "connections": [
         {
-            "dst_node_id": 59,
+            "dst_node_id": 4,
             "dst_port_id": "i_input",
-            "src_node_id": 55,
+            "src_node_id": 0,
             "src_port_id": "o_output"
         },
         {
-            "dst_node_id": 58,
+            "dst_node_id": 3,
             "dst_port_id": "i_uResolution",
-            "src_node_id": 57,
+            "src_node_id": 2,
             "src_port_id": "o_vec2"
         },
         {
-            "dst_node_id": 63,
-            "dst_port_id": "i_time_mask",
-            "src_node_id": 58,
-            "src_port_id": "o_output"
-        },
-        {
-            "dst_node_id": 69,
+            "dst_node_id": 14,
             "dst_port_id": "i_filter_mask",
-            "src_node_id": 58,
+            "src_node_id": 3,
             "src_port_id": "o_output"
         },
         {
-            "dst_node_id": 58,
+            "dst_node_id": 8,
+            "dst_port_id": "i_time_mask",
+            "src_node_id": 3,
+            "src_port_id": "o_output"
+        },
+        {
+            "dst_node_id": 3,
             "dst_port_id": "i_input",
-            "src_node_id": 59,
+            "src_node_id": 4,
             "src_port_id": "o_output"
         },
         {
-            "dst_node_id": 59,
+            "dst_node_id": 4,
             "dst_port_id": "i_uTransform",
-            "src_node_id": 60,
+            "src_node_id": 5,
             "src_port_id": "o_output"
         },
         {
-            "dst_node_id": 57,
+            "dst_node_id": 2,
             "dst_port_id": "i_x",
-            "src_node_id": 61,
+            "src_node_id": 6,
             "src_port_id": "o_out"
         },
         {
-            "dst_node_id": 59,
+            "dst_node_id": 4,
             "dst_port_id": "i_uTime",
-            "src_node_id": 62,
+            "src_node_id": 7,
             "src_port_id": "o_output"
         },
         {
-            "dst_node_id": 63,
+            "dst_node_id": 8,
             "dst_port_id": "i_time",
-            "src_node_id": 64,
+            "src_node_id": 9,
             "src_port_id": "o_output"
         },
         {
-            "dst_node_id": 69,
+            "dst_node_id": 14,
             "dst_port_id": "i_input",
-            "src_node_id": 63,
+            "src_node_id": 8,
             "src_port_id": "o_output"
         },
         {
-            "dst_node_id": 63,
+            "dst_node_id": 8,
             "dst_port_id": "i_input",
-            "src_node_id": 65,
+            "src_node_id": 10,
             "src_port_id": "o_output"
         },
         {
-            "dst_node_id": 66,
+            "dst_node_id": 11,
             "dst_port_id": "i_x",
-            "src_node_id": 67,
+            "src_node_id": 12,
             "src_port_id": "o_out"
         },
         {
-            "dst_node_id": 67,
+            "dst_node_id": 12,
             "dst_port_id": "i_a",
-            "src_node_id": 68,
+            "src_node_id": 13,
             "src_port_id": "o_output"
         },
         {
-            "dst_node_id": 56,
+            "dst_node_id": 1,
             "dst_port_id": "i_texture",
-            "src_node_id": 69,
+            "src_node_id": 14,
             "src_port_id": "o_output"
         },
         {
-            "dst_node_id": 69,
+            "dst_node_id": 14,
             "dst_port_id": "i_sizeref",
-            "src_node_id": 70,
+            "src_node_id": 15,
             "src_port_id": "o_output"
         },
         {
-            "dst_node_id": 58,
+            "dst_node_id": 3,
             "dst_port_id": "i_transformUV",
-            "src_node_id": 71,
+            "src_node_id": 16,
             "src_port_id": "o_output"
         },
         {
-            "dst_node_id": 71,
+            "dst_node_id": 16,
             "dst_port_id": "i_x",
-            "src_node_id": 72,
+            "src_node_id": 17,
             "src_port_id": "o_output"
         },
         {
-            "dst_node_id": 59,
+            "dst_node_id": 4,
             "dst_port_id": "i_uValueThreshold",
-            "src_node_id": 73,
+            "src_node_id": 18,
             "src_port_id": "o_output"
         },
         {
-            "dst_node_id": 75,
+            "dst_node_id": 20,
             "dst_port_id": "i_alpha",
-            "src_node_id": 74,
+            "src_node_id": 19,
             "src_port_id": "o_output"
         },
         {
-            "dst_node_id": 63,
+            "dst_node_id": 8,
             "dst_port_id": "i_uCubeScale",
-            "src_node_id": 75,
+            "src_node_id": 20,
             "src_port_id": "o_output"
         }
     ],
     "nodes": [
         {
             "custom_ports": [],
-            "id": 55,
+            "id": 0,
             "manual_values": {
                 "i_path": "image/tartuvhs/startup-hub-tartu-estonia.jpg",
                 "o_output": ""
@@ -141,7 +141,7 @@
         },
         {
             "custom_ports": [],
-            "id": 56,
+            "id": 1,
             "manual_values": {
                 "i_texture": ""
             },
@@ -157,7 +157,7 @@
         },
         {
             "custom_ports": [],
-            "id": 57,
+            "id": 2,
             "manual_values": {
                 "i_x": 72.94999694824219,
                 "i_y": 1080.0,
@@ -273,7 +273,7 @@
                     }
                 ]
             ],
-            "id": 58,
+            "id": 3,
             "manual_values": {
                 "i_advanced_filtering": 0.0,
                 "i_enabled": 1.0,
@@ -336,7 +336,7 @@
         },
         {
             "custom_ports": [],
-            "id": 59,
+            "id": 4,
             "manual_values": {
                 "i_enabled": 1.0,
                 "i_force_change": 42.0,
@@ -416,7 +416,7 @@
         },
         {
             "custom_ports": [],
-            "id": 60,
+            "id": 5,
             "manual_values": {
                 "i_uniform": 1.0,
                 "i_x": 1.8899999856948853,
@@ -460,7 +460,7 @@
         },
         {
             "custom_ports": [],
-            "id": 61,
+            "id": 6,
             "manual_values": {
                 "i_a": 0.8600000143051147,
                 "i_b": 10.0,
@@ -479,12 +479,12 @@
         },
         {
             "custom_ports": [],
-            "id": 62,
+            "id": 7,
             "manual_values": {
                 "i_factor": 0.10000000149011612,
                 "i_mod": 0.0,
                 "i_reset": 0.0,
-                "o_output": 28.853759265747154
+                "o_output": 38.405643892372275
             },
             "type": "Time",
             "ui_data": {
@@ -575,12 +575,12 @@
                     }
                 ]
             ],
-            "id": 63,
+            "id": 8,
             "manual_values": {
                 "i_enable_time_mask": 1.0,
                 "i_enabled": 1.0,
                 "i_force_change": 42.0,
-                "i_fragment_source": "\n#include <generate/base_time_mask.frag>\n// Shader downloaded and adapted from glslsandbox.com\n// URL: http://glslsandbox.com/e#50909.0\n\n/*\n * Original shader from: https://www.shadertoy.com/view/llKBDc\n */\n\nuniform float uCubeScale; // {\"default\" : 1.0}\n\n#ifdef GL_ES\nprecision mediump float;\n#endif\n\n// glslsandbox uniforms\n\n;\n\n// shadertoy globals\nfloat iTime = 0.0;\nvec3  iResolution = vec3(0.0);\n\n// Emulate a black texture\n#define texture(s, uv) vec4(0.0)\n\n// --------[ Original ShaderToy begins here ]---------- //\n#define eps 0.01\n\nmat2 r2d(float a){\n    float s = sin(a);\n\tfloat c = cos(a);\n    return mat2(c,-s,s,c);\n}\n\nfloat smin(float d1, float d2, float k){\n        float h = exp(-k * d1) + exp(-k * d2);\n        return -log(h) / k;\n}\nfloat udRoundBox( vec3 p, vec3 b, float r )\n{\n  return length(max(abs(p)-b,0.0))-r;\n}\n\nvoid partitionSpaceAndColor(inout vec3 c, inout vec3 p){\n    // index the cells\n    vec3 i = floor(p);\n    //random y\n    float ry = fract(sin(i.x*76.78+i.z*786.89)*1488.88);\n    //if random number is over .49 invert y direction\n    float updown = 1.0;\n    updown = (ry>.49) ? 1.0 : -1.0;\n    //addto and move y\n    p.y += (ry*1.5 + iTime*ry*2.5)*updown;\n    p.y += ry;\n    //re index cells\n    i=floor(p);\n    //divide the space\n    p=fract(p)-.5;\n    //random rotation using reindexed vec3    \n    float r  = fract(sin(i.x*76.68+i.y*148.34)*768.78);\n    float r2 = fract(sin(i.z*76.68+i.y*148.34)*768.78);\n    p.xz*=r2d(r- iTime*(r*3.));\n    p.xy*=r2d(r2-iTime*(r*2.5));    \n    //random color\n    float c1  = fract(sin(i.x*76.68+i.y*148.34)*768.78);\n    float c2 = fract(sin(i.z*76.68+i.y*148.34)*768.78);\n    float c3 = fract(sin(i.z*76.68+i.x*148.34)*768.78);\n    \n    c = vec3(c1,c2,c3);\n    \n}\n\nfloat map(vec3 p){\n    \n    vec3 dummyVec = vec3(0.0);\n    partitionSpaceAndColor(dummyVec, p);\n    //p += (sin(p.x*55.)*sin(p.y*55.5)*sin(p.z*56.)*.0075);\n    //return smin(udRoundBox(p,vec3(.15),.015), pl, 6.); //*.75;\n    return udRoundBox(p,vec3(.15 * uCubeScale),.015);\n}\n\nfloat trace(vec3 r, vec3 o){\n    float t = 0.0;\n    for(int i = 0; i < 64; i++){\n        vec3 p = o + r * t;\n        float d = map(p);\n        t += d * 0.75;\n        if(d<eps || t > 8.0) break;\n    }\n    return t;\n}\n\nvec3 getNormal2(in vec3 p) {\n\tvec2 e = vec2(eps, 0.0);\n\treturn normalize((vec3(map(p+e.xyy), map(p+e.yxy), map(p+e.yyx)) - map(p)) / e.x);\n}\n// https://github.com/darrenmothersele/raymarch/blob/master/shaders/frag.glsl\nvec3 getNormal(in vec3 p) {\n\t// 6-tap normalization. Probably the most accurate, but a bit of a cycle waster.\n\treturn normalize(vec3(\n\t\tmap(vec3(p.x+eps,p.y,p.z))-map(vec3(p.x-eps,p.y,p.z)),\n\t\tmap(vec3(p.x,p.y+eps,p.z))-map(vec3(p.x,p.y-eps,p.z)),\n\t\tmap(vec3(p.x,p.y,p.z+eps))-map(vec3(p.x,p.y,p.z-eps))\n\t));\n}\n\nvoid mainImage( out vec4 fragColor, in vec2 fragCoord )\n{\n    // Normalized pixel coordinates (from 0 to 1)\n    vec2 uv = fragCoord/iResolution.xy;\n    uv = uv * 2.0 -1.0;\n    uv.x *= iResolution.x / iResolution.y;\n    vec3 l = normalize(vec3(0.3, 0.4, 0.75));\n    \n    vec3 r = normalize(vec3(uv, 1.0 - dot(uv, uv) * .33));\n    vec3 o = vec3(0.0, 0.9, -9.0);\n    \n    o.zy *= r2d(iTime*.15);\n    //o.y = -map(sp)+.3;\n    r.zy*=r2d((sin(iTime/4.)*.5));\n    r.xz*=r2d(iTime*.73+sin(iTime*.25)*4.);\n    \n    \n    float t = trace(r, o);\n    \n    vec3 sp = o+r * t;\n    float d = map(sp);\n\t//vec3 sky = pow(vec3(0.1,0.1,0.65),vec3(3.*r.y));\n\t// https://www.shadertoy.com/view/MlcGD7\n    vec4 sky= pow(vec4(.1, .7, .8, 1), vec4(4.*max(-r.y,-0.41)+2.))+(dot(r,l)*.315+.215);\n    \n    vec3 n = getNormal(sp);\n    \n    float fog = smoothstep(-0.015, .17, t*0.03);\n    // Time varying pixel color\n    //vec4 col = (sky);    //0.5 + 0.5*cos(iTime+uv.xyx+vec3(0,2,4));\n    \n    vec3 c = vec3(0.0);\n    \n    // so if 'sp' or surface position was to be used later it wouldnt be changed...\n    vec3 tmpSP = sp;\n    partitionSpaceAndColor(c, tmpSP);\n    \n    if(abs(d) < .5){\n        vec3 rf = reflect(r,n);\n        vec3 cmp = texture(iChannel0, rf).rgb;\n        fragColor = mix(vec4(0.25+cmp+vec3(c),1.0)* max(dot(n,l),0.18), vec4(sky), fog);\n    }\n    else\n    \tfragColor = vec4(sky);\n}\n\n\n/*\n        vec3 i = floor(sp);\n        float ry = fract(sin(i.x*76.78+i.z*786.89)*1488.88);\n        sp.y += ry*1.5 + iTime*ry;\n        sp.y += ry;\n        i=floor(sp);\n\n        sp=fract(sp)-.5;\n        \n        \n        \n    \tfloat c1  = fract(sin(i.x*76.68+i.y*148.34)*768.78);\n    \tfloat c2 = fract(sin(i.z*76.68+i.y*148.34)*768.78);\n        float c3 = fract(sin(i.z*76.68+i.x*148.34)*768.78);\n        */\n        //vec3 c = partitionSpaceAndColor(sp);\n\n    //vec3 i = floor(sp);\n    //vec3 rn = fract(i);\n    //rn=floor(rn);\n\n\n\n//float pl = p.y;\n/*    \n    vec3 i = floor(p);\n    float ry = fract(sin(i.x*76.78+i.z*786.89)*1488.88);\n    p.y += ry*1.5 + iTime*ry;\n    p.y += ry;\n    i=floor(p);\n    \n    p=fract(p)-.5;\n    \n    float r  = fract(sin(i.x*76.68+i.y*148.34)*768.78);\n    float r2 = fract(sin(i.z*76.68+i.y*148.34)*768.78);\n    p.xz*=r2d(r- iTime*(r*3.));\n    p.xy*=r2d(r2-iTime*(r*2.5));\n    */\n// --------[ Original ShaderToy ends here ]---------- //\n\n\n\nvoid generateFrag() {\n\n\n    iTime = pyvisualTime * 0.5;\n    iResolution = vec3(pyvisualResolution, 0.0);\n\n    mainImage(pyvisualOutColor, (vec2(pyvisualUV.x, 1.0 - pyvisualUV.y) * pyvisualResolution).xy);\n    pyvisualOutColor.a = 1.0;\n}\n",
+                "i_fragment_source": "\n#include <generate/base_time_mask.frag>\n// Shader downloaded and adapted from glslsandbox.com\n// URL: http://glslsandbox.com/e#50909.0\n\n/*\n * Original shader from: https://www.shadertoy.com/view/llKBDc\n */\n\nuniform float uCubeScale; // {\"default\" : 1.0}\n\n#ifdef GL_ES\nprecision mediump float;\n#endif\n\n// glslsandbox uniforms\n\n;\n\n// shadertoy globals\nfloat iTime = 0.0;\nvec3  iResolution = vec3(0.0);\n\n// Emulate a black texture\n#define texture(s, uv) vec4(0.0)\n\n// --------[ Original ShaderToy begins here ]---------- //\n#define eps 0.01\n\nmat2 r2d(float a){\n    float s = sin(a);\n\tfloat c = cos(a);\n    return mat2(c,-s,s,c);\n}\n\nfloat smin(float d1, float d2, float k){\n        float h = exp(-k * d1) + exp(-k * d2);\n        return -log(h) / k;\n}\nfloat udRoundBox( vec3 p, vec3 b, float r )\n{\n  return length(max(abs(p)-b,0.0))-r;\n}\n\nvoid partitionSpaceAndColor(inout vec3 c, inout vec3 p){\n    // index the cells\n    vec3 i = floor(p);\n    //random y\n    float ry = fract(sin(i.x*76.78+i.z*786.89)*1488.88);\n    //if random number is over .49 invert y direction\n    float updown = 1.0;\n    updown = (ry>.49) ? 1.0 : -1.0;\n    //addto and move y\n    p.y += (ry*1.5 + iTime*ry*2.5)*updown;\n    p.y += ry;\n    //re index cells\n    i=floor(p);\n    //divide the space\n    p=fract(p)-.5;\n    //random rotation using reindexed vec3    \n    float r  = fract(sin(i.x*76.68+i.y*148.34)*768.78);\n    float r2 = fract(sin(i.z*76.68+i.y*148.34)*768.78);\n    p.xz*=r2d(r- iTime*(r*3.));\n    p.xy*=r2d(r2-iTime*(r*2.5));    \n    //random color\n    float c1  = fract(sin(i.x*76.68+i.y*148.34)*768.78);\n    float c2 = fract(sin(i.z*76.68+i.y*148.34)*768.78);\n    float c3 = fract(sin(i.z*76.68+i.x*148.34)*768.78);\n    \n    c = vec3(c1,c2,c3);\n    \n}\n\nfloat map(vec3 p){\n    \n    vec3 dummyVec = vec3(0.0);\n    partitionSpaceAndColor(dummyVec, p);\n    //p += (sin(p.x*55.)*sin(p.y*55.5)*sin(p.z*56.)*.0075);\n    //return smin(udRoundBox(p,vec3(.15),.015), pl, 6.); //*.75;\n    return udRoundBox(p,vec3(.15 * uCubeScale),.015);\n}\n\nfloat trace(vec3 r, vec3 o){\n    float t = 0.0;\n    for(int i = 0; i < 48; i++){\n        vec3 p = o + r * t;\n        float d = map(p);\n        t += d * 0.75;\n        if(d<eps || t > 8.0) break;\n    }\n    return t;\n}\n\nvec3 getNormal2(in vec3 p) {\n\tvec2 e = vec2(eps, 0.0);\n\treturn normalize((vec3(map(p+e.xyy), map(p+e.yxy), map(p+e.yyx)) - map(p)) / e.x);\n}\n// https://github.com/darrenmothersele/raymarch/blob/master/shaders/frag.glsl\nvec3 getNormal(in vec3 p) {\n\t// 6-tap normalization. Probably the most accurate, but a bit of a cycle waster.\n\t/*\n\treturn normalize(vec3(\n\t\tmap(vec3(p.x+eps,p.y,p.z))-map(vec3(p.x-eps,p.y,p.z)),\n\t\tmap(vec3(p.x,p.y+eps,p.z))-map(vec3(p.x,p.y-eps,p.z)),\n\t\tmap(vec3(p.x,p.y,p.z+eps))-map(vec3(p.x,p.y,p.z-eps))\n\t));\n\t*/\n\n\t// faster 4-tap version\n\tfloat ref = map(p);\n\treturn normalize(vec3(\n\t\tmap(vec3(p.x+eps,p.y,p.z))-ref,\n\t\tmap(vec3(p.x,p.y+eps,p.z))-ref,\n\t\tmap(vec3(p.x,p.y,p.z+eps))-ref\n\t));\n}\n\nvoid mainImage( out vec4 fragColor, in vec2 fragCoord )\n{\n    // Normalized pixel coordinates (from 0 to 1)\n    vec2 uv = fragCoord/iResolution.xy;\n    uv = uv * 2.0 -1.0;\n    uv.x *= iResolution.x / iResolution.y;\n    vec3 l = normalize(vec3(0.3, 0.4, 0.75));\n    \n    vec3 r = normalize(vec3(uv, 1.0 - dot(uv, uv) * .33));\n    vec3 o = vec3(0.0, 0.9, -9.0);\n    \n    o.zy *= r2d(iTime*.15);\n    //o.y = -map(sp)+.3;\n    r.zy*=r2d((sin(iTime/4.)*.5));\n    r.xz*=r2d(iTime*.73+sin(iTime*.25)*4.);\n    \n    \n    float t = trace(r, o);\n    \n    vec3 sp = o+r * t;\n    float d = map(sp);\n\t//vec3 sky = pow(vec3(0.1,0.1,0.65),vec3(3.*r.y));\n\t// https://www.shadertoy.com/view/MlcGD7\n    vec4 sky= pow(vec4(.1, .7, .8, 1), vec4(4.*max(-r.y,-0.41)+2.))+(dot(r,l)*.315+.215);\n    \n    vec3 n = getNormal(sp);\n    \n    float fog = smoothstep(-0.015, .17, t*0.03);\n    // Time varying pixel color\n    //vec4 col = (sky);    //0.5 + 0.5*cos(iTime+uv.xyx+vec3(0,2,4));\n    \n    vec3 c = vec3(0.0);\n    \n    // so if 'sp' or surface position was to be used later it wouldnt be changed...\n    vec3 tmpSP = sp;\n    partitionSpaceAndColor(c, tmpSP);\n    \n    if(abs(d) < .5){\n        vec3 rf = reflect(r,n);\n        vec3 cmp = texture(iChannel0, rf).rgb;\n        fragColor = mix(vec4(0.25+cmp+vec3(c),1.0)* max(dot(n,l),0.18), vec4(sky), fog);\n    }\n    else\n    \tfragColor = vec4(sky);\n}\n\n\n/*\n        vec3 i = floor(sp);\n        float ry = fract(sin(i.x*76.78+i.z*786.89)*1488.88);\n        sp.y += ry*1.5 + iTime*ry;\n        sp.y += ry;\n        i=floor(sp);\n\n        sp=fract(sp)-.5;\n        \n        \n        \n    \tfloat c1  = fract(sin(i.x*76.68+i.y*148.34)*768.78);\n    \tfloat c2 = fract(sin(i.z*76.68+i.y*148.34)*768.78);\n        float c3 = fract(sin(i.z*76.68+i.x*148.34)*768.78);\n        */\n        //vec3 c = partitionSpaceAndColor(sp);\n\n    //vec3 i = floor(sp);\n    //vec3 rn = fract(i);\n    //rn=floor(rn);\n\n\n\n//float pl = p.y;\n/*    \n    vec3 i = floor(p);\n    float ry = fract(sin(i.x*76.78+i.z*786.89)*1488.88);\n    p.y += ry*1.5 + iTime*ry;\n    p.y += ry;\n    i=floor(p);\n    \n    p=fract(p)-.5;\n    \n    float r  = fract(sin(i.x*76.68+i.y*148.34)*768.78);\n    float r2 = fract(sin(i.z*76.68+i.y*148.34)*768.78);\n    p.xz*=r2d(r- iTime*(r*3.));\n    p.xy*=r2d(r2-iTime*(r*2.5));\n    */\n// --------[ Original ShaderToy ends here ]---------- //\n\n\n\nvoid generateFrag() {\n\n\n    iTime = pyvisualTime * 0.5;\n    iResolution = vec3(pyvisualResolution, 0.0);\n\n    mainImage(pyvisualOutColor, (vec2(pyvisualUV.x, 1.0 - pyvisualUV.y) * pyvisualResolution).xy);\n    pyvisualOutColor.a = 1.0;\n}\n",
                 "i_id": "",
                 "i_input": "",
                 "i_interpolation": 1.0,
@@ -632,12 +632,12 @@
         },
         {
             "custom_ports": [],
-            "id": 64,
+            "id": 9,
             "manual_values": {
-                "i_factor": 0.009999999776482582,
+                "i_factor": 0.019999999552965164,
                 "i_mod": 0.0,
                 "i_reset": 0.0,
-                "o_output": 2.8853811477412012
+                "o_output": 5.7082964589679515
             },
             "type": "Time",
             "ui_data": {
@@ -651,9 +651,9 @@
         },
         {
             "custom_ports": [],
-            "id": 65,
+            "id": 10,
             "manual_values": {
-                "i_path": "image/dummy/1080p.png",
+                "i_path": "image/dummy/720p.png",
                 "o_output": ""
             },
             "type": "LoadTexture",
@@ -668,7 +668,7 @@
         },
         {
             "custom_ports": [],
-            "id": 66,
+            "id": 11,
             "manual_values": {
                 "i_x": 0.0,
                 "i_y": 0.0,
@@ -692,7 +692,7 @@
                         0.0
                     ],
                     [
-                        1442.6920166015625,
+                        1920.2850341796875,
                         0.0,
                         0.0,
                         1.0
@@ -711,12 +711,12 @@
         },
         {
             "custom_ports": [],
-            "id": 67,
+            "id": 12,
             "manual_values": {
                 "i_a": 16.239999771118164,
                 "i_b": 5.0,
                 "i_op": 2.0,
-                "o_out": 1442.6919734477997
+                "o_out": 1920.2849793434143
             },
             "type": "BinaryOpFloat",
             "ui_data": {
@@ -730,12 +730,12 @@
         },
         {
             "custom_ports": [],
-            "id": 68,
+            "id": 13,
             "manual_values": {
                 "i_factor": 1.0,
                 "i_mod": 0.0,
                 "i_reset": 0.0,
-                "o_output": 288.53839468955994
+                "o_output": 384.05699586868286
             },
             "type": "Time",
             "ui_data": {
@@ -865,7 +865,7 @@
                     }
                 ]
             ],
-            "id": 69,
+            "id": 14,
             "manual_values": {
                 "i_advanced_filtering": 1.0,
                 "i_enabled": 1.0,
@@ -926,7 +926,7 @@
         },
         {
             "custom_ports": [],
-            "id": 70,
+            "id": 15,
             "manual_values": {
                 "i_path": "image/dummy/1080p.png",
                 "o_output": ""
@@ -943,7 +943,7 @@
         },
         {
             "custom_ports": [],
-            "id": 71,
+            "id": 16,
             "manual_values": {
                 "i_x": 0.0,
                 "i_y": 0.0,
@@ -967,7 +967,7 @@
                         0.0
                     ],
                     [
-                        20.7206974029541,
+                        2.621708869934082,
                         0.0,
                         0.0,
                         1.0
@@ -986,14 +986,14 @@
         },
         {
             "custom_ports": [],
-            "id": 72,
+            "id": 17,
             "manual_values": {
                 "i_length": 11.470000267028809,
                 "i_max": 25.0,
                 "i_min": -25.0,
                 "i_phase": 0.0,
                 "i_type": 3.0,
-                "o_output": 20.7206966962489
+                "o_output": 2.621708954657077
             },
             "type": "LFO",
             "ui_data": {
@@ -1007,14 +1007,14 @@
         },
         {
             "custom_ports": [],
-            "id": 73,
+            "id": 18,
             "manual_values": {
                 "i_length": 36.25,
                 "i_max": 0.75,
                 "i_min": 0.25,
                 "i_phase": 0.0,
                 "i_type": 3.0,
-                "o_output": 0.4371235218656568
+                "o_output": 0.36008740826500074
             },
             "type": "LFO",
             "ui_data": {
@@ -1028,10 +1028,10 @@
         },
         {
             "custom_ports": [],
-            "id": 74,
+            "id": 19,
             "manual_values": {
                 "i_name": "low_vu",
-                "o_output": 7.159631499227316e-06
+                "o_output": 0.3498416208064899
             },
             "type": "GetFloatVar",
             "ui_data": {
@@ -1045,12 +1045,12 @@
         },
         {
             "custom_ports": [],
-            "id": 75,
+            "id": 20,
             "manual_values": {
                 "i_a": 0.800000011920929,
                 "i_alpha": 0.0,
                 "i_b": 1.0,
-                "o_output": 0.8000014438471434
+                "o_output": 0.8699683319117899
             },
             "type": "MixFloat",
             "ui_data": {
@@ -1065,8 +1065,8 @@
     ],
     "ui_data": {
         "offset": [
-            1650.0,
-            -606.0
+            1573.0,
+            -640.0
         ]
     }
 }
