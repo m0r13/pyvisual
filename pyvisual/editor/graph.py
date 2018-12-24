@@ -449,10 +449,13 @@ class NodeGraph(Graph):
             listener.created_connection(self, src_node, src_port_id, dst_node, dst_port_id)
 
     def remove_connection(self, src_node, src_port_id, dst_node, dst_port_id):
-        input_value = dst_node.get_value(dst_port_id)
-        assert input_value.connected_node == src_node
-        input_value.disconnect()
-        dst_node.update_input_nodes()
+        # it might happen that input port id doesn't exist in dst node
+        # because that input port just got removed and the editor saw there was still a connection to be removed
+        if dst_port_id in dst_node.ports:
+            input_value = dst_node.get_value(dst_port_id)
+            assert input_value.connected_node == src_node
+            input_value.disconnect()
+            dst_node.update_input_nodes()
 
         self.connections_from[src_node].remove((src_port_id, dst_node, dst_port_id))
         self.connections_to[dst_node].remove((dst_port_id, src_node, src_port_id))
