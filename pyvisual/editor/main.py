@@ -1402,6 +1402,7 @@ class NodeEditor(NodeGraphListener):
         if texture is None:
             return
 
+        gl.glViewport(0, 0, target_size[0], target_size[1])
         self.texture_program["uInputTexture"] = texture
         self.texture_program.draw(gl.GL_TRIANGLE_STRIP)
 
@@ -1566,7 +1567,7 @@ processing_time = 0.0
 time_count = 0
 profile_time_count = 0
 
-PROFILE_STATS = False
+PROFILE_STATS = "--profile-nodes" in sys.argv
 
 @window.event
 def on_draw(event):
@@ -1639,4 +1640,5 @@ external_window.event(on_key_press)
 
 if __name__ == "__main__":
     window.show()
+    external_window.hide()
     app.run()

@@ -469,7 +469,7 @@ class HSV2RGBA(Node):
             {"name" : "h", "dtype" : dtype.float, "dtype_args" : {"default" : 0.0}},
             {"name" : "s", "dtype" : dtype.float, "dtype_args" : {"default" : 1.0}},
             {"name" : "v", "dtype" : dtype.float, "dtype_args" : {"default" : 1.0}},
-            {"name" : "a", "dtype" : dtype.float, "dtype_args" : {"range" : [0.0, 1.0]}},
+            {"name" : "a", "dtype" : dtype.float, "dtype_args" : {"default" : 1.0, "range" : [0.0, 1.0]}},
         ]
         outputs = [
             {"name" : "rgba", "dtype" : dtype.color}

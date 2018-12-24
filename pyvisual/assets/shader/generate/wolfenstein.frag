@@ -229,6 +229,7 @@ void getMaterialColor( const int material, in vec2 uv, const float decorationHas
 		col = mix( col, fgcol, onRect( uv, prisoncoords.xy, prisoncoords.zw ) );
 	}
 // flag
+    /*
 	else if( decorationHash > 0.63 && material < (NUM_MATERIALS+1) ) {		
 		vec2 uvc = uv-vec2(32.,30.);
 	
@@ -275,6 +276,7 @@ void getMaterialColor( const int material, in vec2 uv, const float decorationHas
 	// mix flag on background
 		col = mix( col, fgcol, onRect( uv, flagcoords.xy, flagcoords.zw ) );
 	}
+    */
 	
 // fake 8-bit color palette and dithering	
 	col = floor( (col+0.5*mod(uv.x+uv.y,2.)/32.)*32.)/32.;

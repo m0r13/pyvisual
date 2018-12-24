@@ -142,7 +142,7 @@ class RandomFloat(Node):
             {"name" : "generate", "dtype" : dtype.event},
             {"name" : "min", "dtype" : dtype.float, "dtype_args" : {"default" : 0.0}},
             {"name" : "max", "dtype" : dtype.float, "dtype_args" : {"default" : 1.0}},
-            {"name" : "mod", "dtype" : dtype.float, "dtype_args" : {"default" : 1.0}},
+            {"name" : "mod", "dtype" : dtype.float, "dtype_args" : {"default" : 0.0}},
         ]
         outputs = [
             {"name" : "output", "dtype" : dtype.float}
@@ -153,7 +153,7 @@ class RandomFloat(Node):
         }
 
     def _evaluate(self):
-        if self.get("generate"):
+        if self.get("generate") or self._last_evaluated == 0.0:
             min_value = self.get("min")
             max_value = self.get("max")
             mod = self.get("mod")
@@ -228,4 +228,31 @@ class GlitchTimer(Node):
             self._status = 1.0 - self._status
 
         self.set("output", float(self._status))
+
+class TestTimer(Node):
+    class Meta:
+        inputs = [
+            {"name" : "enabled", "dtype" : dtype.bool, "dtype_args" : {"default" : True}},
+            {"name" : "per_minute", "dtype" : dtype.float, "dtype_args" : {"default" : 6.0}},
+        ]
+        outputs = [
+            {"name" : "output", "dtype" : dtype.event},
+        ]
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(always_evaluate=True, *args, **kwargs)
+
+        self._next = 0
+
+    def _evaluate(self):
+        t = time.time()
+
+        if self._next < t and self.get("enabled"):
+            per_minute = self.get("per_minute")
+            if per_minute == 0.0:
+                pass
+            self._next = t + random.expovariate(1.0 / (60.0 / self.get("per_minute")))
+            self.set("output", True)
+        else:
+            self.set("output", False)
 
