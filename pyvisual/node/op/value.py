@@ -2,6 +2,8 @@ import imgui
 import numpy as np
 import time
 import math
+import random
+import colorsys
 from collections import OrderedDict
 from scipy import signal
 
@@ -461,3 +463,23 @@ class ColorLambda(Lambda):
             raise RuntimeError("Invalid result. Must be (4,) array.")
         return result.astype(np.float32)
 
+class HSV2RGBA(Node):
+    class Meta:
+        inputs = [
+            {"name" : "h", "dtype" : dtype.float, "dtype_args" : {"default" : 0.0}},
+            {"name" : "s", "dtype" : dtype.float, "dtype_args" : {"default" : 1.0}},
+            {"name" : "v", "dtype" : dtype.float, "dtype_args" : {"default" : 1.0}},
+            {"name" : "a", "dtype" : dtype.float, "dtype_args" : {"range" : [0.0, 1.0]}},
+        ]
+        outputs = [
+            {"name" : "rgba", "dtype" : dtype.color}
+        ]
+
+    def _evaluate(self):
+        # vec4 K = vec4(1.0, 2.0 / 3.0, 1.0 / 3.0, 3.0);
+        # vec3 p = abs(fract(c.xxx + K.xyz) * 6.0 - K.www);
+        # return c.z * mix(K.xxx, clamp(p - K.xxx, 0.0, 1.0), c.y);
+
+        h, s, v = self.get("h"), self.get("s"), self.get("v")
+        r, g, b = colorsys.hsv_to_rgb(h, s, v)
+        self.set("rgba", np.float32([r, g, b, self.get("a")]))
