@@ -312,6 +312,10 @@ class Node(metaclass=NodeMeta):
     def force_evaluate(self):
         self._force_evaluate = True
 
+    @property
+    def collapsed_title(self):
+        return None
+
     def start(self, graph):
         pass
 

@@ -252,13 +252,27 @@ class UnaryOpFloat(Node):
 
     OPS = list(UNARY_OPS.values())
 
+    def __init__(self):
+        super().__init__()
+
+        self._op_name = ""
+        self._op = None
+
+    @property
+    def collapsed_title(self):
+        return "op: %s" % self._op_name
+
     def _evaluate(self):
-        op = int(self.get("op"))
-        if op < 0 or op >= len(self.OPS):
-            op = 0
+        op_value = self.get_input("op")
+        if op_value.has_changed:
+            op = int(op_value)
+            if op < 0 or op >= len(self.OPS):
+                op = 0
+            self._op_name = list(UNARY_OPS.keys())[op]
+            self._op = self.OPS[op]
 
         x = self.get("x")
-        self.set("out", self.OPS[op](x))
+        self.set("out", self._op(x))
 
     @classmethod
     def get_presets(cls, graph):
@@ -298,15 +312,29 @@ class BinaryOpFloat(Node):
 
     OPS = list(BINARY_OPS.values())
 
+    def __init__(self):
+        super().__init__()
+
+        self._op_name = ""
+        self._op = None
+
+    @property
+    def collapsed_title(self):
+        return "op: %s" % self._op_name
+
     def _evaluate(self):
-        op = int(self.get("op"))
-        if op < 0 or op >= len(self.OPS):
-            op = 0
+        op_value = self.get_input("op")
+        if op_value.has_changed:
+            op = int(op_value.value)
+            if op < 0 or op >= len(self.OPS):
+                op = 0
+            self._op_name = list(BINARY_OPS.keys())[op]
+            self._op = self.OPS[op]
 
         a = self.get("a")
         b = self.get("b")
         try:
-            self.set("out", self.OPS[op](a, b))
+            self.set("out", self._op(a, b))
         except ZeroDivisionError:
             self.set("out", float("nan"))
 

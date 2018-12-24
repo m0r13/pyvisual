@@ -37,6 +37,10 @@ class SetVar(Node):
     def name(self, name):
         self.get_input("name").value = name
 
+    @property
+    def collapsed_title(self):
+        return "var: %s" % self.name
+
     def start(self, graph):
         self.graph = graph
         self.stopped = False
@@ -109,6 +113,10 @@ class GetVar(Node):
         for node in cls.SetVar.instances.get(graph.parent, []):
             presets.append((node.name, {"i_name" : node.name}))
         return presets
+
+    @property
+    def collapsed_title(self):
+        return "var: %s" % self.name
 
     def start(self, graph):
         self.graph = graph

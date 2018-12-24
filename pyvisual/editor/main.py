@@ -320,7 +320,6 @@ class UINode:
         #
         # state of node
         #
-        self.collapsible = self.spec.options["show_title"]
         self.collapsed = ui_data.get("collapsed", False)
         self.selected = ui_data.get("selected", False)
 
@@ -650,6 +649,8 @@ class UINode:
         imgui.begin_group()
         if self.spec.options["show_title"]:
             imgui.text(self.spec.name)
+        elif self.collapsed:
+            imgui.text(self.instance.collapsed_title)
         if not self.collapsed:
             port_filter = lambda port: not port[1]["hide"] and port[1]["group"] == "default"
             inputs = list(filter(port_filter, self.instance.input_ports.items()))
@@ -696,7 +697,8 @@ class UINode:
         # handle clicks / scrolling on the node
         if not self.ui_graph.is_dragging_connection() and self.hovered and not imgui.is_any_item_active():
             # handle collapsing/expanding
-            if self.collapsible:
+            collapsible = self.spec.options["show_title"] or self.instance.collapsed_title is not None
+            if collapsible:
                 if self.collapsed and io.mouse_wheel < 0:
                     self.collapsed = False
                     self.touch_z_index()
