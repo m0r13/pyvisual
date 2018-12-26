@@ -9,6 +9,8 @@ import sys
 import time
 import contextlib
 import numpy as np
+import json
+import traceback
 from collections import defaultdict
 from glumpy import app, gloo, gl
 from glumpy.ext import glfw
@@ -791,7 +793,7 @@ class UINode:
 
 # data that needs to be shared across rendered ui graphs
 class UIGraphData:
-    def __init__(self, base_node):
+    def __init__(self, base_node, settings):
         # information about which node types are available
         self.base_node = base_node
         self.node_specs = []
@@ -801,10 +803,18 @@ class UIGraphData:
         self.graph_clipboard = None
 
         # shared style information
-        self.background_alpha = 0.2
-        self.grid_alpha = 0.0
-        self.node_bg_alpha = 0.75
-        self.node_alpha = 1.0
+        self.background_alpha = settings.get("bg_alpha", 0.2)
+        self.grid_alpha = settings.get("grid_alpha", 0.0)
+        self.node_bg_alpha = settings.get("node_bg_alpha", 0.75)
+        self.node_alpha = settings.get("node_alpha", 1.0)
+
+    def get_settings(self):
+        settings = {}
+        settings["bg_alpha"] = self.background_alpha
+        settings["grid_alpha"] = self.grid_alpha
+        settings["node_bg_alpha"] = self.node_bg_alpha
+        settings["node_alpha"] = self.node_alpha
+        return settings
 
     def update_available_nodes(self):
         # sort by node categories and then by names
@@ -1311,6 +1321,10 @@ class UIGraph(NodeGraphListener):
 
 class NodeEditor(NodeGraphListener):
     def __init__(self, base_node=node_meta.Node):
+        # some settings
+        # - keep them saved in a file
+        settings = self.load_settings()
+
         self.session_graph = NodeGraph()
         self.background_graph = NodeGraph()
 
@@ -1320,18 +1334,17 @@ class NodeEditor(NodeGraphListener):
         for graph in self.graphs:
             graph.add_listener(self)
 
-        self.ui_graph_data = UIGraphData(base_node=base_node)
+        self.ui_graph_data = UIGraphData(base_node=base_node, settings=settings)
         self.ui_graphs = [ UIGraph(g, self.ui_graph_data) for g in self.graphs ]
         self.current_graph_index = 0
         self.current_graph = self.graphs[self.current_graph_index]
         self.current_ui_graph = self.ui_graphs[self.current_graph_index]
         self.root_graph = RootGraph(graphs=self.graphs)
 
-        # appearance options
-        self.show_graph = True
-        self.show_external_window = False
-        self.show_test_window = False
-        self.hide_after_seconds = 5
+        self.show_graph = settings.get("show_graph", True)
+        self.show_external_window = settings.get("show_external_window", False)
+        self.show_test_window = settings.get("show_test_window", False)
+        self.hide_after_seconds = settings.get("hide_after_n_seconds", 5)
         # rendering nodes caught from graph
         self.render_nodes = []
 
@@ -1372,6 +1385,32 @@ class NodeEditor(NodeGraphListener):
     #
     # misc stuff
     #
+
+    def load_settings(self):
+        path = "settings.json"
+        if not os.path.isfile(path):
+            return {}
+       
+        try: 
+            return json.load(open(path))
+        except json.JSONDecodeError:
+            print("### Warning: Unable to load settings, see the exception below:")
+            traceback.print_exc()
+
+        # empty settings in case of an error
+        return {}
+
+    def write_settings(self):
+        settings = {}
+        settings["show_graph"] = self.show_graph
+        settings["show_external_window"] = self.show_external_window
+        settings["show_test_window"] = self.show_test_window
+        settings["hide_after_seconds"] = self.hide_after_seconds
+        settings.update(self.ui_graph_data.get_settings())
+        
+        f = open("settings.json", "w")
+        json.dump(settings, f)
+        f.close()
 
     def timing_callback(self, editor_time, imgui_render_time, processing_time):
         self.fps = app.clock.get_default().get_fps()
@@ -1636,6 +1675,7 @@ def on_key_press(key, modifier):
         editor.session_graph.stop()
         #editor.background_graph.save_file("background.json")
         editor.background_graph.stop()
+        editor.write_settings()
         profile.dump_stats("profile.stats")
         sys.exit(0)
 
