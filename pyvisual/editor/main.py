@@ -34,8 +34,8 @@ profile = cProfile.Profile()
 
 # create window / opengl context already here
 # imgui seems to cause problems otherwise with imgui.get_color_u32_rgba without context
-external_window = app.Window()
-window = app.Window(context=external_window)
+external_window = app.Window(title="pyvisual optics external")
+window = app.Window(context=external_window, title="pyvisual optics")
 imgui_renderer = glumpy_imgui.GlumpyGlfwRenderer(window, True)
 
 # utilities
@@ -1345,11 +1345,14 @@ class NodeEditor(NodeGraphListener):
 
         self.show_graph = settings.get("show_graph", True)
         self.show_external_window = settings.get("show_external_window", False)
+        self.external_window_i3_handle = settings.get("external_window_i3_handle", False)
+        self.external_window_i3_workspace = settings.get("external_window_i3_workspace", "")
         self.show_test_window = settings.get("show_test_window", False)
         self.hide_after_seconds = settings.get("hide_after_n_seconds", 5)
+        self.set_external_window_visibility(self.show_external_window)
 
         autoplay_settings = settings.get("autoplay", {})
-        self.autoplay_wildcard = autoplay_settings.get("wildcard", "")
+        self.autoplay_wildcard = autoplay_settings.get("wildcard", "scenes/*.json")
         self.autoplay_interval = autoplay_settings.get("interval", 120.0)
         self.autoplay_fade_duration = autoplay_settings.get("fade_duration", 2.0)
         self.autoplay_enabled = False
@@ -1426,6 +1429,8 @@ class NodeEditor(NodeGraphListener):
         settings = {}
         settings["show_graph"] = self.show_graph
         settings["show_external_window"] = self.show_external_window
+        settings["external_window_i3_handle"] = self.external_window_i3_handle
+        settings["external_window_i3_workspace"] = self.external_window_i3_workspace
         settings["show_test_window"] = self.show_test_window
         settings["hide_after_seconds"] = self.hide_after_seconds
         settings.update(self.ui_graph_data.get_settings())
@@ -1459,6 +1464,17 @@ class NodeEditor(NodeGraphListener):
     def removed_node(self, graph, node):
         if isinstance(node, Renderer):
             self.render_nodes.remove(node)
+
+    def set_external_window_visibility(self, visible):
+        if visible:
+            external_window.show()
+            if self.external_window_i3_handle:
+                os.system("i3-msg '[title=\"pyvisual optics external\"] move to workspace %s'" % self.external_window_i3_workspace)
+                os.system("i3-msg '[title=\"pyvisual optics external\"] fullscreen'")
+            # only for glfw backend - beware
+            window.focus()
+        else:
+            external_window.hide()
 
     @property
     def autoplay_time(self):
@@ -1617,16 +1633,15 @@ class NodeEditor(NodeGraphListener):
                 imgui.text("total: %.2f ms ~ %.2f%%" % (self.total_time * 1000.0, self.total_time_relative * 100.0))
                 imgui.end()
 
-            if imgui.begin("appearance", False, flags):
+            if imgui.begin("settings", False, flags):
                 changed, self.show_graph = imgui.checkbox("show graph", self.show_graph)
                 changed, self.show_external_window = imgui.checkbox("show external window", self.show_external_window)
                 if changed:
-                    if self.show_external_window:
-                        external_window.show()
-                        # only for glfw backend - beware
-                        window.focus()
-                    else:
-                        external_window.hide()
+                    self.set_external_window_visibility(self.show_external_window)
+                changed, self.external_window_i3_handle = imgui.checkbox("external window move/fullscreen with i3", self.external_window_i3_handle)
+                if self.external_window_i3_handle:
+                    changed, self.external_window_i3_workspace = imgui.input_text("i3 workspace", self.external_window_i3_workspace, 256, imgui.INPUT_TEXT_ENTER_RETURNS_TRUE)
+
                 changed, self.show_test_window = imgui.checkbox("show test window", self.show_test_window)
                 changed, self.hide_after_seconds = imgui.input_int("hide ui after n seconds", self.hide_after_seconds, 5, 60)
 
@@ -1640,9 +1655,6 @@ class NodeEditor(NodeGraphListener):
             if imgui.begin("autoplay", False, flags):
                 autoplay_time = self.autoplay_time
 
-                # path wildcard
-                # interval
-                # enable autoplay
                 changed, self.autoplay_wildcard = imgui.input_text("Files", self.autoplay_wildcard, 256, imgui.INPUT_TEXT_ENTER_RETURNS_TRUE)
                 imgui.same_line()
                 if imgui.button("Load..."):
@@ -1652,7 +1664,7 @@ class NodeEditor(NodeGraphListener):
                     self.autoplay_wildcard = os.path.relpath(wildcard, assets.SAVE_PATH)
 
                 imgui.push_item_width(150)
-                changed, self.autoplay_interval = imgui.input_float("interval (minutes)", self.autoplay_interval, 30.0, 60.0)
+                changed, self.autoplay_interval = imgui.input_float("interval", self.autoplay_interval, 30.0, 60.0)
                 changed, self.autoplay_fade_duration = imgui.slider_float("fade duration", self.autoplay_fade_duration, 0.0, 10.0)
                 changed, self.autoplay_enabled = imgui.checkbox("enable autoplay", self.autoplay_enabled)
                 if changed and self.autoplay_enabled:
@@ -1788,5 +1800,6 @@ external_window.event(on_key_press)
 
 if __name__ == "__main__":
     window.show()
-    external_window.hide()
+    # external window visibility is handled by editor
+    #external_window.hide()
     app.run()
