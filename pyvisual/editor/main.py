@@ -11,6 +11,8 @@ import contextlib
 import numpy as np
 import json
 import traceback
+import glob
+import random
 from collections import defaultdict
 from glumpy import app, gloo, gl
 from glumpy.ext import glfw
@@ -1345,6 +1347,26 @@ class NodeEditor(NodeGraphListener):
         self.show_external_window = settings.get("show_external_window", False)
         self.show_test_window = settings.get("show_test_window", False)
         self.hide_after_seconds = settings.get("hide_after_n_seconds", 5)
+
+        autoplay_settings = settings.get("autoplay", {})
+        self.autoplay_wildcard = autoplay_settings.get("wildcard", "")
+        self.autoplay_interval = autoplay_settings.get("interval", 120.0)
+        self.autoplay_fade_duration = autoplay_settings.get("fade_duration", 2.0)
+        self.autoplay_enabled = False
+
+        self.autoplay_current_interval = self.autoplay_interval
+        self.autoplay_current_file = None
+        # last remaining time of autoplay
+        self.autoplay_last_remaining = self.autoplay_interval
+        # time when autoplay was started last time
+        self.autoplay_last_start = None
+        # remaining autoplay time (if last_start != None): last_remaining - (time - last_start)
+
+        # keep two functions that determine fading in/out
+        # to get final alpha just get both values and multiply. one of them will always be 1
+        self.autoplay_fade_in = lambda: 1.0
+        self.autoplay_fade_out = lambda: min(1.0, self.autoplay_time / (self.autoplay_fade_duration + 0.0001))
+
         # rendering nodes caught from graph
         self.render_nodes = []
 
@@ -1355,7 +1377,7 @@ class NodeEditor(NodeGraphListener):
 
         # shader program to render output texture
         vertex = assets.load_shader(path="common/passthrough.vert")
-        fragment = assets.load_shader(path="common/passthrough.frag")
+        fragment = assets.load_shader(path="common/passthrough_with_alpha.frag")
         self.texture_program = gloo.Program(vertex, fragment, count=4, version="150")
         self.texture_program["iPosition"] = [(-1,-1), (-1,+1), (+1,-1), (+1,+1)]
         self.texture_program["iTexCoord"] = [( 0, 1), ( 0, 0), ( 1, 1), ( 1, 0)]
@@ -1407,6 +1429,12 @@ class NodeEditor(NodeGraphListener):
         settings["show_test_window"] = self.show_test_window
         settings["hide_after_seconds"] = self.hide_after_seconds
         settings.update(self.ui_graph_data.get_settings())
+
+        autoplay = {}
+        autoplay["wildcard"] = self.autoplay_wildcard
+        autoplay["interval"] = self.autoplay_interval
+        autoplay["fade_duration"] = self.autoplay_fade_duration
+        settings["autoplay"] = autoplay
         
         f = open("settings.json", "w")
         json.dump(settings, f)
@@ -1433,6 +1461,26 @@ class NodeEditor(NodeGraphListener):
             self.render_nodes.remove(node)
 
     @property
+    def autoplay_time(self):
+        autoplay_time = self.autoplay_last_remaining
+        if self.autoplay_last_start is not None:
+            autoplay_time -= time.time() - self.autoplay_last_start
+        return autoplay_time
+
+    def pick_next_autoplay_file(self):
+        current = self.autoplay_current_file
+        paths = glob.glob(os.path.join(assets.SAVE_PATH, self.autoplay_wildcard))
+        assert len(paths) != 0
+
+        def pick():
+            path = random.choice(paths)
+            if len(paths) != 1 and path == current:
+                return pick()
+            return path
+
+        return pick()
+
+    @property
     def output_texture(self):
         if len(self.render_nodes) == 0:
             return None
@@ -1443,8 +1491,13 @@ class NodeEditor(NodeGraphListener):
         if texture is None:
             return
 
+        autoplay_alpha = 1.0
+        if self.autoplay_enabled:
+            autoplay_alpha = self.autoplay_fade_in() * self.autoplay_fade_out()
+
         gl.glViewport(0, 0, target_size[0], target_size[1])
         self.texture_program["uInputTexture"] = texture
+        self.texture_program["uAlpha"] = autoplay_alpha
         self.texture_program.draw(gl.GL_TRIANGLE_STRIP)
 
     #
@@ -1584,6 +1637,45 @@ class NodeEditor(NodeGraphListener):
                 changed, d.node_bg_alpha = imgui.slider_float("node bg alpha", d.node_bg_alpha, 0.0, 1.0)
                 imgui.end()
 
+            if imgui.begin("autoplay", False, flags):
+                autoplay_time = self.autoplay_time
+
+                # path wildcard
+                # interval
+                # enable autoplay
+                changed, self.autoplay_wildcard = imgui.input_text("Files", self.autoplay_wildcard, 256, imgui.INPUT_TEXT_ENTER_RETURNS_TRUE)
+                imgui.same_line()
+                if imgui.button("Load..."):
+                    imgui.open_popup("wildcard")
+                wildcard = node_widget.imgui_pick_file("wildcard", assets.SAVE_PATH)
+                if wildcard is not None:
+                    self.autoplay_wildcard = os.path.relpath(wildcard, assets.SAVE_PATH)
+
+                imgui.push_item_width(150)
+                changed, self.autoplay_interval = imgui.input_float("interval (minutes)", self.autoplay_interval, 30.0, 60.0)
+                changed, self.autoplay_fade_duration = imgui.slider_float("fade duration", self.autoplay_fade_duration, 0.0, 10.0)
+                changed, self.autoplay_enabled = imgui.checkbox("enable autoplay", self.autoplay_enabled)
+                if changed and self.autoplay_enabled:
+                    self.autoplay_last_start = time.time()
+                elif changed and not self.autoplay_enabled:
+                    self.autoplay_last_remaining = autoplay_time
+                    self.autoplay_last_start = None
+
+                imgui.separator()
+                
+                imgui.push_item_width(150)
+                changed, value = imgui.input_float("remaining time", autoplay_time, 10.0, 60.0)
+                if changed:
+                    self.autoplay_last_remaining = value
+                    if self.autoplay_last_start is not None:
+                        self.autoplay_last_start = time.time()
+                if imgui.button("change now"):
+                    self.autoplay_last_remaining = self.autoplay_fade_duration
+                    if self.autoplay_last_start is not None:
+                        self.autoplay_last_start = time.time()
+
+                imgui.end()
+
             if self.show_test_window:
                 imgui.show_test_window()
 
@@ -1598,6 +1690,18 @@ class NodeEditor(NodeGraphListener):
         if self.hide_after_seconds != -1 and t - self.last_mouse_pos_changed > self.hide_after_seconds:
             self.show_windows = False
             window.set_cursor_visible(False)
+
+        # handle autoplay
+        if self.autoplay_enabled:
+            autoplay_time = self.autoplay_time
+            if autoplay_time <= 0.0:
+                self.autoplay_current_interval = self.autoplay_interval
+                self.autoplay_last_remaining = self.autoplay_interval
+                self.autoplay_last_start = time.time()
+                # fade in from current time, not from autoplay_time
+                # otherwise more fades might happen if remaining time is increased
+                self.autoplay_fade_in = lambda start=self.autoplay_last_start: min(1.0, (time.time() - start) / (self.autoplay_fade_duration + 0.0001))
+                self.session_graph.load_file(self.pick_next_autoplay_file())
 
         imgui.end()
         pop_style_vars()
