@@ -1555,8 +1555,10 @@ class NodeEditor(NodeGraphListener):
             self.last_mouse_pos = mouse_pos
             self.last_mouse_pos_changed = t
             self.show_windows = True
+            window.set_cursor_visible(True)
         if self.hide_after_seconds != -1 and t - self.last_mouse_pos_changed > self.hide_after_seconds:
             self.show_windows = False
+            window.set_cursor_visible(False)
 
         imgui.end()
         pop_style_vars()
