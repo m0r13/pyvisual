@@ -265,7 +265,7 @@ class UnaryOpFloat(Node):
     def _evaluate(self):
         op_value = self.get_input("op")
         if op_value.has_changed:
-            op = int(op_value)
+            op = int(op_value.value)
             if op < 0 or op >= len(self.OPS):
                 op = 0
             self._op_name = list(UNARY_OPS.keys())[op]

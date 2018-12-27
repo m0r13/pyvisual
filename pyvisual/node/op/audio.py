@@ -17,7 +17,7 @@ class AudioFilter(Node):
             {"name" : "input", "dtype" : dtype.audio},
             {"name" : "type", "dtype" : dtype.int, "dtype_args" : {"choices" : AUDIO_FILTER_TYPES}},
             {"name" : "order", "dtype" : dtype.int, "dtype_args" : {"default" : 5, "range" : [1, 10]}},
-            {"name" : "cutoff", "dtype" : dtype.float, "dtype_args" : {"default" : 1000.0, "range" : [0.0001, DEFAULT_SAMPLE_RATE / 2.0]}}
+            {"name" : "cutoff", "dtype" : dtype.float, "dtype_args" : {"default" : 1000.0, "range" : [0.0001, float("inf")]}}
         ]
         outputs = [
             {"name" : "output", "dtype" : dtype.audio}
