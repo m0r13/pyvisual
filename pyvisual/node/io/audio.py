@@ -1,4 +1,5 @@
 import imgui
+import math
 from pyvisual.node.base import Node
 from pyvisual.node import dtype
 from pyvisual.audio import pulse, util
@@ -19,6 +20,9 @@ class AudioData:
 
 class InputPulseAudio(Node):
     class Meta:
+        inputs = [
+            {"name" : "samplerate", "dtype" : dtype.int, "dtype_args" : {"default" : 5000}}
+        ]
         outputs = [
             {"name" : "output", "dtype" : dtype.audio}
         ]
@@ -32,8 +36,11 @@ class InputPulseAudio(Node):
         sr = DEFAULT_SAMPLE_RATE
         bs = DEFAULT_BLOCK_SIZE
 
-        self.pulse = pulse.PulseAudioContext(self._process_block, sample_rate=sr, block_size=bs)
-        self.output = AudioData(sample_rate=sr)
+        self.create(sr, bs)
+
+    def create(self, samplerate, blocksize):
+        self.pulse = pulse.PulseAudioContext(self._process_block, sample_rate=samplerate, block_size=blocksize)
+        self.output = AudioData(sample_rate=samplerate)
         self.next_blocks = []
         self.blocks = 0
 
@@ -45,6 +52,14 @@ class InputPulseAudio(Node):
         self.pulse.start()
 
     def _evaluate(self):
+        samplerate_value = self.get_input("samplerate")
+        if samplerate_value.has_changed:
+            self.stop()
+            sr = int(samplerate_value.value)
+            bs = 2 ** int(math.log2(sr / 60.0))
+            self.create(sr, bs)
+            self.start(None)
+
         self.output.blocks = self.next_blocks
         self.next_blocks = []
         self.set("output", self.output)
