@@ -158,13 +158,20 @@ class ChooseTexture(Node):
         super().__init__()
 
         self._count = 0
+        # keep current index and next index
+        # when a new texture should be choosen, next index is choosen randomly and that enable flag is set
+        # only in the next frame that texture is delegated and set as current
+        # (to prevent weird glitches when a generator is not enabled yet)
         self._current_index = -1
+        self._next_index = -1
 
     def _choose_next(self):
         if self.get("shuffle"):
-            self._current_index = (self._current_index + random.randint(1, self._count - 1)) % self._count
+            self._next_index = (self._current_index + random.randint(1, self._count - 1)) % self._count
         else:
-            self._current_index = (self._current_index + 1) % self._count
+            self._next_index = (self._current_index + 1) % self._count
+
+        self.get_output("enabled%d" % self._next_index).value = True
 
     def _update_custom_ports(self):
         self._count = int(self.get("count"))
@@ -182,16 +189,10 @@ class ChooseTexture(Node):
         self.set_custom_outputs(custom_outputs)
 
     def _evaluate(self):
-        update_all = False
-        if self.have_inputs_changed("count") or self._last_evaluated == 0.0:
-            self._update_custom_ports()
-            update_all = True
+        if self._next_index != -1:
+            self._current_index = self._next_index
+            self._next_index = -1
 
-        if self.get("next"):
-            self._choose_next()
-            update_all = True
-
-        if update_all:
             # update all enabled-flags, necessary after choosing new texture
             iterator = zip(self.yield_custom_input_values(), self.yield_custom_output_values())
             for i, ((_0, in_texture), (_1, out_enabled)) in enumerate(iterator):
@@ -199,7 +200,14 @@ class ChooseTexture(Node):
                 out_enabled.value = enabled
                 if enabled:
                     self.set("out", in_texture.value)
-        elif self._current_index != -1:
+
+        if self.have_inputs_changed("count") or self._last_evaluated == 0.0:
+            self._update_custom_ports()
+
+        if self.get("next"):
+            self._choose_next()
+
+        if self._current_index != -1:
             in_texture = self.get_input("in%d" % self._current_index)
             out_texture = self.get_output("out")
             in_texture.copy_to(out_texture)
