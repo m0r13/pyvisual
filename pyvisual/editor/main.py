@@ -34,8 +34,8 @@ profile = cProfile.Profile()
 
 # create window / opengl context already here
 # imgui seems to cause problems otherwise with imgui.get_color_u32_rgba without context
-external_window = app.Window(title="pyvisual optics external")
-window = app.Window(context=external_window, title="pyvisual optics")
+external_window = app.Window(title="pyvisual optics external", color=(0, 0, 0, 1))
+window = app.Window(context=external_window, title="pyvisual optics", color=(0, 0, 0, 1))
 imgui_renderer = glumpy_imgui.GlumpyGlfwRenderer(window, True)
 
 # utilities
@@ -1349,6 +1349,7 @@ class NodeEditor(NodeGraphListener):
         self.external_window_i3_workspace = settings.get("external_window_i3_workspace", "")
         self.show_test_window = settings.get("show_test_window", False)
         self.hide_after_seconds = settings.get("hide_after_n_seconds", 5)
+        self.output_value = settings.get("output_value", 1.0)
         self.set_external_window_visibility(self.show_external_window)
 
         autoplay_settings = settings.get("autoplay", {})
@@ -1433,6 +1434,7 @@ class NodeEditor(NodeGraphListener):
         settings["external_window_i3_workspace"] = self.external_window_i3_workspace
         settings["show_test_window"] = self.show_test_window
         settings["hide_after_seconds"] = self.hide_after_seconds
+        settings["output_value"] = self.output_value
         settings.update(self.ui_graph_data.get_settings())
 
         autoplay = {}
@@ -1513,6 +1515,7 @@ class NodeEditor(NodeGraphListener):
 
         gl.glViewport(0, 0, target_size[0], target_size[1])
         self.texture_program["uInputTexture"] = texture
+        self.texture_program["uValue"] = self.output_value
         self.texture_program["uAlpha"] = autoplay_alpha
         self.texture_program.draw(gl.GL_TRIANGLE_STRIP)
 
@@ -1646,6 +1649,7 @@ class NodeEditor(NodeGraphListener):
                 changed, self.hide_after_seconds = imgui.input_int("hide ui after n seconds", self.hide_after_seconds, 5, 60)
 
                 d = self.ui_graph_data
+                changed, self.output_value = imgui.slider_float("output_value", self.output_value, 0.0, 1.0)
                 changed, d.background_alpha = imgui.slider_float("bg alpha", d.background_alpha, 0.0, 1.0)
                 changed, d.grid_alpha = imgui.slider_float("grid alpha", d.grid_alpha, 0.0, 1.0)
                 changed, d.node_alpha = imgui.slider_float("node alpha", d.node_alpha, 0.0, 1.0)
