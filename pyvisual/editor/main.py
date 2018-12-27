@@ -1506,7 +1506,7 @@ class NodeEditor(NodeGraphListener):
             return None
         return self.render_nodes[-1].texture
 
-    def draw_output_texture(self, target_size):
+    def draw_output_texture(self, target_size, is_external_output=False):
         texture = self.output_texture
         if texture is None:
             return
@@ -1514,6 +1514,9 @@ class NodeEditor(NodeGraphListener):
         autoplay_alpha = 1.0
         if self.autoplay_enabled:
             autoplay_alpha = self.autoplay_fade_in() * self.autoplay_fade_out()
+        brightness = 1.0
+        if is_external_output:
+            brightness = self.output_value
 
         mvp = np.eye(4, dtype=np.float32)
         texture_size = texture.shape[:2][::-1]
@@ -1534,7 +1537,7 @@ class NodeEditor(NodeGraphListener):
         gl.glViewport(0, 0, target_size[0], target_size[1])
         self.texture_program["uModelViewProjection"] = mvp
         self.texture_program["uInputTexture"] = texture
-        self.texture_program["uValue"] = self.output_value
+        self.texture_program["uValue"] = brightness
         self.texture_program["uAlpha"] = autoplay_alpha
         self.texture_program.draw(gl.GL_TRIANGLE_STRIP)
 
@@ -1807,7 +1810,7 @@ def on_resize(width, height):
 @external_window.event
 def on_draw(event):
     external_window.clear()
-    editor.draw_output_texture(external_window.get_size())
+    editor.draw_output_texture(external_window.get_size(), is_external_output=True)
 
 def on_key_press(key, modifier):
     if key == ord("Q"):
