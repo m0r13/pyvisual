@@ -1383,7 +1383,7 @@ class NodeEditor(NodeGraphListener):
         # shader program to render output texture
         vertex = assets.load_shader(path="common/passthrough.vert")
         fragment = assets.load_shader(path="common/passthrough_with_alpha.frag")
-        self.texture_program = gloo.Program(vertex, fragment, count=4, version="150")
+        self.texture_program = gloo.Program(vertex, fragment, count=4, version="130")
         self.texture_program["iPosition"] = [(-1,-1), (-1,+1), (+1,-1), (+1,+1)]
         self.texture_program["iTexCoord"] = [( 0, 1), ( 0, 0), ( 1, 1), ( 1, 0)]
         #self.texture_program["uModelViewProjection"] = np.eye(4, dtype=np.float32)
