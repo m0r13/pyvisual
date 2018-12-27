@@ -14,7 +14,7 @@ import traceback
 import glob
 import random
 from collections import defaultdict
-from glumpy import app, gloo, gl
+from glumpy import app, gloo, gl, glm
 from glumpy.ext import glfw
 import imgui
 
@@ -1350,6 +1350,7 @@ class NodeEditor(NodeGraphListener):
         self.show_test_window = settings.get("show_test_window", False)
         self.hide_after_seconds = settings.get("hide_after_n_seconds", 5)
         self.output_value = settings.get("output_value", 1.0)
+        self.output_aspect_zoom_out = settings.get("output_aspect_zoom_out", True)
         self.set_external_window_visibility(self.show_external_window)
 
         autoplay_settings = settings.get("autoplay", {})
@@ -1385,7 +1386,7 @@ class NodeEditor(NodeGraphListener):
         self.texture_program = gloo.Program(vertex, fragment, count=4, version="150")
         self.texture_program["iPosition"] = [(-1,-1), (-1,+1), (+1,-1), (+1,+1)]
         self.texture_program["iTexCoord"] = [( 0, 1), ( 0, 0), ( 1, 1), ( 1, 0)]
-        self.texture_program["uModelViewProjection"] = np.eye(4, dtype=np.float32)
+        #self.texture_program["uModelViewProjection"] = np.eye(4, dtype=np.float32)
         self.texture_program["uTextureSize"] = np.float32([1.0, 1.0], dtype=np.float32)
         self.texture_program["uTransformUV"] = np.eye(4, dtype=np.float32)
 
@@ -1435,6 +1436,7 @@ class NodeEditor(NodeGraphListener):
         settings["show_test_window"] = self.show_test_window
         settings["hide_after_seconds"] = self.hide_after_seconds
         settings["output_value"] = self.output_value
+        settings["output_aspect_zoom_out"] = self.output_aspect_zoom_out
         settings.update(self.ui_graph_data.get_settings())
 
         autoplay = {}
@@ -1513,7 +1515,24 @@ class NodeEditor(NodeGraphListener):
         if self.autoplay_enabled:
             autoplay_alpha = self.autoplay_fade_in() * self.autoplay_fade_out()
 
+        mvp = np.eye(4, dtype=np.float32)
+        texture_size = texture.shape[:2][::-1]
+
+        texture_aspect = texture_size[0] / texture_size[1]
+        target_aspect = target_size[0] / target_size[1]
+
+        if (texture_aspect < target_aspect) ^ self.output_aspect_zoom_out:
+            # border left/right
+            glm.scale(mvp, texture_aspect, 1.0, 1.0)
+            glm.scale(mvp, 1.0 / target_aspect, 1.0, 1.0)
+        else:
+            # border top/bottom
+            glm.scale(mvp, 1.0, 1.0 / texture_aspect, 1.0)
+            glm.scale(mvp, 1.0, target_aspect, 1.0)
+
+
         gl.glViewport(0, 0, target_size[0], target_size[1])
+        self.texture_program["uModelViewProjection"] = mvp
         self.texture_program["uInputTexture"] = texture
         self.texture_program["uValue"] = self.output_value
         self.texture_program["uAlpha"] = autoplay_alpha
@@ -1650,6 +1669,7 @@ class NodeEditor(NodeGraphListener):
 
                 d = self.ui_graph_data
                 changed, self.output_value = imgui.slider_float("output_value", self.output_value, 0.0, 1.0)
+                changed, self.output_aspect_zoom_out= imgui.checkbox("aspect zoom out?", self.output_aspect_zoom_out)
                 changed, d.background_alpha = imgui.slider_float("bg alpha", d.background_alpha, 0.0, 1.0)
                 changed, d.grid_alpha = imgui.slider_float("grid alpha", d.grid_alpha, 0.0, 1.0)
                 changed, d.node_alpha = imgui.slider_float("node alpha", d.node_alpha, 0.0, 1.0)
