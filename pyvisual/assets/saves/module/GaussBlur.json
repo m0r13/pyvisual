@@ -1,58 +1,46 @@
 {
     "connections": [
         {
-            "dst_node_id": 2,
+            "dst_node_id": 103,
             "dst_port_id": "i_input",
-            "src_node_id": 0,
+            "src_node_id": 101,
             "src_port_id": "o_value"
         },
         {
-            "dst_node_id": 3,
+            "dst_node_id": 104,
             "dst_port_id": "i_input",
-            "src_node_id": 2,
+            "src_node_id": 103,
             "src_port_id": "o_output"
         },
         {
-            "dst_node_id": 2,
-            "dst_port_id": "i_uDirection",
-            "src_node_id": 4,
-            "src_port_id": "o_vec2"
-        },
-        {
-            "dst_node_id": 3,
-            "dst_port_id": "i_uDirection",
-            "src_node_id": 5,
-            "src_port_id": "o_vec2"
-        },
-        {
-            "dst_node_id": 2,
+            "dst_node_id": 104,
             "dst_port_id": "i_enabled",
-            "src_node_id": 7,
+            "src_node_id": 108,
             "src_port_id": "o_value"
         },
         {
-            "dst_node_id": 3,
+            "dst_node_id": 103,
             "dst_port_id": "i_enabled",
-            "src_node_id": 7,
+            "src_node_id": 108,
             "src_port_id": "o_value"
         },
         {
-            "dst_node_id": 2,
-            "dst_port_id": "i_uSigma",
-            "src_node_id": 6,
-            "src_port_id": "o_value"
-        },
-        {
-            "dst_node_id": 3,
-            "dst_port_id": "i_uSigma",
-            "src_node_id": 6,
-            "src_port_id": "o_value"
-        },
-        {
-            "dst_node_id": 1,
+            "dst_node_id": 102,
             "dst_port_id": "i_value",
-            "src_node_id": 3,
+            "src_node_id": 104,
             "src_port_id": "o_output"
+        },
+        {
+            "dst_node_id": 103,
+            "dst_port_id": "i_uDirection",
+            "src_node_id": 105,
+            "src_port_id": "o_vec2"
+        },
+        {
+            "dst_node_id": 104,
+            "dst_port_id": "i_uDirection",
+            "src_node_id": 106,
+            "src_port_id": "o_vec2"
         }
     ],
     "nodes": [
@@ -95,13 +83,13 @@
                         "dummy": false,
                         "group": "default",
                         "hide": false,
-                        "manual_input": false,
+                        "manual_input": true,
                         "name": "value",
                         "widgets": []
                     }
                 ]
             ],
-            "id": 0,
+            "id": 101,
             "manual_values": {
                 "i_default_value": "",
                 "i_dtype": 9.0,
@@ -144,13 +132,13 @@
                         "dummy": false,
                         "group": "default",
                         "hide": false,
-                        "manual_input": false,
+                        "manual_input": true,
                         "name": "test_value",
                         "widgets": []
                     }
                 ]
             ],
-            "id": 1,
+            "id": 102,
             "manual_values": {
                 "i_dtype": 9.0,
                 "i_name": "output",
@@ -168,10 +156,118 @@
             }
         },
         {
-            "custom_ports": [],
-            "id": 2,
+            "custom_ports": [
+                [
+                    "i_filter_mask",
+                    {
+                        "default": null,
+                        "dtype": "tex2d",
+                        "dtype_args": {},
+                        "dummy": false,
+                        "group": "default",
+                        "hide": true,
+                        "manual_input": true,
+                        "name": "filter_mask",
+                        "widgets": []
+                    }
+                ],
+                [
+                    "i_filter_mode",
+                    {
+                        "default": null,
+                        "dtype": "int",
+                        "dtype_args": {
+                            "choices": [
+                                "input",
+                                "mask",
+                                "filtered",
+                                "input_filtered_masked",
+                                "input_masked",
+                                "filtered_masked"
+                            ],
+                            "default": 2.0
+                        },
+                        "dummy": false,
+                        "group": "default",
+                        "hide": true,
+                        "manual_input": true,
+                        "name": "filter_mode",
+                        "widgets": []
+                    }
+                ],
+                [
+                    "i_filter_bg",
+                    {
+                        "default": null,
+                        "dtype": "color",
+                        "dtype_args": {
+                            "default": [
+                                0.0,
+                                0.0,
+                                0.0,
+                                0.0
+                            ]
+                        },
+                        "dummy": false,
+                        "group": "default",
+                        "hide": true,
+                        "manual_input": true,
+                        "name": "filter_bg",
+                        "widgets": []
+                    }
+                ],
+                [
+                    "i_uSigma",
+                    {
+                        "default": null,
+                        "dtype": "float",
+                        "dtype_args": {
+                            "default": 3.0,
+                            "range": [
+                                0.0001,
+                                Infinity
+                            ]
+                        },
+                        "dummy": false,
+                        "group": "default",
+                        "hide": false,
+                        "manual_input": true,
+                        "name": "uSigma",
+                        "widgets": []
+                    }
+                ],
+                [
+                    "i_uDirection",
+                    {
+                        "default": null,
+                        "dtype": "vec2",
+                        "dtype_args": {
+                            "default": [
+                                1.0,
+                                0.0
+                            ]
+                        },
+                        "dummy": false,
+                        "group": "default",
+                        "hide": false,
+                        "manual_input": true,
+                        "name": "uDirection",
+                        "widgets": []
+                    }
+                ]
+            ],
+            "id": 103,
             "manual_values": {
+                "i_advanced_filtering": 0.0,
                 "i_enabled": 1.0,
+                "i_filter_bg": [
+                    0.0,
+                    0.0,
+                    0.0,
+                    0.0
+                ],
+                "i_filter_mask": "",
+                "i_filter_mode": 2.0,
                 "i_force_change": 42.0,
                 "i_input": "",
                 "i_interpolation": 1.0,
@@ -222,10 +318,118 @@
             }
         },
         {
-            "custom_ports": [],
-            "id": 3,
+            "custom_ports": [
+                [
+                    "i_filter_mask",
+                    {
+                        "default": null,
+                        "dtype": "tex2d",
+                        "dtype_args": {},
+                        "dummy": false,
+                        "group": "default",
+                        "hide": true,
+                        "manual_input": true,
+                        "name": "filter_mask",
+                        "widgets": []
+                    }
+                ],
+                [
+                    "i_filter_mode",
+                    {
+                        "default": null,
+                        "dtype": "int",
+                        "dtype_args": {
+                            "choices": [
+                                "input",
+                                "mask",
+                                "filtered",
+                                "input_filtered_masked",
+                                "input_masked",
+                                "filtered_masked"
+                            ],
+                            "default": 2.0
+                        },
+                        "dummy": false,
+                        "group": "default",
+                        "hide": true,
+                        "manual_input": true,
+                        "name": "filter_mode",
+                        "widgets": []
+                    }
+                ],
+                [
+                    "i_filter_bg",
+                    {
+                        "default": null,
+                        "dtype": "color",
+                        "dtype_args": {
+                            "default": [
+                                0.0,
+                                0.0,
+                                0.0,
+                                0.0
+                            ]
+                        },
+                        "dummy": false,
+                        "group": "default",
+                        "hide": true,
+                        "manual_input": true,
+                        "name": "filter_bg",
+                        "widgets": []
+                    }
+                ],
+                [
+                    "i_uSigma",
+                    {
+                        "default": null,
+                        "dtype": "float",
+                        "dtype_args": {
+                            "default": 3.0,
+                            "range": [
+                                0.0001,
+                                Infinity
+                            ]
+                        },
+                        "dummy": false,
+                        "group": "default",
+                        "hide": false,
+                        "manual_input": true,
+                        "name": "uSigma",
+                        "widgets": []
+                    }
+                ],
+                [
+                    "i_uDirection",
+                    {
+                        "default": null,
+                        "dtype": "vec2",
+                        "dtype_args": {
+                            "default": [
+                                1.0,
+                                0.0
+                            ]
+                        },
+                        "dummy": false,
+                        "group": "default",
+                        "hide": false,
+                        "manual_input": true,
+                        "name": "uDirection",
+                        "widgets": []
+                    }
+                ]
+            ],
+            "id": 104,
             "manual_values": {
+                "i_advanced_filtering": 0.0,
                 "i_enabled": 1.0,
+                "i_filter_bg": [
+                    0.0,
+                    0.0,
+                    0.0,
+                    0.0
+                ],
+                "i_filter_mask": "",
+                "i_filter_mode": 2.0,
                 "i_force_change": 42.0,
                 "i_input": "",
                 "i_interpolation": 1.0,
@@ -277,7 +481,7 @@
         },
         {
             "custom_ports": [],
-            "id": 4,
+            "id": 105,
             "manual_values": {
                 "i_x": 1.0,
                 "i_y": 0.0,
@@ -298,7 +502,7 @@
         },
         {
             "custom_ports": [],
-            "id": 5,
+            "id": 106,
             "manual_values": {
                 "i_x": 0.0,
                 "i_y": 1.0,
@@ -356,13 +560,13 @@
                         "dummy": false,
                         "group": "default",
                         "hide": false,
-                        "manual_input": false,
+                        "manual_input": true,
                         "name": "value",
                         "widgets": []
                     }
                 ]
             ],
-            "id": 6,
+            "id": 107,
             "manual_values": {
                 "i_default_value": 3.0,
                 "i_dtype": 3.0,
@@ -419,13 +623,13 @@
                         "dummy": false,
                         "group": "default",
                         "hide": false,
-                        "manual_input": false,
+                        "manual_input": true,
                         "name": "value",
                         "widgets": []
                     }
                 ]
             ],
-            "id": 7,
+            "id": 108,
             "manual_values": {
                 "i_default_value": 1.0,
                 "i_dtype": 0.0,
@@ -446,8 +650,8 @@
     ],
     "ui_data": {
         "offset": [
-            -1009.0,
-            116.0
+            -1212.0,
+            -51.0
         ]
     }
 }
