@@ -666,7 +666,7 @@ class UINode:
                     interacted = True
                 imgui.end_group()
                 # TODO hacked layout
-                if len(outputs) or self.spec.name == "Plot":
+                if len(outputs) or self.spec.name in ("Plot", "BeatMonitor"):
                     imgui.same_line()
 
             if len(outputs):
