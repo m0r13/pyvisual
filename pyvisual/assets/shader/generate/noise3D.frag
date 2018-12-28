@@ -13,8 +13,9 @@ out vec4 oFragColor;
 #include <lib/noise3D.glsl>
 
 void main() {
+    vec2 size = textureSize(uInputTexture, 0);
     vec2 uv = TexCoord0.xy - vec2(0.5);
-    uv.x *= 1920.0 / 1080.0;
+    uv.x *= float(size.x) / float(size.y);
     uv = (uTransform * vec4(uv, 0.0, 1.0)).xy;
 
     vec3 position = vec3(uv, uTime * 1.0);

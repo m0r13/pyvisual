@@ -1,12 +1,6 @@
 {
     "connections": [
         {
-            "dst_node_id": 4,
-            "dst_port_id": "i_input",
-            "src_node_id": 0,
-            "src_port_id": "o_output"
-        },
-        {
             "dst_node_id": 3,
             "dst_port_id": "i_uResolution",
             "src_node_id": 2,
@@ -37,153 +31,129 @@
             "src_port_id": "o_output"
         },
         {
-            "dst_node_id": 8,
-            "dst_port_id": "i_input",
-            "src_node_id": 9,
-            "src_port_id": "o_output"
-        },
-        {
             "dst_node_id": 1,
             "dst_port_id": "i_texture",
             "src_node_id": 10,
             "src_port_id": "o_output"
         },
         {
-            "dst_node_id": 10,
-            "dst_port_id": "i_sizeref",
+            "dst_node_id": 3,
+            "dst_port_id": "i_transformUV",
             "src_node_id": 11,
             "src_port_id": "o_output"
         },
         {
-            "dst_node_id": 3,
-            "dst_port_id": "i_transformUV",
-            "src_node_id": 12,
-            "src_port_id": "o_output"
-        },
-        {
-            "dst_node_id": 12,
+            "dst_node_id": 11,
             "dst_port_id": "i_x",
-            "src_node_id": 13,
+            "src_node_id": 12,
             "src_port_id": "o_output"
         },
         {
             "dst_node_id": 4,
             "dst_port_id": "i_uValueThreshold",
-            "src_node_id": 14,
+            "src_node_id": 13,
             "src_port_id": "o_output"
         },
         {
-            "dst_node_id": 16,
+            "dst_node_id": 15,
             "dst_port_id": "i_alpha",
-            "src_node_id": 15,
+            "src_node_id": 14,
             "src_port_id": "o_output"
         },
         {
             "dst_node_id": 8,
             "dst_port_id": "i_uCubeScale",
-            "src_node_id": 16,
+            "src_node_id": 15,
             "src_port_id": "o_output"
         },
         {
             "dst_node_id": 8,
             "dst_port_id": "i_uBackground",
-            "src_node_id": 17,
+            "src_node_id": 16,
             "src_port_id": "o_rgba"
         },
         {
-            "dst_node_id": 17,
+            "dst_node_id": 16,
             "dst_port_id": "i_h",
+            "src_node_id": 17,
+            "src_port_id": "o_output"
+        },
+        {
+            "dst_node_id": 21,
+            "dst_port_id": "i_input",
             "src_node_id": 18,
             "src_port_id": "o_output"
         },
         {
-            "dst_node_id": 22,
-            "dst_port_id": "i_input",
-            "src_node_id": 19,
-            "src_port_id": "o_output"
-        },
-        {
-            "dst_node_id": 22,
+            "dst_node_id": 21,
             "dst_port_id": "i_enabled",
-            "src_node_id": 19,
+            "src_node_id": 18,
             "src_port_id": "o_enabled"
         },
         {
-            "dst_node_id": 19,
-            "dst_port_id": "i_sizeref",
+            "dst_node_id": 18,
+            "dst_port_id": "i_transformUV",
             "src_node_id": 20,
             "src_port_id": "o_output"
         },
         {
-            "dst_node_id": 19,
-            "dst_port_id": "i_transformUV",
-            "src_node_id": 21,
-            "src_port_id": "o_output"
-        },
-        {
-            "dst_node_id": 22,
+            "dst_node_id": 21,
             "dst_port_id": "i_angle",
-            "src_node_id": 23,
+            "src_node_id": 22,
             "src_port_id": "o_output"
         },
         {
-            "dst_node_id": 24,
-            "dst_port_id": "i_input",
+            "dst_node_id": 26,
+            "dst_port_id": "i_t1",
             "src_node_id": 25,
             "src_port_id": "o_output"
         },
         {
-            "dst_node_id": 27,
-            "dst_port_id": "i_t1",
+            "dst_node_id": 26,
+            "dst_port_id": "i_t2",
+            "src_node_id": 27,
+            "src_port_id": "o_output"
+        },
+        {
+            "dst_node_id": 23,
+            "dst_port_id": "i_transformUV",
             "src_node_id": 26,
             "src_port_id": "o_output"
         },
         {
             "dst_node_id": 27,
-            "dst_port_id": "i_t2",
+            "dst_port_id": "i_x",
             "src_node_id": 28,
             "src_port_id": "o_output"
         },
         {
-            "dst_node_id": 24,
-            "dst_port_id": "i_transformUV",
-            "src_node_id": 27,
-            "src_port_id": "o_output"
-        },
-        {
-            "dst_node_id": 28,
-            "dst_port_id": "i_x",
+            "dst_node_id": 23,
+            "dst_port_id": "i_uTime",
             "src_node_id": 29,
             "src_port_id": "o_output"
         },
         {
-            "dst_node_id": 24,
-            "dst_port_id": "i_uTime",
-            "src_node_id": 30,
-            "src_port_id": "o_output"
-        },
-        {
-            "dst_node_id": 34,
+            "dst_node_id": 33,
             "dst_port_id": "i_input",
-            "src_node_id": 22,
+            "src_node_id": 21,
             "src_port_id": "o_output"
         },
         {
             "dst_node_id": 8,
             "dst_port_id": "i_time",
-            "src_node_id": 31,
+            "src_node_id": 30,
             "src_port_id": "o_output"
         },
         {
             "dst_node_id": 10,
             "dst_port_id": "i_filter_mask",
-            "src_node_id": 32,
+            "src_node_id": 31,
             "src_port_id": "o_output"
         },
         {
             "dst_node_id": 8,
             "dst_port_id": "i_time_mask",
-            "src_node_id": 33,
+            "src_node_id": 32,
             "src_port_id": "o_output"
         },
         {
@@ -199,174 +169,235 @@
             "src_port_id": "o_enabled"
         },
         {
-            "dst_node_id": 36,
-            "dst_port_id": "i_in0",
-            "src_node_id": 37,
-            "src_port_id": "o_output"
+            "dst_node_id": 72,
+            "dst_port_id": "i_v1",
+            "src_node_id": 35,
+            "src_port_id": "o_enabled1"
         },
         {
-            "dst_node_id": 54,
+            "dst_node_id": 53,
             "dst_port_id": "i_input",
-            "src_node_id": 36,
+            "src_node_id": 35,
             "src_port_id": "o_enabled3"
-        },
-        {
-            "dst_node_id": 38,
-            "dst_port_id": "i_input",
-            "src_node_id": 36,
-            "src_port_id": "o_enabled0"
-        },
-        {
-            "dst_node_id": 35,
-            "dst_port_id": "i_input",
-            "src_node_id": 36,
-            "src_port_id": "o_out"
-        },
-        {
-            "dst_node_id": 42,
-            "dst_port_id": "i_input",
-            "src_node_id": 36,
-            "src_port_id": "o_enabled2"
         },
         {
             "dst_node_id": 41,
             "dst_port_id": "i_input",
-            "src_node_id": 36,
-            "src_port_id": "o_enabled1"
+            "src_node_id": 35,
+            "src_port_id": "o_enabled2"
         },
         {
-            "dst_node_id": 19,
-            "dst_port_id": "i_enabled",
-            "src_node_id": 39,
-            "src_port_id": "o_output"
+            "dst_node_id": 72,
+            "dst_port_id": "i_v0",
+            "src_node_id": 35,
+            "src_port_id": "o_enabled0"
         },
         {
-            "dst_node_id": 59,
-            "dst_port_id": "i_value",
-            "src_node_id": 39,
-            "src_port_id": "o_output"
-        },
-        {
-            "dst_node_id": 40,
+            "dst_node_id": 34,
             "dst_port_id": "i_input",
-            "src_node_id": 24,
+            "src_node_id": 35,
+            "src_port_id": "o_out"
+        },
+        {
+            "dst_node_id": 18,
+            "dst_port_id": "i_enabled",
+            "src_node_id": 38,
             "src_port_id": "o_output"
         },
         {
-            "dst_node_id": 24,
+            "dst_node_id": 58,
+            "dst_port_id": "i_value",
+            "src_node_id": 38,
+            "src_port_id": "o_output"
+        },
+        {
+            "dst_node_id": 39,
+            "dst_port_id": "i_input",
+            "src_node_id": 23,
+            "src_port_id": "o_output"
+        },
+        {
+            "dst_node_id": 23,
             "dst_port_id": "i_enabled",
+            "src_node_id": 42,
+            "src_port_id": "o_output"
+        },
+        {
+            "dst_node_id": 35,
+            "dst_port_id": "i_in0",
             "src_node_id": 43,
             "src_port_id": "o_output"
         },
         {
-            "dst_node_id": 36,
+            "dst_node_id": 35,
             "dst_port_id": "i_in1",
-            "src_node_id": 44,
+            "src_node_id": 43,
             "src_port_id": "o_output"
         },
         {
-            "dst_node_id": 45,
+            "dst_node_id": 44,
             "dst_port_id": "i_input",
             "src_node_id": 3,
             "src_port_id": "o_output"
         },
         {
-            "dst_node_id": 36,
+            "dst_node_id": 35,
             "dst_port_id": "i_in2",
-            "src_node_id": 46,
+            "src_node_id": 45,
             "src_port_id": "o_output"
         },
         {
             "dst_node_id": 4,
             "dst_port_id": "i_enabled",
-            "src_node_id": 47,
+            "src_node_id": 46,
             "src_port_id": "o_output"
         },
         {
-            "dst_node_id": 51,
+            "dst_node_id": 50,
             "dst_port_id": "i_x",
-            "src_node_id": 50,
-            "src_port_id": "o_output"
-        },
-        {
-            "dst_node_id": 49,
-            "dst_port_id": "i_transformUV",
-            "src_node_id": 51,
-            "src_port_id": "o_output"
-        },
-        {
-            "dst_node_id": 49,
-            "dst_port_id": "i_input",
-            "src_node_id": 48,
-            "src_port_id": "o_texture"
-        },
-        {
-            "dst_node_id": 53,
-            "dst_port_id": "i_input",
             "src_node_id": 49,
             "src_port_id": "o_output"
         },
         {
-            "dst_node_id": 36,
-            "dst_port_id": "i_in3",
-            "src_node_id": 52,
-            "src_port_id": "o_output"
-        },
-        {
-            "dst_node_id": 55,
-            "dst_port_id": "i_value",
-            "src_node_id": 56,
-            "src_port_id": "o_output"
-        },
-        {
-            "dst_node_id": 49,
-            "dst_port_id": "i_enabled",
-            "src_node_id": 56,
+            "dst_node_id": 48,
+            "dst_port_id": "i_transformUV",
+            "src_node_id": 50,
             "src_port_id": "o_output"
         },
         {
             "dst_node_id": 48,
-            "dst_port_id": "i_next",
-            "src_node_id": 55,
-            "src_port_id": "o_rising"
-        },
-        {
-            "dst_node_id": 36,
-            "dst_port_id": "i_next",
-            "src_node_id": 57,
-            "src_port_id": "o_out"
-        },
-        {
-            "dst_node_id": 19,
             "dst_port_id": "i_input",
-            "src_node_id": 58,
+            "src_node_id": 47,
             "src_port_id": "o_texture"
         },
         {
-            "dst_node_id": 58,
+            "dst_node_id": 52,
+            "dst_port_id": "i_input",
+            "src_node_id": 48,
+            "src_port_id": "o_output"
+        },
+        {
+            "dst_node_id": 35,
+            "dst_port_id": "i_in3",
+            "src_node_id": 51,
+            "src_port_id": "o_output"
+        },
+        {
+            "dst_node_id": 54,
+            "dst_port_id": "i_value",
+            "src_node_id": 55,
+            "src_port_id": "o_output"
+        },
+        {
+            "dst_node_id": 48,
+            "dst_port_id": "i_enabled",
+            "src_node_id": 55,
+            "src_port_id": "o_output"
+        },
+        {
+            "dst_node_id": 47,
             "dst_port_id": "i_next",
-            "src_node_id": 59,
+            "src_node_id": 54,
             "src_port_id": "o_rising"
+        },
+        {
+            "dst_node_id": 35,
+            "dst_port_id": "i_next",
+            "src_node_id": 56,
+            "src_port_id": "o_out"
+        },
+        {
+            "dst_node_id": 18,
+            "dst_port_id": "i_input",
+            "src_node_id": 57,
+            "src_port_id": "o_texture"
+        },
+        {
+            "dst_node_id": 57,
+            "dst_port_id": "i_next",
+            "src_node_id": 58,
+            "src_port_id": "o_rising"
+        },
+        {
+            "dst_node_id": 50,
+            "dst_port_id": "i_y",
+            "src_node_id": 60,
+            "src_port_id": "o_output"
+        },
+        {
+            "dst_node_id": 61,
+            "dst_port_id": "i_alpha",
+            "src_node_id": 62,
+            "src_port_id": "o_output"
+        },
+        {
+            "dst_node_id": 30,
+            "dst_port_id": "i_factor",
+            "src_node_id": 61,
+            "src_port_id": "o_output"
+        },
+        {
+            "dst_node_id": 71,
+            "dst_port_id": "i_input",
+            "src_node_id": 70,
+            "src_port_id": "o_output"
+        },
+        {
+            "dst_node_id": 70,
+            "dst_port_id": "i_alpha",
+            "src_node_id": 69,
+            "src_port_id": "o_output"
+        },
+        {
+            "dst_node_id": 29,
+            "dst_port_id": "i_factor",
+            "src_node_id": 71,
+            "src_port_id": "o_output"
+        },
+        {
+            "dst_node_id": 40,
+            "dst_port_id": "i_input",
+            "src_node_id": 72,
+            "src_port_id": "o_output"
+        },
+        {
+            "dst_node_id": 8,
+            "dst_port_id": "i_input",
+            "src_node_id": 73,
+            "src_port_id": "o_output"
+        },
+        {
+            "dst_node_id": 10,
+            "dst_port_id": "i_sizeref",
+            "src_node_id": 74,
+            "src_port_id": "o_output"
+        },
+        {
+            "dst_node_id": 23,
+            "dst_port_id": "i_input",
+            "src_node_id": 75,
+            "src_port_id": "o_output"
+        },
+        {
+            "dst_node_id": 4,
+            "dst_port_id": "i_input",
+            "src_node_id": 76,
+            "src_port_id": "o_output"
+        },
+        {
+            "dst_node_id": 18,
+            "dst_port_id": "i_sizeref",
+            "src_node_id": 77,
+            "src_port_id": "o_output"
+        },
+        {
+            "dst_node_id": 48,
+            "dst_port_id": "i_sizeref",
+            "src_node_id": 78,
+            "src_port_id": "o_output"
         }
     ],
     "nodes": [
-        {
-            "custom_ports": [],
-            "id": 0,
-            "manual_values": {
-                "i_path": "image/tartuvhs/startup-hub-tartu-estonia.jpg",
-                "o_output": ""
-            },
-            "type": "LoadTexture",
-            "ui_data": {
-                "collapsed": true,
-                "pos": [
-                    2693.0,
-                    -1331.0
-                ],
-                "selected": false
-            }
-        },
         {
             "custom_ports": [],
             "id": 1,
@@ -377,8 +408,8 @@
             "ui_data": {
                 "collapsed": false,
                 "pos": [
-                    3363.0,
-                    172.0
+                    3665.0,
+                    -178.0
                 ],
                 "selected": false
             }
@@ -680,8 +711,8 @@
             "ui_data": {
                 "collapsed": true,
                 "pos": [
-                    2718.0,
-                    -1391.0
+                    2710.0,
+                    -1460.0
                 ],
                 "selected": false
             }
@@ -709,17 +740,17 @@
             "custom_ports": [],
             "id": 7,
             "manual_values": {
-                "i_factor": 0.10000000149011612,
+                "i_factor": 0.25999999046325684,
                 "i_mod": 0.0,
                 "i_reset": 0.0,
-                "o_output": 33.957447367272486
+                "o_output": 175.32452531981352
             },
             "type": "Time",
             "ui_data": {
-                "collapsed": true,
+                "collapsed": false,
                 "pos": [
-                    2683.0,
-                    -1211.0
+                    2647.0,
+                    -1215.0
                 ],
                 "selected": false
             }
@@ -829,7 +860,7 @@
                 "i_enable_time_mask": 1.0,
                 "i_enabled": 1.0,
                 "i_force_change": 42.0,
-                "i_fragment_source": "\n#include <generate/base_time_mask.frag>\n// Shader downloaded and adapted from glslsandbox.com\n// URL: http://glslsandbox.com/e#50909.0\n\n/*\n * Original shader from: https://www.shadertoy.com/view/llKBDc\n */\n\nuniform vec4 uBackground; // {\"default\" : [0.1, 0.7, 0.8, 1.0]}\nuniform float uCubeScale; // {\"default\" : 1.0}\n\n#ifdef GL_ES\nprecision mediump float;\n#endif\n\n// glslsandbox uniforms\n\n;\n\n// shadertoy globals\nfloat iTime = 0.0;\nvec3  iResolution = vec3(0.0);\n\n// Emulate a black texture\n#define texture(s, uv) vec4(0.0)\n\n// --------[ Original ShaderToy begins here ]---------- //\n#define eps 0.01\n\nmat2 r2d(float a){\n    float s = sin(a);\n\tfloat c = cos(a);\n    return mat2(c,-s,s,c);\n}\n\nfloat smin(float d1, float d2, float k){\n        float h = exp(-k * d1) + exp(-k * d2);\n        return -log(h) / k;\n}\nfloat udRoundBox( vec3 p, vec3 b, float r )\n{\n  return length(max(abs(p)-b,0.0))-r;\n}\n\nfloat sdTorus( vec3 p, vec2 t )\n{\n      vec2 q = vec2(length(p.xz)-t.x,p.y);\n        return length(q)-t.y;\n}\n\nvoid partitionSpaceAndColor(inout vec3 c, inout vec3 p, inout float a){\n    // index the cells\n    vec3 i = floor(p);\n    //random y\n    float ry = fract(sin(i.x*76.78+i.z*786.89)*1488.88);\n    //if random number is over .49 invert y direction\n    float updown = 1.0;\n    updown = (ry>.49) ? 1.0 : -1.0;\n    //addto and move y\n    p.y += (ry*1.5 + iTime*ry*2.5)*updown;\n    p.y += ry;\n    //re index cells\n    i=floor(p);\n    //divide the space\n    p=fract(p)-.5;\n    //random rotation using reindexed vec3    \n    float r  = fract(sin(i.x*76.68+i.y*148.34)*768.78);\n    float r2 = fract(sin(i.z*76.68+i.y*148.34)*768.78);\n    p.xz*=r2d(r- iTime*(r*3.));\n    p.xy*=r2d(r2-iTime*(r*2.5));    \n    //random color\n    float c1  = fract(sin(i.x*76.68+i.y*148.34)*768.78);\n    float c2 = fract(sin(i.z*76.68+i.y*148.34)*768.78);\n    float c3 = fract(sin(i.z*76.68+i.x*148.34)*768.78);\n    \n    c = vec3(c1,c2,c3);\n    \n    a = c1;\n}\n\nfloat map(vec3 p){\n    \n    vec3 dummyVec = vec3(0.0);\n    float test;\n    partitionSpaceAndColor(dummyVec, p, test);\n    //p += (sin(p.x*55.)*sin(p.y*55.5)*sin(p.z*56.)*.0075);\n    //return smin(udRoundBox(p,vec3(.15),.015), pl, 6.); //*.75;\n   \n    //test = fract(test + pyvisualTime * 0.05);\n    //test = step(0.5, test);\n    test = sin(test * 13.82 + pyvisualTime * 0.5) * 0.5 + 0.5;\n\n    float box = udRoundBox(p,vec3(.15 * uCubeScale),.015);\n    float sphere = length(abs(p)) - 0.15 * uCubeScale;\n    float torus = sdTorus(p, vec2(0.15 * uCubeScale, 0.15 * 0.25));\n    float mixed = mix(torus, box, test);\n\n    //test = step(0.5, test);\n    return box;\n    //return sphere;\n    //return mixed;\n    // mix between box and sphere\n    //return mix(udRoundBox(p,vec3(.15 * uCubeScale),.015), length(abs(p)) - 0.15 * uCubeScale, test);\n}\n\nfloat trace(vec3 r, vec3 o){\n    float t = 0.0;\n    for(int i = 0; i < 48; i++){\n        vec3 p = o + r * t;\n        float d = map(p);\n        t += d * 0.75;\n        if(d<eps || t > 8.0) break;\n    }\n    return t;\n}\n\nvec3 getNormal2(in vec3 p) {\n\tvec2 e = vec2(eps, 0.0);\n\treturn normalize((vec3(map(p+e.xyy), map(p+e.yxy), map(p+e.yyx)) - map(p)) / e.x);\n}\n// https://github.com/darrenmothersele/raymarch/blob/master/shaders/frag.glsl\nvec3 getNormal(in vec3 p) {\n\t// 6-tap normalization. Probably the most accurate, but a bit of a cycle waster.\n\treturn normalize(vec3(\n\t\tmap(vec3(p.x+eps,p.y,p.z))-map(vec3(p.x-eps,p.y,p.z)),\n\t\tmap(vec3(p.x,p.y+eps,p.z))-map(vec3(p.x,p.y-eps,p.z)),\n\t\tmap(vec3(p.x,p.y,p.z+eps))-map(vec3(p.x,p.y,p.z-eps))\n\t));\n\n    /*\n\t// faster 4-tap version\n\tfloat ref = map(p);\n\treturn normalize(vec3(\n\t\tmap(vec3(p.x+eps,p.y,p.z))-ref,\n\t\tmap(vec3(p.x,p.y+eps,p.z))-ref,\n\t\tmap(vec3(p.x,p.y,p.z+eps))-ref\n\t));\n    */\n}\n\nvoid mainImage( out vec4 fragColor, in vec2 fragCoord )\n{\n    // Normalized pixel coordinates (from 0 to 1)\n    vec2 uv = fragCoord/iResolution.xy;\n    uv = uv * 2.0 -1.0;\n    uv.x *= iResolution.x / iResolution.y;\n    vec3 l = normalize(vec3(0.3, 0.4, 0.75));\n    \n    vec3 r = normalize(vec3(uv, 1.0 - dot(uv, uv) * .33));\n    vec3 o = vec3(0.0, 0.9, -9.0);\n    \n    o.zy *= r2d(iTime*.15);\n    //o.y = -map(sp)+.3;\n    r.zy*=r2d((sin(iTime/4.)*.5));\n    r.xz*=r2d(iTime*.73+sin(iTime*.25)*4.);\n    \n    \n    float t = trace(r, o);\n    \n    vec3 sp = o+r * t;\n    float d = map(sp);\n\t//vec3 sky = pow(vec3(0.1,0.1,0.65),vec3(3.*r.y));\n\t// https://www.shadertoy.com/view/MlcGD7\n    vec4 sky= pow(vec4(uBackground.rgb, 1), vec4(4.*max(-r.y,-0.41)+2.))+(dot(r,l)*.315+.215);\n    \n    vec3 n = getNormal(sp);\n    \n    float fog = smoothstep(-0.015, .17, t*0.03);\n    // Time varying pixel color\n    //vec4 col = (sky);    //0.5 + 0.5*cos(iTime+uv.xyx+vec3(0,2,4));\n    \n    vec3 c = vec3(0.0);\n    \n    // so if 'sp' or surface position was to be used later it wouldnt be changed...\n    vec3 tmpSP = sp;\n    float test;\n    partitionSpaceAndColor(c, tmpSP, test);\n    \n    if(abs(d) < .5){\n        vec3 rf = reflect(r,n);\n        vec3 cmp = texture(iChannel0, rf).rgb;\n        fragColor = mix(vec4(0.25+cmp+vec3(c),1.0)* max(dot(n,l),0.18), vec4(sky), fog);\n    }\n    else\n    \tfragColor = vec4(sky);\n}\n\n\n/*\n        vec3 i = floor(sp);\n        float ry = fract(sin(i.x*76.78+i.z*786.89)*1488.88);\n        sp.y += ry*1.5 + iTime*ry;\n        sp.y += ry;\n        i=floor(sp);\n\n        sp=fract(sp)-.5;\n        \n        \n        \n    \tfloat c1  = fract(sin(i.x*76.68+i.y*148.34)*768.78);\n    \tfloat c2 = fract(sin(i.z*76.68+i.y*148.34)*768.78);\n        float c3 = fract(sin(i.z*76.68+i.x*148.34)*768.78);\n        */\n        //vec3 c = partitionSpaceAndColor(sp);\n\n    //vec3 i = floor(sp);\n    //vec3 rn = fract(i);\n    //rn=floor(rn);\n\n\n\n//float pl = p.y;\n/*    \n    vec3 i = floor(p);\n    float ry = fract(sin(i.x*76.78+i.z*786.89)*1488.88);\n    p.y += ry*1.5 + iTime*ry;\n    p.y += ry;\n    i=floor(p);\n    \n    p=fract(p)-.5;\n    \n    float r  = fract(sin(i.x*76.68+i.y*148.34)*768.78);\n    float r2 = fract(sin(i.z*76.68+i.y*148.34)*768.78);\n    p.xz*=r2d(r- iTime*(r*3.));\n    p.xy*=r2d(r2-iTime*(r*2.5));\n    */\n// --------[ Original ShaderToy ends here ]---------- //\n\n\n\nvoid generateFrag() {\n\n\n    iTime = pyvisualTime * 0.5;\n    iResolution = vec3(pyvisualResolution, 0.0);\n\n    mainImage(pyvisualOutColor, (vec2(pyvisualUV.x, 1.0 - pyvisualUV.y) * pyvisualResolution).xy);\n    pyvisualOutColor.a = 1.0;\n}\n",
+                "i_fragment_source": "\n#include <generate/base_time_mask.frag>\n// Shader downloaded and adapted from glslsandbox.com\n// URL: http://glslsandbox.com/e#50909.0\n\n/*\n * Original shader from: https://www.shadertoy.com/view/llKBDc\n */\n\nuniform vec4 uBackground; // {\"default\" : [0.1, 0.7, 0.8, 1.0]}\nuniform float uCubeScale; // {\"default\" : 1.0}\n\n#ifdef GL_ES\nprecision mediump float;\n#endif\n\n// glslsandbox uniforms\n\n;\n\n// shadertoy globals\nfloat iTime = 0.0;\nvec3  iResolution = vec3(0.0);\n\n// Emulate a black texture\n#define texture(s, uv) vec4(0.0)\n\n// --------[ Original ShaderToy begins here ]---------- //\n#define eps 0.01\n\nmat2 r2d(float a){\n    float s = sin(a);\n\tfloat c = cos(a);\n    return mat2(c,-s,s,c);\n}\n\nfloat smin(float d1, float d2, float k){\n        float h = exp(-k * d1) + exp(-k * d2);\n        return -log(h) / k;\n}\nfloat udRoundBox( vec3 p, vec3 b, float r )\n{\n  return length(max(abs(p)-b,0.0))-r;\n}\n\nfloat sdTorus( vec3 p, vec2 t )\n{\n      vec2 q = vec2(length(p.xz)-t.x,p.y);\n        return length(q)-t.y;\n}\n\nvoid partitionSpaceAndColor(inout vec3 c, inout vec3 p, inout float a){\n    // index the cells\n    vec3 i = floor(p);\n    //random y\n    float ry = fract(sin(i.x*76.78+i.z*786.89)*1488.88);\n    //if random number is over .49 invert y direction\n    float updown = 1.0;\n    updown = (ry>.49) ? 1.0 : -1.0;\n    //addto and move y\n    p.y += (ry*1.5 + iTime*ry*2.5)*updown;\n    p.y += ry;\n    //re index cells\n    i=floor(p);\n    //divide the space\n    p=fract(p)-.5;\n    //random rotation using reindexed vec3    \n    float r  = fract(sin(i.x*76.68+i.y*148.34)*768.78);\n    float r2 = fract(sin(i.z*76.68+i.y*148.34)*768.78);\n    p.xz*=r2d(r- iTime*(r*3.));\n    p.xy*=r2d(r2-iTime*(r*2.5));    \n    //random color\n    float c1  = fract(sin(i.x*76.68+i.y*148.34)*768.78);\n    float c2 = fract(sin(i.z*76.68+i.y*148.34)*768.78);\n    float c3 = fract(sin(i.z*76.68+i.x*148.34)*768.78);\n    \n    c = vec3(c1,c2,c3);\n    \n    a = c1;\n}\n\nfloat map(vec3 p){\n    \n    vec3 dummyVec = vec3(0.0);\n    float test;\n    partitionSpaceAndColor(dummyVec, p, test);\n    //p += (sin(p.x*55.)*sin(p.y*55.5)*sin(p.z*56.)*.0075);\n    //return smin(udRoundBox(p,vec3(.15),.015), pl, 6.); //*.75;\n   \n    //test = fract(test + pyvisualTime * 0.05);\n    //test = step(0.5, test);\n    test = sin(test * 13.82 + pyvisualTime * 0.5) * 0.5 + 0.5;\n\n    float box = udRoundBox(p,vec3(.15 * uCubeScale),.015);\n    float sphere = length(abs(p)) - 0.15 * uCubeScale;\n    float torus = sdTorus(p, vec2(0.15 * uCubeScale, 0.15 * 0.25));\n    float mixed = mix(torus, box, test);\n\n    //test = step(0.5, test);\n    //return box;\n    //return sphere;\n    return mixed;\n    // mix between box and sphere\n    //return mix(udRoundBox(p,vec3(.15 * uCubeScale),.015), length(abs(p)) - 0.15 * uCubeScale, test);\n}\n\nfloat trace(vec3 r, vec3 o){\n    float t = 0.0;\n    for(int i = 0; i < 48; i++){\n        vec3 p = o + r * t;\n        float d = map(p);\n        t += d * 0.75;\n        if(d<eps || t > 8.0) break;\n    }\n    return t;\n}\n\nvec3 getNormal2(in vec3 p) {\n\tvec2 e = vec2(eps, 0.0);\n\treturn normalize((vec3(map(p+e.xyy), map(p+e.yxy), map(p+e.yyx)) - map(p)) / e.x);\n}\n// https://github.com/darrenmothersele/raymarch/blob/master/shaders/frag.glsl\nvec3 getNormal(in vec3 p) {\n\t// 6-tap normalization. Probably the most accurate, but a bit of a cycle waster.\n\treturn normalize(vec3(\n\t\tmap(vec3(p.x+eps,p.y,p.z))-map(vec3(p.x-eps,p.y,p.z)),\n\t\tmap(vec3(p.x,p.y+eps,p.z))-map(vec3(p.x,p.y-eps,p.z)),\n\t\tmap(vec3(p.x,p.y,p.z+eps))-map(vec3(p.x,p.y,p.z-eps))\n\t));\n\n    /*\n\t// faster 4-tap version\n\tfloat ref = map(p);\n\treturn normalize(vec3(\n\t\tmap(vec3(p.x+eps,p.y,p.z))-ref,\n\t\tmap(vec3(p.x,p.y+eps,p.z))-ref,\n\t\tmap(vec3(p.x,p.y,p.z+eps))-ref\n\t));\n    */\n}\n\nvoid mainImage( out vec4 fragColor, in vec2 fragCoord )\n{\n    // Normalized pixel coordinates (from 0 to 1)\n    vec2 uv = fragCoord/iResolution.xy;\n    uv = uv * 2.0 -1.0;\n    uv.x *= iResolution.x / iResolution.y;\n    vec3 l = normalize(vec3(0.3, 0.4, 0.75));\n    \n    vec3 r = normalize(vec3(uv, 1.0 - dot(uv, uv) * .33));\n    vec3 o = vec3(0.0, 0.9, -9.0);\n    \n    o.zy *= r2d(iTime*.15);\n    //o.y = -map(sp)+.3;\n    r.zy*=r2d((sin(iTime/4.)*.5));\n    r.xz*=r2d(iTime*.73+sin(iTime*.25)*4.);\n    \n    \n    float t = trace(r, o);\n    \n    vec3 sp = o+r * t;\n    float d = map(sp);\n\t//vec3 sky = pow(vec3(0.1,0.1,0.65),vec3(3.*r.y));\n\t// https://www.shadertoy.com/view/MlcGD7\n    vec4 sky= pow(vec4(uBackground.rgb, 1), vec4(4.*max(-r.y,-0.41)+2.))+(dot(r,l)*.315+.215);\n    \n    vec3 n = getNormal(sp);\n    \n    float fog = smoothstep(-0.015, .17, t*0.03);\n    // Time varying pixel color\n    //vec4 col = (sky);    //0.5 + 0.5*cos(iTime+uv.xyx+vec3(0,2,4));\n    \n    vec3 c = vec3(0.0);\n    \n    // so if 'sp' or surface position was to be used later it wouldnt be changed...\n    vec3 tmpSP = sp;\n    float test;\n    partitionSpaceAndColor(c, tmpSP, test);\n    \n    if(abs(d) < .5){\n        vec3 rf = reflect(r,n);\n        vec3 cmp = texture(iChannel0, rf).rgb;\n        fragColor = mix(vec4(0.25+cmp+vec3(c),1.0)* max(dot(n,l),0.18), vec4(sky), fog);\n    }\n    else\n    \tfragColor = vec4(sky);\n}\n\n\n/*\n        vec3 i = floor(sp);\n        float ry = fract(sin(i.x*76.78+i.z*786.89)*1488.88);\n        sp.y += ry*1.5 + iTime*ry;\n        sp.y += ry;\n        i=floor(sp);\n\n        sp=fract(sp)-.5;\n        \n        \n        \n    \tfloat c1  = fract(sin(i.x*76.68+i.y*148.34)*768.78);\n    \tfloat c2 = fract(sin(i.z*76.68+i.y*148.34)*768.78);\n        float c3 = fract(sin(i.z*76.68+i.x*148.34)*768.78);\n        */\n        //vec3 c = partitionSpaceAndColor(sp);\n\n    //vec3 i = floor(sp);\n    //vec3 rn = fract(i);\n    //rn=floor(rn);\n\n\n\n//float pl = p.y;\n/*    \n    vec3 i = floor(p);\n    float ry = fract(sin(i.x*76.78+i.z*786.89)*1488.88);\n    p.y += ry*1.5 + iTime*ry;\n    p.y += ry;\n    i=floor(p);\n    \n    p=fract(p)-.5;\n    \n    float r  = fract(sin(i.x*76.68+i.y*148.34)*768.78);\n    float r2 = fract(sin(i.z*76.68+i.y*148.34)*768.78);\n    p.xz*=r2d(r- iTime*(r*3.));\n    p.xy*=r2d(r2-iTime*(r*2.5));\n    */\n// --------[ Original ShaderToy ends here ]---------- //\n\n\n\nvoid generateFrag() {\n\n\n    iTime = pyvisualTime * 0.5;\n    iResolution = vec3(pyvisualResolution, 0.0);\n\n    mainImage(pyvisualOutColor, (vec2(pyvisualUV.x, 1.0 - pyvisualUV.y) * pyvisualResolution).xy);\n    pyvisualOutColor.a = 1.0;\n}\n",
                 "i_id": "",
                 "i_input": "",
                 "i_interpolation": 1.0,
@@ -881,23 +912,6 @@
                 "pos": [
                     2731.0,
                     -223.0
-                ],
-                "selected": false
-            }
-        },
-        {
-            "custom_ports": [],
-            "id": 9,
-            "manual_values": {
-                "i_path": "image/dummy/720p.png",
-                "o_output": ""
-            },
-            "type": "LoadTexture",
-            "ui_data": {
-                "collapsed": true,
-                "pos": [
-                    2353.0,
-                    -148.0
                 ],
                 "selected": false
             }
@@ -1083,23 +1097,6 @@
             "custom_ports": [],
             "id": 11,
             "manual_values": {
-                "i_path": "image/dummy/1080p.png",
-                "o_output": ""
-            },
-            "type": "LoadTexture",
-            "ui_data": {
-                "collapsed": true,
-                "pos": [
-                    3007.0,
-                    -319.0
-                ],
-                "selected": false
-            }
-        },
-        {
-            "custom_ports": [],
-            "id": 12,
-            "manual_values": {
                 "i_x": 0.0,
                 "i_y": 0.0,
                 "o_output": [
@@ -1122,7 +1119,7 @@
                         0.0
                     ],
                     [
-                        -175.4027862548828,
+                        -136.3142852783203,
                         0.0,
                         0.0,
                         1.0
@@ -1141,14 +1138,14 @@
         },
         {
             "custom_ports": [],
-            "id": 13,
+            "id": 12,
             "manual_values": {
                 "i_length": 120.0,
                 "i_max": 200.0,
                 "i_min": -200.0,
                 "i_phase": 0.0,
                 "i_type": 3.0,
-                "o_output": -175.40278289731276
+                "o_output": -136.3142890640007
             },
             "type": "LFO",
             "ui_data": {
@@ -1162,31 +1159,31 @@
         },
         {
             "custom_ports": [],
-            "id": 14,
+            "id": 13,
             "manual_values": {
                 "i_length": 36.25,
                 "i_max": 0.75,
                 "i_min": 0.25,
                 "i_phase": 0.0,
                 "i_type": 3.0,
-                "o_output": 0.6849169695670722
+                "o_output": 0.3505454355486667
             },
             "type": "LFO",
             "ui_data": {
                 "collapsed": true,
                 "pos": [
-                    2763.0,
-                    -1266.0
+                    2697.0,
+                    -1273.0
                 ],
                 "selected": false
             }
         },
         {
             "custom_ports": [],
-            "id": 15,
+            "id": 14,
             "manual_values": {
                 "i_name": "low_vu",
-                "o_output": 0.3626469892572274
+                "o_output": 0.0
             },
             "type": "GetFloatVar",
             "ui_data": {
@@ -1200,12 +1197,12 @@
         },
         {
             "custom_ports": [],
-            "id": 16,
+            "id": 15,
             "manual_values": {
                 "i_a": 0.800000011920929,
                 "i_alpha": 0.0,
                 "i_b": 1.0,
-                "o_output": 0.8725294054492855
+                "o_output": 0.800000011920929
             },
             "type": "MixFloat",
             "ui_data": {
@@ -1219,16 +1216,16 @@
         },
         {
             "custom_ports": [],
-            "id": 17,
+            "id": 16,
             "manual_values": {
                 "i_a": 1.0,
                 "i_h": 0.0,
-                "i_s": 0.875,
-                "i_v": 0.800000011920929,
+                "i_s": 0.8149999976158142,
+                "i_v": 0.7599999904632568,
                 "o_rgba": [
-                    0.11567367613315582,
-                    0.800000011920929,
-                    0.10000000149011612,
+                    0.7599999904632568,
+                    0.5840806365013123,
+                    0.14059999585151672,
                     1.0
                 ]
             },
@@ -1244,14 +1241,14 @@
         },
         {
             "custom_ports": [],
-            "id": 18,
+            "id": 17,
             "manual_values": {
                 "i_length": 240.0,
                 "i_max": 1.0,
                 "i_min": 0.0,
                 "i_phase": 0.0,
                 "i_type": 1.0,
-                "o_output": 0.32960150639214725
+                "o_output": 0.11933071215952323
             },
             "type": "LFO",
             "ui_data": {
@@ -1325,7 +1322,7 @@
                     }
                 ]
             ],
-            "id": 19,
+            "id": 18,
             "manual_values": {
                 "i_advanced_filtering": 0.0,
                 "i_enabled": 1.0,
@@ -1384,23 +1381,6 @@
         {
             "custom_ports": [],
             "id": 20,
-            "manual_values": {
-                "i_path": "image/dummy/1080p.png",
-                "o_output": ""
-            },
-            "type": "LoadTexture",
-            "ui_data": {
-                "collapsed": false,
-                "pos": [
-                    1549.0,
-                    -1218.0
-                ],
-                "selected": false
-            }
-        },
-        {
-            "custom_ports": [],
-            "id": 21,
             "manual_values": {
                 "i_uniform": 1.0,
                 "i_x": 0.9399999976158142,
@@ -1532,6 +1512,22 @@
                     }
                 ],
                 [
+                    "i_scale",
+                    {
+                        "default": null,
+                        "dtype": "float",
+                        "dtype_args": {
+                            "default": 1.0
+                        },
+                        "dummy": false,
+                        "group": "default",
+                        "hide": false,
+                        "manual_input": true,
+                        "name": "scale",
+                        "widgets": []
+                    }
+                ],
+                [
                     "i_segments",
                     {
                         "default": null,
@@ -1550,9 +1546,29 @@
                         "name": "segments",
                         "widgets": []
                     }
+                ],
+                [
+                    "i_segments1",
+                    {
+                        "default": null,
+                        "dtype": "int",
+                        "dtype_args": {
+                            "default": 0.0,
+                            "range": [
+                                0,
+                                Infinity
+                            ]
+                        },
+                        "dummy": false,
+                        "group": "default",
+                        "hide": false,
+                        "manual_input": true,
+                        "name": "segments1",
+                        "widgets": []
+                    }
                 ]
             ],
-            "id": 22,
+            "id": 21,
             "manual_values": {
                 "i_advanced_filtering": 0.0,
                 "i_angle": 0.0,
@@ -1569,7 +1585,9 @@
                 "i_force_change": 42.0,
                 "i_input": "",
                 "i_interpolation": 1.0,
+                "i_scale": 1.0,
                 "i_segments": 6.0,
+                "i_segments1": 0.0,
                 "i_sizeref": "",
                 "i_transformUV": [
                     [
@@ -1613,12 +1631,12 @@
         },
         {
             "custom_ports": [],
-            "id": 23,
+            "id": 22,
             "manual_values": {
                 "i_factor": 2.0,
                 "i_mod": 0.0,
                 "i_reset": 0.0,
-                "o_output": 679.1360445022583
+                "o_output": 1348.6391100883484
             },
             "type": "Time",
             "ui_data": {
@@ -1632,7 +1650,7 @@
         },
         {
             "custom_ports": [],
-            "id": 24,
+            "id": 23,
             "manual_values": {
                 "i_enabled": 1.0,
                 "i_force_change": 42.0,
@@ -1714,23 +1732,6 @@
             "custom_ports": [],
             "id": 25,
             "manual_values": {
-                "i_path": "image/dummy/1080p.png",
-                "o_output": ""
-            },
-            "type": "LoadTexture",
-            "ui_data": {
-                "collapsed": true,
-                "pos": [
-                    1936.0,
-                    -677.0
-                ],
-                "selected": false
-            }
-        },
-        {
-            "custom_ports": [],
-            "id": 26,
-            "manual_values": {
                 "i_uniform": 1.0,
                 "i_x": 1.4299999475479126,
                 "i_y": 1.4299999475479126,
@@ -1773,7 +1774,7 @@
         },
         {
             "custom_ports": [],
-            "id": 27,
+            "id": 26,
             "manual_values": {
                 "i_t1": [
                     [
@@ -1847,7 +1848,7 @@
                         0.0
                     ],
                     [
-                        3395.661376953125,
+                        6743.18212890625,
                         0.0,
                         0.0,
                         1.0
@@ -1866,7 +1867,7 @@
         },
         {
             "custom_ports": [],
-            "id": 28,
+            "id": 27,
             "manual_values": {
                 "i_x": -5.019999980926514,
                 "i_y": 0.0,
@@ -1890,7 +1891,7 @@
                         0.0
                     ],
                     [
-                        3395.661376953125,
+                        6743.18212890625,
                         0.0,
                         0.0,
                         1.0
@@ -1909,12 +1910,12 @@
         },
         {
             "custom_ports": [],
-            "id": 29,
+            "id": 28,
             "manual_values": {
                 "i_factor": 10.0,
                 "i_mod": 0.0,
                 "i_reset": 0.0,
-                "o_output": 3395.661268234253
+                "o_output": 6743.182029724121
             },
             "type": "Time",
             "ui_data": {
@@ -1928,16 +1929,16 @@
         },
         {
             "custom_ports": [],
-            "id": 30,
+            "id": 29,
             "manual_values": {
-                "i_factor": 0.019999999552965164,
+                "i_factor": 0.3100000023841858,
                 "i_mod": 0.0,
                 "i_reset": 0.0,
-                "o_output": 6.79131663878299
+                "o_output": 67.34365883954592
             },
             "type": "Time",
             "ui_data": {
-                "collapsed": true,
+                "collapsed": false,
                 "pos": [
                     1928.0,
                     -508.0
@@ -1947,26 +1948,26 @@
         },
         {
             "custom_ports": [],
-            "id": 31,
+            "id": 30,
             "manual_values": {
-                "i_factor": 0.07000000029802322,
+                "i_factor": 0.10999999940395355,
                 "i_mod": 0.0,
                 "i_reset": 0.0,
-                "o_output": 9.957170959850895
+                "o_output": 26.972647407368186
             },
             "type": "Time",
             "ui_data": {
                 "collapsed": false,
                 "pos": [
-                    2386.0,
-                    -261.0
+                    2381.0,
+                    -288.0
                 ],
                 "selected": false
             }
         },
         {
             "custom_ports": [],
-            "id": 32,
+            "id": 31,
             "manual_values": {
                 "i_name": "mask",
                 "o_output": ""
@@ -1975,15 +1976,15 @@
             "ui_data": {
                 "collapsed": true,
                 "pos": [
-                    2990.0,
-                    -118.0
+                    2934.0,
+                    156.0
                 ],
                 "selected": false
             }
         },
         {
             "custom_ports": [],
-            "id": 33,
+            "id": 32,
             "manual_values": {
                 "i_name": "mask",
                 "o_output": ""
@@ -2000,7 +2001,7 @@
         },
         {
             "custom_ports": [],
-            "id": 34,
+            "id": 33,
             "manual_values": {
                 "i_input": "",
                 "i_name": "mask_rotating"
@@ -2017,7 +2018,7 @@
         },
         {
             "custom_ports": [],
-            "id": 35,
+            "id": 34,
             "manual_values": {
                 "i_input": "",
                 "i_name": "mask"
@@ -2147,7 +2148,7 @@
                     }
                 ]
             ],
-            "id": 36,
+            "id": 35,
             "manual_values": {
                 "i_count": 4.0,
                 "i_in0": "",
@@ -2175,24 +2176,24 @@
         },
         {
             "custom_ports": [],
-            "id": 37,
+            "id": 36,
             "manual_values": {
                 "i_name": "mask_rotating",
                 "o_output": ""
             },
             "type": "GetTextureVar",
             "ui_data": {
-                "collapsed": true,
+                "collapsed": false,
                 "pos": [
-                    2747.0,
-                    -659.0
+                    2672.0,
+                    -717.0
                 ],
                 "selected": false
             }
         },
         {
             "custom_ports": [],
-            "id": 38,
+            "id": 37,
             "manual_values": {
                 "i_input": 0.0,
                 "i_name": "enabled_rotating"
@@ -2201,15 +2202,15 @@
             "ui_data": {
                 "collapsed": true,
                 "pos": [
-                    3256.0,
-                    -656.0
+                    3277.0,
+                    -698.0
                 ],
                 "selected": false
             }
         },
         {
             "custom_ports": [],
-            "id": 39,
+            "id": 38,
             "manual_values": {
                 "i_name": "enabled_rotating",
                 "o_output": 0.0
@@ -2226,7 +2227,7 @@
         },
         {
             "custom_ports": [],
-            "id": 40,
+            "id": 39,
             "manual_values": {
                 "i_input": "",
                 "i_name": "mask_noise"
@@ -2243,7 +2244,7 @@
         },
         {
             "custom_ports": [],
-            "id": 41,
+            "id": 40,
             "manual_values": {
                 "i_input": 0.0,
                 "i_name": "enabled_noise"
@@ -2252,15 +2253,15 @@
             "ui_data": {
                 "collapsed": true,
                 "pos": [
-                    3257.0,
-                    -624.0
+                    3327.0,
+                    -649.0
                 ],
                 "selected": false
             }
         },
         {
             "custom_ports": [],
-            "id": 42,
+            "id": 41,
             "manual_values": {
                 "i_input": 0.0,
                 "i_name": "enabled_noise_pixelated"
@@ -2277,7 +2278,7 @@
         },
         {
             "custom_ports": [],
-            "id": 43,
+            "id": 42,
             "manual_values": {
                 "i_name": "enabled_noise",
                 "o_output": 1.0
@@ -2294,7 +2295,7 @@
         },
         {
             "custom_ports": [],
-            "id": 44,
+            "id": 43,
             "manual_values": {
                 "i_name": "mask_noise",
                 "o_output": ""
@@ -2303,15 +2304,15 @@
             "ui_data": {
                 "collapsed": true,
                 "pos": [
-                    2731.0,
-                    -622.0
+                    2709.0,
+                    -648.0
                 ],
                 "selected": false
             }
         },
         {
             "custom_ports": [],
-            "id": 45,
+            "id": 44,
             "manual_values": {
                 "i_input": "",
                 "i_name": "mask_noise_pixelated"
@@ -2328,7 +2329,7 @@
         },
         {
             "custom_ports": [],
-            "id": 46,
+            "id": 45,
             "manual_values": {
                 "i_name": "mask_noise_pixelated",
                 "o_output": ""
@@ -2345,7 +2346,7 @@
         },
         {
             "custom_ports": [],
-            "id": 47,
+            "id": 46,
             "manual_values": {
                 "i_name": "enabled_noise_pixelated",
                 "o_output": 0.0
@@ -2362,9 +2363,9 @@
         },
         {
             "custom_ports": [],
-            "id": 48,
+            "id": 47,
             "manual_values": {
-                "i_current": "image/mask/full/3squares.png",
+                "i_current": "image/mask/full/1rectcenter.png",
                 "i_next": 0.0,
                 "i_shuffle": 1.0,
                 "i_wildcard": "image/mask/full/*.png",
@@ -2444,7 +2445,7 @@
                     }
                 ]
             ],
-            "id": 49,
+            "id": 48,
             "manual_values": {
                 "i_advanced_filtering": 0.0,
                 "i_enabled": 1.0,
@@ -2502,14 +2503,14 @@
         },
         {
             "custom_ports": [],
-            "id": 50,
+            "id": 49,
             "manual_values": {
-                "i_length": 60.0,
+                "i_length": 10.0,
                 "i_max": 200.0,
                 "i_min": -200.0,
                 "i_phase": 0.0,
                 "i_type": 2.0,
-                "o_output": -127.55632082621449
+                "o_output": 54.74685668942777
             },
             "type": "LFO",
             "ui_data": {
@@ -2523,7 +2524,7 @@
         },
         {
             "custom_ports": [],
-            "id": 51,
+            "id": 50,
             "manual_values": {
                 "i_x": 0.0,
                 "i_y": 0.0,
@@ -2547,8 +2548,8 @@
                         0.0
                     ],
                     [
-                        -127.55632019042969,
-                        0.0,
+                        54.746856689453125,
+                        -99.99907684326172,
                         0.0,
                         1.0
                     ]
@@ -2566,7 +2567,7 @@
         },
         {
             "custom_ports": [],
-            "id": 52,
+            "id": 51,
             "manual_values": {
                 "i_name": "mask_full",
                 "o_output": ""
@@ -2583,7 +2584,7 @@
         },
         {
             "custom_ports": [],
-            "id": 53,
+            "id": 52,
             "manual_values": {
                 "i_input": "",
                 "i_name": "mask_full"
@@ -2600,7 +2601,7 @@
         },
         {
             "custom_ports": [],
-            "id": 54,
+            "id": 53,
             "manual_values": {
                 "i_input": 0.0,
                 "i_name": "enabled_full"
@@ -2617,7 +2618,7 @@
         },
         {
             "custom_ports": [],
-            "id": 55,
+            "id": 54,
             "manual_values": {
                 "i_threshold": 0.8999999761581421,
                 "i_value": 0.0,
@@ -2637,7 +2638,7 @@
         },
         {
             "custom_ports": [],
-            "id": 56,
+            "id": 55,
             "manual_values": {
                 "i_name": "enabled_full",
                 "o_output": 0.0
@@ -2654,12 +2655,12 @@
         },
         {
             "custom_ports": [],
-            "id": 57,
+            "id": 56,
             "manual_values": {
                 "i_enabled": 1.0,
                 "i_force": 0.0,
-                "i_max": 60.0,
-                "i_min": 60.0,
+                "i_max": 120.0,
+                "i_min": 120.0,
                 "o_out": 0.0
             },
             "type": "TimerEvent",
@@ -2674,9 +2675,9 @@
         },
         {
             "custom_ports": [],
-            "id": 58,
+            "id": 57,
             "manual_values": {
-                "i_current": "image/mask/rotate/1.png",
+                "i_current": "image/mask/rotate/4.png",
                 "i_next": 0.0,
                 "i_shuffle": 1.0,
                 "i_wildcard": "image/mask/rotate/*.png",
@@ -2696,7 +2697,7 @@
         },
         {
             "custom_ports": [],
-            "id": 59,
+            "id": 58,
             "manual_values": {
                 "i_threshold": 0.8999999761581421,
                 "i_value": 0.0,
@@ -2713,12 +2714,244 @@
                 ],
                 "selected": false
             }
+        },
+        {
+            "custom_ports": [],
+            "id": 60,
+            "manual_values": {
+                "i_length": 5.320000171661377,
+                "i_max": 100.0,
+                "i_min": -100.0,
+                "i_phase": 0.0,
+                "i_type": 3.0,
+                "o_output": -99.99907964282073
+            },
+            "type": "LFO",
+            "ui_data": {
+                "collapsed": false,
+                "pos": [
+                    547.0,
+                    -761.0
+                ],
+                "selected": false
+            }
+        },
+        {
+            "custom_ports": [],
+            "id": 61,
+            "manual_values": {
+                "i_a": 0.03999999910593033,
+                "i_alpha": 0.0,
+                "i_b": 0.47999998927116394,
+                "o_output": 0.03999999910593033
+            },
+            "type": "MixFloat",
+            "ui_data": {
+                "collapsed": false,
+                "pos": [
+                    1972.0,
+                    -327.0
+                ],
+                "selected": false
+            }
+        },
+        {
+            "custom_ports": [],
+            "id": 62,
+            "manual_values": {
+                "i_name": "low_vu0",
+                "o_output": 0.0
+            },
+            "type": "GetFloatVar",
+            "ui_data": {
+                "collapsed": false,
+                "pos": [
+                    1637.0,
+                    -299.0
+                ],
+                "selected": false
+            }
+        },
+        {
+            "custom_ports": [],
+            "id": 69,
+            "manual_values": {
+                "i_name": "beat_running",
+                "o_output": 0.0
+            },
+            "type": "GetFloatVar",
+            "ui_data": {
+                "collapsed": false,
+                "pos": [
+                    1094.0,
+                    -607.0
+                ],
+                "selected": false
+            }
+        },
+        {
+            "custom_ports": [],
+            "id": 70,
+            "manual_values": {
+                "i_a": 0.10000000149011612,
+                "i_alpha": 0.0,
+                "i_b": 0.029999999329447746,
+                "o_output": 0.10000000149011612
+            },
+            "type": "MixFloat",
+            "ui_data": {
+                "collapsed": false,
+                "pos": [
+                    1259.0,
+                    -607.0
+                ],
+                "selected": false
+            }
+        },
+        {
+            "custom_ports": [],
+            "id": 71,
+            "manual_values": {
+                "i_cutoff": 2.5,
+                "i_input": 0.0,
+                "i_order": 2.0,
+                "o_output": 0.10000367287985555
+            },
+            "type": "LowpassFloat",
+            "ui_data": {
+                "collapsed": false,
+                "pos": [
+                    1533.0,
+                    -549.0
+                ],
+                "selected": false
+            }
+        },
+        {
+            "custom_ports": [],
+            "id": 72,
+            "manual_values": {
+                "i_v0": 0.0,
+                "i_v1": 0.0,
+                "o_output": 1.0
+            },
+            "type": "Or",
+            "ui_data": {
+                "collapsed": true,
+                "pos": [
+                    3239.0,
+                    -643.0
+                ],
+                "selected": false
+            }
+        },
+        {
+            "custom_ports": [],
+            "id": 73,
+            "manual_values": {
+                "i_name": "ref_lowres",
+                "o_output": ""
+            },
+            "type": "GetTextureVar",
+            "ui_data": {
+                "collapsed": true,
+                "pos": [
+                    2418.0,
+                    -152.0
+                ],
+                "selected": false
+            }
+        },
+        {
+            "custom_ports": [],
+            "id": 74,
+            "manual_values": {
+                "i_name": "ref_highres",
+                "o_output": ""
+            },
+            "type": "GetTextureVar",
+            "ui_data": {
+                "collapsed": true,
+                "pos": [
+                    2922.0,
+                    -361.0
+                ],
+                "selected": false
+            }
+        },
+        {
+            "custom_ports": [],
+            "id": 75,
+            "manual_values": {
+                "i_name": "ref_lowres",
+                "o_output": ""
+            },
+            "type": "GetTextureVar",
+            "ui_data": {
+                "collapsed": true,
+                "pos": [
+                    2008.0,
+                    -666.0
+                ],
+                "selected": false
+            }
+        },
+        {
+            "custom_ports": [],
+            "id": 76,
+            "manual_values": {
+                "i_name": "ref_lowres",
+                "o_output": ""
+            },
+            "type": "GetTextureVar",
+            "ui_data": {
+                "collapsed": true,
+                "pos": [
+                    2626.0,
+                    -1368.0
+                ],
+                "selected": false
+            }
+        },
+        {
+            "custom_ports": [],
+            "id": 77,
+            "manual_values": {
+                "i_name": "ref_lowres",
+                "o_output": ""
+            },
+            "type": "GetTextureVar",
+            "ui_data": {
+                "collapsed": true,
+                "pos": [
+                    1599.0,
+                    -1171.0
+                ],
+                "selected": false
+            }
+        },
+        {
+            "custom_ports": [],
+            "id": 78,
+            "manual_values": {
+                "i_name": "ref_lowres",
+                "o_output": ""
+            },
+            "type": "GetTextureVar",
+            "ui_data": {
+                "collapsed": true,
+                "pos": [
+                    764.0,
+                    -1280.0
+                ],
+                "selected": false
+            }
         }
     ],
     "ui_data": {
         "offset": [
-            1676.0,
-            -600.0
+            545.0,
+            -1354.0
         ]
     }
 }

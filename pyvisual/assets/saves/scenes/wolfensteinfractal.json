@@ -1,262 +1,292 @@
 {
     "connections": [
         {
-            "dst_node_id": 48,
+            "dst_node_id": 186,
             "dst_port_id": "i_t2",
-            "src_node_id": 46,
+            "src_node_id": 184,
             "src_port_id": "o_output"
         },
         {
-            "dst_node_id": 46,
+            "dst_node_id": 184,
             "dst_port_id": "i_x",
-            "src_node_id": 47,
+            "src_node_id": 185,
             "src_port_id": "o_output"
         },
         {
-            "dst_node_id": 46,
+            "dst_node_id": 184,
             "dst_port_id": "i_y",
-            "src_node_id": 47,
+            "src_node_id": 185,
             "src_port_id": "o_output"
         },
         {
-            "dst_node_id": 48,
+            "dst_node_id": 186,
             "dst_port_id": "i_t1",
-            "src_node_id": 45,
+            "src_node_id": 183,
             "src_port_id": "o_output"
         },
         {
-            "dst_node_id": 45,
+            "dst_node_id": 183,
             "dst_port_id": "i_theta",
-            "src_node_id": 49,
+            "src_node_id": 187,
             "src_port_id": "o_output"
         },
         {
-            "dst_node_id": 82,
+            "dst_node_id": 218,
             "dst_port_id": "i_transformUV",
-            "src_node_id": 48,
+            "src_node_id": 186,
             "src_port_id": "o_output"
         },
         {
-            "dst_node_id": 51,
-            "dst_port_id": "i_sizeref",
-            "src_node_id": 52,
-            "src_port_id": "o_output"
-        },
-        {
-            "dst_node_id": 82,
+            "dst_node_id": 218,
             "dst_port_id": "i_input",
-            "src_node_id": 51,
+            "src_node_id": 189,
             "src_port_id": "o_output"
         },
         {
-            "dst_node_id": 85,
+            "dst_node_id": 221,
             "dst_port_id": "i_input",
-            "src_node_id": 53,
+            "src_node_id": 190,
             "src_port_id": "o_output"
         },
         {
-            "dst_node_id": 50,
+            "dst_node_id": 188,
             "dst_port_id": "i_texture",
-            "src_node_id": 54,
+            "src_node_id": 191,
             "src_port_id": "o_output"
         },
         {
-            "dst_node_id": 58,
+            "dst_node_id": 195,
             "dst_port_id": "i_a",
-            "src_node_id": 55,
+            "src_node_id": 192,
             "src_port_id": "o_output"
         },
         {
-            "dst_node_id": 56,
+            "dst_node_id": 193,
             "dst_port_id": "i_sizeref",
-            "src_node_id": 57,
+            "src_node_id": 194,
             "src_port_id": "o_output"
         },
         {
-            "dst_node_id": 85,
+            "dst_node_id": 221,
             "dst_port_id": "i_filter_mask",
-            "src_node_id": 56,
+            "src_node_id": 193,
             "src_port_id": "o_output"
         },
         {
-            "dst_node_id": 51,
-            "dst_port_id": "i_uTime",
-            "src_node_id": 60,
+            "dst_node_id": 228,
+            "dst_port_id": "i_a",
+            "src_node_id": 197,
             "src_port_id": "o_output"
         },
         {
-            "dst_node_id": 60,
+            "dst_node_id": 197,
             "dst_port_id": "i_factor",
-            "src_node_id": 59,
+            "src_node_id": 196,
             "src_port_id": "o_output"
         },
         {
-            "dst_node_id": 56,
+            "dst_node_id": 193,
             "dst_port_id": "i_transformUV",
-            "src_node_id": 61,
+            "src_node_id": 198,
             "src_port_id": "o_output"
         },
         {
-            "dst_node_id": 61,
+            "dst_node_id": 198,
             "dst_port_id": "i_x",
-            "src_node_id": 62,
+            "src_node_id": 199,
             "src_port_id": "o_output"
         },
         {
-            "dst_node_id": 62,
+            "dst_node_id": 199,
             "dst_port_id": "i_alpha",
-            "src_node_id": 63,
+            "src_node_id": 200,
             "src_port_id": "o_output"
         },
         {
-            "dst_node_id": 56,
+            "dst_node_id": 193,
             "dst_port_id": "i_input",
-            "src_node_id": 64,
+            "src_node_id": 201,
             "src_port_id": "o_output"
         },
         {
-            "dst_node_id": 65,
-            "dst_port_id": "i_sizeref",
-            "src_node_id": 66,
-            "src_port_id": "o_output"
-        },
-        {
-            "dst_node_id": 84,
+            "dst_node_id": 220,
             "dst_port_id": "i_filter_mask",
-            "src_node_id": 65,
+            "src_node_id": 202,
             "src_port_id": "o_output"
         },
         {
-            "dst_node_id": 65,
+            "dst_node_id": 202,
             "dst_port_id": "i_input",
-            "src_node_id": 68,
+            "src_node_id": 204,
             "src_port_id": "o_output"
         },
         {
-            "dst_node_id": 65,
+            "dst_node_id": 202,
             "dst_port_id": "i_transformUV",
-            "src_node_id": 69,
+            "src_node_id": 205,
             "src_port_id": "o_output"
         },
         {
-            "dst_node_id": 69,
+            "dst_node_id": 205,
             "dst_port_id": "i_x",
-            "src_node_id": 70,
+            "src_node_id": 206,
             "src_port_id": "o_output"
         },
         {
-            "dst_node_id": 70,
+            "dst_node_id": 206,
             "dst_port_id": "i_alpha",
-            "src_node_id": 71,
+            "src_node_id": 207,
             "src_port_id": "o_output"
         },
         {
-            "dst_node_id": 64,
+            "dst_node_id": 201,
             "dst_port_id": "i_input",
-            "src_node_id": 72,
+            "src_node_id": 208,
             "src_port_id": "o_output"
         },
         {
-            "dst_node_id": 54,
+            "dst_node_id": 191,
             "dst_port_id": "i_uRadiusFactor",
-            "src_node_id": 67,
+            "src_node_id": 203,
             "src_port_id": "o_vec2"
         },
         {
-            "dst_node_id": 77,
+            "dst_node_id": 213,
             "dst_port_id": "i_input",
-            "src_node_id": 73,
+            "src_node_id": 209,
             "src_port_id": "o_output"
         },
         {
-            "dst_node_id": 74,
+            "dst_node_id": 210,
             "dst_port_id": "i_factor",
-            "src_node_id": 75,
+            "src_node_id": 211,
             "src_port_id": "o_output"
         },
         {
-            "dst_node_id": 78,
-            "dst_port_id": "i_x",
-            "src_node_id": 74,
-            "src_port_id": "o_output"
-        },
-        {
-            "dst_node_id": 53,
+            "dst_node_id": 190,
             "dst_port_id": "i_angle",
-            "src_node_id": 74,
+            "src_node_id": 210,
             "src_port_id": "o_output"
         },
         {
-            "dst_node_id": 53,
+            "dst_node_id": 214,
+            "dst_port_id": "i_x",
+            "src_node_id": 210,
+            "src_port_id": "o_output"
+        },
+        {
+            "dst_node_id": 190,
             "dst_port_id": "i_transformUV",
-            "src_node_id": 76,
+            "src_node_id": 212,
             "src_port_id": "o_output"
         },
         {
-            "dst_node_id": 75,
+            "dst_node_id": 211,
             "dst_port_id": "i_alpha",
-            "src_node_id": 77,
+            "src_node_id": 213,
             "src_port_id": "o_output"
         },
         {
-            "dst_node_id": 79,
+            "dst_node_id": 215,
             "dst_port_id": "i_theta",
-            "src_node_id": 80,
+            "src_node_id": 216,
             "src_port_id": "o_output"
         },
         {
-            "dst_node_id": 59,
+            "dst_node_id": 196,
             "dst_port_id": "i_alpha",
-            "src_node_id": 81,
+            "src_node_id": 217,
             "src_port_id": "o_output"
         },
         {
-            "dst_node_id": 84,
+            "dst_node_id": 222,
             "dst_port_id": "i_input",
-            "src_node_id": 82,
+            "src_node_id": 217,
             "src_port_id": "o_output"
         },
         {
-            "dst_node_id": 82,
+            "dst_node_id": 220,
+            "dst_port_id": "i_input",
+            "src_node_id": 218,
+            "src_port_id": "o_output"
+        },
+        {
+            "dst_node_id": 218,
             "dst_port_id": "i_uHue",
-            "src_node_id": 83,
+            "src_node_id": 219,
             "src_port_id": "o_output"
         },
         {
-            "dst_node_id": 53,
+            "dst_node_id": 190,
             "dst_port_id": "i_input",
-            "src_node_id": 84,
+            "src_node_id": 220,
             "src_port_id": "o_output"
         },
         {
-            "dst_node_id": 54,
+            "dst_node_id": 191,
             "dst_port_id": "i_input",
-            "src_node_id": 85,
+            "src_node_id": 221,
             "src_port_id": "o_output"
         },
         {
-            "dst_node_id": 84,
+            "dst_node_id": 223,
+            "dst_port_id": "i_alpha",
+            "src_node_id": 224,
+            "src_port_id": "o_output"
+        },
+        {
+            "dst_node_id": 196,
+            "dst_port_id": "i_a",
+            "src_node_id": 223,
+            "src_port_id": "o_output"
+        },
+        {
+            "dst_node_id": 220,
             "dst_port_id": "i_sizeref",
-            "src_node_id": 86,
+            "src_node_id": 225,
+            "src_port_id": "o_output"
+        },
+        {
+            "dst_node_id": 189,
+            "dst_port_id": "i_input",
+            "src_node_id": 226,
+            "src_port_id": "o_output"
+        },
+        {
+            "dst_node_id": 202,
+            "dst_port_id": "i_sizeref",
+            "src_node_id": 227,
+            "src_port_id": "o_output"
+        },
+        {
+            "dst_node_id": 189,
+            "dst_port_id": "i_uTime",
+            "src_node_id": 228,
+            "src_port_id": "o_out"
+        },
+        {
+            "dst_node_id": 228,
+            "dst_port_id": "i_b",
+            "src_node_id": 229,
             "src_port_id": "o_output"
         }
     ],
     "nodes": [
         {
             "custom_ports": [],
-            "id": 45,
+            "id": 183,
             "manual_values": {
                 "i_theta": 12.010000228881836,
                 "o_output": [
                     [
-                        0.899375855922699,
-                        -0.4371761977672577,
+                        0.9997204542160034,
+                        -0.023643851280212402,
                         0.0,
                         0.0
                     ],
                     [
-                        0.4371761977672577,
-                        0.899375855922699,
+                        0.023643851280212402,
+                        0.9997204542160034,
                         0.0,
                         0.0
                     ],
@@ -286,21 +316,21 @@
         },
         {
             "custom_ports": [],
-            "id": 46,
+            "id": 184,
             "manual_values": {
                 "i_uniform": 1.0,
                 "i_x": 1.0,
-                "i_y": 0.9531498366857323,
+                "i_y": 1.0025889074036547,
                 "o_output": [
                     [
-                        0.9531498551368713,
+                        1.0025888681411743,
                         0.0,
                         0.0,
                         0.0
                     ],
                     [
                         0.0,
-                        0.9531498551368713,
+                        1.0025888681411743,
                         0.0,
                         0.0
                     ],
@@ -330,14 +360,14 @@
         },
         {
             "custom_ports": [],
-            "id": 47,
+            "id": 185,
             "manual_values": {
                 "i_length": 69.44999694824219,
                 "i_max": 1.149999976158142,
                 "i_min": 0.75,
                 "i_phase": 0.0,
                 "i_type": 3.0,
-                "o_output": 0.9531498366857323
+                "o_output": 1.0025889074036547
             },
             "type": "LFO",
             "ui_data": {
@@ -351,7 +381,7 @@
         },
         {
             "custom_ports": [],
-            "id": 48,
+            "id": 186,
             "manual_values": {
                 "i_t1": [
                     [
@@ -389,14 +419,14 @@
                 ],
                 "o_output": [
                     [
-                        0.8572399616241455,
-                        -0.41669443249702454,
+                        1.0023086071014404,
+                        -0.02370506152510643,
                         0.0,
                         0.0
                     ],
                     [
-                        0.41669443249702454,
-                        0.8572399616241455,
+                        0.02370506152510643,
+                        1.0023086071014404,
                         0.0,
                         0.0
                     ],
@@ -426,14 +456,14 @@
         },
         {
             "custom_ports": [],
-            "id": 49,
+            "id": 187,
             "manual_values": {
                 "i_length": 200.0,
                 "i_max": 35.0,
                 "i_min": -35.0,
                 "i_phase": 0.0,
                 "i_type": 3.0,
-                "o_output": -25.923848947145473
+                "o_output": -1.3548191182168523
             },
             "type": "LFO",
             "ui_data": {
@@ -447,7 +477,7 @@
         },
         {
             "custom_ports": [],
-            "id": 50,
+            "id": 188,
             "manual_values": {
                 "i_texture": ""
             },
@@ -463,7 +493,7 @@
         },
         {
             "custom_ports": [],
-            "id": 51,
+            "id": 189,
             "manual_values": {
                 "i_enabled": 1.0,
                 "i_force_change": 42.0,
@@ -507,23 +537,6 @@
                 "pos": [
                     -160.0,
                     845.0
-                ],
-                "selected": false
-            }
-        },
-        {
-            "custom_ports": [],
-            "id": 52,
-            "manual_values": {
-                "i_path": "image/dummy/720p.png",
-                "o_output": ""
-            },
-            "type": "LoadTexture",
-            "ui_data": {
-                "collapsed": false,
-                "pos": [
-                    -463.0,
-                    831.0
                 ],
                 "selected": false
             }
@@ -636,9 +649,29 @@
                         "name": "segments",
                         "widgets": []
                     }
+                ],
+                [
+                    "i_segments1",
+                    {
+                        "default": null,
+                        "dtype": "int",
+                        "dtype_args": {
+                            "default": 0.0,
+                            "range": [
+                                0,
+                                Infinity
+                            ]
+                        },
+                        "dummy": false,
+                        "group": "default",
+                        "hide": false,
+                        "manual_input": true,
+                        "name": "segments1",
+                        "widgets": []
+                    }
                 ]
             ],
-            "id": 53,
+            "id": 190,
             "manual_values": {
                 "i_advanced_filtering": 0.0,
                 "i_angle": -28.950000762939453,
@@ -656,6 +689,7 @@
                 "i_input": "",
                 "i_interpolation": 1.0,
                 "i_segments": 6.0,
+                "i_segments1": 0.0,
                 "i_sizeref": "",
                 "i_transformUV": [
                     [
@@ -854,7 +888,7 @@
                     }
                 ]
             ],
-            "id": 54,
+            "id": 191,
             "manual_values": {
                 "i_advanced_filtering": 0.0,
                 "i_enabled": 0.0,
@@ -920,14 +954,14 @@
         },
         {
             "custom_ports": [],
-            "id": 55,
+            "id": 192,
             "manual_values": {
                 "i_length": 76.80000305175781,
                 "i_max": 1.0,
                 "i_min": 0.0,
                 "i_phase": 0.0,
                 "i_type": 2.0,
-                "o_output": 0.9830151293966956
+                "o_output": 0.8634139378502479
             },
             "type": "LFO",
             "ui_data": {
@@ -1001,7 +1035,7 @@
                     }
                 ]
             ],
-            "id": 56,
+            "id": 193,
             "manual_values": {
                 "i_advanced_filtering": 0.0,
                 "i_enabled": 1.0,
@@ -1059,7 +1093,7 @@
         },
         {
             "custom_ports": [],
-            "id": 57,
+            "id": 194,
             "manual_values": {
                 "i_path": "image/dummy/480p.png",
                 "o_output": ""
@@ -1076,12 +1110,12 @@
         },
         {
             "custom_ports": [],
-            "id": 58,
+            "id": 195,
             "manual_values": {
                 "i_a": 0.0,
                 "i_b": 0.5,
                 "i_op": 0.0,
-                "o_out": 1.4830151293966956
+                "o_out": 1.363413937850248
             },
             "type": "BinaryOpFloat",
             "ui_data": {
@@ -1095,11 +1129,11 @@
         },
         {
             "custom_ports": [],
-            "id": 59,
+            "id": 196,
             "manual_values": {
                 "i_a": 0.009999999776482582,
                 "i_alpha": 0.0,
-                "i_b": 0.0949999988079071,
+                "i_b": 0.07500000298023224,
                 "o_output": 0.009999999776482582
             },
             "type": "MixFloat",
@@ -1114,40 +1148,40 @@
         },
         {
             "custom_ports": [],
-            "id": 60,
+            "id": 197,
             "manual_values": {
                 "i_factor": 0.10999999940395355,
                 "i_mod": 0.0,
                 "i_reset": 0.0,
-                "o_output": 4.228816487599008
+                "o_output": 1.0123155343760053
             },
             "type": "Time",
             "ui_data": {
                 "collapsed": false,
                 "pos": [
-                    -237.0,
-                    1148.0
+                    -321.0,
+                    1143.0
                 ],
                 "selected": false
             }
         },
         {
             "custom_ports": [],
-            "id": 61,
+            "id": 198,
             "manual_values": {
                 "i_uniform": 1.0,
                 "i_x": 1.0,
-                "i_y": 2.082372804739428,
+                "i_y": 2.1700000762939453,
                 "o_output": [
                     [
-                        2.0823729038238525,
+                        2.1700000762939453,
                         0.0,
                         0.0,
                         0.0
                     ],
                     [
                         0.0,
-                        2.0823729038238525,
+                        2.1700000762939453,
                         0.0,
                         0.0
                     ],
@@ -1177,12 +1211,12 @@
         },
         {
             "custom_ports": [],
-            "id": 62,
+            "id": 199,
             "manual_values": {
                 "i_a": 2.1700000762939453,
                 "i_alpha": 0.0,
                 "i_b": 0.6700000166893005,
-                "o_output": 2.082372804739428
+                "o_output": 2.1700000762939453
             },
             "type": "MixFloat",
             "ui_data": {
@@ -1196,10 +1230,10 @@
         },
         {
             "custom_ports": [],
-            "id": 63,
+            "id": 200,
             "manual_values": {
                 "i_name": "low_vu",
-                "o_output": 0.05841817871501507
+                "o_output": 0.0
             },
             "type": "GetFloatVar",
             "ui_data": {
@@ -1368,7 +1402,7 @@
                     }
                 ]
             ],
-            "id": 64,
+            "id": 201,
             "manual_values": {
                 "i_advanced_filtering": 0.0,
                 "i_enabled": 1.0,
@@ -1494,7 +1528,7 @@
                     }
                 ]
             ],
-            "id": 65,
+            "id": 202,
             "manual_values": {
                 "i_advanced_filtering": 0.0,
                 "i_enabled": 1.0,
@@ -1552,24 +1586,7 @@
         },
         {
             "custom_ports": [],
-            "id": 66,
-            "manual_values": {
-                "i_path": "image/dummy/1080p.png",
-                "o_output": ""
-            },
-            "type": "LoadTexture",
-            "ui_data": {
-                "collapsed": true,
-                "pos": [
-                    1065.0,
-                    237.0
-                ],
-                "selected": false
-            }
-        },
-        {
-            "custom_ports": [],
-            "id": 67,
+            "id": 203,
             "manual_values": {
                 "i_x": 1.0,
                 "i_y": 0.5400000214576721,
@@ -1590,7 +1607,7 @@
         },
         {
             "custom_ports": [],
-            "id": 68,
+            "id": 204,
             "manual_values": {
                 "i_path": "image/mask/common/triangle.png",
                 "o_output": ""
@@ -1607,21 +1624,21 @@
         },
         {
             "custom_ports": [],
-            "id": 69,
+            "id": 205,
             "manual_values": {
                 "i_uniform": 1.0,
                 "i_x": 1.0,
-                "i_y": 1.6445716742256014,
+                "i_y": 1.7100000381469727,
                 "o_output": [
                     [
-                        1.6445716619491577,
+                        1.7100000381469727,
                         0.0,
                         0.0,
                         0.0
                     ],
                     [
                         0.0,
-                        1.6445716619491577,
+                        1.7100000381469727,
                         0.0,
                         0.0
                     ],
@@ -1651,12 +1668,12 @@
         },
         {
             "custom_ports": [],
-            "id": 70,
+            "id": 206,
             "manual_values": {
                 "i_a": 1.7100000381469727,
                 "i_alpha": 0.0,
                 "i_b": 0.5899999737739563,
-                "o_output": 1.6445716742256014
+                "o_output": 1.7100000381469727
             },
             "type": "MixFloat",
             "ui_data": {
@@ -1670,10 +1687,10 @@
         },
         {
             "custom_ports": [],
-            "id": 71,
+            "id": 207,
             "manual_values": {
                 "i_name": "low_vu",
-                "o_output": 0.05841817871501507
+                "o_output": 0.0
             },
             "type": "GetFloatVar",
             "ui_data": {
@@ -1687,7 +1704,7 @@
         },
         {
             "custom_ports": [],
-            "id": 72,
+            "id": 208,
             "manual_values": {
                 "i_path": "image/mask/common/circle.png",
                 "o_output": ""
@@ -1704,10 +1721,10 @@
         },
         {
             "custom_ports": [],
-            "id": 73,
+            "id": 209,
             "manual_values": {
                 "i_name": "beat_running",
-                "o_output": 1.0
+                "o_output": 0.0
             },
             "type": "GetFloatVar",
             "ui_data": {
@@ -1721,12 +1738,12 @@
         },
         {
             "custom_ports": [],
-            "id": 74,
+            "id": 210,
             "manual_values": {
                 "i_factor": 1.0,
                 "i_mod": 0.0,
                 "i_reset": 0.0,
-                "o_output": 182.25393251503894
+                "o_output": 303.68548250198364
             },
             "type": "Time",
             "ui_data": {
@@ -1740,12 +1757,12 @@
         },
         {
             "custom_ports": [],
-            "id": 75,
+            "id": 211,
             "manual_values": {
                 "i_a": 3.0,
                 "i_alpha": 0.0,
                 "i_b": 0.25,
-                "o_output": 0.2504305019887181
+                "o_output": 3.0
             },
             "type": "MixFloat",
             "ui_data": {
@@ -1759,7 +1776,7 @@
         },
         {
             "custom_ports": [],
-            "id": 76,
+            "id": 212,
             "manual_values": {
                 "i_uniform": 1.0,
                 "i_x": 0.8999999761581421,
@@ -1803,12 +1820,12 @@
         },
         {
             "custom_ports": [],
-            "id": 77,
+            "id": 213,
             "manual_values": {
                 "i_cutoff": 2.5,
                 "i_input": 0.0,
                 "i_order": 2.0,
-                "o_output": 0.9998434538222843
+                "o_output": 0.0
             },
             "type": "LowpassFloat",
             "ui_data": {
@@ -1822,11 +1839,11 @@
         },
         {
             "custom_ports": [],
-            "id": 78,
+            "id": 214,
             "manual_values": {
                 "i_op": 3.0,
                 "i_x": 0.0,
-                "o_out": -181.25393251503894
+                "o_out": -302.68548250198364
             },
             "type": "UnaryOpFloat",
             "ui_data": {
@@ -1840,19 +1857,19 @@
         },
         {
             "custom_ports": [],
-            "id": 79,
+            "id": 215,
             "manual_values": {
                 "i_theta": -21.18000030517578,
                 "o_output": [
                     [
-                        0.986484706401825,
-                        -0.1638534665107727,
+                        0.956022322177887,
+                        0.29329392313957214,
                         0.0,
                         0.0
                     ],
                     [
-                        0.1638534665107727,
-                        0.986484706401825,
+                        -0.29329392313957214,
+                        0.956022322177887,
                         0.0,
                         0.0
                     ],
@@ -1882,14 +1899,14 @@
         },
         {
             "custom_ports": [],
-            "id": 80,
+            "id": 216,
             "manual_values": {
                 "i_length": 300.0,
                 "i_max": 20.0,
                 "i_min": -20.0,
                 "i_phase": 0.0,
                 "i_type": 3.0,
-                "o_output": -9.430636803378206
+                "o_output": 17.055261748204003
             },
             "type": "LFO",
             "ui_data": {
@@ -1903,9 +1920,9 @@
         },
         {
             "custom_ports": [],
-            "id": 81,
+            "id": 217,
             "manual_values": {
-                "i_name": "low_vu0",
+                "i_name": "low_vu",
                 "o_output": 0.0
             },
             "type": "GetFloatVar",
@@ -2036,7 +2053,7 @@
                     }
                 ]
             ],
-            "id": 82,
+            "id": 218,
             "manual_values": {
                 "i_advanced_filtering": 0.0,
                 "i_enabled": 1.0,
@@ -2097,14 +2114,14 @@
         },
         {
             "custom_ports": [],
-            "id": 83,
+            "id": 219,
             "manual_values": {
                 "i_length": 300.0,
                 "i_max": 1.0,
                 "i_min": 0.0,
                 "i_phase": 0.0,
                 "i_type": 1.0,
-                "o_output": 0.656272748311358
+                "o_output": 0.17487760543823067
             },
             "type": "LFO",
             "ui_data": {
@@ -2234,7 +2251,7 @@
                     }
                 ]
             ],
-            "id": 84,
+            "id": 220,
             "manual_values": {
                 "i_advanced_filtering": 1.0,
                 "i_enabled": 1.0,
@@ -2248,7 +2265,7 @@
                 "i_filter_mode": 3.0,
                 "i_force_change": 42.0,
                 "i_input": "",
-                "i_interpolation": 1.0,
+                "i_interpolation": 0.0,
                 "i_sizeref": "",
                 "i_transformUV": [
                     [
@@ -2411,7 +2428,7 @@
                     }
                 ]
             ],
-            "id": 85,
+            "id": 221,
             "manual_values": {
                 "i_advanced_filtering": 1.0,
                 "i_enabled": 1.0,
@@ -2472,17 +2489,145 @@
         },
         {
             "custom_ports": [],
-            "id": 86,
+            "id": 222,
             "manual_values": {
-                "i_path": "image/dummy/1080p.png",
-                "o_output": ""
+                "i_input": 0.0,
+                "i_max": 1.0,
+                "i_min": 0.0,
+                "i_time": 5.0
             },
-            "type": "LoadTexture",
+            "type": "Plot",
             "ui_data": {
                 "collapsed": false,
                 "pos": [
-                    1228.0,
-                    497.0
+                    -896.0,
+                    1307.0
+                ],
+                "selected": false
+            }
+        },
+        {
+            "custom_ports": [],
+            "id": 223,
+            "manual_values": {
+                "i_a": 0.009999999776482582,
+                "i_alpha": 0.0,
+                "i_b": 0.05999999865889549,
+                "o_output": 0.009999999776482582
+            },
+            "type": "MixFloat",
+            "ui_data": {
+                "collapsed": false,
+                "pos": [
+                    -794.0,
+                    961.0
+                ],
+                "selected": false
+            }
+        },
+        {
+            "custom_ports": [],
+            "id": 224,
+            "manual_values": {
+                "i_name": "beat_running",
+                "o_output": 0.0
+            },
+            "type": "GetFloatVar",
+            "ui_data": {
+                "collapsed": false,
+                "pos": [
+                    -1113.0,
+                    909.0
+                ],
+                "selected": false
+            }
+        },
+        {
+            "custom_ports": [],
+            "id": 225,
+            "manual_values": {
+                "i_name": "ref_highres",
+                "o_output": ""
+            },
+            "type": "GetTextureVar",
+            "ui_data": {
+                "collapsed": true,
+                "pos": [
+                    1282.0,
+                    519.0
+                ],
+                "selected": false
+            }
+        },
+        {
+            "custom_ports": [],
+            "id": 226,
+            "manual_values": {
+                "i_name": "ref_lowres",
+                "o_output": ""
+            },
+            "type": "GetTextureVar",
+            "ui_data": {
+                "collapsed": true,
+                "pos": [
+                    -439.0,
+                    817.0
+                ],
+                "selected": false
+            }
+        },
+        {
+            "custom_ports": [],
+            "id": 227,
+            "manual_values": {
+                "i_name": "ref_highres",
+                "o_output": ""
+            },
+            "type": "GetTextureVar",
+            "ui_data": {
+                "collapsed": true,
+                "pos": [
+                    1121.0,
+                    286.0
+                ],
+                "selected": false
+            }
+        },
+        {
+            "custom_ports": [],
+            "id": 228,
+            "manual_values": {
+                "i_a": 0.0,
+                "i_b": 0.0,
+                "i_op": 0.0,
+                "o_out": 284.3071129687995
+            },
+            "type": "BinaryOpFloat",
+            "ui_data": {
+                "collapsed": true,
+                "pos": [
+                    -139.0,
+                    1272.0
+                ],
+                "selected": false
+            }
+        },
+        {
+            "custom_ports": [],
+            "id": 229,
+            "manual_values": {
+                "i_generate": 0.0,
+                "i_max": 1000.0,
+                "i_min": 0.0,
+                "i_mod": 0.0,
+                "o_output": 283.2947974344235
+            },
+            "type": "RandomFloat",
+            "ui_data": {
+                "collapsed": true,
+                "pos": [
+                    -285.0,
+                    1270.0
                 ],
                 "selected": false
             }
@@ -2490,8 +2635,8 @@
     ],
     "ui_data": {
         "offset": [
-            -1102.0,
-            534.0
+            -1304.0,
+            512.0
         ]
     }
 }
