@@ -93,6 +93,7 @@ class GetVar(Node):
 
         self.graph = None
         self.connected_node = None
+        self._force_value_update = False
 
     @property
     def name(self):
@@ -121,6 +122,13 @@ class GetVar(Node):
     def start(self, graph):
         self.graph = graph
 
+    def update_input_nodes(self):
+        # overwrite this to have connected node added as input node
+        super().update_input_nodes()
+
+        if self.connected_node is not None:
+            self.input_nodes.add(self.connected_node)
+
     def evaluate(self, *args, **kwargs):
         if self.connected_node is not None:
             if self.connected_node.stopped:
@@ -131,8 +139,9 @@ class GetVar(Node):
     def _evaluate(self):
         assert self.graph is not None
 
-        if self.have_inputs_changed("name"):
-            name = self.name
+        input_name = self.get_input("name")
+        if input_name.has_changed:
+            name = input_name.value
 
             self.connected_node = None
             if not name:
@@ -140,10 +149,25 @@ class GetVar(Node):
             for node in self.SetVar.instances[self.graph.parent]:
                 if node.valid and node.name == name:
                     self.connected_node = node
+                    # okay slight problem
+                    # SetXXXVar is associated in first evaluation
+                    # only in second evaluation the nodes are executed in correct order then
+                    # and by then the value might be changed on the SetXXXVar but we've missed it
+                    # just force setting the value in the next evaluation (that's at the end of the function)
+                    # and also update input nodes
+                    self.update_input_nodes()
                     break
 
         if self.connected_node is not None:
-            self.set("output", self.connected_node.get("input"))
+            if self._force_value_update:
+                self.set("output", self.connected_node.get("input"))
+                self._force_value_update = False
+            else:
+                self.connected_node.get_input("input").copy_to(self.get_output("output"))
+
+        if input_name.has_changed:
+            # see above where connected node is associated
+            self._force_value_update = True
 
     def _show_custom_ui(self):
         preview = "<none>"
