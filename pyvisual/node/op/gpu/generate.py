@@ -109,6 +109,15 @@ class Vinyl(TimeMaskedGenerate):
         fragment_source = assets.FileShaderSource(fragment_path)
         super().__init__(fragment_source)
 
+class NoiseTest(TimeMaskedGenerate):
+    class Meta:
+        pass
+
+    def __init__(self):
+        fragment_path = assets.get_shader_path("generate/noise_test.frag")
+        fragment_source = assets.FileShaderSource(fragment_path)
+        super().__init__(fragment_source)
+
 def download_glslsandbox(shader_id):
     assert shader_id is not None
     url = "http://glslsandbox.com/item/%s" % shader_id

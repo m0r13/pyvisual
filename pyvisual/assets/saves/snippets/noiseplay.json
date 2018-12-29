@@ -1,0 +1,1578 @@
+{
+    "connections": [
+        {
+            "dst_node_id": 247,
+            "dst_port_id": "i_input",
+            "src_node_id": 240,
+            "src_port_id": "o_output"
+        },
+        {
+            "dst_node_id": 252,
+            "dst_port_id": "i_t1",
+            "src_node_id": 242,
+            "src_port_id": "o_output"
+        },
+        {
+            "dst_node_id": 244,
+            "dst_port_id": "i_a",
+            "src_node_id": 243,
+            "src_port_id": "o_output"
+        },
+        {
+            "dst_node_id": 246,
+            "dst_port_id": "i_alpha",
+            "src_node_id": 245,
+            "src_port_id": "o_output"
+        },
+        {
+            "dst_node_id": 243,
+            "dst_port_id": "i_factor",
+            "src_node_id": 246,
+            "src_port_id": "o_output"
+        },
+        {
+            "dst_node_id": 263,
+            "dst_port_id": "i_input",
+            "src_node_id": 247,
+            "src_port_id": "o_output"
+        },
+        {
+            "dst_node_id": 247,
+            "dst_port_id": "i_time",
+            "src_node_id": 248,
+            "src_port_id": "o_output"
+        },
+        {
+            "dst_node_id": 251,
+            "dst_port_id": "i_a",
+            "src_node_id": 250,
+            "src_port_id": "o_output"
+        },
+        {
+            "dst_node_id": 247,
+            "dst_port_id": "i_uThreshold",
+            "src_node_id": 251,
+            "src_port_id": "o_out"
+        },
+        {
+            "dst_node_id": 247,
+            "dst_port_id": "i_uTransform",
+            "src_node_id": 252,
+            "src_port_id": "o_output"
+        },
+        {
+            "dst_node_id": 252,
+            "dst_port_id": "i_t2",
+            "src_node_id": 253,
+            "src_port_id": "o_output"
+        },
+        {
+            "dst_node_id": 253,
+            "dst_port_id": "i_x",
+            "src_node_id": 254,
+            "src_port_id": "o_output"
+        },
+        {
+            "dst_node_id": 265,
+            "dst_port_id": "i_input",
+            "src_node_id": 255,
+            "src_port_id": "o_output"
+        },
+        {
+            "dst_node_id": 256,
+            "dst_port_id": "i_uResolution",
+            "src_node_id": 257,
+            "src_port_id": "o_vec2"
+        },
+        {
+            "dst_node_id": 265,
+            "dst_port_id": "i_transformUV",
+            "src_node_id": 258,
+            "src_port_id": "o_output"
+        },
+        {
+            "dst_node_id": 259,
+            "dst_port_id": "i_x",
+            "src_node_id": 260,
+            "src_port_id": "o_output"
+        },
+        {
+            "dst_node_id": 256,
+            "dst_port_id": "i_transformUV",
+            "src_node_id": 261,
+            "src_port_id": "o_output"
+        },
+        {
+            "dst_node_id": 261,
+            "dst_port_id": "i_x",
+            "src_node_id": 262,
+            "src_port_id": "o_output"
+        },
+        {
+            "dst_node_id": 241,
+            "dst_port_id": "i_texture",
+            "src_node_id": 263,
+            "src_port_id": "o_output"
+        },
+        {
+            "dst_node_id": 247,
+            "dst_port_id": "i_time_mask",
+            "src_node_id": 256,
+            "src_port_id": "o_output"
+        },
+        {
+            "dst_node_id": 263,
+            "dst_port_id": "i_filter_mask",
+            "src_node_id": 256,
+            "src_port_id": "o_output"
+        },
+        {
+            "dst_node_id": 263,
+            "dst_port_id": "i_uColor",
+            "src_node_id": 264,
+            "src_port_id": "o_rgba"
+        },
+        {
+            "dst_node_id": 256,
+            "dst_port_id": "i_input",
+            "src_node_id": 265,
+            "src_port_id": "o_output"
+        }
+    ],
+    "nodes": [
+        {
+            "custom_ports": [],
+            "id": 240,
+            "manual_values": {
+                "i_name": "ref_highres",
+                "o_output": ""
+            },
+            "type": "GetTextureVar",
+            "ui_data": {
+                "collapsed": true,
+                "pos": [
+                    2433.0,
+                    -27.0
+                ],
+                "selected": false
+            }
+        },
+        {
+            "custom_ports": [],
+            "id": 241,
+            "manual_values": {
+                "i_texture": ""
+            },
+            "type": "Renderer",
+            "ui_data": {
+                "collapsed": false,
+                "pos": [
+                    3243.0,
+                    -18.0
+                ],
+                "selected": false
+            }
+        },
+        {
+            "custom_ports": [],
+            "id": 242,
+            "manual_values": {
+                "i_uniform": 1.0,
+                "i_x": 2.130000114440918,
+                "i_y": 2.130000114440918,
+                "o_output": [
+                    [
+                        2.130000114440918,
+                        0.0,
+                        0.0,
+                        0.0
+                    ],
+                    [
+                        0.0,
+                        2.130000114440918,
+                        0.0,
+                        0.0
+                    ],
+                    [
+                        0.0,
+                        0.0,
+                        1.0,
+                        0.0
+                    ],
+                    [
+                        0.0,
+                        0.0,
+                        0.0,
+                        1.0
+                    ]
+                ]
+            },
+            "type": "Scale",
+            "ui_data": {
+                "collapsed": false,
+                "pos": [
+                    2121.0,
+                    -318.0
+                ],
+                "selected": false
+            }
+        },
+        {
+            "custom_ports": [],
+            "id": 243,
+            "manual_values": {
+                "i_factor": 0.07000000029802322,
+                "i_mod": 0.0,
+                "i_reset": 0.0,
+                "o_output": 0.0
+            },
+            "type": "Time",
+            "ui_data": {
+                "collapsed": false,
+                "pos": [
+                    1660.0,
+                    157.0
+                ],
+                "selected": false
+            }
+        },
+        {
+            "custom_ports": [],
+            "id": 244,
+            "manual_values": {
+                "i_a": 0.0,
+                "i_b": 0.0,
+                "i_op": 0.0,
+                "o_out": 0.0
+            },
+            "type": "BinaryOpFloat",
+            "ui_data": {
+                "collapsed": false,
+                "pos": [
+                    2005.0,
+                    150.0
+                ],
+                "selected": false
+            }
+        },
+        {
+            "custom_ports": [],
+            "id": 245,
+            "manual_values": {
+                "i_name": "low_vu",
+                "o_output": 0.0
+            },
+            "type": "GetFloatVar",
+            "ui_data": {
+                "collapsed": false,
+                "pos": [
+                    1249.0,
+                    21.0
+                ],
+                "selected": false
+            }
+        },
+        {
+            "custom_ports": [],
+            "id": 246,
+            "manual_values": {
+                "i_a": 0.0,
+                "i_alpha": 0.0,
+                "i_b": 0.20999999344348907,
+                "o_output": 0.0
+            },
+            "type": "MixFloat",
+            "ui_data": {
+                "collapsed": false,
+                "pos": [
+                    1462.0,
+                    26.0
+                ],
+                "selected": false
+            }
+        },
+        {
+            "custom_ports": [
+                [
+                    "i_time",
+                    {
+                        "default": null,
+                        "dtype": "float",
+                        "dtype_args": {},
+                        "dummy": false,
+                        "group": "default",
+                        "hide": false,
+                        "manual_input": true,
+                        "name": "time",
+                        "widgets": []
+                    }
+                ],
+                [
+                    "i_time_mask",
+                    {
+                        "default": null,
+                        "dtype": "tex2d",
+                        "dtype_args": {},
+                        "dummy": false,
+                        "group": "default",
+                        "hide": false,
+                        "manual_input": true,
+                        "name": "time_mask",
+                        "widgets": []
+                    }
+                ],
+                [
+                    "i_time_d0",
+                    {
+                        "default": null,
+                        "dtype": "float",
+                        "dtype_args": {
+                            "default": 0.0
+                        },
+                        "dummy": false,
+                        "group": "default",
+                        "hide": false,
+                        "manual_input": true,
+                        "name": "time_d0",
+                        "widgets": []
+                    }
+                ],
+                [
+                    "i_time_d1",
+                    {
+                        "default": null,
+                        "dtype": "float",
+                        "dtype_args": {
+                            "default": 0.0
+                        },
+                        "dummy": false,
+                        "group": "default",
+                        "hide": false,
+                        "manual_input": true,
+                        "name": "time_d1",
+                        "widgets": []
+                    }
+                ],
+                [
+                    "i_uTransform",
+                    {
+                        "default": null,
+                        "dtype": "mat4",
+                        "dtype_args": {},
+                        "dummy": false,
+                        "group": "default",
+                        "hide": false,
+                        "manual_input": true,
+                        "name": "uTransform",
+                        "widgets": []
+                    }
+                ],
+                [
+                    "i_uAspectAdjust",
+                    {
+                        "default": null,
+                        "dtype": "float",
+                        "dtype_args": {
+                            "default": 1.0
+                        },
+                        "dummy": false,
+                        "group": "default",
+                        "hide": false,
+                        "manual_input": true,
+                        "name": "uAspectAdjust",
+                        "widgets": []
+                    }
+                ],
+                [
+                    "i_uThreshold",
+                    {
+                        "default": null,
+                        "dtype": "float",
+                        "dtype_args": {
+                            "default": 0.5
+                        },
+                        "dummy": false,
+                        "group": "default",
+                        "hide": false,
+                        "manual_input": true,
+                        "name": "uThreshold",
+                        "widgets": []
+                    }
+                ],
+                [
+                    "i_uBorderWidth",
+                    {
+                        "default": null,
+                        "dtype": "float",
+                        "dtype_args": {
+                            "default": 0.0
+                        },
+                        "dummy": false,
+                        "group": "default",
+                        "hide": false,
+                        "manual_input": true,
+                        "name": "uBorderWidth",
+                        "widgets": []
+                    }
+                ],
+                [
+                    "i_uInnerSoftness",
+                    {
+                        "default": null,
+                        "dtype": "float",
+                        "dtype_args": {
+                            "default": 0.1,
+                            "range": [
+                                0.0001,
+                                Infinity
+                            ]
+                        },
+                        "dummy": false,
+                        "group": "default",
+                        "hide": false,
+                        "manual_input": true,
+                        "name": "uInnerSoftness",
+                        "widgets": []
+                    }
+                ],
+                [
+                    "i_uOuterSoftness",
+                    {
+                        "default": null,
+                        "dtype": "float",
+                        "dtype_args": {
+                            "default": 0.1,
+                            "range": [
+                                0.0001,
+                                Infinity
+                            ]
+                        },
+                        "dummy": false,
+                        "group": "default",
+                        "hide": false,
+                        "manual_input": true,
+                        "name": "uOuterSoftness",
+                        "widgets": []
+                    }
+                ]
+            ],
+            "id": 247,
+            "manual_values": {
+                "i_enable_time_mask": 1.0,
+                "i_enabled": 1.0,
+                "i_force_change": 42.0,
+                "i_input": "",
+                "i_interpolation": 1.0,
+                "i_sizeref": "",
+                "i_time": -3.380000114440918,
+                "i_time_d0": 0.0,
+                "i_time_d1": 0.4099999964237213,
+                "i_time_mask": "",
+                "i_transformUV": [
+                    [
+                        1.0,
+                        0.0,
+                        0.0,
+                        0.0
+                    ],
+                    [
+                        0.0,
+                        1.0,
+                        0.0,
+                        0.0
+                    ],
+                    [
+                        0.0,
+                        0.0,
+                        1.0,
+                        0.0
+                    ],
+                    [
+                        0.0,
+                        0.0,
+                        0.0,
+                        1.0
+                    ]
+                ],
+                "i_uAspectAdjust": 1.0700000524520874,
+                "i_uBorderWidth": 0.09000000357627869,
+                "i_uInnerSoftness": 0.05999999865889549,
+                "i_uOuterSoftness": 0.05999999865889549,
+                "i_uThreshold": 0.4399999976158142,
+                "i_uTransform": [
+                    [
+                        1.0,
+                        0.0,
+                        0.0,
+                        0.0
+                    ],
+                    [
+                        0.0,
+                        1.0,
+                        0.0,
+                        0.0
+                    ],
+                    [
+                        0.0,
+                        0.0,
+                        1.0,
+                        0.0
+                    ],
+                    [
+                        0.0,
+                        0.0,
+                        0.0,
+                        1.0
+                    ]
+                ],
+                "i_wrapping": 1.0,
+                "o_enabled": 1.0,
+                "o_output": ""
+            },
+            "type": "NoiseTest",
+            "ui_data": {
+                "collapsed": false,
+                "pos": [
+                    2489.0,
+                    79.0
+                ],
+                "selected": false
+            }
+        },
+        {
+            "custom_ports": [],
+            "id": 248,
+            "manual_values": {
+                "i_factor": 0.019999999552965164,
+                "i_mod": 0.0,
+                "i_reset": 0.0,
+                "o_output": 2.4574715017347435
+            },
+            "type": "Time",
+            "ui_data": {
+                "collapsed": false,
+                "pos": [
+                    2245.0,
+                    549.0
+                ],
+                "selected": false
+            }
+        },
+        {
+            "custom_ports": [],
+            "id": 249,
+            "manual_values": {
+                "i_name": "low_vu0",
+                "o_output": 0.0
+            },
+            "type": "GetFloatVar",
+            "ui_data": {
+                "collapsed": true,
+                "pos": [
+                    1711.0,
+                    -79.0
+                ],
+                "selected": false
+            }
+        },
+        {
+            "custom_ports": [],
+            "id": 250,
+            "manual_values": {
+                "i_a": 0.07000000029802322,
+                "i_alpha": 0.0,
+                "i_b": -0.05999999865889549,
+                "o_output": 0.07000000029802322
+            },
+            "type": "MixFloat",
+            "ui_data": {
+                "collapsed": false,
+                "pos": [
+                    1914.0,
+                    -74.0
+                ],
+                "selected": false
+            }
+        },
+        {
+            "custom_ports": [],
+            "id": 251,
+            "manual_values": {
+                "i_a": 0.0,
+                "i_b": 0.4399999976158142,
+                "i_op": 0.0,
+                "o_out": 0.5099999979138374
+            },
+            "type": "BinaryOpFloat",
+            "ui_data": {
+                "collapsed": false,
+                "pos": [
+                    2168.0,
+                    11.0
+                ],
+                "selected": false
+            }
+        },
+        {
+            "custom_ports": [],
+            "id": 252,
+            "manual_values": {
+                "i_t1": [
+                    [
+                        1.0,
+                        0.0,
+                        0.0,
+                        0.0
+                    ],
+                    [
+                        0.0,
+                        1.0,
+                        0.0,
+                        0.0
+                    ],
+                    [
+                        0.0,
+                        0.0,
+                        1.0,
+                        0.0
+                    ],
+                    [
+                        0.0,
+                        0.0,
+                        0.0,
+                        1.0
+                    ]
+                ],
+                "i_t2": [
+                    [
+                        1.0,
+                        0.0,
+                        0.0,
+                        0.0
+                    ],
+                    [
+                        0.0,
+                        1.0,
+                        0.0,
+                        0.0
+                    ],
+                    [
+                        0.0,
+                        0.0,
+                        1.0,
+                        0.0
+                    ],
+                    [
+                        0.0,
+                        0.0,
+                        0.0,
+                        1.0
+                    ]
+                ],
+                "o_output": [
+                    [
+                        2.130000114440918,
+                        0.0,
+                        0.0,
+                        0.0
+                    ],
+                    [
+                        0.0,
+                        2.130000114440918,
+                        0.0,
+                        0.0
+                    ],
+                    [
+                        0.0,
+                        0.0,
+                        1.0,
+                        0.0
+                    ],
+                    [
+                        3.6862120628356934,
+                        0.0,
+                        0.0,
+                        1.0
+                    ]
+                ]
+            },
+            "type": "Dot",
+            "ui_data": {
+                "collapsed": false,
+                "pos": [
+                    2321.0,
+                    -168.0
+                ],
+                "selected": false
+            }
+        },
+        {
+            "custom_ports": [],
+            "id": 253,
+            "manual_values": {
+                "i_x": -3.2699999809265137,
+                "i_y": 0.0,
+                "o_output": [
+                    [
+                        1.0,
+                        0.0,
+                        0.0,
+                        0.0
+                    ],
+                    [
+                        0.0,
+                        1.0,
+                        0.0,
+                        0.0
+                    ],
+                    [
+                        0.0,
+                        0.0,
+                        1.0,
+                        0.0
+                    ],
+                    [
+                        3.6862120628356934,
+                        0.0,
+                        0.0,
+                        1.0
+                    ]
+                ]
+            },
+            "type": "Translate",
+            "ui_data": {
+                "collapsed": false,
+                "pos": [
+                    2073.0,
+                    -200.0
+                ],
+                "selected": false
+            }
+        },
+        {
+            "custom_ports": [],
+            "id": 254,
+            "manual_values": {
+                "i_factor": 0.029999999329447746,
+                "i_mod": 0.0,
+                "i_reset": 0.0,
+                "o_output": 3.686211980442433
+            },
+            "type": "Time",
+            "ui_data": {
+                "collapsed": false,
+                "pos": [
+                    1825.0,
+                    -238.0
+                ],
+                "selected": false
+            }
+        },
+        {
+            "custom_ports": [],
+            "id": 255,
+            "manual_values": {
+                "i_name": "ref_highres",
+                "o_output": ""
+            },
+            "type": "GetTextureVar",
+            "ui_data": {
+                "collapsed": false,
+                "pos": [
+                    1255.0,
+                    455.0
+                ],
+                "selected": false
+            }
+        },
+        {
+            "custom_ports": [
+                [
+                    "i_filter_mask",
+                    {
+                        "default": null,
+                        "dtype": "tex2d",
+                        "dtype_args": {},
+                        "dummy": false,
+                        "group": "default",
+                        "hide": true,
+                        "manual_input": true,
+                        "name": "filter_mask",
+                        "widgets": []
+                    }
+                ],
+                [
+                    "i_filter_mode",
+                    {
+                        "default": null,
+                        "dtype": "int",
+                        "dtype_args": {
+                            "choices": [
+                                "input",
+                                "mask",
+                                "filtered",
+                                "input_filtered_masked",
+                                "input_masked",
+                                "filtered_masked"
+                            ],
+                            "default": 2.0
+                        },
+                        "dummy": false,
+                        "group": "default",
+                        "hide": true,
+                        "manual_input": true,
+                        "name": "filter_mode",
+                        "widgets": []
+                    }
+                ],
+                [
+                    "i_filter_bg",
+                    {
+                        "default": null,
+                        "dtype": "color",
+                        "dtype_args": {
+                            "default": [
+                                0.0,
+                                0.0,
+                                0.0,
+                                0.0
+                            ]
+                        },
+                        "dummy": false,
+                        "group": "default",
+                        "hide": true,
+                        "manual_input": true,
+                        "name": "filter_bg",
+                        "widgets": []
+                    }
+                ],
+                [
+                    "i_uResolution",
+                    {
+                        "default": null,
+                        "dtype": "vec2",
+                        "dtype_args": {
+                            "default": [
+                                100.0,
+                                100.0
+                            ]
+                        },
+                        "dummy": false,
+                        "group": "default",
+                        "hide": false,
+                        "manual_input": true,
+                        "name": "uResolution",
+                        "widgets": []
+                    }
+                ],
+                [
+                    "i_uAspectCorrect",
+                    {
+                        "default": null,
+                        "dtype": "int",
+                        "dtype_args": {
+                            "default": 1.0
+                        },
+                        "dummy": false,
+                        "group": "default",
+                        "hide": false,
+                        "manual_input": true,
+                        "name": "uAspectCorrect",
+                        "widgets": []
+                    }
+                ]
+            ],
+            "id": 256,
+            "manual_values": {
+                "i_advanced_filtering": 0.0,
+                "i_enabled": 1.0,
+                "i_filter_bg": [
+                    0.0,
+                    0.0,
+                    0.0,
+                    0.0
+                ],
+                "i_filter_mask": "",
+                "i_filter_mode": 2.0,
+                "i_force_change": 42.0,
+                "i_input": "",
+                "i_interpolation": 1.0,
+                "i_sizeref": "",
+                "i_transformUV": [
+                    [
+                        1.0,
+                        0.0,
+                        0.0,
+                        0.0
+                    ],
+                    [
+                        0.0,
+                        1.0,
+                        0.0,
+                        0.0
+                    ],
+                    [
+                        0.0,
+                        0.0,
+                        1.0,
+                        0.0
+                    ],
+                    [
+                        0.0,
+                        0.0,
+                        0.0,
+                        1.0
+                    ]
+                ],
+                "i_uAspectCorrect": 1.0,
+                "i_uResolution": [
+                    100.0,
+                    100.0
+                ],
+                "i_wrapping": 0.0,
+                "o_enabled": 1.0,
+                "o_output": ""
+            },
+            "type": "Pixelate",
+            "ui_data": {
+                "collapsed": false,
+                "pos": [
+                    2074.0,
+                    305.0
+                ],
+                "selected": false
+            }
+        },
+        {
+            "custom_ports": [],
+            "id": 257,
+            "manual_values": {
+                "i_x": 4.0,
+                "i_y": 0.0,
+                "o_vec2": [
+                    4.0,
+                    0.0
+                ]
+            },
+            "type": "Float2Vec2",
+            "ui_data": {
+                "collapsed": false,
+                "pos": [
+                    1923.0,
+                    600.0
+                ],
+                "selected": false
+            }
+        },
+        {
+            "custom_ports": [],
+            "id": 258,
+            "manual_values": {
+                "i_uniform": 1.0,
+                "i_x": 2.259999990463257,
+                "i_y": 2.259999990463257,
+                "o_output": [
+                    [
+                        2.259999990463257,
+                        0.0,
+                        0.0,
+                        0.0
+                    ],
+                    [
+                        0.0,
+                        2.259999990463257,
+                        0.0,
+                        0.0
+                    ],
+                    [
+                        0.0,
+                        0.0,
+                        1.0,
+                        0.0
+                    ],
+                    [
+                        0.0,
+                        0.0,
+                        0.0,
+                        1.0
+                    ]
+                ]
+            },
+            "type": "Scale",
+            "ui_data": {
+                "collapsed": false,
+                "pos": [
+                    1286.0,
+                    351.0
+                ],
+                "selected": false
+            }
+        },
+        {
+            "custom_ports": [],
+            "id": 259,
+            "manual_values": {
+                "i_x": 0.0,
+                "i_y": 0.0,
+                "o_output": [
+                    [
+                        1.0,
+                        0.0,
+                        0.0,
+                        0.0
+                    ],
+                    [
+                        0.0,
+                        1.0,
+                        0.0,
+                        0.0
+                    ],
+                    [
+                        0.0,
+                        0.0,
+                        1.0,
+                        0.0
+                    ],
+                    [
+                        -1228.78955078125,
+                        0.0,
+                        0.0,
+                        1.0
+                    ]
+                ]
+            },
+            "type": "Translate",
+            "ui_data": {
+                "collapsed": false,
+                "pos": [
+                    1379.0,
+                    199.0
+                ],
+                "selected": false
+            }
+        },
+        {
+            "custom_ports": [],
+            "id": 260,
+            "manual_values": {
+                "i_factor": -10.0,
+                "i_mod": 0.0,
+                "i_reset": 0.0,
+                "o_output": -1228.7896084785461
+            },
+            "type": "Time",
+            "ui_data": {
+                "collapsed": false,
+                "pos": [
+                    1122.0,
+                    188.0
+                ],
+                "selected": false
+            }
+        },
+        {
+            "custom_ports": [],
+            "id": 261,
+            "manual_values": {
+                "i_x": 0.0,
+                "i_y": 0.0,
+                "o_output": [
+                    [
+                        1.0,
+                        0.0,
+                        0.0,
+                        0.0
+                    ],
+                    [
+                        0.0,
+                        1.0,
+                        0.0,
+                        0.0
+                    ],
+                    [
+                        0.0,
+                        0.0,
+                        1.0,
+                        0.0
+                    ],
+                    [
+                        -6143.5380859375,
+                        0.0,
+                        0.0,
+                        1.0
+                    ]
+                ]
+            },
+            "type": "Translate",
+            "ui_data": {
+                "collapsed": false,
+                "pos": [
+                    1866.0,
+                    244.0
+                ],
+                "selected": false
+            }
+        },
+        {
+            "custom_ports": [],
+            "id": 262,
+            "manual_values": {
+                "i_factor": -50.0,
+                "i_mod": 0.0,
+                "i_reset": 0.0,
+                "o_output": -6143.538022041321
+            },
+            "type": "Time",
+            "ui_data": {
+                "collapsed": false,
+                "pos": [
+                    1611.0,
+                    249.0
+                ],
+                "selected": false
+            }
+        },
+        {
+            "custom_ports": [
+                [
+                    "i_filter_mask",
+                    {
+                        "default": null,
+                        "dtype": "tex2d",
+                        "dtype_args": {},
+                        "dummy": false,
+                        "group": "default",
+                        "hide": false,
+                        "manual_input": true,
+                        "name": "filter_mask",
+                        "widgets": []
+                    }
+                ],
+                [
+                    "i_filter_mode",
+                    {
+                        "default": null,
+                        "dtype": "int",
+                        "dtype_args": {
+                            "choices": [
+                                "input",
+                                "mask",
+                                "filtered",
+                                "input_filtered_masked",
+                                "input_masked",
+                                "filtered_masked"
+                            ],
+                            "default": 2.0
+                        },
+                        "dummy": false,
+                        "group": "default",
+                        "hide": false,
+                        "manual_input": true,
+                        "name": "filter_mode",
+                        "widgets": []
+                    }
+                ],
+                [
+                    "i_filter_bg",
+                    {
+                        "default": null,
+                        "dtype": "color",
+                        "dtype_args": {
+                            "default": [
+                                0.0,
+                                0.0,
+                                0.0,
+                                0.0
+                            ]
+                        },
+                        "dummy": false,
+                        "group": "default",
+                        "hide": false,
+                        "manual_input": true,
+                        "name": "filter_bg",
+                        "widgets": []
+                    }
+                ],
+                [
+                    "i_uMode",
+                    {
+                        "default": null,
+                        "dtype": "int",
+                        "dtype_args": {
+                            "choices": [
+                                "difference",
+                                "overlay",
+                                "grain merge",
+                                "exclusion",
+                                "hsv hue",
+                                "hsv saturation",
+                                "hsv value"
+                            ]
+                        },
+                        "dummy": false,
+                        "group": "default",
+                        "hide": false,
+                        "manual_input": true,
+                        "name": "uMode",
+                        "widgets": []
+                    }
+                ],
+                [
+                    "i_uColor",
+                    {
+                        "default": null,
+                        "dtype": "color",
+                        "dtype_args": {},
+                        "dummy": false,
+                        "group": "default",
+                        "hide": false,
+                        "manual_input": true,
+                        "name": "uColor",
+                        "widgets": []
+                    }
+                ]
+            ],
+            "id": 263,
+            "manual_values": {
+                "i_advanced_filtering": 1.0,
+                "i_enabled": 1.0,
+                "i_filter_bg": [
+                    0.0,
+                    0.0,
+                    0.0,
+                    0.0
+                ],
+                "i_filter_mask": "",
+                "i_filter_mode": 3.0,
+                "i_force_change": 42.0,
+                "i_input": "",
+                "i_interpolation": 1.0,
+                "i_sizeref": "",
+                "i_transformUV": [
+                    [
+                        1.0,
+                        0.0,
+                        0.0,
+                        0.0
+                    ],
+                    [
+                        0.0,
+                        1.0,
+                        0.0,
+                        0.0
+                    ],
+                    [
+                        0.0,
+                        0.0,
+                        1.0,
+                        0.0
+                    ],
+                    [
+                        0.0,
+                        0.0,
+                        0.0,
+                        1.0
+                    ]
+                ],
+                "i_uColor": [
+                    1.0,
+                    0.0,
+                    0.0,
+                    1.0
+                ],
+                "i_uMode": 0.0,
+                "i_wrapping": 1.0,
+                "o_enabled": 1.0,
+                "o_output": ""
+            },
+            "type": "OverlayColor",
+            "ui_data": {
+                "collapsed": false,
+                "pos": [
+                    2936.0,
+                    142.0
+                ],
+                "selected": false
+            }
+        },
+        {
+            "custom_ports": [],
+            "id": 264,
+            "manual_values": {
+                "i_a": 1.0,
+                "i_h": 0.0,
+                "i_s": 1.0,
+                "i_v": 1.0,
+                "o_rgba": [
+                    1.0,
+                    0.0,
+                    0.0,
+                    1.0
+                ]
+            },
+            "type": "HSV2RGBA",
+            "ui_data": {
+                "collapsed": false,
+                "pos": [
+                    2702.0,
+                    428.0
+                ],
+                "selected": false
+            }
+        },
+        {
+            "custom_ports": [
+                [
+                    "i_time",
+                    {
+                        "default": null,
+                        "dtype": "float",
+                        "dtype_args": {},
+                        "dummy": false,
+                        "group": "default",
+                        "hide": false,
+                        "manual_input": true,
+                        "name": "time",
+                        "widgets": []
+                    }
+                ],
+                [
+                    "i_time_mask",
+                    {
+                        "default": null,
+                        "dtype": "tex2d",
+                        "dtype_args": {},
+                        "dummy": false,
+                        "group": "default",
+                        "hide": true,
+                        "manual_input": true,
+                        "name": "time_mask",
+                        "widgets": []
+                    }
+                ],
+                [
+                    "i_time_d0",
+                    {
+                        "default": null,
+                        "dtype": "float",
+                        "dtype_args": {
+                            "default": 0.0
+                        },
+                        "dummy": false,
+                        "group": "default",
+                        "hide": true,
+                        "manual_input": true,
+                        "name": "time_d0",
+                        "widgets": []
+                    }
+                ],
+                [
+                    "i_time_d1",
+                    {
+                        "default": null,
+                        "dtype": "float",
+                        "dtype_args": {
+                            "default": 0.0
+                        },
+                        "dummy": false,
+                        "group": "default",
+                        "hide": true,
+                        "manual_input": true,
+                        "name": "time_d1",
+                        "widgets": []
+                    }
+                ],
+                [
+                    "i_uTransform",
+                    {
+                        "default": null,
+                        "dtype": "mat4",
+                        "dtype_args": {},
+                        "dummy": false,
+                        "group": "default",
+                        "hide": false,
+                        "manual_input": true,
+                        "name": "uTransform",
+                        "widgets": []
+                    }
+                ],
+                [
+                    "i_uAspectAdjust",
+                    {
+                        "default": null,
+                        "dtype": "float",
+                        "dtype_args": {
+                            "default": 1.0
+                        },
+                        "dummy": false,
+                        "group": "default",
+                        "hide": false,
+                        "manual_input": true,
+                        "name": "uAspectAdjust",
+                        "widgets": []
+                    }
+                ],
+                [
+                    "i_uThreshold",
+                    {
+                        "default": null,
+                        "dtype": "float",
+                        "dtype_args": {
+                            "default": 0.5
+                        },
+                        "dummy": false,
+                        "group": "default",
+                        "hide": false,
+                        "manual_input": true,
+                        "name": "uThreshold",
+                        "widgets": []
+                    }
+                ],
+                [
+                    "i_uBorderWidth",
+                    {
+                        "default": null,
+                        "dtype": "float",
+                        "dtype_args": {
+                            "default": 0.0
+                        },
+                        "dummy": false,
+                        "group": "default",
+                        "hide": false,
+                        "manual_input": true,
+                        "name": "uBorderWidth",
+                        "widgets": []
+                    }
+                ],
+                [
+                    "i_uInnerSoftness",
+                    {
+                        "default": null,
+                        "dtype": "float",
+                        "dtype_args": {
+                            "default": 0.1,
+                            "range": [
+                                0.0001,
+                                Infinity
+                            ]
+                        },
+                        "dummy": false,
+                        "group": "default",
+                        "hide": false,
+                        "manual_input": true,
+                        "name": "uInnerSoftness",
+                        "widgets": []
+                    }
+                ],
+                [
+                    "i_uOuterSoftness",
+                    {
+                        "default": null,
+                        "dtype": "float",
+                        "dtype_args": {
+                            "default": 0.1,
+                            "range": [
+                                0.0001,
+                                Infinity
+                            ]
+                        },
+                        "dummy": false,
+                        "group": "default",
+                        "hide": false,
+                        "manual_input": true,
+                        "name": "uOuterSoftness",
+                        "widgets": []
+                    }
+                ]
+            ],
+            "id": 265,
+            "manual_values": {
+                "i_enable_time_mask": 0.0,
+                "i_enabled": 1.0,
+                "i_force_change": 42.0,
+                "i_input": "",
+                "i_interpolation": 1.0,
+                "i_sizeref": "",
+                "i_time": 0.0,
+                "i_time_d0": 0.0,
+                "i_time_d1": 0.0,
+                "i_time_mask": "",
+                "i_transformUV": [
+                    [
+                        1.0,
+                        0.0,
+                        0.0,
+                        0.0
+                    ],
+                    [
+                        0.0,
+                        1.0,
+                        0.0,
+                        0.0
+                    ],
+                    [
+                        0.0,
+                        0.0,
+                        1.0,
+                        0.0
+                    ],
+                    [
+                        0.0,
+                        0.0,
+                        0.0,
+                        1.0
+                    ]
+                ],
+                "i_uAspectAdjust": 1.0,
+                "i_uBorderWidth": 0.5600000023841858,
+                "i_uInnerSoftness": 0.10010000318288803,
+                "i_uOuterSoftness": 100.0,
+                "i_uThreshold": 0.8500000238418579,
+                "i_uTransform": [
+                    [
+                        1.0,
+                        0.0,
+                        0.0,
+                        0.0
+                    ],
+                    [
+                        0.0,
+                        1.0,
+                        0.0,
+                        0.0
+                    ],
+                    [
+                        0.0,
+                        0.0,
+                        1.0,
+                        0.0
+                    ],
+                    [
+                        0.0,
+                        0.0,
+                        0.0,
+                        1.0
+                    ]
+                ],
+                "i_wrapping": 1.0,
+                "o_enabled": 1.0,
+                "o_output": ""
+            },
+            "type": "NoiseTest",
+            "ui_data": {
+                "collapsed": false,
+                "pos": [
+                    1594.0,
+                    411.0
+                ],
+                "selected": false
+            }
+        }
+    ],
+    "ui_data": {
+        "offset": [
+            1165.0,
+            -304.0
+        ]
+    }
+}
