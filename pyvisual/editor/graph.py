@@ -69,6 +69,7 @@ class Graph:
                 #if instance_before in visited_instances:
                 #    circular = True
                 dfs(instance_before)
+            instance.dfs_index = len(sorted_instances)
             sorted_instances.append(instance)
 
         for instance in instances:

@@ -81,6 +81,7 @@ class GetVar(Node):
     
     # subclasses must have their respective SetXXXVar class here
     SetVar = None
+    FORCE_UPDATE = False
 
     class Meta:
         options = {
@@ -159,7 +160,11 @@ class GetVar(Node):
                     break
 
         if self.connected_node is not None:
-            if self._force_value_update:
+            # AAARGH
+            # set/get var nodes might create cycles in the node graph!! and fuck up has_changed semantics
+            # especially with ChooseTexture
+            # workaround for now: force update of float vars each time!
+            if self._force_value_update or self.FORCE_UPDATE:
                 self.set("output", self.connected_node.get("input"))
                 self._force_value_update = False
             else:
@@ -220,6 +225,7 @@ class GetFloatVar(GetVar):
         }
 
     SetVar = SetFloatVar
+    FORCE_UPDATE = True
 
 class SetTextureVar(SetVar):
     class Meta:

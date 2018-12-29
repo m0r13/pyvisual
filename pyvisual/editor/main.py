@@ -653,8 +653,10 @@ class UINode:
         imgui.begin_group()
         if self.spec.options["show_title"]:
             imgui.text(self.spec.name)
+            #imgui.text(self.spec.name + " (%d)" % self.instance.dfs_index)
         elif self.collapsed:
             imgui.text(self.instance.collapsed_title)
+            #imgui.text(self.instance.collapsed_title + " (%d)" % self.instance.dfs_index)
         if not self.collapsed:
             port_filter = lambda port: not port[1]["hide"] and port[1]["group"] == "default"
             inputs = list(filter(port_filter, self.instance.input_ports.items()))
