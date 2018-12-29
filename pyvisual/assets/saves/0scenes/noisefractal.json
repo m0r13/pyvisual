@@ -80,13 +80,13 @@
         },
         {
             "dst_node_id": 13,
-            "dst_port_id": "i_y",
+            "dst_port_id": "i_x",
             "src_node_id": 16,
             "src_port_id": "o_out"
         },
         {
             "dst_node_id": 13,
-            "dst_port_id": "i_x",
+            "dst_port_id": "i_y",
             "src_node_id": 16,
             "src_port_id": "o_out"
         },
@@ -638,22 +638,6 @@
                     }
                 ],
                 [
-                    "i_scale",
-                    {
-                        "default": null,
-                        "dtype": "float",
-                        "dtype_args": {
-                            "default": 1.0
-                        },
-                        "dummy": false,
-                        "group": "default",
-                        "hide": false,
-                        "manual_input": true,
-                        "name": "scale",
-                        "widgets": []
-                    }
-                ],
-                [
                     "i_segments",
                     {
                         "default": null,
@@ -711,7 +695,6 @@
                 "i_force_change": 42.0,
                 "i_input": "",
                 "i_interpolation": 1.0,
-                "i_scale": 1.0,
                 "i_segments": 6.0,
                 "i_segments1": 0.0,
                 "i_sizeref": "",
@@ -842,7 +825,7 @@
                 "i_factor": 1.0,
                 "i_mod": 0.0,
                 "i_reset": 0.0,
-                "o_output": 7.39740252494812
+                "o_output": 63.57180881500244
             },
             "type": "Time",
             "ui_data": {
@@ -1145,7 +1128,7 @@
                 "i_factor": 0.10000000149011612,
                 "i_mod": 0.0,
                 "i_reset": 0.0,
-                "o_output": 0.14774186280946733
+                "o_output": 1.2712885572473276
             },
             "type": "Time",
             "ui_data": {
@@ -1164,7 +1147,7 @@
                 "i_a": 0.0,
                 "i_b": 0.0,
                 "i_op": 0.0,
-                "o_out": 0.14774186280946733
+                "o_out": 1.2712885572473276
             },
             "type": "BinaryOpFloat",
             "ui_data": {
@@ -1476,7 +1459,7 @@
                 "i_factor": 1.0,
                 "i_mod": 0.0,
                 "i_reset": 0.0,
-                "o_output": 0.3542357510161596
+                "o_output": 3.1625346643628505
             },
             "type": "Time",
             "ui_data": {
@@ -1493,6 +1476,7 @@
             "id": 25,
             "manual_values": {
                 "i_cutoff": 2.5,
+                "i_enabled": 1.0,
                 "i_input": 0.0,
                 "i_order": 2.0,
                 "o_output": 0.050004315668461426
@@ -1513,17 +1497,17 @@
             "manual_values": {
                 "i_uniform": 1.0,
                 "i_x": 1.0,
-                "i_y": 1.0,
+                "i_y": 0.9247767320922892,
                 "o_output": [
                     [
-                        1.0,
+                        0.9247767329216003,
                         0.0,
                         0.0,
                         0.0
                     ],
                     [
                         0.0,
-                        1.0,
+                        0.9247767329216003,
                         0.0,
                         0.0
                     ],
@@ -1555,8 +1539,8 @@
             "custom_ports": [],
             "id": 27,
             "manual_values": {
-                "i_name": "",
-                "o_output": 0.0
+                "i_name": "low_vu",
+                "o_output": 0.6268605409883903
             },
             "type": "GetFloatVar",
             "ui_data": {
@@ -1575,7 +1559,7 @@
                 "i_a": 1.0,
                 "i_alpha": 0.0,
                 "i_b": 0.8799999952316284,
-                "o_output": 1.0
+                "o_output": 0.9247767320922892
             },
             "type": "MixFloat",
             "ui_data": {
@@ -1596,7 +1580,7 @@
                 "i_min": 0.0,
                 "i_phase": 0.0,
                 "i_type": 2.0,
-                "o_output": 4.537292221092524
+                "o_output": 6.921207727169558
             },
             "type": "LFO",
             "ui_data": {
@@ -1615,8 +1599,8 @@
                 "i_x": 0.0,
                 "i_y": 0.0,
                 "o_vec2": [
-                    4.537292003631592,
-                    4.537292003631592
+                    6.921207904815674,
+                    6.921207904815674
                 ]
             },
             "type": "Float2Vec2",
@@ -1799,7 +1783,7 @@
                 "i_factor": 1.0,
                 "i_mod": 0.0,
                 "i_reset": 0.0,
-                "o_output": 7.385567903518677
+                "o_output": 63.56308054924011
             },
             "type": "Time",
             "ui_data": {
@@ -2030,7 +2014,7 @@
                 "i_factor": 0.006399999838322401,
                 "i_mod": 0.0,
                 "i_reset": 0.0,
-                "o_output": 0.04726115450676638
+                "o_output": 0.40679706766533597
             },
             "type": "Time",
             "ui_data": {
@@ -2510,8 +2494,8 @@
             "custom_ports": [],
             "id": 41,
             "manual_values": {
-                "i_name": "",
-                "o_output": 0.0
+                "i_name": "low_vu",
+                "o_output": 0.6268605409883903
             },
             "type": "GetFloatVar",
             "ui_data": {
@@ -2530,7 +2514,7 @@
                 "i_a": 1.8200000524520874,
                 "i_alpha": 0.0,
                 "i_b": 1.2100000381469727,
-                "o_output": 1.8200000524520874
+                "o_output": 1.4376151134818573
             },
             "type": "MixFloat",
             "ui_data": {
@@ -2546,6 +2530,7 @@
             "custom_ports": [],
             "id": 43,
             "manual_values": {
+                "i_condition": 1.0,
                 "i_duration": 0.20000000298023224,
                 "i_input": 0.0,
                 "o_output": 0.0
@@ -2598,7 +2583,7 @@
             "custom_ports": [],
             "id": 46,
             "manual_values": {
-                "i_name": "",
+                "i_name": "ref_highres",
                 "o_output": ""
             },
             "type": "GetTextureVar",
@@ -2614,8 +2599,8 @@
     ],
     "ui_data": {
         "offset": [
-            880.0,
-            -522.0
+            -1275.0,
+            -205.0
         ]
     }
 }

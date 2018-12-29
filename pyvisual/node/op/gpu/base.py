@@ -40,7 +40,7 @@ class RenderNode(Node):
         projection = glm.ortho(-1.0, 1.0, -1.0, 1.0, -1.0, 1.0)
         texture = np.eye(4, dtype=np.float32)
 
-        if abs(texture_aspect - target_aspect) < 0.001:
+        if abs(texture_aspect - target_aspect) < 0.1:
             pass
         elif texture_aspect < target_aspect:
             # border left/right
