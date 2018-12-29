@@ -53,6 +53,6 @@ vec4 filterFrag(vec2 uv, vec4 _) {
         frag = max(frag, frag1);
     }
 
-    return vec4(frag.rgb, 1.0);
+    return vec4(frag.rgb, frag.a);
 }
 

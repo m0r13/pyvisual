@@ -34,6 +34,7 @@ class Plot(Node):
 class BeatMonitor(Node):
     class Meta:
         inputs = [
+            {"name" : "gain", "dtype" : dtype.float, "dtype_args" : {"default" : 1.0}},
             {"name" : "beat_value", "dtype" : dtype.float},
             {"name" : "beat_rising", "dtype" : dtype.event},
             {"name" : "threshold", "dtype" : dtype.float, "dtype_args" : {"default" : 0.5, "range" : [0.0, 1.0]}},
@@ -49,25 +50,21 @@ class BeatMonitor(Node):
 
         self._duration = 0
         self._beat_value_buffer = None
-        self._last_beats = None
+        self._beat_rising_buffer = None
         self._update_buffers()
 
     def _update_buffers(self):
         self._duration = self.get("duration")
         self._beat_value_buffer = analyzer.RingBuffer(int(self._duration*60))
+        self._beat_rising_buffer = analyzer.RingBuffer(int(self._duration*60))
         self._last_beats = []
 
     def _evaluate(self):
         if self.have_inputs_changed("duration"):
             self._update_buffers()
 
-        self._beat_value_buffer.append(self.get("beat_value"))
-        if self.get("beat_rising"):
-            self._last_beats.append(time.time())
-
-        start_time = time.time() - self._duration
-        while len(self._last_beats) and self._last_beats[0] < start_time:
-            self._last_beats.pop(0)
+        self._beat_value_buffer.append(self.get("beat_value") / self.get("gain"))
+        self._beat_rising_buffer.append(self.get("beat_rising"))
 
     def _show_custom_ui(self):
         width = 250
@@ -76,14 +73,16 @@ class BeatMonitor(Node):
         draw_list = imgui.get_window_draw_list()
         plot_start = imgui.get_cursor_screen_pos()
         imgui.push_style_color(imgui.COLOR_PLOT_LINES, 0.8, 0.8, 0.8, 1.0)
-        imgui.plot_lines("", self._beat_value_buffer.contents, 0.0, 1.0, (width, height))
+        imgui.plot_lines("", self._beat_value_buffer.contents * self.get("gain"), 0.0, 1.0, (width, height))
         imgui.pop_style_color()
         plot_size = imgui.get_item_rect_size()
 
-        t = time.time()
-        for abs_time in self._last_beats:
-            rel_time = 1.0 - (t - abs_time) / self._duration
-            x = width * rel_time
+        beat_risings = self._beat_rising_buffer.contents
+        count = self._beat_rising_buffer.size
+        for i, beat_rising in enumerate(beat_risings):
+            if not beat_rising:
+                continue
+            x = i / (count - 1) * width
             line_start = plot_start[0] + x, plot_start[1]
             line_end = plot_start[0] + x, plot_start[1] + height
             draw_list.add_line(line_start, line_end, imgui.get_color_u32_rgba(0.0, 0.8, 0.0, 0.8))

@@ -331,6 +331,11 @@ class NodeGraph(Graph):
                         % (src_port_id, src_node_id, dst_port_id, dst_node_id))
                 continue
 
+            if src_node_id not in id_map or dst_node_id not in id_map:
+                print("### Warning: Ignoring connection %s (node #%d) -> %s (node #%d) because src and/or dst node was not found." \
+                        % (src_port_id, src_node_id, dst_port_id, dst_node_id))
+                continue
+
             src_node_id = id_map[src_node_id]
             dst_node_id = id_map[dst_node_id]
 
