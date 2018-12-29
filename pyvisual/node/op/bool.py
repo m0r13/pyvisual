@@ -76,6 +76,7 @@ class HoldBool(Node):
         inputs = [
             {"name" : "input", "dtype" : dtype.event},
             {"name" : "duration", "dtype" : dtype.float, "dtype_args" : {"default" : 0.2, "range" : [0.0, float("inf")]}},
+            {"name" : "condition", "dtype" : dtype.bool, "dtype_args" : {"default" : True}},
         ]
         outputs = [
             {"name" : "output", "dtype" : dtype.bool},
@@ -89,9 +90,10 @@ class HoldBool(Node):
     def _evaluate(self):
         t = time.time()
         i = self.get("input")
-        if i:
+        condition = self.get("condition")
+        if i and condition:
             self._next_off = t + self.get("duration")
             self.set("output", True)
         else:
-            if t > self._next_off:
+            if t > self._next_off or not condition:
                 self.set("output", False)

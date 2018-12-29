@@ -229,7 +229,7 @@ class GlitchTimer(Node):
 
         self.set("output", float(self._status))
 
-class TestTimer(Node):
+class PoissonTimer(Node):
     class Meta:
         inputs = [
             {"name" : "enabled", "dtype" : dtype.bool, "dtype_args" : {"default" : True}},

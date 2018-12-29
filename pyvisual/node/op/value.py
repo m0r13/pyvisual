@@ -393,6 +393,7 @@ class FloatLambda(Lambda):
 class LowpassFloat(Node):
     class Meta:
         inputs = [
+            {"name" : "enabled", "dtype" : dtype.bool, "dtype_args" : {"default" : True}},
             {"name" : "input", "dtype" : dtype.float},
             {"name" : "order", "dtype" : dtype.int, "dtype_args" : {"default" : 2, "range" : [0, float("inf")]}},
             # TODO fps automatically!
@@ -422,7 +423,8 @@ class LowpassFloat(Node):
 
         value = self.get("input")
         if self._filter:
-            self.set("output", self._filter.process(np.array([value]))[0])
+            filtered = self._filter.process(np.array([value]))[0]
+            self.set("output", filtered if self.get("enabled") else value)
         else:
             self.set("output", value)
 
