@@ -57,10 +57,10 @@
                 "i_offset": 0.0,
                 "i_play": 1.0,
                 "i_speed": 0.5,
-                "i_video": "video/Last Pool Party Raccoons-ou91bv1HlZc.mp4",
-                "o_duration": 88.45503333333333,
+                "i_video": "video/24 SMILEY - HABEN WIR NOCH PEPPS-UGxr2tnzGS4.webm",
+                "o_duration": 92.6926,
                 "o_frame": "",
-                "o_time": 16.54986666666667
+                "o_time": 7.273933333333334
             },
             "type": "PlayVideo",
             "ui_data": {
@@ -229,17 +229,17 @@
             "manual_values": {
                 "i_uniform": 1.0,
                 "i_x": 1.0,
-                "i_y": 1.6316914121099113,
+                "i_y": 1.637303692926802,
                 "o_output": [
                     [
-                        1.6316914558410645,
+                        1.6373037099838257,
                         0.0,
                         0.0,
                         0.0
                     ],
                     [
                         0.0,
-                        1.6316914558410645,
+                        1.6373037099838257,
                         0.0,
                         0.0
                     ],
@@ -435,7 +435,7 @@
             "id": 119,
             "manual_values": {
                 "i_name": "low_vu",
-                "o_output": 0.012982146516695435
+                "o_output": 0.004212957544297073
             },
             "type": "GetFloatVar",
             "ui_data": {
@@ -454,7 +454,7 @@
                 "i_a": 1.6399999856948853,
                 "i_alpha": 0.0,
                 "i_b": 1.0,
-                "o_output": 1.6316914121099113
+                "o_output": 1.637303692926802
             },
             "type": "MixFloat",
             "ui_data": {
