@@ -1,6 +1,6 @@
 #include <generate/base_time_mask.frag>
 
-//#define HQ_TIME
+#define HQ_TIME
 
 #ifdef HQ_TIME
 #include <lib/noise3D.glsl>
