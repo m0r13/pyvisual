@@ -175,8 +175,6 @@ class ChooseTexture(Node):
 
     def _update_custom_ports(self):
         self._count = int(self.get("count"))
-        if self._current_index >= self._count or self._current_index == -1:
-            self._choose_next()
 
         custom_inputs = []
         custom_outputs = []
@@ -187,6 +185,9 @@ class ChooseTexture(Node):
             custom_outputs.append(output_port)
         self.set_custom_inputs(custom_inputs)
         self.set_custom_outputs(custom_outputs)
+
+        if self._current_index >= self._count or self._current_index == -1:
+            self._choose_next()
 
     def _evaluate(self):
         if self._next_index != -1:
