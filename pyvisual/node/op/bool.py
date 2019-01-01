@@ -97,3 +97,24 @@ class HoldBool(Node):
         else:
             if t > self._next_off or not condition:
                 self.set("output", False)
+
+class SetResetBool(Node):
+    class Meta:
+        inputs = [
+            {"name" : "set", "dtype" : dtype.event},
+            {"name" : "reset", "dtype" : dtype.event},
+            {"name" : "default", "dtype" : dtype.bool, "dtype_args" : {"default" : False}},
+        ]
+        outputs = [
+            {"name" : "output", "dtype" : dtype.bool},
+        ]
+
+    def _evaluate(self):
+        if self._last_evaluated == 0.0:
+            self.set("output", self.get("default"))
+
+        if self.get("set"):
+            self.set("output", True)
+        if self.get("reset"):
+            self.set("output", False)
+
