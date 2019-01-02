@@ -128,6 +128,39 @@ class LoadTextures(Node):
         self.set("texture", tt[1])
         self.set("last_texture", self.last_texture)
 
+class DummyTexture(Node):
+    class Meta:
+        inputs = [
+            {"name" : "aspect", "dtype" : dtype.str, "dtype_args" : {"default" : "16:9"}},
+            {"name" : "height", "dtype" : dtype.int, "dtype_args" : {"default" : 1080}},
+        ]
+        outputs = [
+            {"name" : "out", "dtype" : dtype.tex2d}
+        ]
+
+    def __init__(self):
+        super().__init__()
+
+        self._texture = None
+
+    def _evaluate(self):
+        if self._texture is not None:
+            self._texture.delete()
+
+        aspect = self.get("aspect").strip()
+        parts = aspect.split(":")
+        try:
+            aspect_w, aspect_h = float(parts[0]), float(parts[1])
+        except (IndexError, ValueError):
+            return
+
+        a = aspect_w / aspect_h
+        height = int(self.get("height"))
+        width = int(a * height)
+
+        self._texture = np.zeros((height, width, 1), dtype=np.uint8).view(gloo.Texture2D)
+        self.set("out", self._texture)
+
 class Renderer(Node):
     class Meta:
         inputs = [
