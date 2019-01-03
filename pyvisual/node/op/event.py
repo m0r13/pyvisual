@@ -52,6 +52,7 @@ class EveryNEvent(Node):
         inputs = [
             {"name" : "event", "dtype" : dtype.event},
             {"name" : "every_n", "dtype" : dtype.int, "dtype_args" : {"default" : 1, "range" : [1, float("inf")]}},
+            {"name" : "offset", "dtype" : dtype.int, "dtype_args" : {"default" : 0}},
             {"name" : "p", "dtype" : dtype.float, "dtype_args" : {"default" : 1, "range" : [0.0, 1.0]}},
         ]
         outputs = [
@@ -61,9 +62,11 @@ class EveryNEvent(Node):
     def __init__(self):
         super().__init__(always_evaluate=True)
 
-        self._counter = 0
+        self._counter = None
 
     def _evaluate(self):
+        if self._counter is None:
+            self._counter = self.get("offset")
         if self.get("event"):
             self._counter += 1
             if self._counter >= self.get("every_n"):
