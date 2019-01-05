@@ -96,7 +96,7 @@ class Or(Node):
             {"name" : "v1", "dtype" : dtype.bool}
         ]
         outputs = [
-            {"name" : "output", "dtype" : dtype.event}
+            {"name" : "output", "dtype" : dtype.bool}
         ]
         options = {
             "category" : "math",
@@ -143,7 +143,7 @@ class Not(Node):
 # Float operations
 #
 
-COMPARE_MODES = ["v0 < v1", "v0 <= v1", "v0 > v1", "v0 >= v1"]
+COMPARE_MODES = ["v0 < v1", "v0 <= v1", "v0 > v1", "v0 >= v1", "v0 == v1"]
 class Compare(Node):
     class Meta:
         inputs = [
@@ -165,7 +165,8 @@ class Compare(Node):
         value = (mode == 0 and v0 < v1) \
              or (mode == 1 and v0 <= v1) \
              or (mode == 2 and v0 > v1) \
-             or (mode == 3 and v0 >= v1)
+             or (mode == 3 and v0 >= v1) \
+             or (mode == 4 and abs(v0 - v1) < 0.0001)
         self.set("output", 1.0 if value else 0.0)
 
 class Edge(Node):
@@ -196,6 +197,36 @@ class Edge(Node):
         self.set("combined", last_value < threshold and value >= threshold or last_value > threshold and value <= threshold)
         self.last_value = value
 
+class BoolEdge(Node):
+    class Meta:
+        inputs = [
+            {"name" : "value", "dtype" : dtype.bool},
+        ]
+        outputs = [
+            {"name" : "rising", "dtype" : dtype.event},
+            {"name" : "falling", "dtype" : dtype.event},
+            {"name" : "combined", "dtype" : dtype.event}
+        ]
+        options = {
+            "category" : "math"
+        }
+
+    def __init__(self):
+        super().__init__(always_evaluate=True)
+        self.last_value = 0.0
+
+    def _evaluate(self):
+        last_value = self.last_value
+        value = self.get("value")
+
+        rising = not last_value and value
+        falling = last_value and not value
+        self.set("rising", rising)
+        self.set("falling", falling)
+        self.set("combined", rising or falling)
+        self.last_value = value
+
+
 class FloatLatch(Latch):
     class Meta:
         inputs = [
@@ -214,7 +245,9 @@ class MixFloat(Node):
         inputs = [
             {"name" : "a", "dtype" : dtype.float},
             {"name" : "b", "dtype" : dtype.float},
-            {"name" : "alpha", "dtype" : dtype.float, "dtype_args" : {"range" : [0.0, 1.0]}}
+            {"name" : "alpha", "dtype" : dtype.float, "dtype_args" : {}},
+            {"name" : "alpha0", "dtype" : dtype.float, "dtype_args" : {"default" : 0.0}, "group" : "additional"},
+            {"name" : "alpha1", "dtype" : dtype.float, "dtype_args" : {"default" : 1.0}, "group" : "additional"},
         ]
         outputs = [
             {"name" : "output", "dtype" : dtype.float}
@@ -224,7 +257,17 @@ class MixFloat(Node):
         }
 
     def _evaluate(self):
-        self.set("output", (1.0-self.get("alpha")) * self.get("a") + self.get("alpha") * self.get("b"))
+        alpha = self.get("alpha")
+        alpha0 = self.get("alpha0")
+        alpha1 = self.get("alpha1")
+        if alpha1 - alpha0 != 0.0:
+            alpha = (alpha - alpha0) / (alpha1 - alpha0)
+        else:
+            alpha = float("nan")
+
+        a = self.get("a")
+        b = self.get("b")
+        self.set("output", (1.0-alpha) * a + alpha * b)
 
 UNARY_OPS = OrderedDict(
     id=lambda x: x,
@@ -406,7 +449,7 @@ class LowpassFloat(Node):
     def __init__(self):
         super().__init__(always_evaluate=True)
 
-        self._filter = self._create_filter(self.get("order"), self.get("cutoff"))
+        self._filter = None
         self.status = None
 
     def _create_filter(self, order, cutoff):
@@ -418,7 +461,7 @@ class LowpassFloat(Node):
             self.status = str(e)
 
     def _evaluate(self):
-        if self.have_inputs_changed("order", "cutoff"):
+        if self.have_inputs_changed("order", "cutoff") or self._last_evaluated == 0.0:
             self._filter = self._create_filter(self.get("order"), self.get("cutoff"))
 
         value = self.get("input")
@@ -434,6 +477,34 @@ class LowpassFloat(Node):
             imgui.text_colored("Error. (?)", 1.0, 0.0, 0.0)
             if imgui.is_item_hovered():
                 imgui.set_tooltip(self.status)
+
+class SetResetToggle(Node):
+    class Meta:
+        inputs = [
+            {"name" : "v0", "dtype" : dtype.float, "dtype_args" : {"default" : 0.0}},
+            {"name" : "v1", "dtype" : dtype.float, "dtype_args" : {"default" : 1.0}},
+            {"name" : "set", "dtype" : dtype.event},
+            {"name" : "reset", "dtype" : dtype.event},
+            {"name" : "toggle", "dtype" : dtype.event},
+        ]
+        outputs = [
+            {"name" : "output", "dtype" : dtype.float},
+        ]
+
+    def __init__(self):
+        super().__init__()
+
+        self._state = False
+
+    def _evaluate(self):
+        if not self._state and self.get("set"):
+            self._state = True
+        if self._state and self.get("reset"):
+            self._state = False
+        if self.get("toggle"):
+            self._state = not self._state
+
+        self.set("output", self.get("v1") if self._state else self.get("v0"))
 
 #
 # Vec2 operations
