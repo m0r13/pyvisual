@@ -175,6 +175,12 @@
             "src_port_id": "o_out"
         },
         {
+            "dst_node_id": 38,
+            "dst_port_id": "i_input",
+            "src_node_id": 35,
+            "src_port_id": "o_output"
+        },
+        {
             "dst_node_id": 39,
             "dst_port_id": "i_generate",
             "src_node_id": 35,
@@ -183,12 +189,6 @@
         {
             "dst_node_id": 42,
             "dst_port_id": "i_generate",
-            "src_node_id": 35,
-            "src_port_id": "o_output"
-        },
-        {
-            "dst_node_id": 38,
-            "dst_port_id": "i_input",
             "src_node_id": 35,
             "src_port_id": "o_output"
         },
@@ -247,8 +247,8 @@
             "src_port_id": "o_output"
         },
         {
-            "dst_node_id": 173,
-            "dst_port_id": "i_a",
+            "dst_node_id": 15,
+            "dst_port_id": "i_uRotation",
             "src_node_id": 7,
             "src_port_id": "o_out"
         },
@@ -259,8 +259,8 @@
             "src_port_id": "o_out"
         },
         {
-            "dst_node_id": 15,
-            "dst_port_id": "i_uRotation",
+            "dst_node_id": 173,
+            "dst_port_id": "i_a",
             "src_node_id": 7,
             "src_port_id": "o_out"
         },
@@ -271,14 +271,14 @@
             "src_port_id": "o_output"
         },
         {
-            "dst_node_id": 44,
-            "dst_port_id": "i_v0",
+            "dst_node_id": 35,
+            "dst_port_id": "i_enabled",
             "src_node_id": 48,
             "src_port_id": "o_output"
         },
         {
-            "dst_node_id": 35,
-            "dst_port_id": "i_enabled",
+            "dst_node_id": 44,
+            "dst_port_id": "i_v0",
             "src_node_id": 48,
             "src_port_id": "o_output"
         },
@@ -493,14 +493,14 @@
             "src_port_id": "o_output"
         },
         {
-            "dst_node_id": 116,
-            "dst_port_id": "i_v0",
+            "dst_node_id": 97,
+            "dst_port_id": "i_input",
             "src_node_id": 99,
             "src_port_id": "o_output"
         },
         {
-            "dst_node_id": 97,
-            "dst_port_id": "i_input",
+            "dst_node_id": 116,
+            "dst_port_id": "i_v0",
             "src_node_id": 99,
             "src_port_id": "o_output"
         },
@@ -565,13 +565,13 @@
             "src_port_id": "o_out"
         },
         {
-            "dst_node_id": 118,
+            "dst_node_id": 119,
             "dst_port_id": "i_generate",
             "src_node_id": 120,
             "src_port_id": "o_out"
         },
         {
-            "dst_node_id": 119,
+            "dst_node_id": 118,
             "dst_port_id": "i_generate",
             "src_node_id": 120,
             "src_port_id": "o_out"
@@ -667,6 +667,12 @@
             "src_port_id": "o_out"
         },
         {
+            "dst_node_id": 138,
+            "dst_port_id": "i_input",
+            "src_node_id": 139,
+            "src_port_id": "o_output"
+        },
+        {
             "dst_node_id": 149,
             "dst_port_id": "i_generate",
             "src_node_id": 139,
@@ -675,12 +681,6 @@
         {
             "dst_node_id": 146,
             "dst_port_id": "i_generate",
-            "src_node_id": 139,
-            "src_port_id": "o_output"
-        },
-        {
-            "dst_node_id": 138,
-            "dst_port_id": "i_input",
             "src_node_id": 139,
             "src_port_id": "o_output"
         },
@@ -829,14 +829,14 @@
             "src_port_id": "o_out"
         },
         {
-            "dst_node_id": 168,
-            "dst_port_id": "i_alpha",
+            "dst_node_id": 166,
+            "dst_port_id": "i_x",
             "src_node_id": 165,
             "src_port_id": "o_output"
         },
         {
-            "dst_node_id": 166,
-            "dst_port_id": "i_x",
+            "dst_node_id": 168,
+            "dst_port_id": "i_alpha",
             "src_node_id": 165,
             "src_port_id": "o_output"
         },
@@ -889,21 +889,15 @@
             "src_port_id": "o_out"
         },
         {
-            "dst_node_id": 178,
+            "dst_node_id": 176,
             "dst_port_id": "i_input",
-            "src_node_id": 177,
+            "src_node_id": 175,
             "src_port_id": "o_output"
         },
         {
-            "dst_node_id": 179,
+            "dst_node_id": 177,
             "dst_port_id": "i_alpha",
-            "src_node_id": 178,
-            "src_port_id": "o_output"
-        },
-        {
-            "dst_node_id": 15,
-            "dst_port_id": "i_uDisplacement",
-            "src_node_id": 179,
+            "src_node_id": 176,
             "src_port_id": "o_output"
         },
         {
@@ -1123,7 +1117,7 @@
                 "i_factor": 1.0,
                 "i_mod": 0.0,
                 "i_reset": 0.0,
-                "o_output": 3068.748839855194
+                "o_output": 554.9929296970367
             },
             "type": "Time",
             "ui_data": {
@@ -1159,7 +1153,7 @@
                 "i_factor": 1.0,
                 "i_mod": 0.0,
                 "i_reset": 0.0,
-                "o_output": 325.4521862130273
+                "o_output": 83.24859396809742
             },
             "type": "Time",
             "ui_data": {
@@ -1217,7 +1211,7 @@
                 "i_operate": 0.0,
                 "i_reset": 0.0,
                 "i_reset_value": 0.0,
-                "o_out": 18.31000017374754
+                "o_out": 0.0
             },
             "type": "Counter",
             "ui_data": {
@@ -1236,7 +1230,7 @@
                 "i_a": 0.0,
                 "i_b": 0.0,
                 "i_op": 0.0,
-                "o_out": 343.76218638677483
+                "o_out": 83.24859396809742
             },
             "type": "BinaryOpFloat",
             "ui_data": {
@@ -1255,7 +1249,7 @@
                 "i_a": 0.0,
                 "i_b": -0.25,
                 "i_op": 2.0,
-                "o_out": -0.07000000029802322
+                "o_out": 0.14000000059604645
             },
             "type": "BinaryOpFloat",
             "ui_data": {
@@ -1274,7 +1268,7 @@
                 "i_a": 0.0,
                 "i_b": 0.5,
                 "i_op": 2.0,
-                "o_out": -0.07500000298023224
+                "o_out": 0.15000000596046448
             },
             "type": "BinaryOpFloat",
             "ui_data": {
@@ -1502,7 +1496,7 @@
             "id": 13,
             "manual_values": {
                 "i_name": "dir",
-                "o_output": -1.0
+                "o_output": 1.0
             },
             "type": "GetFloatVar",
             "ui_data": {
@@ -1520,7 +1514,7 @@
             "manual_values": {
                 "i_input": 0.0,
                 "i_lambda": "(x*0.5+0.5) * 0.5",
-                "o_output": 0.0
+                "o_output": 0.5
             },
             "type": "FloatLambda",
             "ui_data": {
@@ -1718,7 +1712,7 @@
                 "i_enable_time_mask": 1.0,
                 "i_enabled": 1.0,
                 "i_force_change": 42.0,
-                "i_fragment_source": "\n#include <generate/base_time_mask.frag>\n// Shader downloaded and adapted from glslsandbox.com\n// URL: http://glslsandbox.com/e#45513.0\n\n#ifdef GL_ES\nprecision mediump float;\n#endif\n\n\nuniform vec2 mouse;\nuniform float uAlpha; // {\"default\" : 1.0, \"range\" : [0.0, 1.0]}\nuniform float uScale; // {\"default\" : 1.0}\nuniform float uBackgroundBorder; // {\"default\" : 0.8, \"range\" : [0.0, 1.0]}\n\nuniform float uRotation;\nuniform float uMirrorRotation;\n\nuniform float uDisplacement; // {\"default\" : 1.0, \"range\" : [-1.0, 1.0]}\n\nvec3 rotatex(in vec3 p, float ang) {\t\n\treturn vec3(p.x, p.y*cos(ang) - p.z*sin(ang), p.y*sin(ang) + p.z*cos(ang)); \n}\nvec3 rotatey(in vec3 p, float ang) {\t\n\treturn vec3(p.x*cos(ang) - p.z*sin(ang), p.y, p.x*sin(ang) + p.z*cos(ang)); \n}\nvec3 rotatez(in vec3 p, float ang) {\t\n\treturn vec3(p.x*cos(ang) - p.y*sin(ang), p.x*sin(ang) + p.y*cos(ang), p.z); \n}\n\nvec2 uvToPolar(vec2 uv) {\n    ivec2 size = textureSize(uInputTexture, 0);\n    //vec2 texCoords = (uv - vec2(0.5)) * 2.0;\n    //texCoords.x *= float(size.x) / float(size.y);\n    vec2 texCoords = uv;\n\n    float radius = length(texCoords);\n    // this was an accident: interesting WTF\n    // float angle = radians(atan(texCoords.y, texCoords.x)) + 3.141595;\n    float angle = atan(texCoords.y, texCoords.x) + 3.141595;\n\n    return vec2(angle, radius);\n}\n\nvec2 polarToUV(vec2 polar) {\n    vec2 uv;\n    uv.x = polar.y * cos(polar.x);\n    uv.y = polar.y * sin(polar.x);\n    //uv = (uv + vec2(1.0)) / 2.0;\n    return uv;\n}\n\nvec2 polarMirror(vec2 polar, float n, float angleOffset) {\n    float modAngle = radians(360.0) / n;\n    polar.x = mod(polar.x + angleOffset, modAngle);\n    if (polar.x > modAngle / 2) {\n        polar.x = modAngle - polar.x;\n    }\n    return polar;\n}\n\nfloat scene(vec3 p)\n{\n\tp = rotatey(p, 0.3*uRotation);\n\tp = rotatex(p, 0.2*uRotation);\n\tp = rotatez(p, 0.4*uRotation);\n\t\n\t//p = rotatey(p, 0.3*uRotation);\n\t//p = rotatex(p, 0.2*uRotation);\n\t//p = rotatez(p, 0.4*uRotation);\n\n\tfloat mirrorRotation = uMirrorRotation * 0.1;\n\tp = rotatex(p, 0.8 * mirrorRotation + 4.73);\n\tp = rotatey(p, mirrorRotation);\n\tp = rotatez(p, -0.5 * mirrorRotation - 2.76);\n\tp.xz = polarToUV(polarMirror(uvToPolar(p.xz), 8.0, 0.0));\n\tp = rotatez(p, -(-0.5 * mirrorRotation - 2.76));\n\tp = rotatey(p, -mirrorRotation);\n\tp = rotatex(p, -(0.8 * mirrorRotation + 4.73));\n\n\tfloat displace = clamp(sin((p.x+p.y+p.z)*20.0)*0.03, 0.0, 1.0);\n\tfloat boxish = length(max(abs(p) - 0.5, 0.0)) - 0.01 + displace * uDisplacement; \n\tfloat sphere = length(p) - 0.5;\n\t\n\tfloat t = pyvisualTime;\n\t// make mix factor go from -1 to 0.5\n\t// (only 0.5 because I don't want pure sphere)\n\tfloat alpha = mix(-1.0, 0.5, sin(t)*0.5+0.5);\n\treturn mix(boxish, sphere, alpha);\n//\treturn sin(min(d0,d1)*1.6); \n//\treturn length(p) - 1.0; \n}\n\nvec3 get_normal(vec3 p)\n{\n\tvec3 eps = vec3(0.01, 0.0, 0.0);\n\tfloat nx = scene(p + eps.xyy) - scene(p - eps.xyy); \n\tfloat ny = scene(p + eps.yxy) - scene(p - eps.yxy); \n\tfloat nz = scene(p + eps.yyx) - scene(p - eps.yyx); \n\treturn normalize(vec3(nx,ny,nz));\n}\n\n\nvoid generateFrag() {\n\n\n\n\tvec3 color = vec3(0); \n\tvec2 p = 2.0*(vec2(pyvisualUV.x, 1.0 - pyvisualUV.y) * pyvisualResolution).xy/pyvisualResolution - 1.0; \n\tp.x *= pyvisualResolution.x/pyvisualResolution.y; \n\n\tif (abs(p.y) < uBackgroundBorder) {\n\t\tvec3 ro = vec3(0.0, 0.0, 2.0); \n\t\tvec3 rd = normalize(vec3(p.x, p.y, -1.4 * uScale)); \n\t\t\n\t\tcolor = (1.0 - vec3(length(p*0.5)))*0.2;   \n\n\t\tconst int steps = 128;\n\t\tconst float epsilon = 0.0001;\n\n\t\tvec3 pos = ro; \n\t\tfloat dist = 0.0;\n\t\tfloat dscene = 0.0;\n\t\tfloat lr = 0.5;\n\n\t\tint i = 0;\n\t\tfor (; i < steps; i++) {\n\t\t\tdscene = scene(pos);\n\t\t\tif (dscene < epsilon) {\n\t\t\t\tbreak;\n\t\t\t}\n\t\t\tpos += rd*dscene * lr;\n\t\t\tdist += dscene * lr; \n\t\t}\n\t\t\n\t\tif (dist < 100.0 && dscene < epsilon) {\n\t\t\tvec3 n = get_normal(pos);\n\t\t\tvec3 r = reflect(normalize(pos - ro),n); \n\t\t\tvec3 h = -normalize(n + pos - ro ); \n\t\t\tfloat diff  = 1.0*clamp(dot(n, normalize(vec3(1,1,1))), 0.0, 1.0); \n\t\t\tfloat diff2 = 0.2*clamp(dot(n, normalize(vec3(0.7,-1,0.5))), 0.0, 1.0); \n\t\t\tfloat diff3 = 0.1*clamp(dot(n, normalize(vec3(-0.7,-0.4,0.7))), 0.0, 1.0); \n\t\t\tfloat spec = pow(clamp(dot(h, normalize(vec3(1,1,1))), 0.0, 1.0), 50.0); \n\t\t\tfloat amb = 0.2 + pos.y; \n\t\t\tvec3 cubeColor = diff*vec3(1,1,1) + diff2*vec3(1,0,0)  + diff3*vec3(1,0,1) + spec*vec3(1,1,1)  + amb*vec3(0.2,0.2,0.2);\n\t\t\tcubeColor /= dist;\n\t\t\t// count of iterations until convergance as color\n\t\t\t//cubeColor = mix(vec3(1.0, 0.0, 0.0), vec3(0.0, 1.0, 0.0), float(i) / steps);\n\t\t\t// normal as color\n\t\t\t//cubeColor = clamp(dot(n, normalize(vec3(1,1,1))), 0.0, 1.0) * (n + vec3(1.0)) / 2.0 + spec*vec3(1,1,1)  + amb*vec3(0.2,0.2,0.2);\n\t\t\tcolor = mix(color, cubeColor, uAlpha);\n\t\t}\n\t}\n\t\n\tpyvisualOutColor = vec4(color, 1.0); \n}\n",
+                "i_fragment_source": "\n#include <generate/base_time_mask.frag>\n// Shader downloaded and adapted from glslsandbox.com\n// URL: http://glslsandbox.com/e#45513.0\n\n#ifdef GL_ES\nprecision mediump float;\n#endif\n\n\nuniform vec2 mouse;\nuniform float uAlpha; // {\"default\" : 1.0, \"range\" : [0.0, 1.0]}\nuniform float uScale; // {\"default\" : 1.0}\nuniform float uBackgroundBorder; // {\"default\" : 0.8, \"range\" : [0.0, 1.0]}\n\nuniform float uRotation;\nuniform float uMirrorRotation;\n\nuniform float uDisplacement; // {\"default\" : 1.0, \"range\" : [-1.0, 1.0]}\n\nvec3 rotatex(in vec3 p, float ang) {\t\n\treturn vec3(p.x, p.y*cos(ang) - p.z*sin(ang), p.y*sin(ang) + p.z*cos(ang)); \n}\nvec3 rotatey(in vec3 p, float ang) {\t\n\treturn vec3(p.x*cos(ang) - p.z*sin(ang), p.y, p.x*sin(ang) + p.z*cos(ang)); \n}\nvec3 rotatez(in vec3 p, float ang) {\t\n\treturn vec3(p.x*cos(ang) - p.y*sin(ang), p.x*sin(ang) + p.y*cos(ang), p.z); \n}\n\nvec2 uvToPolar(vec2 uv) {\n    ivec2 size = textureSize(uInputTexture, 0);\n    //vec2 texCoords = (uv - vec2(0.5)) * 2.0;\n    //texCoords.x *= float(size.x) / float(size.y);\n    vec2 texCoords = uv;\n\n    float radius = length(texCoords);\n    // this was an accident: interesting WTF\n    // float angle = radians(atan(texCoords.y, texCoords.x)) + 3.141595;\n    float angle = atan(texCoords.y, texCoords.x) + 3.141595;\n\n    return vec2(angle, radius);\n}\n\nvec2 polarToUV(vec2 polar) {\n    vec2 uv;\n    uv.x = polar.y * cos(polar.x);\n    uv.y = polar.y * sin(polar.x);\n    //uv = (uv + vec2(1.0)) / 2.0;\n    return uv;\n}\n\nvec2 polarMirror(vec2 polar, float n, float angleOffset) {\n    float modAngle = radians(360.0) / n;\n    polar.x = mod(polar.x + angleOffset, modAngle);\n    if (polar.x > modAngle / 2) {\n        polar.x = modAngle - polar.x;\n    }\n    return polar;\n}\n\nfloat scene(vec3 p)\n{\n\tp = rotatey(p, 0.3*uRotation);\n\tp = rotatex(p, 0.2*uRotation);\n\tp = rotatez(p, 0.4*uRotation);\n\t\n\t//p = rotatey(p, 0.3*uRotation);\n\t//p = rotatex(p, 0.2*uRotation);\n\t//p = rotatez(p, 0.4*uRotation);\n\n\tfloat mirrorRotation = uMirrorRotation * 0.1;\n\tp = rotatex(p, 0.8 * mirrorRotation + 4.73);\n\tp = rotatey(p, mirrorRotation);\n\tp = rotatez(p, -0.5 * mirrorRotation - 2.76);\n\tp.xz = polarToUV(polarMirror(uvToPolar(p.xz), 8.0, 0.0));\n\tp = rotatez(p, -(-0.5 * mirrorRotation - 2.76));\n\tp = rotatey(p, -mirrorRotation);\n\tp = rotatex(p, -(0.8 * mirrorRotation + 4.73));\n\n\tfloat displace = clamp(sin((p.x+p.y+p.z)*20.0)*0.03, 0.0, 1.0);\n\tfloat boxish = length(max(abs(p) - 0.5, 0.0)) - 0.01 + displace * uDisplacement; \n\tfloat sphere = length(p) - 0.5;\n\t\n\tfloat t = pyvisualTime;\n\t// make mix factor go from -1 to 0.5\n\t// (only 0.5 because I don't want pure sphere)\n\tfloat alpha = mix(-1.0, 0.5, sin(t)*0.5+0.5);\n\treturn mix(boxish, sphere, alpha);\n//\treturn sin(min(d0,d1)*1.6); \n//\treturn length(p) - 1.0; \n}\n\nvec3 get_normal(vec3 p)\n{\n\tvec3 eps = vec3(0.01, 0.0, 0.0);\n\tfloat nx = scene(p + eps.xyy) - scene(p - eps.xyy); \n\tfloat ny = scene(p + eps.yxy) - scene(p - eps.yxy); \n\tfloat nz = scene(p + eps.yyx) - scene(p - eps.yyx); \n\treturn normalize(vec3(nx,ny,nz));\n}\n\n\nvoid generateFrag() {\n\n\n\n\tvec3 color = vec3(0); \n\tvec2 p = 2.0*(vec2(pyvisualUV.x, 1.0 - pyvisualUV.y) * pyvisualResolution).xy/pyvisualResolution - 1.0; \n\tp.x *= pyvisualResolution.x/pyvisualResolution.y; \n\n\tif (abs(p.y) < uBackgroundBorder) {\n\t\tvec3 ro = vec3(0.0, 0.0, 2.0); \n\t\tvec3 rd = normalize(vec3(p.x, p.y, -1.4 * uScale)); \n\t\t\n\t\tcolor = (1.0 - vec3(length(p*0.5)))*0.2;   \n\n\t\tconst int steps = 64+32;\n\t\tconst float epsilon = 0.001;\n\n\t\tvec3 pos = ro; \n\t\tfloat dist = 0.0;\n\t\tfloat dscene = 0.0;\n\t\tfloat lr = 0.8;\n\n\t\tint i = 0;\n\t\tfor (; i < steps; i++) {\n\t\t\tdscene = scene(pos);\n\t\t\tif (dscene < epsilon) {\n\t\t\t\tbreak;\n\t\t\t}\n\t\t\tpos += rd*dscene * lr;\n\t\t\tdist += dscene * lr;\n\t\t\tlr = max(0.5, lr*0.85);\n\t\t}\n\t\t\n\t\tif (dist < 100.0 && dscene < epsilon) {\n\t\t\tvec3 n = get_normal(pos);\n\t\t\tvec3 r = reflect(normalize(pos - ro),n); \n\t\t\tvec3 h = -normalize(n + pos - ro ); \n\t\t\tfloat diff  = 1.0*clamp(dot(n, normalize(vec3(1,1,1))), 0.0, 1.0); \n\t\t\tfloat diff2 = 0.2*clamp(dot(n, normalize(vec3(0.7,-1,0.5))), 0.0, 1.0); \n\t\t\tfloat diff3 = 0.1*clamp(dot(n, normalize(vec3(-0.7,-0.4,0.7))), 0.0, 1.0); \n\t\t\tfloat spec = pow(clamp(dot(h, normalize(vec3(1,1,1))), 0.0, 1.0), 50.0); \n\t\t\tfloat amb = 0.2 + pos.y; \n\t\t\tvec3 cubeColor = diff*vec3(1,1,1) + diff2*vec3(1,0,0)  + diff3*vec3(1,0,1) + spec*vec3(1,1,1)  + amb*vec3(0.2,0.2,0.2);\n\t\t\tcubeColor /= dist;\n\t\t\t// count of iterations until convergance as color\n\t\t\t//cubeColor = mix(vec3(1.0, 0.0, 0.0), vec3(0.0, 1.0, 0.0), step(8.0, float(i)));\n\t\t\t// normal as color\n\t\t\t//cubeColor = clamp(dot(n, normalize(vec3(1,1,1))), 0.0, 1.0) * (n + vec3(1.0)) / 2.0 + spec*vec3(1,1,1)  + amb*vec3(0.2,0.2,0.2);\n\t\t\t//dist = clamp(dist, 0.0, 1.0) / 1.0;\n\t\t\t//cubeColor = mix(vec3(1.0, 0.0, 0.0), vec3(0.0, 1.0, 0.0), dist);\n\t\t\tcolor = mix(color, cubeColor, uAlpha);\n\t\t}\n\t}\n\t\n\tpyvisualOutColor = vec4(color, 1.0); \n}\n",
                 "i_id": "45513.0",
                 "i_input": "",
                 "i_interpolation": 1.0,
@@ -1803,7 +1797,7 @@
                         0.0
                     ],
                     [
-                        -427.12017822265625,
+                        375.1001892089844,
                         0.0,
                         0.0,
                         1.0
@@ -1829,7 +1823,7 @@
                 "i_min": 0.0,
                 "i_phase": 0.0,
                 "i_type": 2.0,
-                "o_output": -427.12019284559045
+                "o_output": 375.1002013683293
             },
             "type": "LFO",
             "ui_data": {
@@ -1848,7 +1842,7 @@
                 "i_factor": 0.009999999776482582,
                 "i_mod": 0.0,
                 "i_reset": 0.0,
-                "o_output": 30.68744674278552
+                "o_output": 5.549868733811389
             },
             "type": "Time",
             "ui_data": {
@@ -1867,7 +1861,7 @@
                 "i_a": 0.0,
                 "i_b": 0.5,
                 "i_op": 0.0,
-                "o_out": 30.68744674278552
+                "o_out": 6.049868733811389
             },
             "type": "BinaryOpFloat",
             "ui_data": {
@@ -2041,7 +2035,7 @@
                 "i_operate": 0.0,
                 "i_reset": 0.0,
                 "i_reset_value": 1.0,
-                "o_out": -1.0
+                "o_out": 1.0
             },
             "type": "Counter",
             "ui_data": {
@@ -2060,7 +2054,7 @@
                 "i_factor": -1.0,
                 "i_mod": 0.0,
                 "i_reset": 0.0,
-                "o_output": -3068.744040489197
+                "o_output": -554.985716342926
             },
             "type": "Time",
             "ui_data": {
@@ -2096,7 +2090,7 @@
                 "i_enabled": 1.0,
                 "i_input": 0.0,
                 "i_order": 2.0,
-                "o_output": 18.31000017374754
+                "o_output": 0.0
             },
             "type": "LowpassFloat",
             "ui_data": {
@@ -2297,7 +2291,7 @@
                 "i_factor": 1.0,
                 "i_mod": 0.0,
                 "i_reset": 0.0,
-                "o_output": 3068.74245095253
+                "o_output": 554.9835135936737
             },
             "type": "Time",
             "ui_data": {
@@ -2332,7 +2326,7 @@
             "id": 36,
             "manual_values": {
                 "i_name": "beat_running",
-                "o_output": 1.0
+                "o_output": 0.0
             },
             "type": "GetFloatVar",
             "ui_data": {
@@ -2350,7 +2344,7 @@
             "manual_values": {
                 "i_op": 3.0,
                 "i_x": 0.0,
-                "o_out": 0.0
+                "o_out": 1.0
             },
             "type": "UnaryOpFloat",
             "ui_data": {
@@ -2389,7 +2383,7 @@
                 "i_max": 5.0,
                 "i_min": 0.10000000149011612,
                 "i_mod": 0.0,
-                "o_output": 4.028476351476875
+                "o_output": 1.4344677033661857
             },
             "type": "RandomFloat",
             "ui_data": {
@@ -2450,7 +2444,7 @@
                 "i_max": 0.5,
                 "i_min": -0.5,
                 "i_mod": 0.0,
-                "o_output": 0.029095551460307623
+                "o_output": 0.19726380006904065
             },
             "type": "RandomFloat",
             "ui_data": {
@@ -2469,7 +2463,7 @@
                 "i_a": 0.0,
                 "i_b": 0.0,
                 "i_op": 5.0,
-                "o_out": 0.029095551460307623
+                "o_out": 0.19726380006904065
             },
             "type": "BinaryOpFloat",
             "ui_data": {
@@ -2508,7 +2502,7 @@
                 "i_min": 45.0,
                 "i_phase": 0.0,
                 "i_type": 2.0,
-                "o_output": 38.448032140744935
+                "o_output": -33.76555645465815
             },
             "type": "LFO",
             "ui_data": {
@@ -2850,7 +2844,7 @@
             "id": 65,
             "manual_values": {
                 "i_name": "low_vu",
-                "o_output": 0.6405378814965396
+                "o_output": 0.0
             },
             "type": "GetFloatVar",
             "ui_data": {
@@ -3201,7 +3195,7 @@
                 "i_factor": 0.3499999940395355,
                 "i_mod": 0.0,
                 "i_reset": 0.0,
-                "o_output": 1074.057451804072
+                "o_output": 194.2408379377488
             },
             "type": "Time",
             "ui_data": {
@@ -3257,7 +3251,7 @@
             "id": 80,
             "manual_values": {
                 "i_name": "beat_on",
-                "o_output": 1.0
+                "o_output": 0.0
             },
             "type": "GetFloatVar",
             "ui_data": {
@@ -3501,7 +3495,7 @@
                 "i_alpha0": 0.0,
                 "i_alpha1": 1.0,
                 "i_b": 1.059999942779541,
-                "o_output": 0.2336775880620871
+                "o_output": 0.0
             },
             "type": "MixFloat",
             "ui_data": {
@@ -3518,7 +3512,7 @@
             "id": 95,
             "manual_values": {
                 "i_name": "low_vu0",
-                "o_output": 0.2204505666758205
+                "o_output": 0.0
             },
             "type": "GetFloatVar",
             "ui_data": {
@@ -3535,7 +3529,7 @@
             "id": 96,
             "manual_values": {
                 "i_name": "beat_on",
-                "o_output": 1.0
+                "o_output": 0.0
             },
             "type": "GetFloatVar",
             "ui_data": {
@@ -3555,7 +3549,7 @@
                 "i_enabled": 1.0,
                 "i_input": 0.0,
                 "i_order": 2.0,
-                "o_output": 0.2125212844210694
+                "o_output": 0.0
             },
             "type": "LowpassFloat",
             "ui_data": {
@@ -3576,7 +3570,7 @@
                 "i_alpha0": 0.0,
                 "i_alpha1": 1.0,
                 "i_b": 1.4199999570846558,
-                "o_output": 0.9275368704291757
+                "o_output": 0.05000000074505806
             },
             "type": "MixFloat",
             "ui_data": {
@@ -3595,7 +3589,7 @@
                 "i_condition": 1.0,
                 "i_duration": 0.10000000149011612,
                 "i_input": 0.0,
-                "o_output": 1.0
+                "o_output": 0.0
             },
             "type": "HoldBool",
             "ui_data": {
@@ -3796,7 +3790,7 @@
             "id": 111,
             "manual_values": {
                 "i_name": "beat_running",
-                "o_output": 1.0
+                "o_output": 0.0
             },
             "type": "GetFloatVar",
             "ui_data": {
@@ -3890,7 +3884,7 @@
             "manual_values": {
                 "i_v0": 0.0,
                 "i_v1": 0.0,
-                "o_output": 1.0
+                "o_output": 0.0
             },
             "type": "And",
             "ui_data": {
@@ -3910,7 +3904,7 @@
                 "i_max": 1.0,
                 "i_min": 0.0,
                 "i_value": 0.5,
-                "o_output": 0.0
+                "o_output": 1.0
             },
             "type": "PWM",
             "ui_data": {
@@ -3930,7 +3924,7 @@
                 "i_max": 8.0,
                 "i_min": 0.0,
                 "i_mod": 2.0,
-                "o_output": 6.0
+                "o_output": 2.0
             },
             "type": "RandomFloat",
             "ui_data": {
@@ -3950,7 +3944,7 @@
                 "i_max": 6.0,
                 "i_min": 2.0,
                 "i_mod": 2.0,
-                "o_output": 2.0
+                "o_output": 6.0
             },
             "type": "RandomFloat",
             "ui_data": {
@@ -4143,7 +4137,7 @@
                 "i_min": -300.0,
                 "i_phase": 0.0,
                 "i_type": 2.0,
-                "o_output": -268.39799880936675
+                "o_output": -49.36237335208622
             },
             "type": "LFO",
             "ui_data": {
@@ -4714,7 +4708,7 @@
                 "i_max": 0.5,
                 "i_min": 0.10000000149011612,
                 "i_mod": 0.0,
-                "o_output": 0.2169148039174999
+                "o_output": 0.4184506397444085
             },
             "type": "RandomFloat",
             "ui_data": {
@@ -4731,7 +4725,7 @@
             "id": 150,
             "manual_values": {
                 "i_name": "low_vu",
-                "o_output": 0.6405378814965396
+                "o_output": 0.0
             },
             "type": "GetFloatVar",
             "ui_data": {
@@ -4936,7 +4930,7 @@
                 "i_factor": 0.05000000074505806,
                 "i_mod": 0.0,
                 "i_reset": 0.0,
-                "o_output": 153.43590540641327
+                "o_output": 27.747701700742525
             },
             "type": "Time",
             "ui_data": {
@@ -4955,7 +4949,7 @@
                 "i_factor": 0.10000000149011612,
                 "i_mod": 0.0,
                 "i_reset": 0.0,
-                "o_output": 306.871790404199
+                "o_output": 55.49537841521801
             },
             "type": "Time",
             "ui_data": {
@@ -5051,7 +5045,7 @@
                 "i_alpha0": -1.0,
                 "i_alpha1": 1.0,
                 "i_b": 1.0,
-                "o_output": -0.5
+                "o_output": 1.0
             },
             "type": "MixFloat",
             "ui_data": {
@@ -5070,7 +5064,7 @@
                 "i_factor": 1.340000033378601,
                 "i_mod": 0.0,
                 "i_reset": 0.0,
-                "o_output": -277.9709557131923
+                "o_output": -85.74846678979942
             },
             "type": "Time",
             "ui_data": {
@@ -5147,7 +5141,7 @@
                 "i_a": 0.0,
                 "i_b": 0.5,
                 "i_op": 2.0,
-                "o_out": -0.05499496287013959
+                "o_out": -0.1550039503989496
             },
             "type": "BinaryOpFloat",
             "ui_data": {
@@ -5166,7 +5160,7 @@
                 "i_a": 0.0,
                 "i_b": 0.5,
                 "i_op": 2.0,
-                "o_out": 0.054999999701976776
+                "o_out": 0.1550000011920929
             },
             "type": "BinaryOpFloat",
             "ui_data": {
@@ -5183,7 +5177,7 @@
             "id": 165,
             "manual_values": {
                 "i_name": "beat_running",
-                "o_output": 1.0
+                "o_output": 0.0
             },
             "type": "GetFloatVar",
             "ui_data": {
@@ -5201,7 +5195,7 @@
             "manual_values": {
                 "i_op": 3.0,
                 "i_x": 0.0,
-                "o_out": 0.0
+                "o_out": 1.0
             },
             "type": "UnaryOpFloat",
             "ui_data": {
@@ -5221,7 +5215,7 @@
                 "i_enabled": 1.0,
                 "i_input": 0.0,
                 "i_order": 2.0,
-                "o_output": 0.05499496287013959
+                "o_output": 0.1550039503989496
             },
             "type": "LowpassFloat",
             "ui_data": {
@@ -5242,7 +5236,7 @@
                 "i_alpha0": 0.0,
                 "i_alpha1": 1.0,
                 "i_b": 0.10999999940395355,
-                "o_output": 0.10999999940395355
+                "o_output": 0.3100000023841858
             },
             "type": "MixFloat",
             "ui_data": {
@@ -5263,7 +5257,7 @@
                 "i_alpha0": 0.0,
                 "i_alpha1": 1.0,
                 "i_b": 0.0,
-                "o_output": 0.0
+                "o_output": 0.23999999463558197
             },
             "type": "MixFloat",
             "ui_data": {
@@ -5280,7 +5274,7 @@
             "id": 170,
             "manual_values": {
                 "i_name": "beat_running",
-                "o_output": 1.0
+                "o_output": 0.0
             },
             "type": "GetFloatVar",
             "ui_data": {
@@ -5299,7 +5293,7 @@
                 "i_factor": 1.0,
                 "i_mod": 0.0,
                 "i_reset": 0.0,
-                "o_output": 521.8827361186742
+                "o_output": 132.96223223085138
             },
             "type": "Time",
             "ui_data": {
@@ -5318,7 +5312,7 @@
                 "i_a": 0.0,
                 "i_b": 0.0,
                 "i_op": 0.0,
-                "o_out": 693.7638293120616
+                "o_out": 174.5865292149001
             },
             "type": "BinaryOpFloat",
             "ui_data": {
@@ -5337,7 +5331,7 @@
                 "i_a": 0.0,
                 "i_b": 0.5,
                 "i_op": 2.0,
-                "o_out": 171.88109319338741
+                "o_out": 41.62429698404871
             },
             "type": "BinaryOpFloat",
             "ui_data": {
@@ -5351,12 +5345,12 @@
         },
         {
             "custom_ports": [],
-            "id": 175,
+            "id": 174,
             "manual_values": {
                 "i_factor": 0.6299999952316284,
                 "i_mod": 0.0,
                 "i_reset": 0.0,
-                "o_output": 759.6064284132982
+                "o_output": 349.6182513501671
             },
             "type": "Time",
             "ui_data": {
@@ -5370,10 +5364,10 @@
         },
         {
             "custom_ports": [],
-            "id": 177,
+            "id": 175,
             "manual_values": {
                 "i_name": "beat_running",
-                "o_output": 1.0
+                "o_output": 0.0
             },
             "type": "GetFloatVar",
             "ui_data": {
@@ -5387,13 +5381,13 @@
         },
         {
             "custom_ports": [],
-            "id": 178,
+            "id": 176,
             "manual_values": {
                 "i_cutoff": 2.0,
                 "i_enabled": 1.0,
                 "i_input": 0.0,
                 "i_order": 2.0,
-                "o_output": 0.9999962002201862
+                "o_output": -4.406038558026966e-06
             },
             "type": "LowpassFloat",
             "ui_data": {
@@ -5407,14 +5401,14 @@
         },
         {
             "custom_ports": [],
-            "id": 179,
+            "id": 177,
             "manual_values": {
                 "i_a": -1.0,
                 "i_alpha": 0.0,
                 "i_alpha0": 0.0,
                 "i_alpha1": 1.0,
                 "i_b": 1.0,
-                "o_output": 0.9999924004403724
+                "o_output": -1.000008812077116
             },
             "type": "MixFloat",
             "ui_data": {
@@ -5429,8 +5423,8 @@
     ],
     "ui_data": {
         "offset": [
-            -694.0,
-            -42.0
+            -559.0,
+            -129.0
         ]
     }
 }
