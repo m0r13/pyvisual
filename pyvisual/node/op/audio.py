@@ -268,3 +268,4 @@ class BeatDetection(Module):
 
     def __init__(self):
         super().__init__("BeatDetection.json")
+

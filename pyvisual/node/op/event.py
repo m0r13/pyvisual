@@ -1,6 +1,7 @@
 import random
 import time
 from pyvisual.node.base import Node
+from pyvisual.node.op.module import Module
 from pyvisual.node import dtype
 from collections import OrderedDict
 
@@ -120,3 +121,81 @@ class ChooseEvent(Node):
             for _, output in self.yield_custom_output_values():
                 output.value = False
 
+class EventSequencer(Node):
+    class Meta:
+        inputs = [
+            {"name" : "next", "dtype" : dtype.event},
+            {"name" : "reset_next", "dtype" : dtype.event},
+            {"name" : "modulo", "dtype" : dtype.int, "dtype_args" : {"default" : 32, "range": [1, float("inf")]}},
+        ]
+        outputs = [
+            {"name" : "index", "dtype" : dtype.int},
+            {"name" : "next", "dtype" : dtype.event},
+            {"name" : "reset", "dtype" : dtype.event},
+        ]
+
+    def __init__(self):
+        super().__init__()
+
+        self._next_index = 0
+        self._next_is_reset = False
+
+    def _evaluate(self):
+        if self.get("reset_next"):
+            self._next_index = 0
+            self._next_is_reset = True
+
+        if self.get("next"):
+            index = self._next_index
+            modulo = int(self.get("modulo"))
+            if modulo < 1:
+                modulo = 0
+            self.set("index", index)
+            self.set("next", True)
+            self.set("reset", self._next_is_reset)
+            
+            self._next_index = (index + 1) % int(self.get("modulo"))
+            self._next_is_reset = False
+
+        else:
+            self.set("next", False)
+            self.set("reset", False)
+
+class EveryNSequencer(Node):
+    class Meta:
+        inputs = [
+            {"name" : "index", "dtype" : dtype.int},
+            {"name" : "next", "dtype" : dtype.event},
+            {"name" : "reset", "dtype" : dtype.event},
+            {"name" : "n", "dtype" : dtype.int, "dtype_args" : {"default" : 1, "range" : [1, float("inf")]}},
+            {"name" : "offset", "dtype" : dtype.int, "dtype_args" : {"default" : 0}},
+            {"name" : "p", "dtype" : dtype.float, "dtype_args" : {"default" : 1, "range" : [0.0, 1.0]}},
+            {"name" : "reset_p", "dtype" : dtype.float, "dtype_args" : {"default" : 1, "range" : [0.0, 1.0]}},
+        ]
+        outputs = [
+            {"name" : "out", "dtype" : dtype.event},
+        ]
+
+    def __init__(self):
+        super().__init__()
+
+    def _evaluate(self):
+        if self.get("next"):
+            index = self.get("index")
+            n = self.get("n")
+            offset = self.get("offset")
+
+            p = self.get("p")
+            if self.get("reset"):
+                p = self.get("reset_p")
+            triggered = (index - offset) % n == 0 and random.random() <= p
+            self.set("out", triggered)
+        else:
+            self.set("out", False)
+
+class EveryNBeat(Module):
+    class Meta:
+        pass
+
+    def __init__(self):
+        super().__init__("EveryNBeat.json", embed_graph=True)

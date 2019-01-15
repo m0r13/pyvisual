@@ -17,21 +17,32 @@ class Module(Node):
             "virtual" : True
         }
 
-    def __init__(self, path):
+    def __init__(self, path, embed_graph=False):
         super().__init__(always_evaluate=True)
+
+        self._path = path
+        # whether to set the root graph (containing beat detection and session as subgraphs)
+        # as the parent graph
+        # this is quite hacky, but allows grabbing beat detection variables
+        # on the other side you shouldn't set variables with this option enabled
+        self._embed_graph = embed_graph
+        self._graph = None
 
         self._inputs = {}
         self._outputs = {}
 
-        self._graph = NodeGraph()
-        self._graph.load_file(os.path.join(assets.ASSET_PATH, "saves", "module", path))
+    def update_graph(self, graph):
+        parent = None
+        if self._embed_graph:
+            parent = graph.parent
+        self._graph = NodeGraph(parent=parent)
+        self._graph.load_file(os.path.join(assets.ASSET_PATH, "saves", "module", self._path))
 
         inputs, outputs = [], []
         for node in self._graph.instances:
             if not isinstance(node, (ModuleInput, ModuleOutput)):
                 continue
 
-            print(node.name, node.is_input)
             if node.is_input:
                 self._inputs[node.name] = node
                 inputs.append(node.port_spec)
@@ -43,7 +54,13 @@ class Module(Node):
         self.set_custom_inputs(inputs)
         self.set_custom_outputs(outputs)
 
+    def start(self, graph):
+        self.update_graph(graph)
+
     def _evaluate(self):
+        if self._graph is None:
+            return
+
         for name, node in self._inputs.items():
             self.get_input(name).copy_to(node.get_output("value"))
 

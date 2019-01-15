@@ -1,0 +1,365 @@
+{
+    "connections": [
+        {
+            "dst_node_id": 20,
+            "dst_port_id": "i_reset",
+            "src_node_id": 23,
+            "src_port_id": "o_output"
+        },
+        {
+            "dst_node_id": 20,
+            "dst_port_id": "i_next",
+            "src_node_id": 22,
+            "src_port_id": "o_output"
+        },
+        {
+            "dst_node_id": 20,
+            "dst_port_id": "i_index",
+            "src_node_id": 21,
+            "src_port_id": "o_output"
+        },
+        {
+            "dst_node_id": 20,
+            "dst_port_id": "i_n",
+            "src_node_id": 24,
+            "src_port_id": "o_value"
+        },
+        {
+            "dst_node_id": 20,
+            "dst_port_id": "i_offset",
+            "src_node_id": 25,
+            "src_port_id": "o_value"
+        },
+        {
+            "dst_node_id": 20,
+            "dst_port_id": "i_reset_p",
+            "src_node_id": 26,
+            "src_port_id": "o_value"
+        },
+        {
+            "dst_node_id": 27,
+            "dst_port_id": "i_value",
+            "src_node_id": 20,
+            "src_port_id": "o_out"
+        }
+    ],
+    "nodes": [
+        {
+            "custom_ports": [],
+            "id": 20,
+            "manual_values": {
+                "i_n": 1.0,
+                "i_index": 0.0,
+                "i_next": 0.0,
+                "i_offset": 0.0,
+                "i_p": 1.0,
+                "i_reset": 0.0,
+                "i_reset_p": 1.0,
+                "o_out": 0.0
+            },
+            "type": "EveryNSequencer",
+            "ui_data": {
+                "collapsed": false,
+                "pos": [
+                    -259.0,
+                    178.0
+                ],
+                "selected": false
+            }
+        },
+        {
+            "custom_ports": [],
+            "id": 21,
+            "manual_values": {
+                "i_name": "sequencer_index",
+                "o_output": 21.0
+            },
+            "type": "GetFloatVar",
+            "ui_data": {
+                "collapsed": true,
+                "pos": [
+                    -591.0,
+                    139.0
+                ],
+                "selected": false
+            }
+        },
+        {
+            "custom_ports": [],
+            "id": 22,
+            "manual_values": {
+                "i_name": "sequencer_next",
+                "o_output": 0.0
+            },
+            "type": "GetFloatVar",
+            "ui_data": {
+                "collapsed": true,
+                "pos": [
+                    -622.0,
+                    254.0
+                ],
+                "selected": false
+            }
+        },
+        {
+            "custom_ports": [],
+            "id": 23,
+            "manual_values": {
+                "i_name": "sequencer_reset",
+                "o_output": 0.0
+            },
+            "type": "GetFloatVar",
+            "ui_data": {
+                "collapsed": true,
+                "pos": [
+                    -594.0,
+                    366.0
+                ],
+                "selected": false
+            }
+        },
+        {
+            "custom_ports": [
+                [
+                    "i_default_value",
+                    {
+                        "default": null,
+                        "dtype": "int",
+                        "dtype_args": {},
+                        "dummy": false,
+                        "group": "default",
+                        "hide": false,
+                        "manual_input": true,
+                        "name": "default_value",
+                        "widgets": []
+                    }
+                ],
+                [
+                    "i_test_value",
+                    {
+                        "default": null,
+                        "dtype": "int",
+                        "dtype_args": {},
+                        "dummy": false,
+                        "group": "default",
+                        "hide": false,
+                        "manual_input": true,
+                        "name": "test_value",
+                        "widgets": []
+                    }
+                ],
+                [
+                    "o_value",
+                    {
+                        "default": null,
+                        "dtype": "int",
+                        "dtype_args": {},
+                        "dummy": false,
+                        "group": "default",
+                        "hide": false,
+                        "manual_input": true,
+                        "name": "value",
+                        "widgets": []
+                    }
+                ]
+            ],
+            "id": 24,
+            "manual_values": {
+                "i_default_value": 4.0,
+                "i_dtype": 2.0,
+                "i_name": "n",
+                "i_test_value": 4.0,
+                "o_value": 4.0
+            },
+            "type": "ModuleInput",
+            "ui_data": {
+                "collapsed": false,
+                "pos": [
+                    -635.0,
+                    485.0
+                ],
+                "selected": false
+            }
+        },
+        {
+            "custom_ports": [
+                [
+                    "i_default_value",
+                    {
+                        "default": null,
+                        "dtype": "int",
+                        "dtype_args": {},
+                        "dummy": false,
+                        "group": "default",
+                        "hide": false,
+                        "manual_input": true,
+                        "name": "default_value",
+                        "widgets": []
+                    }
+                ],
+                [
+                    "i_test_value",
+                    {
+                        "default": null,
+                        "dtype": "int",
+                        "dtype_args": {},
+                        "dummy": false,
+                        "group": "default",
+                        "hide": false,
+                        "manual_input": true,
+                        "name": "test_value",
+                        "widgets": []
+                    }
+                ],
+                [
+                    "o_value",
+                    {
+                        "default": null,
+                        "dtype": "int",
+                        "dtype_args": {},
+                        "dummy": false,
+                        "group": "default",
+                        "hide": false,
+                        "manual_input": true,
+                        "name": "value",
+                        "widgets": []
+                    }
+                ]
+            ],
+            "id": 25,
+            "manual_values": {
+                "i_default_value": 0.0,
+                "i_dtype": 2.0,
+                "i_name": "offset",
+                "i_test_value": 0.0,
+                "o_value": 0.0
+            },
+            "type": "ModuleInput",
+            "ui_data": {
+                "collapsed": false,
+                "pos": [
+                    -558.0,
+                    649.0
+                ],
+                "selected": false
+            }
+        },
+        {
+            "custom_ports": [
+                [
+                    "i_default_value",
+                    {
+                        "default": null,
+                        "dtype": "float",
+                        "dtype_args": {},
+                        "dummy": false,
+                        "group": "default",
+                        "hide": false,
+                        "manual_input": true,
+                        "name": "default_value",
+                        "widgets": []
+                    }
+                ],
+                [
+                    "i_test_value",
+                    {
+                        "default": null,
+                        "dtype": "float",
+                        "dtype_args": {},
+                        "dummy": false,
+                        "group": "default",
+                        "hide": false,
+                        "manual_input": true,
+                        "name": "test_value",
+                        "widgets": []
+                    }
+                ],
+                [
+                    "o_value",
+                    {
+                        "default": null,
+                        "dtype": "float",
+                        "dtype_args": {},
+                        "dummy": false,
+                        "group": "default",
+                        "hide": false,
+                        "manual_input": true,
+                        "name": "value",
+                        "widgets": []
+                    }
+                ]
+            ],
+            "id": 26,
+            "manual_values": {
+                "i_default_value": 1.0,
+                "i_dtype": 3.0,
+                "i_name": "p",
+                "i_test_value": 1.0,
+                "o_value": 1.0
+            },
+            "type": "ModuleInput",
+            "ui_data": {
+                "collapsed": false,
+                "pos": [
+                    -416.0,
+                    828.0
+                ],
+                "selected": false
+            }
+        },
+        {
+            "custom_ports": [
+                [
+                    "i_value",
+                    {
+                        "default": null,
+                        "dtype": "event",
+                        "dtype_args": {},
+                        "dummy": false,
+                        "group": "default",
+                        "hide": false,
+                        "manual_input": true,
+                        "name": "value",
+                        "widgets": []
+                    }
+                ],
+                [
+                    "o_test_value",
+                    {
+                        "default": null,
+                        "dtype": "event",
+                        "dtype_args": {},
+                        "dummy": false,
+                        "group": "default",
+                        "hide": false,
+                        "manual_input": true,
+                        "name": "test_value",
+                        "widgets": []
+                    }
+                ]
+            ],
+            "id": 27,
+            "manual_values": {
+                "i_dtype": 1.0,
+                "i_name": "event",
+                "i_value": 0.0,
+                "o_test_value": 0.0
+            },
+            "type": "ModuleOutput",
+            "ui_data": {
+                "collapsed": false,
+                "pos": [
+                    36.0,
+                    196.0
+                ],
+                "selected": false
+            }
+        }
+    ],
+    "ui_data": {
+        "offset": [
+            -1143.0,
+            9.0
+        ]
+    }
+}

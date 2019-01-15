@@ -24,6 +24,21 @@ class NodeGraphListener:
     def removed_connection(self, graph, src_node, src_port_id, dst_node, dst_port_id):
         pass
 
+class DFSChangedListener(NodeGraphListener):
+    def __init__(self, callback):
+        self.callback = callback
+
+    def created_node(self, graph, node, ui_data):
+        self.callback()
+    def removed_node(self, graph, node):
+        self.callback()
+    def changed_node_ui_data(self, graph, node, ui_data):
+        self.callback()
+    def created_connection(self, graph, src_node, src_port_id, dst_node, dst_port_id):
+        self.callback()
+    def removed_connection(self, graph, src_node, src_port_id, dst_node, dst_port_id):
+        self.callback()
+
 # prepare for serialization
 def format_port_spec(port_spec):
     port_spec = dict(port_spec)
@@ -44,9 +59,12 @@ def unformat_port_spec(port_spec):
     return port_spec
 
 class Graph:
-    def __init__(self):
+    def __init__(self, evaluate_all=False):
         self.parent = self
         self.stats = defaultdict(lambda: [])
+        self.evaluate_all = evaluate_all
+
+        self._sorted_instances = None
 
     @property
     def instances(self):
@@ -55,6 +73,11 @@ class Graph:
 
     @property
     def sorted_instances(self):
+        if self._sorted_instances is None:
+            self._sort_instances()
+        return self._sorted_instances
+
+    def _sort_instances(self):
         instances = self.instances
         visited_instances = set()
         sorted_instances = list()
@@ -68,16 +91,24 @@ class Graph:
             for instance_before in instance.input_nodes:
                 #if instance_before in visited_instances:
                 #    circular = True
+                if not self.evaluate_all and instance_before.graph != self:
+                    continue
                 dfs(instance_before)
             instance.dfs_index = len(sorted_instances)
             sorted_instances.append(instance)
 
         for instance in instances:
             dfs(instance)
-        return sorted_instances, circular
+        self._sorted_instances = sorted_instances
+
+    def reset_sorted_instances(self):
+        self._sorted_instances = None
 
     def evaluate(self, reset_instances=True, record_stats=False):
-        instances, _ = self.sorted_instances
+        instances = self.sorted_instances
+        # check that we're evaluating only our own instances
+        # (commented because of performance paranoia)
+        #assert len(instances) == len(self.instances)
         active_instances = set()
         for instance in instances:
             if record_stats:
@@ -151,11 +182,12 @@ class Graph:
 
 class RootGraph(Graph):
     def __init__(self, graphs):
-        super().__init__()
+        super().__init__(evaluate_all=True)
 
         self.graphs = graphs
         for graph in self.graphs:
             graph.parent = self
+            graph.listeners.append(DFSChangedListener(lambda: self.reset_sorted_instances()))
 
     @property
     def instances(self):
@@ -165,10 +197,14 @@ class RootGraph(Graph):
         return instances
 
 class NodeGraph(Graph):
-    def __init__(self):
+    def __init__(self, parent=None):
         super().__init__()
 
+        if parent is not None:
+            self.parent = parent
+
         self.listeners = []
+        self.listeners.append(DFSChangedListener(lambda: self.reset_sorted_instances()))
 
         self.ui_data = {}
         self.node_id_counter = 0
@@ -408,6 +444,8 @@ class NodeGraph(Graph):
 
     def create_node(self, spec, values={}, ui_data={}):
         node = spec.instantiate_node()
+        assert node.graph is None
+        node.graph = self
         node.id = self._assign_node_id()
         # TODO maybe move this to extra function
         for port_id, value in values.items():

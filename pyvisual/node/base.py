@@ -138,6 +138,7 @@ class Node(metaclass=NodeMeta):
 
     def __init__(self, always_evaluate=False):
         self.always_evaluate = always_evaluate
+        self.graph = None
         self.id = -1
         self.dfs_index = -1
         self._evaluated = False
