@@ -45,12 +45,15 @@ class Module(Node):
 
             if node.is_input:
                 self._inputs[node.name] = node
-                inputs.append(node.port_spec)
+                inputs.append((node.order, node.port_spec))
             else:
                 self._outputs[node.name] = node
-                outputs.append(node.port_spec)
+                outputs.append((node.order, node.port_spec))
             node.use_defaults = False
 
+        # sort and remove order index
+        inputs = [ t[1] for t in sorted(inputs, key = lambda t: t[0]) ]
+        outputs = [ t[1] for t in sorted(outputs, key = lambda t: t[0]) ]
         self.set_custom_inputs(inputs)
         self.set_custom_outputs(outputs)
 

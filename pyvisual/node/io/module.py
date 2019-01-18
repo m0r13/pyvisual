@@ -17,6 +17,7 @@ class ModuleInputOutput(Node):
         inputs = [
             {"name" : "name", "dtype" : dtype.str},
             {"name" : "dtype", "dtype" : dtype.int, "dtype_args" : {"choices" : DTYPE_NAMES, "default" : DTYPES_DEFAULT}},
+            {"name" : "order", "dtype" : dtype.int, "group" : "additional"},
         ]
         outputs = [
         ]
@@ -45,6 +46,10 @@ class ModuleInputOutput(Node):
         dt = int(self.get("dtype"))
         dt = max(0, min(len(DTYPES), dt))
         return DTYPES[dt]
+
+    @property
+    def order(self):
+        return self.get("order")
 
     @property
     def port_spec(self):

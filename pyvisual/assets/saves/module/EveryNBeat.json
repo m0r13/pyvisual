@@ -1,55 +1,55 @@
 {
     "connections": [
         {
-            "dst_node_id": 20,
+            "dst_node_id": 0,
             "dst_port_id": "i_reset",
-            "src_node_id": 23,
+            "src_node_id": 3,
             "src_port_id": "o_output"
         },
         {
-            "dst_node_id": 20,
+            "dst_node_id": 0,
             "dst_port_id": "i_next",
-            "src_node_id": 22,
+            "src_node_id": 2,
             "src_port_id": "o_output"
         },
         {
-            "dst_node_id": 20,
+            "dst_node_id": 0,
             "dst_port_id": "i_index",
-            "src_node_id": 21,
+            "src_node_id": 1,
             "src_port_id": "o_output"
         },
         {
-            "dst_node_id": 20,
+            "dst_node_id": 0,
             "dst_port_id": "i_n",
-            "src_node_id": 24,
+            "src_node_id": 4,
             "src_port_id": "o_value"
         },
         {
-            "dst_node_id": 20,
+            "dst_node_id": 0,
             "dst_port_id": "i_offset",
-            "src_node_id": 25,
+            "src_node_id": 5,
             "src_port_id": "o_value"
         },
         {
-            "dst_node_id": 20,
+            "dst_node_id": 0,
             "dst_port_id": "i_reset_p",
-            "src_node_id": 26,
+            "src_node_id": 6,
             "src_port_id": "o_value"
         },
         {
-            "dst_node_id": 27,
+            "dst_node_id": 7,
             "dst_port_id": "i_value",
-            "src_node_id": 20,
+            "src_node_id": 0,
             "src_port_id": "o_out"
         }
     ],
     "nodes": [
         {
             "custom_ports": [],
-            "id": 20,
+            "id": 0,
             "manual_values": {
-                "i_n": 1.0,
                 "i_index": 0.0,
+                "i_n": 1.0,
                 "i_next": 0.0,
                 "i_offset": 0.0,
                 "i_p": 1.0,
@@ -69,10 +69,10 @@
         },
         {
             "custom_ports": [],
-            "id": 21,
+            "id": 1,
             "manual_values": {
                 "i_name": "sequencer_index",
-                "o_output": 21.0
+                "o_output": 12.0
             },
             "type": "GetFloatVar",
             "ui_data": {
@@ -86,7 +86,7 @@
         },
         {
             "custom_ports": [],
-            "id": 22,
+            "id": 2,
             "manual_values": {
                 "i_name": "sequencer_next",
                 "o_output": 0.0
@@ -103,7 +103,7 @@
         },
         {
             "custom_ports": [],
-            "id": 23,
+            "id": 3,
             "manual_values": {
                 "i_name": "sequencer_reset",
                 "o_output": 0.0
@@ -163,11 +163,12 @@
                     }
                 ]
             ],
-            "id": 24,
+            "id": 4,
             "manual_values": {
                 "i_default_value": 4.0,
                 "i_dtype": 2.0,
                 "i_name": "n",
+                "i_order": 0.0,
                 "i_test_value": 4.0,
                 "o_value": 4.0
             },
@@ -226,11 +227,12 @@
                     }
                 ]
             ],
-            "id": 25,
+            "id": 5,
             "manual_values": {
                 "i_default_value": 0.0,
                 "i_dtype": 2.0,
                 "i_name": "offset",
+                "i_order": 1.0,
                 "i_test_value": 0.0,
                 "o_value": 0.0
             },
@@ -289,11 +291,12 @@
                     }
                 ]
             ],
-            "id": 26,
+            "id": 6,
             "manual_values": {
                 "i_default_value": 1.0,
                 "i_dtype": 3.0,
                 "i_name": "p",
+                "i_order": 2.0,
                 "i_test_value": 1.0,
                 "o_value": 1.0
             },
@@ -338,10 +341,11 @@
                     }
                 ]
             ],
-            "id": 27,
+            "id": 7,
             "manual_values": {
                 "i_dtype": 1.0,
                 "i_name": "event",
+                "i_order": 0.0,
                 "i_value": 0.0,
                 "o_test_value": 0.0
             },
