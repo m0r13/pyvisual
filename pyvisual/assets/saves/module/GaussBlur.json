@@ -1,46 +1,58 @@
 {
     "connections": [
         {
-            "dst_node_id": 34,
+            "dst_node_id": 9,
             "dst_port_id": "i_input",
-            "src_node_id": 32,
+            "src_node_id": 7,
             "src_port_id": "o_value"
         },
         {
-            "dst_node_id": 35,
+            "dst_node_id": 10,
             "dst_port_id": "i_input",
-            "src_node_id": 34,
+            "src_node_id": 9,
             "src_port_id": "o_output"
         },
         {
-            "dst_node_id": 35,
+            "dst_node_id": 9,
             "dst_port_id": "i_enabled",
-            "src_node_id": 39,
+            "src_node_id": 14,
             "src_port_id": "o_value"
         },
         {
-            "dst_node_id": 34,
+            "dst_node_id": 10,
             "dst_port_id": "i_enabled",
-            "src_node_id": 39,
+            "src_node_id": 14,
             "src_port_id": "o_value"
         },
         {
-            "dst_node_id": 33,
+            "dst_node_id": 8,
             "dst_port_id": "i_value",
-            "src_node_id": 35,
+            "src_node_id": 10,
             "src_port_id": "o_output"
         },
         {
-            "dst_node_id": 34,
+            "dst_node_id": 9,
             "dst_port_id": "i_uDirection",
-            "src_node_id": 36,
+            "src_node_id": 11,
             "src_port_id": "o_vec2"
         },
         {
-            "dst_node_id": 35,
+            "dst_node_id": 10,
             "dst_port_id": "i_uDirection",
-            "src_node_id": 37,
+            "src_node_id": 12,
             "src_port_id": "o_vec2"
+        },
+        {
+            "dst_node_id": 9,
+            "dst_port_id": "i_uSigma",
+            "src_node_id": 13,
+            "src_port_id": "o_value"
+        },
+        {
+            "dst_node_id": 10,
+            "dst_port_id": "i_uSigma",
+            "src_node_id": 13,
+            "src_port_id": "o_value"
         }
     ],
     "nodes": [
@@ -89,7 +101,7 @@
                     }
                 ]
             ],
-            "id": 32,
+            "id": 7,
             "manual_values": {
                 "i_default_value": "",
                 "i_dtype": 9.0,
@@ -139,7 +151,7 @@
                     }
                 ]
             ],
-            "id": 33,
+            "id": 8,
             "manual_values": {
                 "i_dtype": 9.0,
                 "i_name": "output",
@@ -258,7 +270,7 @@
                     }
                 ]
             ],
-            "id": 34,
+            "id": 9,
             "manual_values": {
                 "i_advanced_filtering": 0.0,
                 "i_enabled": 1.0,
@@ -420,7 +432,7 @@
                     }
                 ]
             ],
-            "id": 35,
+            "id": 10,
             "manual_values": {
                 "i_advanced_filtering": 0.0,
                 "i_enabled": 1.0,
@@ -483,7 +495,7 @@
         },
         {
             "custom_ports": [],
-            "id": 36,
+            "id": 11,
             "manual_values": {
                 "i_x": 1.0,
                 "i_y": 0.0,
@@ -504,7 +516,7 @@
         },
         {
             "custom_ports": [],
-            "id": 37,
+            "id": 12,
             "manual_values": {
                 "i_x": 0.0,
                 "i_y": 1.0,
@@ -568,7 +580,7 @@
                     }
                 ]
             ],
-            "id": 38,
+            "id": 13,
             "manual_values": {
                 "i_default_value": 3.0,
                 "i_dtype": 3.0,
@@ -581,8 +593,8 @@
             "ui_data": {
                 "collapsed": false,
                 "pos": [
-                    -825.0,
-                    580.0
+                    -573.0,
+                    911.0
                 ],
                 "selected": false
             }
@@ -632,7 +644,7 @@
                     }
                 ]
             ],
-            "id": 39,
+            "id": 14,
             "manual_values": {
                 "i_default_value": 1.0,
                 "i_dtype": 0.0,
@@ -654,8 +666,8 @@
     ],
     "ui_data": {
         "offset": [
-            -1149.0,
-            29.0
+            -954.0,
+            64.0
         ]
     }
 }
