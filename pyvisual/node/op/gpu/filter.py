@@ -5,7 +5,7 @@ import traceback
 import random
 import imgui
 from pyvisual.node.base import Node
-from pyvisual.node.op.gpu.base import BaseShader, Shader
+from pyvisual.node.op.gpu.base import BaseShader, Shader, ShaderNodeLoader
 from pyvisual.node.op.module import Module
 from pyvisual.node import dtype
 from pyvisual.editor import widget
@@ -18,6 +18,10 @@ class Filter(BaseShader):
         inputs = [
             {"name" : "advanced_filtering", "dtype" : dtype.bool, "dtype_args" : {"default" : False}, "group" : "additional"},
         ]
+
+        options = {
+            "virtual" : True
+        }
 
     def __init__(self, vertex_path, fragment_path):
         vertex_path = assets.get_shader_path(vertex_path)
@@ -43,12 +47,7 @@ class Filter(BaseShader):
 
         super()._evaluate()
 
-class GeneratedFilterMeta:
-    options = {
-        "virtual" : False
-    }
-
-class GeneratedFilter(Filter):
+class FilterWrapper(Filter):
     class Meta:
         options = {
             "virtual" : True
@@ -60,26 +59,10 @@ class GeneratedFilter(Filter):
     def __init__(self):
         super().__init__(self.VERTEX, self.FRAGMENT)
 
-def load_filter_classes():
-    module = __name__
-    g = globals()
-    for path in assets.glob_paths("shader/filter/*.frag"):
-        name = os.path.basename(path).replace(".frag", "")
-        if name == "basefilter":
-            continue
-        if name in g:
-            if isinstance(g[name], GeneratedFilter):
-                print("### Warning: Seems that filter class name %s in module %s is already" % (name, module))
-            else:
-                # filter class already exist, no need to recreate it for now
-                continue
-        fragment_path = path.replace("shader" + os.path.sep, "")
-        attrs = {"FRAGMENT" : fragment_path, "Meta" : GeneratedFilterMeta, "__module__" : module}
-        filter_class = type(name, (GeneratedFilter,), attrs)
-        g[name] = filter_class
-        del filter_class
-
-load_filter_classes()
+filter_loader = ShaderNodeLoader(
+        wildcard="shader/filter/*.frag", baseclass=FilterWrapper,
+        module=__name__, globals_=globals()
+)
 
 class GaussBlur(Module):
     class Meta:

@@ -1,8 +1,8 @@
-#include <generate/base_time_mask.frag>
+#include <generate/timemasked/base.frag>
 
 // uniforms
 
-uniform float uScale;
+uniform float uScale; // {"default" : 1.0, "range" : [0.0001, Infinity]}
 
 float scene(vec3 p);
 vec4 sceneColor(vec3 p, vec3 n, float camDist, float convergence, vec4 bgColor);

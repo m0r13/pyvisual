@@ -1,4 +1,4 @@
-#include <generate/base_time_mask.frag>
+#include <generate/timemasked/base.frag>
 
 #define HQ_TIME
 

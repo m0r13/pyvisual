@@ -1,4 +1,4 @@
-#include <generate/base_time_mask.frag>
+#include <generate/timemasked/base.frag>
 
 uniform mat4 uTransform;
 uniform float uAspectAdjust; // {"default" : 1.0}

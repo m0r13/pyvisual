@@ -1,4 +1,4 @@
-#include <generate/base_time_mask.frag>
+#include <generate/timemasked/base.frag>
 
 uniform float uBrightness; // {"default" : 0.5}
 uniform float uInvert; // {"default" : 0.0, "range" : [0.0, 1.0]}

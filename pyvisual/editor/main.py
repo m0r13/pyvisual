@@ -26,8 +26,8 @@ from pyvisual.node.io.texture import Renderer
 import pyvisual.editor.widget as node_widget
 import pyvisual.node.dtype as node_dtype
 from pyvisual.editor.graph import RootGraph, NodeGraph, NodeGraphListener
+from pyvisual.node.op.gpu.base import ShaderNodeLoader
 from pyvisual import assets
-import pyvisual
 
 import cProfile
 profile = cProfile.Profile()
@@ -1133,7 +1133,7 @@ class UIGraph(NodeGraphListener):
             #if clicked:
             #    imgui.set_window_focus("ImGui Demo")
             if imgui.menu_item("update node types")[0]:
-                pyvisual.node.op.gpu.filter.load_filter_classes()
+                ShaderNodeLoader.reload_all()
                 self.ui_graph_data.update_available_nodes()
             if imgui.menu_item("reset offset")[0]:
                 self.ui_offset = (0, 0)

@@ -19,6 +19,7 @@ def glob_paths(wildcard):
     return paths
 
 def get_shader_path(name):
+    assert name, "Shader path must not be empty"
     path = os.path.join(SHADER_PATH, name)
     if not path.startswith(os.path.abspath(SHADER_PATH) + os.sep):
         raise ValueError("Illegal shader path '%s', may not be outside of SHADER_PATH." % path)

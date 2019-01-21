@@ -3,6 +3,7 @@ import numpy as np
 import traceback
 import random
 import imgui
+import os
 from pyvisual.node.base import Node
 from pyvisual.node import dtype
 from pyvisual.editor import widget
@@ -300,6 +301,50 @@ class Shader(BaseShader):
         fragment_path = assets.get_shader_path(fragment)
 
         super().__init__(assets.FileShaderSource(vertex_path), assets.FileShaderSource(fragment_path), **kwargs)
+
+class GeneratedMeta:
+    pass
+
+class ShaderNodeLoader():
+
+    instances = []
+
+    def __init__(self, wildcard, baseclass, module, globals_):
+        self._wildcard = wildcard
+        self._baseclass = baseclass
+        self._module = module
+        self._globals = globals_
+
+        self._classes = {}
+
+        self.instances.append(self)
+
+        self.reload()
+
+    def reload(self):
+        baseclass = self._baseclass
+        module = self._module
+        g = self._globals
+        for path in assets.glob_paths(self._wildcard):
+            name = os.path.basename(path).replace(".frag", "")
+            if name == "base":
+                continue
+            if name in g:
+                if not issubclass(g[name], self._baseclass):
+                    print("### Warning: Seems that class name %s in module %s is already taken" % (name, module))
+                else:
+                    # filter class already exist, no need to recreate it for now
+                    continue
+            fragment_path = path.replace("shader" + os.path.sep, "")
+            attrs = {"FRAGMENT" : fragment_path, "Meta" : GeneratedMeta, "__module__" : module}
+            filter_class = type(name, (baseclass,), attrs)
+            g[name] = filter_class
+            del filter_class
+
+    @classmethod
+    def reload_all(cls):
+        for loader in cls.instances:
+            loader.reload()
 
 class Blend(RenderNode):
     class Meta:

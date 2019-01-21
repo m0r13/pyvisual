@@ -5,7 +5,7 @@ import imgui
 import clipboard
 import json
 import re
-from pyvisual.node.op.gpu.base import BaseShader, Shader
+from pyvisual.node.op.gpu.base import BaseShader, Shader, ShaderNodeLoader
 from pyvisual.node import dtype
 import pyvisual.editor.widget as node_widget
 from pyvisual import assets
@@ -91,50 +91,23 @@ class TimeMaskedGenerate(BaseShader):
 
         super()._evaluate()
 
-class Rorschach(TimeMaskedGenerate):
-    class Meta:
-        pass
+class TimeMaskedGenerateWrapper(TimeMaskedGenerate):
+
+    FRAGMENT = None
 
     def __init__(self):
-        fragment_path = assets.get_shader_path("generate/rorschach.frag")
+        fragment_path = assets.get_shader_path(self.FRAGMENT)
         fragment_source = assets.FileShaderSource(fragment_path)
         super().__init__(fragment_source)
 
-class Vinyl(TimeMaskedGenerate):
-    class Meta:
-        pass
-
-    def __init__(self):
-        fragment_path = assets.get_shader_path("generate/vinyl.frag")
-        fragment_source = assets.FileShaderSource(fragment_path)
-        super().__init__(fragment_source)
-
-class NoiseTest(TimeMaskedGenerate):
-    class Meta:
-        pass
-
-    def __init__(self):
-        fragment_path = assets.get_shader_path("generate/noise_test.frag")
-        fragment_source = assets.FileShaderSource(fragment_path)
-        super().__init__(fragment_source)
-
-class RaymarchingTest(TimeMaskedGenerate):
-    class Meta:
-        pass
-
-    def __init__(self):
-        fragment_path = assets.get_shader_path("generate/raymarching_test.frag")
-        fragment_source = assets.FileShaderSource(fragment_path)
-        super().__init__(fragment_source)
-
-class AbstractForm(TimeMaskedGenerate):
-    class Meta:
-        pass
-
-    def __init__(self):
-        fragment_path = assets.get_shader_path("generate/abstractform.frag")
-        fragment_source = assets.FileShaderSource(fragment_path)
-        super().__init__(fragment_source)
+timemasked_loader = ShaderNodeLoader(
+        wildcard="shader/generate/timemasked/*.frag", baseclass=TimeMaskedGenerateWrapper,
+        module=__name__, globals_=globals()
+)
+raymarching_loader = ShaderNodeLoader(
+        wildcard="shader/generate/timemasked/raymarching/*.frag", baseclass=TimeMaskedGenerateWrapper,
+        module=__name__, globals_=globals()
+)
 
 def download_glslsandbox(shader_id):
     assert shader_id is not None
@@ -149,7 +122,7 @@ def download_glslsandbox(shader_id):
     return code
 
 BEGIN = """
-#include <generate/base_time_mask.frag>
+#include <generate/timemasked/base.frag>
 """
 
 MAIN = """
