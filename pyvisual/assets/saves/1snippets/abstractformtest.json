@@ -1,0 +1,413 @@
+{
+    "connections": [
+        {
+            "dst_node_id": 0,
+            "dst_port_id": "i_input",
+            "src_node_id": 1,
+            "src_port_id": "o_output"
+        },
+        {
+            "dst_node_id": 2,
+            "dst_port_id": "i_texture",
+            "src_node_id": 0,
+            "src_port_id": "o_output"
+        },
+        {
+            "dst_node_id": 0,
+            "dst_port_id": "i_time",
+            "src_node_id": 3,
+            "src_port_id": "o_output"
+        },
+        {
+            "dst_node_id": 0,
+            "dst_port_id": "i_uRotation",
+            "src_node_id": 4,
+            "src_port_id": "o_output"
+        },
+        {
+            "dst_node_id": 0,
+            "dst_port_id": "i_uMirrorRotation",
+            "src_node_id": 5,
+            "src_port_id": "o_output"
+        }
+    ],
+    "nodes": [
+        {
+            "custom_ports": [
+                [
+                    "i_time",
+                    {
+                        "default": null,
+                        "dtype": "float",
+                        "dtype_args": {},
+                        "dummy": false,
+                        "group": "default",
+                        "hide": false,
+                        "manual_input": true,
+                        "name": "time",
+                        "widgets": []
+                    }
+                ],
+                [
+                    "i_time_mask",
+                    {
+                        "default": null,
+                        "dtype": "tex2d",
+                        "dtype_args": {},
+                        "dummy": false,
+                        "group": "default",
+                        "hide": true,
+                        "manual_input": true,
+                        "name": "time_mask",
+                        "widgets": []
+                    }
+                ],
+                [
+                    "i_time_d0",
+                    {
+                        "default": null,
+                        "dtype": "float",
+                        "dtype_args": {
+                            "default": 0.0
+                        },
+                        "dummy": false,
+                        "group": "default",
+                        "hide": true,
+                        "manual_input": true,
+                        "name": "time_d0",
+                        "widgets": []
+                    }
+                ],
+                [
+                    "i_time_d1",
+                    {
+                        "default": null,
+                        "dtype": "float",
+                        "dtype_args": {
+                            "default": 0.0
+                        },
+                        "dummy": false,
+                        "group": "default",
+                        "hide": true,
+                        "manual_input": true,
+                        "name": "time_d1",
+                        "widgets": []
+                    }
+                ],
+                [
+                    "i_uScale",
+                    {
+                        "default": null,
+                        "dtype": "float",
+                        "dtype_args": {
+                            "default": 1.0,
+                            "range": [
+                                0.0001,
+                                Infinity
+                            ]
+                        },
+                        "dummy": false,
+                        "group": "default",
+                        "hide": false,
+                        "manual_input": true,
+                        "name": "uScale",
+                        "widgets": []
+                    }
+                ],
+                [
+                    "i_uRotation",
+                    {
+                        "default": null,
+                        "dtype": "float",
+                        "dtype_args": {},
+                        "dummy": false,
+                        "group": "default",
+                        "hide": false,
+                        "manual_input": true,
+                        "name": "uRotation",
+                        "widgets": []
+                    }
+                ],
+                [
+                    "i_uDisplace",
+                    {
+                        "default": null,
+                        "dtype": "float",
+                        "dtype_args": {
+                            "default": 1.0,
+                            "range": [
+                                -1.0,
+                                1.0
+                            ]
+                        },
+                        "dummy": false,
+                        "group": "default",
+                        "hide": false,
+                        "manual_input": true,
+                        "name": "uDisplace",
+                        "widgets": []
+                    }
+                ],
+                [
+                    "i_uMirrorRotation",
+                    {
+                        "default": null,
+                        "dtype": "float",
+                        "dtype_args": {},
+                        "dummy": false,
+                        "group": "default",
+                        "hide": false,
+                        "manual_input": true,
+                        "name": "uMirrorRotation",
+                        "widgets": []
+                    }
+                ],
+                [
+                    "i_uSliceForm",
+                    {
+                        "default": null,
+                        "dtype": "float",
+                        "dtype_args": {},
+                        "dummy": false,
+                        "group": "default",
+                        "hide": false,
+                        "manual_input": true,
+                        "name": "uSliceForm",
+                        "widgets": []
+                    }
+                ],
+                [
+                    "i_uSliceFormRotate",
+                    {
+                        "default": null,
+                        "dtype": "float",
+                        "dtype_args": {},
+                        "dummy": false,
+                        "group": "default",
+                        "hide": false,
+                        "manual_input": true,
+                        "name": "uSliceFormRotate",
+                        "widgets": []
+                    }
+                ],
+                [
+                    "i_uSliceColor",
+                    {
+                        "default": null,
+                        "dtype": "float",
+                        "dtype_args": {},
+                        "dummy": false,
+                        "group": "default",
+                        "hide": false,
+                        "manual_input": true,
+                        "name": "uSliceColor",
+                        "widgets": []
+                    }
+                ],
+                [
+                    "i_uSliceTime",
+                    {
+                        "default": null,
+                        "dtype": "float",
+                        "dtype_args": {
+                            "default": 1.5
+                        },
+                        "dummy": false,
+                        "group": "default",
+                        "hide": false,
+                        "manual_input": true,
+                        "name": "uSliceTime",
+                        "widgets": []
+                    }
+                ],
+                [
+                    "i_uSliceTimeOffset",
+                    {
+                        "default": null,
+                        "dtype": "float",
+                        "dtype_args": {
+                            "default": 0.5
+                        },
+                        "dummy": false,
+                        "group": "default",
+                        "hide": false,
+                        "manual_input": true,
+                        "name": "uSliceTimeOffset",
+                        "widgets": []
+                    }
+                ],
+                [
+                    "i_uNoise",
+                    {
+                        "default": null,
+                        "dtype": "tex2d",
+                        "dtype_args": {},
+                        "dummy": false,
+                        "group": "default",
+                        "hide": false,
+                        "manual_input": true,
+                        "name": "uNoise",
+                        "widgets": []
+                    }
+                ]
+            ],
+            "id": 0,
+            "manual_values": {
+                "i_enable_time_mask": 0.0,
+                "i_enabled": 1.0,
+                "i_force_change": 42.0,
+                "i_input": "",
+                "i_interpolation": 1.0,
+                "i_sizeref": "",
+                "i_time": -5.199999809265137,
+                "i_time_d0": 0.0,
+                "i_time_d1": 0.0,
+                "i_time_mask": "",
+                "i_transformUV": [
+                    [
+                        1.0,
+                        0.0,
+                        0.0,
+                        0.0
+                    ],
+                    [
+                        0.0,
+                        1.0,
+                        0.0,
+                        0.0
+                    ],
+                    [
+                        0.0,
+                        0.0,
+                        1.0,
+                        0.0
+                    ],
+                    [
+                        0.0,
+                        0.0,
+                        0.0,
+                        1.0
+                    ]
+                ],
+                "i_uDisplace": 0.0,
+                "i_uMirrorRotation": -18.34000015258789,
+                "i_uNoise": "",
+                "i_uRotation": -0.5199999809265137,
+                "i_uScale": 1.0,
+                "i_uSliceColor": 0.0,
+                "i_uSliceForm": 3.369999885559082,
+                "i_uSliceFormRotate": 0.0,
+                "i_uSliceTime": 1.5,
+                "i_uSliceTimeOffset": 0.5,
+                "i_wrapping": 1.0,
+                "o_enabled": 1.0,
+                "o_output": ""
+            },
+            "type": "AbstractForm",
+            "ui_data": {
+                "collapsed": false,
+                "pos": [
+                    -676.0,
+                    440.0
+                ],
+                "selected": false
+            }
+        },
+        {
+            "custom_ports": [],
+            "id": 1,
+            "manual_values": {
+                "i_name": "ref_highres",
+                "o_output": ""
+            },
+            "type": "GetTextureVar",
+            "ui_data": {
+                "collapsed": false,
+                "pos": [
+                    -928.0,
+                    449.0
+                ],
+                "selected": false
+            }
+        },
+        {
+            "custom_ports": [],
+            "id": 2,
+            "manual_values": {
+                "i_texture": ""
+            },
+            "type": "Renderer",
+            "ui_data": {
+                "collapsed": false,
+                "pos": [
+                    -424.0,
+                    467.0
+                ],
+                "selected": false
+            }
+        },
+        {
+            "custom_ports": [],
+            "id": 3,
+            "manual_values": {
+                "i_factor": 0.4699999988079071,
+                "i_mod": 0.0,
+                "i_reset": 0.0,
+                "o_output": 560.4737481275853
+            },
+            "type": "Time",
+            "ui_data": {
+                "collapsed": true,
+                "pos": [
+                    -1101.0,
+                    456.0
+                ],
+                "selected": false
+            }
+        },
+        {
+            "custom_ports": [],
+            "id": 4,
+            "manual_values": {
+                "i_factor": 1.159999966621399,
+                "i_mod": 0.0,
+                "i_reset": 0.0,
+                "o_output": 1158.8518231907253
+            },
+            "type": "Time",
+            "ui_data": {
+                "collapsed": false,
+                "pos": [
+                    -1035.0,
+                    566.0
+                ],
+                "selected": false
+            }
+        },
+        {
+            "custom_ports": [],
+            "id": 5,
+            "manual_values": {
+                "i_factor": 1.8799999952316284,
+                "i_mod": 0.0,
+                "i_reset": 0.0,
+                "o_output": 2013.9368680745026
+            },
+            "type": "Time",
+            "ui_data": {
+                "collapsed": false,
+                "pos": [
+                    -1177.0,
+                    679.0
+                ],
+                "selected": false
+            }
+        }
+    ],
+    "ui_data": {
+        "offset": [
+            -1293.0,
+            -191.0
+        ]
+    }
+}

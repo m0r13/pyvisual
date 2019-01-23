@@ -23,7 +23,7 @@ void generateFrag() {
     vec3 ro = vec3(0.0, 0.0, 2.0); 
     vec3 rd = normalize(vec3(uv.x, uv.y, -1.4 * uScale)); 
 
-    const int steps = 128;
+    const int steps = 64;
     const float epsilon = 0.001;
 
     vec3 pos = ro; 
