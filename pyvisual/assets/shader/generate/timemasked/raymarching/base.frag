@@ -9,6 +9,11 @@ vec4 sceneColor(vec3 p, vec3 n, float camDist, float convergence, vec4 bgColor);
 vec4 backgroundColor(vec2 uv, float minD);
 
 vec3 estimateSceneNormal(vec3 p) {
+    /*
+    vec2 e = vec2(0.01, 0.0);
+    return normalize((vec3(scene(p+e.xyy), scene(p+e.yxy), scene(p+e.yyx)) - scene(p)) / e.x);
+    */
+
     vec3 eps = vec3(0.01, 0.0, 0.0);
     float nx = scene(p + eps.xyy) - scene(p - eps.xyy); 
     float ny = scene(p + eps.yxy) - scene(p - eps.yxy); 

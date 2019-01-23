@@ -24,20 +24,42 @@ vec3 opRotateZ(in vec3 p, float ang) {
     return vec3(p.x*cosa - p.y*sina, p.x*sina + p.y*cosa, p.z); 
 }
 
-//Returns a rotation matrix for the given angles around the X,Y,Z axes.
-/*
 vec3 opRotate(vec3 p, vec3 angles) {
     vec3 c = cos(angles);
     vec3 s = sin(angles);
 
+    p = vec3(p.x, p.y*c.x - p.z*s.x, p.y*s.x + p.z*c.x);
+    p = vec3(p.x*c.y - p.z*s.y, p.y, p.x*s.y + p.z*c.y);
+    p = vec3(p.x*c.z - p.y*s.z, p.x*s.z + p.y*c.z, p.z);
+    return p;
+
+    /*
     mat3 rotX = mat3( 1.0, 0.0, 0.0, 0.0,c.x,s.x, 0.0,-s.x, c.x);
     mat3 rotY = mat3( c.y, 0.0,-s.y, 0.0,1.0,0.0, s.y, 0.0, c.y);
     mat3 rotZ = mat3( c.z, s.z, 0.0,-s.z,c.z,0.0, 0.0, 0.0, 1.0);
-
-    return rotX*rotY*rotZ*p;
+    return p*(rotX*rotY*rotZ);
+    */
 }
-*/
 
+vec3 opRotateInv(vec3 p, vec3 angles) {
+    vec3 c = cos(-angles);
+    vec3 s = sin(-angles);
+
+    p = vec3(p.x*c.z - p.y*s.z, p.x*s.z + p.y*c.z, p.z);
+    p = vec3(p.x*c.y - p.z*s.y, p.y, p.x*s.y + p.z*c.y);
+    p = vec3(p.x, p.y*c.x - p.z*s.x, p.y*s.x + p.z*c.x);
+    return p;
+
+    /*
+    mat3 rotX = mat3( 1.0, 0.0, 0.0, 0.0,c.x,s.x, 0.0,-s.x, c.x);
+    mat3 rotY = mat3( c.y, 0.0,-s.y, 0.0,1.0,0.0, s.y, 0.0, c.y);
+    mat3 rotZ = mat3( c.z, s.z, 0.0,-s.z,c.z,0.0, 0.0, 0.0, 1.0);
+    return p*(rotZ*rotY*rotX);
+    */
+}
+
+
+/*
 vec3 opRotate(vec3 p, vec3 axis, float angle)
 {
     axis = normalize(axis);
@@ -49,6 +71,7 @@ vec3 opRotate(vec3 p, vec3 axis, float angle)
                 oc * axis.x * axis.y + axis.z * s,  oc * axis.y * axis.y + c,           oc * axis.y * axis.z - axis.x * s,
                 oc * axis.z * axis.x - axis.y * s,  oc * axis.y * axis.z + axis.x * s,  oc * axis.z * axis.z + c);
 }
+*/
 
 vec2 opXYToPolar(vec2 xy) {
     vec2 texCoords = xy;
@@ -114,34 +137,12 @@ float ditherOther(float color);
 vec3 finalPP; 
 
 float scene(vec3 p) {
-
-    /*
-    //p = opRotateX(p, 0.3*uRotation);
-    p = opRotateY(p, 0.2*uRotation);
-    //p = opRotateZ(p, 0.4*uRotation);
-
-    float noise = snoise(vec3(p.xy + vec2(pyvisualTime), p.z * 0.5 + pyvisualTime)) - 0.5;
-    float b = sdBox(p, vec3(1.92, 1.0, 0.025 * 0.1));
-    return opSmoothIntersection(b, noise, 0.1) + noise * 0.2;
-    */
-
-    /*
-    p.y *= -1.0;
-    p.y -= 4.2;
-
-    vec3 c = vec3(5.0, 5.0, 5.0);
-    if (p.y > 0.0) {
-
-        p = mod(p,c)-0.5*c;
-    }
-    */
-
     /*
     p = opRotateX(p, 0.3*uRotation);
     p = opRotateY(p, 0.2*uRotation);
     p = opRotateZ(p, 0.4*uRotation);
     */
-    p = opRotate(p, vec3(0.3, 0.05, 0.4), uRotation);
+    p = opRotate(p, vec3(0.3, 0.05, 0.4) * uRotation);
 
     float mirrorRotation = uMirrorRotation * 0.1;
     /*
@@ -149,8 +150,7 @@ float scene(vec3 p) {
     p = opRotateY(p, mirrorRotation);
     p = opRotateZ(p, -0.5 * mirrorRotation - 2.76);
     */
-    p = opRotate(p, vec3(0.8, 1.0, -0.5), uRotation);
-    //p = opRotate(p, vec3(0.8, 1.0, -0.5) * uMirrorRotation + vec3(4.73, 0.0, -2.76));
+    p = opRotate(p, vec3(0.8, 1.0, -0.5) * uMirrorRotation);
     p.xz = opPolarToXY(opPolarMirror(opXYToPolar(p.xz), 8.0, -mirrorRotation));
     float timeOffset = p.y > uSliceTime ? uSliceTimeOffset : 0.0;
     finalPP = p;
@@ -166,8 +166,7 @@ float scene(vec3 p) {
     p = opRotateY(p, -mirrorRotation);
     p = opRotateX(p, -(0.8 * mirrorRotation + 4.73));
     */
-    //p = opRotate(p, -(vec3(0.8, 1.0, -0.5) * uMirrorRotation + vec3(4.73, 0.0, -2.76)));
-    p = opRotate(p, vec3(0.8, 1.0, -0.5), -uRotation);
+    p = opRotateInv(p, vec3(0.8, 1.0, -0.5) * uMirrorRotation);
 
     float displace = clamp(sin((p.x+p.y+p.z)*20.0)*0.03, 0.0, 1.0) * uDisplace;
     float sphere = sdSphere(p, 0.5);
@@ -180,21 +179,6 @@ float scene(vec3 p) {
 }
 
 vec4 sceneColor(vec3 p, vec3 n, float camDist, float convergence, vec4 bgColor) {
-    /*
-    vec3 pp = p;
-    pp = opRotateX(pp, 0.3*uRotation);
-    pp = opRotateY(pp, 0.2*uRotation);
-    pp = opRotateZ(pp, 0.4*uRotation);
-
-    float mirrorRotation = uMirrorRotation * 0.1;
-    pp = opRotateX(pp, 0.8 * mirrorRotation + 4.73);
-    pp = opRotateY(pp, mirrorRotation);
-    pp = opRotateZ(pp, -0.5 * mirrorRotation - 2.76);
-    */
-
-    //vec3 pp = p;
-    //pp = opRotateY(pp, 0.2*uRotation);
-    
     float fr = finalPP.y < uSliceTime ? 1.0 : 0.0;
     float fg = 1.0 - fr;
 
