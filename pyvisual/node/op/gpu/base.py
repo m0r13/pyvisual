@@ -198,6 +198,8 @@ class BaseShader(RenderNode):
         input_uniform_mapping, input_ports = self._parse_uniform_inputs(vertex, fragment)
 
         try:
+            if self.quad:
+                self.quad.delete()
             self.quad = gloo.Program(vertex, fragment, version="130", count=4)
             self.quad["iPosition"] = [(-1,-1), (-1,+1), (+1,-1), (+1,+1)]
             self.quad["iTexCoord"] = [( 0, 1), ( 0, 0), ( 1, 1), ( 1, 0)]
@@ -222,6 +224,8 @@ class BaseShader(RenderNode):
             # force re-rendering of this node by changing at least one input
             self.get_input("force_change").value = 42.0
         except Exception as e:
+            if self.quad:
+                self.quad.delete()
             self.quad = None
             self.shader_error = traceback.format_exc()
             traceback.print_exc()

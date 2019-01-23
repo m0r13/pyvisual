@@ -1,4 +1,4 @@
-#include <generate/base_raymarching.frag>
+#include <generate/timemasked/raymarching/base.frag>
 
 float sdSphere(vec3 p, float s) {
     return length(p)-s;

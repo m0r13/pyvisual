@@ -87,6 +87,12 @@ class AudioFilter(Node):
             if imgui.is_item_hovered():
                 imgui.set_tooltip(self.filter_status)
 
+    def _show_custom_context(self):
+        if imgui.button("copy filter coefficients"):
+            if self.filter is not None:
+                import clipboard
+                clipboard.copy("""a = %s\nb = %s""" % (str(self.filter._a.tolist()), str(self.filter._b.tolist())))
+
 class AbsAudio(Node):
     class Meta:
         inputs = [
