@@ -21,6 +21,10 @@ vec3 estimateSceneNormal(vec3 p) {
     return normalize(vec3(nx, ny, nz));
 }
 
+float rand(vec2 co) { return fract(sin(dot(co*0.123,vec2(12.9898,78.233))) * 43758.5453); }
+
+uniform float uDitheringTime;
+
 void generateFrag() {
     vec2 uv = 2.0*(vec2(pyvisualUV.x, 1.0 - pyvisualUV.y) * pyvisualResolution).xy/pyvisualResolution - 1.0; 
     uv.x *= pyvisualResolution.x/pyvisualResolution.y;
@@ -34,12 +38,23 @@ void generateFrag() {
     vec3 pos = ro; 
     float dist = 0.0;
     float dscene = 0.0;
-    float lr = 0.8;
+    float lr = 1.0;
 
     int i = 0;
     float minD = 10000.0;
+
+    //#define DITHER
+    #ifdef DITHER
+    vec2 dpos = ( (vec2(pyvisualUV.x, 1.0 - pyvisualUV.y) * pyvisualResolution).xy / pyvisualResolution.xy );
+    vec2 num = vec2(1000.0);
+    num.x *= pyvisualResolution.x / pyvisualResolution.y;
+    vec2 seed = floor(dpos*num) / num + fract(uDitheringTime);
+    #endif
     for (; i < steps; i++) {
         dscene = scene(pos);
+        #ifdef DITHER
+        dscene *= (0.25+0.5*rand(seed*vec2(i)));
+        #endif 
         minD = min(minD, dscene);
         if (abs(dscene) < epsilon) {
             break;
@@ -49,8 +64,8 @@ void generateFrag() {
         lr = max(0.5, lr*0.85);
     }
 
-    vec4 color = backgroundColor(uv, minD);
-    if (dist < 100.0 && dscene < epsilon) {
+    vec4 color = backgroundColor(uv, 0.0);
+    if (dist < 100.0) {
         vec3 n = estimateSceneNormal(pos);
         color = sceneColor(pos, n, dist, float(i) / float(steps - 1), color);
     }

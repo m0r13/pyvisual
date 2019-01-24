@@ -20,14 +20,8 @@
         },
         {
             "dst_node_id": 0,
-            "dst_port_id": "i_uRotation",
-            "src_node_id": 4,
-            "src_port_id": "o_output"
-        },
-        {
-            "dst_node_id": 0,
             "dst_port_id": "i_uMirrorRotation",
-            "src_node_id": 5,
+            "src_node_id": 4,
             "src_port_id": "o_output"
         }
     ],
@@ -115,6 +109,20 @@
                     }
                 ],
                 [
+                    "i_uDitheringTime",
+                    {
+                        "default": null,
+                        "dtype": "float",
+                        "dtype_args": {},
+                        "dummy": false,
+                        "group": "default",
+                        "hide": false,
+                        "manual_input": true,
+                        "name": "uDitheringTime",
+                        "widgets": []
+                    }
+                ],
+                [
                     "i_uRotation",
                     {
                         "default": null,
@@ -163,48 +171,6 @@
                     }
                 ],
                 [
-                    "i_uSliceForm",
-                    {
-                        "default": null,
-                        "dtype": "float",
-                        "dtype_args": {},
-                        "dummy": false,
-                        "group": "default",
-                        "hide": false,
-                        "manual_input": true,
-                        "name": "uSliceForm",
-                        "widgets": []
-                    }
-                ],
-                [
-                    "i_uSliceFormRotate",
-                    {
-                        "default": null,
-                        "dtype": "float",
-                        "dtype_args": {},
-                        "dummy": false,
-                        "group": "default",
-                        "hide": false,
-                        "manual_input": true,
-                        "name": "uSliceFormRotate",
-                        "widgets": []
-                    }
-                ],
-                [
-                    "i_uSliceColor",
-                    {
-                        "default": null,
-                        "dtype": "float",
-                        "dtype_args": {},
-                        "dummy": false,
-                        "group": "default",
-                        "hide": false,
-                        "manual_input": true,
-                        "name": "uSliceColor",
-                        "widgets": []
-                    }
-                ],
-                [
                     "i_uSliceTime",
                     {
                         "default": null,
@@ -233,20 +199,6 @@
                         "hide": false,
                         "manual_input": true,
                         "name": "uSliceTimeOffset",
-                        "widgets": []
-                    }
-                ],
-                [
-                    "i_uNoise",
-                    {
-                        "default": null,
-                        "dtype": "tex2d",
-                        "dtype_args": {},
-                        "dummy": false,
-                        "group": "default",
-                        "hide": false,
-                        "manual_input": true,
-                        "name": "uNoise",
                         "widgets": []
                     }
                 ]
@@ -290,15 +242,12 @@
                     ]
                 ],
                 "i_uDisplace": 0.0,
-                "i_uMirrorRotation": -18.34000015258789,
-                "i_uNoise": "",
+                "i_uDitheringTime": 0.0,
+                "i_uMirrorRotation": -32.150001525878906,
                 "i_uRotation": -0.5199999809265137,
                 "i_uScale": 1.0,
-                "i_uSliceColor": 0.0,
-                "i_uSliceForm": 3.369999885559082,
-                "i_uSliceFormRotate": 0.0,
-                "i_uSliceTime": 1.5,
-                "i_uSliceTimeOffset": 0.5,
+                "i_uSliceTime": -1.4800000190734863,
+                "i_uSliceTimeOffset": 1.7000000476837158,
                 "i_wrapping": 1.0,
                 "o_enabled": 1.0,
                 "o_output": ""
@@ -307,8 +256,8 @@
             "ui_data": {
                 "collapsed": false,
                 "pos": [
-                    -676.0,
-                    440.0
+                    -693.0,
+                    443.0
                 ],
                 "selected": false
             }
@@ -322,10 +271,10 @@
             },
             "type": "GetTextureVar",
             "ui_data": {
-                "collapsed": false,
+                "collapsed": true,
                 "pos": [
-                    -928.0,
-                    449.0
+                    -974.0,
+                    377.0
                 ],
                 "selected": false
             }
@@ -353,7 +302,7 @@
                 "i_factor": 0.4699999988079071,
                 "i_mod": 0.0,
                 "i_reset": 0.0,
-                "o_output": 560.4737481275853
+                "o_output": 77.10357990258919
             },
             "type": "Time",
             "ui_data": {
@@ -369,10 +318,10 @@
             "custom_ports": [],
             "id": 4,
             "manual_values": {
-                "i_factor": 1.159999966621399,
+                "i_factor": 0.6000000238418579,
                 "i_mod": 0.0,
                 "i_reset": 0.0,
-                "o_output": 1158.8518231907253
+                "o_output": 252.9317175305162
             },
             "type": "Time",
             "ui_data": {
@@ -391,7 +340,7 @@
                 "i_factor": 1.8799999952316284,
                 "i_mod": 0.0,
                 "i_reset": 0.0,
-                "o_output": 2013.9368680745026
+                "o_output": 308.4146893975705
             },
             "type": "Time",
             "ui_data": {
@@ -402,12 +351,33 @@
                 ],
                 "selected": false
             }
+        },
+        {
+            "custom_ports": [],
+            "id": 6,
+            "manual_values": {
+                "i_length": 16.8700008392334,
+                "i_max": 5.0,
+                "i_min": -5.0,
+                "i_phase": 0.0,
+                "i_type": 2.0,
+                "o_output": 3.369991511623237
+            },
+            "type": "LFO",
+            "ui_data": {
+                "collapsed": false,
+                "pos": [
+                    -1015.0,
+                    880.0
+                ],
+                "selected": false
+            }
         }
     ],
     "ui_data": {
         "offset": [
-            -1293.0,
-            -191.0
+            -1508.0,
+            32.0
         ]
     }
 }

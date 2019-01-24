@@ -123,14 +123,12 @@ uniform float uRotation;
 uniform float uDisplace; // {"default" : 1.0, "range": [-1.0, 1.0]}
 uniform float uMirrorRotation;
 
-uniform float uSliceForm;
-uniform float uSliceFormRotate;
-uniform float uSliceColor;
+//uniform float uSliceForm;
+//uniform float uSliceFormRotate;
+//uniform float uSliceColor;
 
 uniform float uSliceTime; // {"default" : 1.5}
 uniform float uSliceTimeOffset; // {"default" : 0.5}
-
-uniform sampler2D uNoise;
 
 float ditherOther(float color);
 
@@ -150,7 +148,7 @@ float scene(vec3 p) {
     p = opRotateY(p, mirrorRotation);
     p = opRotateZ(p, -0.5 * mirrorRotation - 2.76);
     */
-    p = opRotate(p, vec3(0.8, 1.0, -0.5) * uMirrorRotation);
+    p = opRotate(p, vec3(0.8, 1.0, -0.5) * mirrorRotation);
     p.xz = opPolarToXY(opPolarMirror(opXYToPolar(p.xz), 8.0, -mirrorRotation));
     float timeOffset = p.y > uSliceTime ? uSliceTimeOffset : 0.0;
     finalPP = p;
@@ -166,7 +164,7 @@ float scene(vec3 p) {
     p = opRotateY(p, -mirrorRotation);
     p = opRotateX(p, -(0.8 * mirrorRotation + 4.73));
     */
-    p = opRotateInv(p, vec3(0.8, 1.0, -0.5) * uMirrorRotation);
+    p = opRotateInv(p, vec3(0.8, 1.0, -0.5) * mirrorRotation);
 
     float displace = clamp(sin((p.x+p.y+p.z)*20.0)*0.03, 0.0, 1.0) * uDisplace;
     float sphere = sdSphere(p, 0.5);
@@ -181,8 +179,6 @@ float scene(vec3 p) {
 vec4 sceneColor(vec3 p, vec3 n, float camDist, float convergence, vec4 bgColor) {
     float fr = finalPP.y < uSliceTime ? 1.0 : 0.0;
     float fg = 1.0 - fr;
-
-
 
     vec3 ro = vec3(0.0, 0.0, 2.0); 
     vec3 r = reflect(normalize(p - ro),n); 
@@ -248,6 +244,8 @@ vec4 backgroundColor(vec2 uv, float minD) {
     const float glowExp = 0.2;
     float d = min(glowMaxDist, minD) / glowMaxDist;
     */
+
+    return vec4(0.0, 0.0, 0.0, 1.0);
 
     float c = (1.0 - length(uv * 1.2)) * 0.2;
     //vec3 color = vec3(ditherGreen(c));
