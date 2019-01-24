@@ -194,6 +194,10 @@ class UIConnection:
         self.color = 0
         self.connect()
 
+        self.p0 = None
+        self.p1 = None
+        self.visible = None
+
     def connect(self):
         self.src_node.attach_connection(self.src_port_id, self)
         self.dst_node.attach_connection(self.dst_port_id, self)
@@ -212,6 +216,26 @@ class UIConnection:
         self.dst_node.detach_connection(self.dst_port_id, self)
 
         self.color = 0
+
+    def update_position(self):
+        self.p0 = self.src_node.get_port_position(self.src_port_id)
+        self.p1 = self.dst_node.get_port_position(self.dst_port_id)
+
+    def reset_position(self):
+        self.p0 = None
+        self.p1 = None
+        self.visible = None
+
+    def is_visible(self):
+        if self.visible is None:
+            if self.p0 is None:
+                self.update_position()
+
+            (x0, y0), (x1, y1) = self.p0, self.p1
+            start = min(x0, x1), min(y0, y1)
+            end = max(x0, x1), max(y0, y1)
+            self.visible = not t_cull(start, end)
+        return self.visible
 
     def show(self, draw_list):
         # is connected when both sides are on a node
@@ -238,8 +262,10 @@ class UIConnection:
             self.ui_graph.remove_connection(self)
             return
 
-        p0 = self.src_node.get_port_position(self.src_port_id)
-        p1 = self.dst_node.get_port_position(self.dst_port_id)
+        if self.p0 is None:
+            self.update_position()
+        p0 = self.p0
+        p1 = self.p1
 
         delta = p1[0] - p0[0], p1[1] - p0[1]
         offset_x = min(200, abs(delta[0])) * 0.5
@@ -321,6 +347,9 @@ class UINode:
         # self.actual_pos
         self.size = 10, 10
 
+        # things cached
+        self.visible = None
+
         #
         # state of node
         #
@@ -359,6 +388,17 @@ class UINode:
     @property
     def size_with_padding(self):
         return t_add(self.size, t_mul(self.padding, 2))
+
+    def reset_position(self):
+        self.visible = None
+
+    def is_visible(self):
+        if self.visible is None:
+            size = self.size_with_padding
+            start = self.ui_graph.local_to_screen(self.actual_pos)
+            end = start[0]+size[0], start[1]+size[1]
+            self.visible = not t_cull(start, end)
+        return self.visible
 
     def touch_z_index(self):
         self.z_index = self.ui_graph.touch_z_index()
@@ -838,6 +878,8 @@ class UIGraph(NodeGraphListener):
         self.ui_connections = []
         self.ui_graph_data = ui_graph_data
 
+        self.reset_cached_counter = 0
+
         # current z index
         # gets incremented each time node is created / bumped to foreground
         self.nodes_z_index = 0
@@ -887,6 +929,8 @@ class UIGraph(NodeGraphListener):
     def changed_ui_data(self, graph, ui_data):
         self.ui_offset = ui_data.get("offset", (0, 0))
 
+        self.reset_cached_positions()
+
     def created_node(self, graph, node, ui_data):
         ui_node = UINode(self, node, ui_data)
         self.ui_nodes[node.id] = ui_node
@@ -903,6 +947,8 @@ class UIGraph(NodeGraphListener):
             ui_node.pos = ui_data["pos"]
         if "selected" in ui_data:
             ui_node.selected = ui_data["selected"]
+
+        self.reset_cached_positions()
 
     def created_connection(self, graph, src_node, src_port_id, dst_node, dst_port_id):
         src_node = self.ui_nodes[src_node.id]
@@ -930,6 +976,8 @@ class UIGraph(NodeGraphListener):
     def update_ui_state(self):
         self.graph.set_ui_data({"offset" : self.ui_offset})
 
+        self.reset_cached_positions()
+
     def update_node_ui_state(self, node):
         # node is a ui node object
         ui_data = {}
@@ -937,6 +985,8 @@ class UIGraph(NodeGraphListener):
         ui_data["collapsed"] = node.collapsed
         ui_data["selected"] = node.selected
         self.graph.set_node_ui_data(node.instance, ui_data)
+
+        self.reset_cached_positions()
 
     #
     # editor api functions used by ui nodes, connections and user interaction logic
@@ -950,6 +1000,11 @@ class UIGraph(NodeGraphListener):
         i = self.nodes_z_index
         self.nodes_z_index += 1
         return i
+
+    def reset_cached_positions(self):
+        # HACK
+        # need to update it for multiple frames for connections to receive right position on toggle collapse node
+        self.reset_cached_counter = 3
 
     def is_key_down(self, key):
         io = self.io
@@ -1197,21 +1252,26 @@ class UIGraph(NodeGraphListener):
                 draw_list.add_rect_filled(upper_left, lower_right, COLOR_SELECTION)
                 draw_list.add_rect(upper_left, lower_right, COLOR_SELECTION_BORDER)
 
+        rendered_connections = 0
+        rendered_nodes = 0
+
         # draw / handle nodes and connections
         imgui.push_style_var(imgui.STYLE_ALPHA, self.ui_graph_data.node_alpha)
         for connection in self.ui_connections:
+            if not connection.is_visible():
+                continue
+            rendered_connections += 1
             connection.show(draw_list)
+
         # little hack: to get overlapping nodes and such correct,
         #    render nodes in an order. nodes request a new z-index from the
         #    editor when they got touched and should be in the foreground again
         interaction_allowed = not io.key_shift
         for node in sorted(self.nodes, key=lambda n: n.z_index):
-            # simple culling
-            node_start = self.local_to_screen(node.actual_pos)
-            node_end = t_add(node_start, node.size_with_padding)
-            if t_cull(node_start, node_end):
+            if not node.is_visible():
                 continue
 
+            rendered_nodes += 1
             with draw_on_channel(draw_list, CHANNEL_NODE):
                 if not interaction_allowed:
                     imgui.push_item_flag(imgui.ITEM_DISABLED, True)
@@ -1227,8 +1287,16 @@ class UIGraph(NodeGraphListener):
             draw_list.channels_split(CHANNEL_COUNT)
             draw_list.channels_set_current(CHANNEL_DEFAULT)
         if self.dragging_connection is not None:
+            self.dragging_connection.reset_position()
             self.dragging_connection.show(draw_list)
         imgui.pop_style_var()
+
+        if self.reset_cached_counter:
+            for connection in self.ui_connections:
+                connection.reset_position()
+            for node in self.nodes:
+                node.reset_position()
+            self.reset_cached_counter = max(0, self.reset_cached_counter - 1)
 
         # dropping connection to ports is handled by nodes
         # we're checking here if a connection was dropped into nowhere
@@ -1322,6 +1390,12 @@ class UIGraph(NodeGraphListener):
 
         # show context
         self.show_context_menu()
+
+        stats = {
+            "connections" : (rendered_connections, len(self.ui_connections)),
+            "nodes" : (rendered_nodes, len(self.ui_nodes))
+        }
+        return stats
 
 class NodeEditor(NodeGraphListener):
     def __init__(self, base_node=node_meta.Node):
@@ -1592,8 +1666,9 @@ class NodeEditor(NodeGraphListener):
         # show graph
         # if you're wondering where output texture in background comes from:
         # it's rendered in the render loop outside of the editor
+        graph_stats = None
         if self.show_graph:
-            self.current_ui_graph.show(draw_list)
+            graph_stats = self.current_ui_graph.show(draw_list)
 
         # make sure to not get triggered when pressing e inside a text field
         if not io.want_capture_keyboard and not io.want_text_input and self.is_key_down(glfw.GLFW_KEY_E):
@@ -1658,6 +1733,10 @@ class NodeEditor(NodeGraphListener):
                 imgui.text("imgui render time: %.2f ms ~ %.2f%%" % (self.imgui_render_time * 1000.0, self.imgui_render_time_relative * 100.0))
                 imgui.text("processing time: %.2f ms ~ %.2f%%" % (self.processing_time * 1000.0, self.processing_time_relative * 100.0))
                 imgui.text("total: %.2f ms ~ %.2f%%" % (self.total_time * 1000.0, self.total_time_relative * 100.0))
+
+                if graph_stats is not None:
+                    imgui.dummy(1, 10)
+                    imgui.text("c: %d / %d n: %d / %d" % (graph_stats["connections"] + graph_stats["nodes"]))
                 imgui.end()
 
             if imgui.begin("settings", False, flags):
@@ -1774,8 +1853,10 @@ def on_draw(event):
     imgui_renderer.process_inputs()
     imgui.new_frame()
 
+    #profile.enable()
     editor.show()
     editor_time += time.time() - start
+    #profile.disable()
 
     start = time.time()
     imgui.render()
@@ -1800,8 +1881,8 @@ def on_draw(event):
             print("=== Performance stats ===")
             rows = []
             for node, values in stats_by_node_type[:25]:
-                rows.append([node, "%.2f" % (values["avg"] * 1000000.0), "%.2f%%" % (values["rel"] * 100.0), "%.2f%%" % (values["cum"] * 100.0)])
-            print(tabulate.tabulate(rows, headers=["Node type", "avg time (micros)", "rel time", "inv cum time"]))
+                rows.append([node, "%d" % values["count"], "%.2f" % (values["avg"] * 1000000.0), "%.2f%%" % (values["rel"] * 100.0), "%.2f%%" % (values["cum"] * 100.0)])
+            print(tabulate.tabulate(rows, headers=["Node type", "count", "avg time (micros)", "rel time", "inv cum time"]))
             print("=== ===")
             profile_time_count = 0
 

@@ -139,7 +139,7 @@ class Graph:
             max_time = max(timings)
             avg_time = sum(timings) / len(timings)
             total += avg_time
-            collected_stats[instance] = {"min" : min_time, "max" : max_time, "avg" : avg_time}
+            collected_stats[instance] = {"min" : min_time, "max" : max_time, "avg" : avg_time, "count" : 1}
         for instance, values in collected_stats.items():
             values["rel"] = values["avg"] / total
 
@@ -164,6 +164,7 @@ class Graph:
                 "max" : max(values0["max"], values1["max"]),
                 "avg" : values0["avg"] + values1["avg"],
                 "rel" : values0["rel"] + values1["rel"],
+                "count" : values0["count"] + values1["count"],
             }
         for instance, values in collected_stats.items():
             node_type = instance.spec.name
