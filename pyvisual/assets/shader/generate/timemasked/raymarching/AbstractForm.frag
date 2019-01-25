@@ -203,13 +203,13 @@ vec3 estimateSceneNormal(vec3 p) {
 }
 
 vec4 sceneColor(vec3 p, float camDist, vec4 bgColor) {
-    /*
     float fr = finalPP.y < uSliceTime ? 1.0 : 0.0;
     float fg = 1.0 - fr;
-    */
 
+    /*
     const float fr = 1.0;
     const float fg = 0.0;
+    */
 
     vec3 n = estimateSceneNormal(p);
     vec3 ro = vec3(0.0, 0.0, 2.0); 
