@@ -1,64 +1,70 @@
 {
     "connections": [
         {
-            "dst_node_id": 178,
+            "dst_node_id": 156,
             "dst_port_id": "i_reset",
-            "src_node_id": 181,
+            "src_node_id": 159,
             "src_port_id": "o_output"
         },
         {
-            "dst_node_id": 178,
+            "dst_node_id": 156,
             "dst_port_id": "i_next",
-            "src_node_id": 180,
+            "src_node_id": 158,
             "src_port_id": "o_output"
         },
         {
-            "dst_node_id": 178,
+            "dst_node_id": 156,
             "dst_port_id": "i_index",
-            "src_node_id": 179,
+            "src_node_id": 157,
             "src_port_id": "o_output"
         },
         {
-            "dst_node_id": 178,
+            "dst_node_id": 156,
             "dst_port_id": "i_n",
-            "src_node_id": 182,
+            "src_node_id": 160,
             "src_port_id": "o_value"
         },
         {
-            "dst_node_id": 178,
+            "dst_node_id": 156,
             "dst_port_id": "i_offset",
-            "src_node_id": 183,
+            "src_node_id": 161,
             "src_port_id": "o_value"
         },
         {
-            "dst_node_id": 178,
+            "dst_node_id": 156,
+            "dst_port_id": "i_p",
+            "src_node_id": 162,
+            "src_port_id": "o_value"
+        },
+        {
+            "dst_node_id": 156,
             "dst_port_id": "i_reset_p",
-            "src_node_id": 184,
+            "src_node_id": 162,
             "src_port_id": "o_value"
         },
         {
-            "dst_node_id": 187,
+            "dst_node_id": 165,
             "dst_port_id": "i_v1",
-            "src_node_id": 178,
+            "src_node_id": 156,
             "src_port_id": "o_out"
         },
         {
-            "dst_node_id": 187,
+            "dst_node_id": 165,
             "dst_port_id": "i_v0",
-            "src_node_id": 186,
+            "src_node_id": 164,
             "src_port_id": "o_value"
         },
         {
-            "dst_node_id": 185,
+            "dst_node_id": 163,
             "dst_port_id": "i_value",
-            "src_node_id": 187,
+            "src_node_id": 165,
             "src_port_id": "o_output"
         }
     ],
     "nodes": [
         {
             "custom_ports": [],
-            "id": 178,
+            "id": 156,
             "manual_values": {
                 "i_index": 0.0,
                 "i_n": 1.0,
@@ -81,10 +87,10 @@
         },
         {
             "custom_ports": [],
-            "id": 179,
+            "id": 157,
             "manual_values": {
                 "i_name": "sequencer_index",
-                "o_output": 4.0
+                "o_output": 13.0
             },
             "type": "GetFloatVar",
             "ui_data": {
@@ -98,7 +104,7 @@
         },
         {
             "custom_ports": [],
-            "id": 180,
+            "id": 158,
             "manual_values": {
                 "i_name": "sequencer_next",
                 "o_output": 0.0
@@ -115,7 +121,7 @@
         },
         {
             "custom_ports": [],
-            "id": 181,
+            "id": 159,
             "manual_values": {
                 "i_name": "sequencer_reset",
                 "o_output": 0.0
@@ -175,7 +181,7 @@
                     }
                 ]
             ],
-            "id": 182,
+            "id": 160,
             "manual_values": {
                 "i_default_value": 4.0,
                 "i_dtype": 2.0,
@@ -239,7 +245,7 @@
                     }
                 ]
             ],
-            "id": 183,
+            "id": 161,
             "manual_values": {
                 "i_default_value": 0.0,
                 "i_dtype": 2.0,
@@ -303,7 +309,7 @@
                     }
                 ]
             ],
-            "id": 184,
+            "id": 162,
             "manual_values": {
                 "i_default_value": 1.0,
                 "i_dtype": 3.0,
@@ -353,7 +359,7 @@
                     }
                 ]
             ],
-            "id": 185,
+            "id": 163,
             "manual_values": {
                 "i_dtype": 1.0,
                 "i_name": "event",
@@ -416,7 +422,7 @@
                     }
                 ]
             ],
-            "id": 186,
+            "id": 164,
             "manual_values": {
                 "i_default_value": 1.0,
                 "i_dtype": 0.0,
@@ -437,7 +443,7 @@
         },
         {
             "custom_ports": [],
-            "id": 187,
+            "id": 165,
             "manual_values": {
                 "i_v0": 0.0,
                 "i_v1": 0.0,
@@ -456,8 +462,8 @@
     ],
     "ui_data": {
         "offset": [
-            -935.0,
-            -309.0
+            -829.0,
+            -114.0
         ]
     }
 }
