@@ -121,6 +121,9 @@ float opSmoothIntersection( float d1, float d2, float k ) {
 
 uniform float uRotation;
 uniform float uDisplace; // {"default" : 1.0, "range": [-1.0, 1.0]}
+uniform float uAlpha; // {"default" : 1.0, "range" : [0.0, 1.0]}
+
+uniform float uMirrorCount; // {"default" : 4.0, "range" : [0.0, Infinity]}
 uniform float uMirrorRotation;
 
 //uniform float uSliceForm;
@@ -130,9 +133,11 @@ uniform float uMirrorRotation;
 uniform float uSliceTime; // {"default" : 1.5}
 uniform float uSliceTimeOffset; // {"default" : 0.5}
 
-float ditherOther(float color);
+vec3 finalPP;
 
-vec3 finalPP; 
+// mirroring enabled, but uMirrorCount == 0.0 should be as mirroring disabled
+// both looks and performance
+#define MIRROR
 
 float scene(vec3 p) {
     /*
@@ -142,18 +147,23 @@ float scene(vec3 p) {
     */
     p = opRotate(p, vec3(0.3, 0.05, 0.4) * uRotation);
 
+#ifdef MIRROR
     float mirrorRotation = uMirrorRotation * 0.1;
-    /*
-    p = opRotateX(p, 0.8 * mirrorRotation + 4.73);
-    p = opRotateY(p, mirrorRotation);
-    p = opRotateZ(p, -0.5 * mirrorRotation - 2.76);
-    */
-    p = opRotate(p, vec3(0.8, 1.0, -0.5) * mirrorRotation);
-    p.xz = opPolarToXY(opPolarMirror(opXYToPolar(p.xz), 8.0, -mirrorRotation));
+    if (uMirrorCount > 0.0) {
+        /*
+        p = opRotateX(p, 0.8 * mirrorRotation + 4.73);
+        p = opRotateY(p, mirrorRotation);
+        p = opRotateZ(p, -0.5 * mirrorRotation - 2.76);
+        */
+        p = opRotate(p, vec3(0.8, 1.0, -0.5) * mirrorRotation);
+        p.xz = opPolarToXY(opPolarMirror(opXYToPolar(p.xz), uMirrorCount, -mirrorRotation));
+    }
+#endif
     float timeOffset = p.y > uSliceTime ? uSliceTimeOffset : 0.0;
     finalPP = p;
     //p = opRotateY(p, uSliceFormRotate);
 
+#ifdef MIRROR
     /*
     vec3 pp = opRotateZ(p, mirrorRotation);
     float sliceFormBox = sdBox(pp, vec3(5.0, 5.0, uSliceForm)) - 0.05;
@@ -164,7 +174,10 @@ float scene(vec3 p) {
     p = opRotateY(p, -mirrorRotation);
     p = opRotateX(p, -(0.8 * mirrorRotation + 4.73));
     */
-    p = opRotateInv(p, vec3(0.8, 1.0, -0.5) * mirrorRotation);
+    if (uMirrorCount > 0.0) {
+        p = opRotateInv(p, vec3(0.8, 1.0, -0.5) * mirrorRotation);
+    }
+#endif
 
     float displace = clamp(sin((p.x+p.y+p.z)*20.0)*0.03, 0.0, 1.0) * uDisplace;
     float sphere = sdSphere(p, 0.5);
@@ -176,10 +189,24 @@ float scene(vec3 p) {
     //return opIntersection(form, sliceFormBox);
 }
 
-vec4 sceneColor(vec3 p, vec3 n, float camDist, float convergence, vec4 bgColor) {
+vec3 estimateSceneNormal(vec3 p) {
+    vec2 e = vec2(0.01, 0.0);
+    return normalize((vec3(scene(p+e.xyy), scene(p+e.yxy), scene(p+e.yyx)) - scene(p)) / e.x);
+
+    /*
+    vec3 eps = vec3(0.01, 0.0, 0.0);
+    float nx = scene(p + eps.xyy) - scene(p - eps.xyy); 
+    float ny = scene(p + eps.yxy) - scene(p - eps.yxy); 
+    float nz = scene(p + eps.yyx) - scene(p - eps.yyx); 
+    return normalize(vec3(nx, ny, nz));
+    */
+}
+
+vec4 sceneColor(vec3 p, float camDist, vec4 bgColor) {
     float fr = finalPP.y < uSliceTime ? 1.0 : 0.0;
     float fg = 1.0 - fr;
 
+    vec3 n = estimateSceneNormal(p);
     vec3 ro = vec3(0.0, 0.0, 2.0); 
     vec3 r = reflect(normalize(p - ro),n); 
     vec3 h = -normalize(n + p - ro); 
@@ -192,70 +219,18 @@ vec4 sceneColor(vec3 p, vec3 n, float camDist, float convergence, vec4 bgColor) 
     float spec = pow(clamp(dot(h, normalize(vec3(1,1,1))), 0.0, 1.0), 50.0); 
     float amb = 0.2 + p.y; 
     vec3 cubeColor = diff*vec3(1,1,1) + diff2*vec3(fr,fg,0)  + diff3*vec3(fr,fg,1) + spec*vec3(1,1,1)  + amb*vec3(0.2,0.2,0.2);
-    cubeColor *= (1.0 - convergence);
-    //cubeColor /= camDist;
+    cubeColor /= camDist;
     // count of iterations until convergance as color
     //cubeColor = mix(vec3(1.0, 0.0, 0.0), vec3(0.0, 1.0, 0.0), step(8.0, float(i)));
     // normal as color
     //cubeColor = clamp(dot(n, normalize(vec3(1,1,1))), 0.0, 1.0) * (n + vec3(1.0)) / 2.0 + spec*vec3(1,1,1)  + amb*vec3(0.2,0.2,0.2);
     //dist = clamp(dist, 0.0, 1.0) / 1.0;
     //cubeColor = mix(vec3(1.0, 0.0, 0.0), vec3(0.0, 1.0, 0.0), dist);
-    return mix(bgColor, vec4(cubeColor, 1.0), 1.0);
+    return mix(bgColor, vec4(cubeColor, 1.0), uAlpha);
 }
 
-/*
-const int indexMatrix8[64] = int[](0,  32, 8,  40, 2,  34, 10, 42,
-                                     48, 16, 56, 24, 50, 18, 58, 26,
-                                     12, 44, 4,  36, 14, 46, 6,  38,
-                                     60, 28, 52, 20, 62, 30, 54, 22,
-                                     3,  35, 11, 43, 1,  33, 9,  41,
-                                     51, 19, 59, 27, 49, 17, 57, 25,
-                                     15, 47, 7,  39, 13, 45, 5,  37,
-                                     63, 31, 55, 23, 61, 29, 53, 21);
-
-float indexValue() {
-    int x = int(mod(gl_FragCoord.x * 0.5, 8));
-    int y = int(mod(gl_FragCoord.y * 0.5, 8));
-    return indexMatrix8[(x + y * 8)] / 64.0;
-}
-
-vec3 ditherGreen(float color) {
-    float closestColor = (color < 0.5) ? 0 : 1;
-    float secondClosestColor = 1 - closestColor;
-    float d = indexValue();
-    float distance = abs(closestColor - color);
-    float c = (distance < d) ? closestColor : secondClosestColor;
-    return vec3(0.0, 0.75*c * ((1.0-pow(1.0-color,1.5)) * 3.0) + 0.0, 0.0);
-}
-
-float ditherOther(float color) {
-    float closestColor = (color < 0.5) ? 0 : 1;
-    float secondClosestColor = 1 - closestColor;
-    float d = indexValue();
-    float distance = abs(closestColor - color);
-    float c = (distance < d) ? closestColor : secondClosestColor;
-    return 0.75*c * ((1.0-pow(1.0-color,1.5)) * 3.0);
-}
-*/
-
-vec4 backgroundColor(vec2 uv, float minD) {
-    /*
-    const float glowMaxDist = 0.5;
-    const float glowExp = 0.2;
-    float d = min(glowMaxDist, minD) / glowMaxDist;
-    */
-
+vec4 backgroundColor(vec2 uv) {
+    return vec4((1.0 - vec3(length(uv*0.5)))*0.2, 1.0);
     return vec4(0.0, 0.0, 0.0, 1.0);
-
-    float c = (1.0 - length(uv * 1.2)) * 0.2;
-    //vec3 color = vec3(ditherGreen(c));
-    vec3 color = vec3(c);
-    //uv *= 0.2;
-    //float noise = texture2D(uNoise, uv).r;
-    //color.rgb += mix(-20.5/255.0, 20.5/255.0, noise) * 0.05;
-    //return vec4(uv.x, 0.0, 0.0, 1.0);
-
-    //color = 1.0 - ((1.0 - color) * pow(d, glowExp));
-    return vec4(color, 1.0);
 }
 

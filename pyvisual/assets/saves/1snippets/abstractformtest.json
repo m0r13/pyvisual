@@ -1,27 +1,27 @@
 {
     "connections": [
         {
-            "dst_node_id": 0,
+            "dst_node_id": 9,
             "dst_port_id": "i_input",
-            "src_node_id": 1,
+            "src_node_id": 10,
             "src_port_id": "o_output"
         },
         {
-            "dst_node_id": 2,
+            "dst_node_id": 11,
             "dst_port_id": "i_texture",
-            "src_node_id": 0,
+            "src_node_id": 9,
             "src_port_id": "o_output"
         },
         {
-            "dst_node_id": 0,
+            "dst_node_id": 9,
             "dst_port_id": "i_time",
-            "src_node_id": 3,
+            "src_node_id": 12,
             "src_port_id": "o_output"
         },
         {
-            "dst_node_id": 0,
+            "dst_node_id": 9,
             "dst_port_id": "i_uMirrorRotation",
-            "src_node_id": 4,
+            "src_node_id": 13,
             "src_port_id": "o_output"
         }
     ],
@@ -157,6 +157,46 @@
                     }
                 ],
                 [
+                    "i_uAlpha",
+                    {
+                        "default": null,
+                        "dtype": "float",
+                        "dtype_args": {
+                            "default": 1.0,
+                            "range": [
+                                0.0,
+                                1.0
+                            ]
+                        },
+                        "dummy": false,
+                        "group": "default",
+                        "hide": false,
+                        "manual_input": true,
+                        "name": "uAlpha",
+                        "widgets": []
+                    }
+                ],
+                [
+                    "i_uMirrorCount",
+                    {
+                        "default": null,
+                        "dtype": "float",
+                        "dtype_args": {
+                            "default": 4.0,
+                            "range": [
+                                0.0,
+                                Infinity
+                            ]
+                        },
+                        "dummy": false,
+                        "group": "default",
+                        "hide": false,
+                        "manual_input": true,
+                        "name": "uMirrorCount",
+                        "widgets": []
+                    }
+                ],
+                [
                     "i_uMirrorRotation",
                     {
                         "default": null,
@@ -203,7 +243,7 @@
                     }
                 ]
             ],
-            "id": 0,
+            "id": 9,
             "manual_values": {
                 "i_enable_time_mask": 0.0,
                 "i_enabled": 1.0,
@@ -241,10 +281,12 @@
                         1.0
                     ]
                 ],
+                "i_uAlpha": 1.0,
                 "i_uDisplace": 0.0,
                 "i_uDitheringTime": 0.0,
+                "i_uMirrorCount": 0.0,
                 "i_uMirrorRotation": -32.150001525878906,
-                "i_uRotation": -0.5199999809265137,
+                "i_uRotation": 5.150000095367432,
                 "i_uScale": 1.0,
                 "i_uSliceTime": -1.4800000190734863,
                 "i_uSliceTimeOffset": 1.7000000476837158,
@@ -264,7 +306,7 @@
         },
         {
             "custom_ports": [],
-            "id": 1,
+            "id": 10,
             "manual_values": {
                 "i_name": "ref_highres",
                 "o_output": ""
@@ -281,7 +323,7 @@
         },
         {
             "custom_ports": [],
-            "id": 2,
+            "id": 11,
             "manual_values": {
                 "i_texture": ""
             },
@@ -297,12 +339,12 @@
         },
         {
             "custom_ports": [],
-            "id": 3,
+            "id": 12,
             "manual_values": {
                 "i_factor": 0.4699999988079071,
                 "i_mod": 0.0,
                 "i_reset": 0.0,
-                "o_output": 77.10357990258919
+                "o_output": 158.00580760218764
             },
             "type": "Time",
             "ui_data": {
@@ -316,12 +358,12 @@
         },
         {
             "custom_ports": [],
-            "id": 4,
+            "id": 13,
             "manual_values": {
                 "i_factor": 0.6000000238418579,
                 "i_mod": 0.0,
                 "i_reset": 0.0,
-                "o_output": 252.9317175305162
+                "o_output": 201.70941195922708
             },
             "type": "Time",
             "ui_data": {
@@ -335,12 +377,12 @@
         },
         {
             "custom_ports": [],
-            "id": 5,
+            "id": 14,
             "manual_values": {
                 "i_factor": 1.8799999952316284,
                 "i_mod": 0.0,
                 "i_reset": 0.0,
-                "o_output": 308.4146893975705
+                "o_output": 632.0281586638146
             },
             "type": "Time",
             "ui_data": {
@@ -354,14 +396,14 @@
         },
         {
             "custom_ports": [],
-            "id": 6,
+            "id": 15,
             "manual_values": {
                 "i_length": 16.8700008392334,
                 "i_max": 5.0,
                 "i_min": -5.0,
                 "i_phase": 0.0,
                 "i_type": 2.0,
-                "o_output": 3.369991511623237
+                "o_output": -1.4407974616328523
             },
             "type": "LFO",
             "ui_data": {
