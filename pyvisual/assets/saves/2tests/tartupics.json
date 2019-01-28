@@ -2,9 +2,15 @@
     "connections": [
         {
             "dst_node_id": 19,
-            "dst_port_id": "i_input",
+            "dst_port_id": "i_destination",
             "src_node_id": 0,
-            "src_port_id": "o_texture"
+            "src_port_id": "o_last_texture"
+        },
+        {
+            "dst_node_id": 18,
+            "dst_port_id": "i_destination",
+            "src_node_id": 0,
+            "src_port_id": "o_last_texture"
         },
         {
             "dst_node_id": 18,
@@ -14,27 +20,21 @@
         },
         {
             "dst_node_id": 2,
-            "dst_port_id": "i_input",
+            "dst_port_id": "i_destination",
             "src_node_id": 0,
-            "src_port_id": "o_texture"
+            "src_port_id": "o_last_texture"
         },
         {
             "dst_node_id": 19,
-            "dst_port_id": "i_destination",
+            "dst_port_id": "i_input",
             "src_node_id": 0,
-            "src_port_id": "o_last_texture"
+            "src_port_id": "o_texture"
         },
         {
             "dst_node_id": 2,
-            "dst_port_id": "i_destination",
+            "dst_port_id": "i_input",
             "src_node_id": 0,
-            "src_port_id": "o_last_texture"
-        },
-        {
-            "dst_node_id": 18,
-            "dst_port_id": "i_destination",
-            "src_node_id": 0,
-            "src_port_id": "o_last_texture"
+            "src_port_id": "o_texture"
         },
         {
             "dst_node_id": 3,
@@ -43,16 +43,28 @@
             "src_port_id": "o_next"
         },
         {
+            "dst_node_id": 18,
+            "dst_port_id": "i_alpha",
+            "src_node_id": 3,
+            "src_port_id": "o_output"
+        },
+        {
+            "dst_node_id": 19,
+            "dst_port_id": "i_alpha",
+            "src_node_id": 3,
+            "src_port_id": "o_output"
+        },
+        {
             "dst_node_id": 2,
             "dst_port_id": "i_alpha",
             "src_node_id": 3,
             "src_port_id": "o_output"
         },
         {
-            "dst_node_id": 18,
-            "dst_port_id": "i_alpha",
-            "src_node_id": 3,
-            "src_port_id": "o_output"
+            "dst_node_id": 8,
+            "dst_port_id": "i_trigger",
+            "src_node_id": 6,
+            "src_port_id": "o_next"
         },
         {
             "dst_node_id": 7,
@@ -65,12 +77,6 @@
             "dst_port_id": "i_destination",
             "src_node_id": 6,
             "src_port_id": "o_last_texture"
-        },
-        {
-            "dst_node_id": 8,
-            "dst_port_id": "i_trigger",
-            "src_node_id": 6,
-            "src_port_id": "o_next"
         },
         {
             "dst_node_id": 7,
@@ -115,13 +121,7 @@
             "src_port_id": "o_output"
         },
         {
-            "dst_node_id": 54,
-            "dst_port_id": "i_input",
-            "src_node_id": 13,
-            "src_port_id": "o_output"
-        },
-        {
-            "dst_node_id": 39,
+            "dst_node_id": 26,
             "dst_port_id": "i_input",
             "src_node_id": 13,
             "src_port_id": "o_output"
@@ -151,87 +151,171 @@
             "src_port_id": "o_output"
         },
         {
-            "dst_node_id": 35,
-            "dst_port_id": "i_input",
-            "src_node_id": 22,
-            "src_port_id": "o_output"
-        },
-        {
             "dst_node_id": 1,
             "dst_port_id": "i_texture",
-            "src_node_id": 23,
+            "src_node_id": 21,
             "src_port_id": "o_output"
         },
         {
             "dst_node_id": 38,
-            "dst_port_id": "i_transformUV",
-            "src_node_id": 34,
+            "dst_port_id": "i_t2",
+            "src_node_id": 22,
             "src_port_id": "o_output"
         },
         {
-            "dst_node_id": 23,
+            "dst_node_id": 21,
             "dst_port_id": "i_mask",
-            "src_node_id": 36,
-            "src_port_id": "o_output"
-        },
-        {
-            "dst_node_id": 23,
-            "dst_port_id": "i_foreground",
-            "src_node_id": 38,
-            "src_port_id": "o_output"
-        },
-        {
-            "dst_node_id": 53,
-            "dst_port_id": "i_input",
-            "src_node_id": 39,
-            "src_port_id": "o_output"
-        },
-        {
-            "dst_node_id": 39,
-            "dst_port_id": "i_timeV",
-            "src_node_id": 40,
-            "src_port_id": "o_output"
-        },
-        {
-            "dst_node_id": 40,
-            "dst_port_id": "i_factor",
-            "src_node_id": 42,
-            "src_port_id": "o_output"
-        },
-        {
-            "dst_node_id": 47,
-            "dst_port_id": "i_input",
-            "src_node_id": 46,
-            "src_port_id": "o_output"
-        },
-        {
-            "dst_node_id": 42,
-            "dst_port_id": "i_alpha",
-            "src_node_id": 47,
-            "src_port_id": "o_output"
-        },
-        {
-            "dst_node_id": 48,
-            "dst_port_id": "i_input",
-            "src_node_id": 47,
+            "src_node_id": 24,
             "src_port_id": "o_output"
         },
         {
             "dst_node_id": 46,
             "dst_port_id": "i_input",
-            "src_node_id": 49,
-            "src_port_id": "o_event"
+            "src_node_id": 25,
+            "src_port_id": "o_output"
         },
         {
-            "dst_node_id": 38,
+            "dst_node_id": 21,
             "dst_port_id": "i_input",
-            "src_node_id": 53,
+            "src_node_id": 26,
+            "src_port_id": "o_output"
+        },
+        {
+            "dst_node_id": 25,
+            "dst_port_id": "i_uColor",
+            "src_node_id": 27,
+            "src_port_id": "o_rgba"
+        },
+        {
+            "dst_node_id": 27,
+            "dst_port_id": "i_h",
+            "src_node_id": 28,
+            "src_port_id": "o_output"
+        },
+        {
+            "dst_node_id": 31,
+            "dst_port_id": "i_trigger",
+            "src_node_id": 29,
+            "src_port_id": "o_next"
+        },
+        {
+            "dst_node_id": 30,
+            "dst_port_id": "i_destination",
+            "src_node_id": 29,
+            "src_port_id": "o_last_texture"
+        },
+        {
+            "dst_node_id": 30,
+            "dst_port_id": "i_input",
+            "src_node_id": 29,
+            "src_port_id": "o_texture"
+        },
+        {
+            "dst_node_id": 30,
+            "dst_port_id": "i_alpha",
+            "src_node_id": 31,
+            "src_port_id": "o_output"
+        },
+        {
+            "dst_node_id": 32,
+            "dst_port_id": "i_input",
+            "src_node_id": 33,
+            "src_port_id": "o_output"
+        },
+        {
+            "dst_node_id": 32,
+            "dst_port_id": "i_time",
+            "src_node_id": 34,
+            "src_port_id": "o_output"
+        },
+        {
+            "dst_node_id": 32,
+            "dst_port_id": "i_transformUV",
+            "src_node_id": 35,
+            "src_port_id": "o_output"
+        },
+        {
+            "dst_node_id": 10,
+            "dst_port_id": "i_sizeref",
+            "src_node_id": 36,
             "src_port_id": "o_output"
         },
         {
             "dst_node_id": 23,
             "dst_port_id": "i_input",
-            "src_node_id": 54,
+            "src_node_id": 30,
+            "src_port_id": "o_output"
+        },
+        {
+            "dst_node_id": 25,
+            "dst_port_id": "i_input",
+            "src_node_id": 37,
+            "src_port_id": "o_output"
+        },
+        {
+            "dst_node_id": 38,
+            "dst_port_id": "i_t1",
+            "src_node_id": 39,
+            "src_port_id": "o_output"
+        },
+        {
+            "dst_node_id": 25,
+            "dst_port_id": "i_transformUV",
+            "src_node_id": 38,
+            "src_port_id": "o_output"
+        },
+        {
+            "dst_node_id": 42,
+            "dst_port_id": "i_a",
+            "src_node_id": 40,
+            "src_port_id": "o_output"
+        },
+        {
+            "dst_node_id": 42,
+            "dst_port_id": "i_b",
+            "src_node_id": 41,
+            "src_port_id": "o_output"
+        },
+        {
+            "dst_node_id": 44,
+            "dst_port_id": "i_a",
+            "src_node_id": 42,
+            "src_port_id": "o_out"
+        },
+        {
+            "dst_node_id": 45,
+            "dst_port_id": "i_generate",
+            "src_node_id": 43,
+            "src_port_id": "o_output"
+        },
+        {
+            "dst_node_id": 41,
+            "dst_port_id": "i_reset",
+            "src_node_id": 43,
+            "src_port_id": "o_output"
+        },
+        {
+            "dst_node_id": 40,
+            "dst_port_id": "i_generate",
+            "src_node_id": 43,
+            "src_port_id": "o_output"
+        },
+        {
+            "dst_node_id": 39,
+            "dst_port_id": "i_x",
+            "src_node_id": 44,
+            "src_port_id": "o_out"
+        },
+        {
+            "dst_node_id": 44,
+            "dst_port_id": "i_b",
+            "src_node_id": 45,
+            "src_port_id": "o_output"
+        },
+        {
+            "dst_node_id": 21,
+            "dst_port_id": "i_foreground",
+            "src_node_id": 46,
             "src_port_id": "o_output"
         }
     ],
@@ -240,10 +324,10 @@
             "custom_ports": [],
             "id": 0,
             "manual_values": {
-                "i_current": "image/industrial/erik-eastman-293388-unsplash.jpg",
+                "i_current": "image/tartuvhs/1264653_10151685340588005_1519423834_o.jpg",
                 "i_next": 0.0,
                 "i_shuffle": 0.0,
-                "i_wildcard": "image/industrial/*.jpg",
+                "i_wildcard": "image/tartuvhs/*.jpg",
                 "o_last_texture": "",
                 "o_next": 0.0,
                 "o_texture": ""
@@ -252,8 +336,8 @@
             "ui_data": {
                 "collapsed": false,
                 "pos": [
-                    -1920.0,
-                    865.0
+                    -1921.0,
+                    679.0
                 ],
                 "selected": false
             }
@@ -268,8 +352,8 @@
             "ui_data": {
                 "collapsed": false,
                 "pos": [
-                    393.0,
-                    1405.0
+                    813.0,
+                    1417.0
                 ],
                 "selected": false
             }
@@ -319,8 +403,8 @@
             "ui_data": {
                 "collapsed": false,
                 "pos": [
-                    -1489.0,
-                    671.0
+                    -1491.0,
+                    484.0
                 ],
                 "selected": false
             }
@@ -338,8 +422,8 @@
             "ui_data": {
                 "collapsed": false,
                 "pos": [
-                    -1717.0,
-                    981.0
+                    -1721.0,
+                    794.0
                 ],
                 "selected": false
             }
@@ -355,8 +439,8 @@
             "ui_data": {
                 "collapsed": false,
                 "pos": [
-                    -960.0,
-                    836.0
+                    -961.0,
+                    649.0
                 ],
                 "selected": false
             }
@@ -370,10 +454,10 @@
             },
             "type": "SetTextureVar",
             "ui_data": {
-                "collapsed": true,
+                "collapsed": false,
                 "pos": [
-                    -1421.0,
-                    1117.0
+                    -1461.0,
+                    1006.0
                 ],
                 "selected": false
             }
@@ -382,7 +466,7 @@
             "custom_ports": [],
             "id": 6,
             "manual_values": {
-                "i_current": "image/tartuvhs/m\u00f6ku+baar_.jpg",
+                "i_current": "image/tartuvhs/tu_1.jpg",
                 "i_next": 0.0,
                 "i_shuffle": 0.0,
                 "i_wildcard": "image/tartuvhs/*.jpg",
@@ -394,8 +478,8 @@
             "ui_data": {
                 "collapsed": false,
                 "pos": [
-                    -1899.0,
-                    1100.0
+                    -1936.0,
+                    991.0
                 ],
                 "selected": false
             }
@@ -445,8 +529,8 @@
             "ui_data": {
                 "collapsed": true,
                 "pos": [
-                    -1583.0,
-                    1117.0
+                    -1621.0,
+                    1006.0
                 ],
                 "selected": false
             }
@@ -464,8 +548,8 @@
             "ui_data": {
                 "collapsed": true,
                 "pos": [
-                    -1720.0,
-                    1251.0
+                    -1756.0,
+                    1141.0
                 ],
                 "selected": false
             }
@@ -481,8 +565,8 @@
             "ui_data": {
                 "collapsed": true,
                 "pos": [
-                    -1622.0,
-                    1671.0
+                    -1594.0,
+                    1653.0
                 ],
                 "selected": false
             }
@@ -612,14 +696,14 @@
                 "i_theta": 0.0,
                 "o_output": [
                     [
-                        0.7401939630508423,
-                        -0.6723934412002563,
+                        0.9951462149620056,
+                        0.09840747714042664,
                         0.0,
                         0.0
                     ],
                     [
-                        0.6723934412002563,
-                        0.7401939630508423,
+                        -0.09840747714042664,
+                        0.9951462149620056,
                         0.0,
                         0.0
                     ],
@@ -656,7 +740,7 @@
                 "i_min": -45.0,
                 "i_phase": 0.0,
                 "i_type": 3.0,
-                "o_output": -42.252060342420116
+                "o_output": 5.647473251299836
             },
             "type": "LFO",
             "ui_data": {
@@ -931,14 +1015,14 @@
                 ],
                 "o_output": [
                     [
-                        0.7401939630508423,
-                        -0.6723934412002563,
+                        0.9951462149620056,
+                        0.09840747714042664,
                         0.0,
                         0.0
                     ],
                     [
-                        0.6723934412002563,
-                        0.7401939630508423,
+                        -0.09840747714042664,
+                        0.9951462149620056,
                         0.0,
                         0.0
                     ],
@@ -949,7 +1033,7 @@
                         0.0
                     ],
                     [
-                        9235.2236328125,
+                        50.05816650390625,
                         0.0,
                         0.0,
                         1.0
@@ -1017,7 +1101,7 @@
                 "i_factor": 5.0,
                 "i_mod": 0.0,
                 "i_reset": 0.0,
-                "o_output": 9235.223623514175
+                "o_output": 50.058168172836304
             },
             "type": "Time",
             "ui_data": {
@@ -1055,7 +1139,7 @@
                         0.0
                     ],
                     [
-                        9235.2236328125,
+                        50.05816650390625,
                         0.0,
                         0.0,
                         1.0
@@ -1119,8 +1203,8 @@
             "ui_data": {
                 "collapsed": false,
                 "pos": [
-                    -1212.0,
-                    736.0
+                    -1216.0,
+                    549.0
                 ],
                 "selected": false
             }
@@ -1172,15 +1256,15 @@
             "ui_data": {
                 "collapsed": false,
                 "pos": [
-                    -1180.0,
-                    987.0
+                    -1212.0,
+                    800.0
                 ],
                 "selected": false
             }
         },
         {
             "custom_ports": [],
-            "id": 22,
+            "id": 20,
             "manual_values": {
                 "i_path": "image/mask/full/3squares.png",
                 "o_output": ""
@@ -1197,7 +1281,7 @@
         },
         {
             "custom_ports": [],
-            "id": 23,
+            "id": 21,
             "manual_values": {
                 "i_enabled": 1.0,
                 "i_force_change": 42.0,
@@ -1240,29 +1324,29 @@
             "ui_data": {
                 "collapsed": false,
                 "pos": [
-                    83.0,
-                    1375.0
+                    503.0,
+                    1387.0
                 ],
                 "selected": false
             }
         },
         {
             "custom_ports": [],
-            "id": 34,
+            "id": 22,
             "manual_values": {
                 "i_uniform": 1.0,
-                "i_x": 1.2100000381469727,
-                "i_y": 1.2100000381469727,
+                "i_x": 1.2000000476837158,
+                "i_y": 1.2000000476837158,
                 "o_output": [
                     [
-                        1.2100000381469727,
+                        1.2000000476837158,
                         0.0,
                         0.0,
                         0.0
                     ],
                     [
                         0.0,
-                        1.2100000381469727,
+                        1.2000000476837158,
                         0.0,
                         0.0
                     ],
@@ -1282,17 +1366,17 @@
             },
             "type": "Scale",
             "ui_data": {
-                "collapsed": false,
+                "collapsed": true,
                 "pos": [
-                    -679.0,
-                    1599.0
+                    -421.0,
+                    1660.0
                 ],
                 "selected": false
             }
         },
         {
             "custom_ports": [],
-            "id": 35,
+            "id": 23,
             "manual_values": {
                 "i_input": "",
                 "i_name": "mask"
@@ -1301,15 +1385,15 @@
             "ui_data": {
                 "collapsed": true,
                 "pos": [
-                    -1130.0,
-                    1977.0
+                    -1389.0,
+                    2137.0
                 ],
                 "selected": false
             }
         },
         {
             "custom_ports": [],
-            "id": 36,
+            "id": 24,
             "manual_values": {
                 "i_name": "mask",
                 "o_output": ""
@@ -1318,8 +1402,8 @@
             "ui_data": {
                 "collapsed": true,
                 "pos": [
-                    109.0,
-                    1570.0
+                    528.0,
+                    1582.0
                 ],
                 "selected": false
             }
@@ -1424,7 +1508,7 @@
                     }
                 ]
             ],
-            "id": 38,
+            "id": 25,
             "manual_values": {
                 "i_advanced_filtering": 0.0,
                 "i_enabled": 1.0,
@@ -1481,526 +1565,8 @@
             "ui_data": {
                 "collapsed": false,
                 "pos": [
-                    -177.0,
-                    1668.0
-                ],
-                "selected": false
-            }
-        },
-        {
-            "custom_ports": [
-                [
-                    "i_filter_mask",
-                    {
-                        "default": null,
-                        "dtype": "tex2d",
-                        "dtype_args": {},
-                        "dummy": false,
-                        "group": "default",
-                        "hide": true,
-                        "manual_input": true,
-                        "name": "filter_mask",
-                        "widgets": []
-                    }
-                ],
-                [
-                    "i_filter_mode",
-                    {
-                        "default": null,
-                        "dtype": "int",
-                        "dtype_args": {
-                            "choices": [
-                                "input",
-                                "mask",
-                                "filtered",
-                                "input_filtered_masked",
-                                "input_masked",
-                                "filtered_masked"
-                            ],
-                            "default": 2.0
-                        },
-                        "dummy": false,
-                        "group": "default",
-                        "hide": true,
-                        "manual_input": true,
-                        "name": "filter_mode",
-                        "widgets": []
-                    }
-                ],
-                [
-                    "i_filter_bg",
-                    {
-                        "default": null,
-                        "dtype": "color",
-                        "dtype_args": {
-                            "default": [
-                                0.0,
-                                0.0,
-                                0.0,
-                                0.0
-                            ]
-                        },
-                        "dummy": false,
-                        "group": "default",
-                        "hide": true,
-                        "manual_input": true,
-                        "name": "filter_bg",
-                        "widgets": []
-                    }
-                ],
-                [
-                    "i_slices",
-                    {
-                        "default": null,
-                        "dtype": "float",
-                        "dtype_args": {
-                            "default": 3.0
-                        },
-                        "dummy": false,
-                        "group": "default",
-                        "hide": false,
-                        "manual_input": true,
-                        "name": "slices",
-                        "widgets": []
-                    }
-                ],
-                [
-                    "i_offset",
-                    {
-                        "default": null,
-                        "dtype": "float",
-                        "dtype_args": {
-                            "default": 100.0
-                        },
-                        "dummy": false,
-                        "group": "default",
-                        "hide": false,
-                        "manual_input": true,
-                        "name": "offset",
-                        "widgets": []
-                    }
-                ],
-                [
-                    "i_timeH",
-                    {
-                        "default": null,
-                        "dtype": "float",
-                        "dtype_args": {
-                            "default": 0.0
-                        },
-                        "dummy": false,
-                        "group": "default",
-                        "hide": false,
-                        "manual_input": true,
-                        "name": "timeH",
-                        "widgets": []
-                    }
-                ],
-                [
-                    "i_timeV",
-                    {
-                        "default": null,
-                        "dtype": "float",
-                        "dtype_args": {
-                            "default": 0.0
-                        },
-                        "dummy": false,
-                        "group": "default",
-                        "hide": false,
-                        "manual_input": true,
-                        "name": "timeV",
-                        "widgets": []
-                    }
-                ]
-            ],
-            "id": 39,
-            "manual_values": {
-                "i_advanced_filtering": 0.0,
-                "i_enabled": 0.0,
-                "i_filter_bg": [
-                    0.0,
-                    0.0,
-                    0.0,
-                    0.0
-                ],
-                "i_filter_mask": "",
-                "i_filter_mode": 2.0,
-                "i_force_change": 42.0,
-                "i_input": "",
-                "i_interpolation": 1.0,
-                "i_offset": 36.869998931884766,
-                "i_sizeref": "",
-                "i_slices": 3.0,
-                "i_timeH": 2.4800000190734863,
-                "i_timeV": 0.5099999904632568,
-                "i_transformUV": [
-                    [
-                        1.0,
-                        0.0,
-                        0.0,
-                        0.0
-                    ],
-                    [
-                        0.0,
-                        1.0,
-                        0.0,
-                        0.0
-                    ],
-                    [
-                        0.0,
-                        0.0,
-                        1.0,
-                        0.0
-                    ],
-                    [
-                        0.0,
-                        0.0,
-                        0.0,
-                        1.0
-                    ]
-                ],
-                "i_wrapping": 1.0,
-                "o_enabled": 0.0,
-                "o_output": ""
-            },
-            "type": "Slices",
-            "ui_data": {
-                "collapsed": false,
-                "pos": [
-                    -770.0,
-                    1752.0
-                ],
-                "selected": false
-            }
-        },
-        {
-            "custom_ports": [],
-            "id": 40,
-            "manual_values": {
-                "i_factor": 0.05999999865889549,
-                "i_mod": 0.0,
-                "i_reset": 0.0,
-                "o_output": -27.833483006099467
-            },
-            "type": "Time",
-            "ui_data": {
-                "collapsed": false,
-                "pos": [
-                    -966.0,
-                    2021.0
-                ],
-                "selected": false
-            }
-        },
-        {
-            "custom_ports": [],
-            "id": 42,
-            "manual_values": {
-                "i_a": -0.05000000074505806,
-                "i_alpha": 0.0,
-                "i_alpha0": 0.0,
-                "i_alpha1": 1.0,
-                "i_b": 0.550000011920929,
-                "o_output": 0.15273673097912605
-            },
-            "type": "MixFloat",
-            "ui_data": {
-                "collapsed": false,
-                "pos": [
-                    -1248.0,
-                    2165.0
-                ],
-                "selected": false
-            }
-        },
-        {
-            "custom_ports": [],
-            "id": 46,
-            "manual_values": {
-                "i_condition": 1.0,
-                "i_duration": 0.10000000149011612,
-                "i_input": 0.0,
-                "o_output": 0.0
-            },
-            "type": "HoldBool",
-            "ui_data": {
-                "collapsed": false,
-                "pos": [
-                    -1445.0,
-                    2336.0
-                ],
-                "selected": false
-            }
-        },
-        {
-            "custom_ports": [],
-            "id": 47,
-            "manual_values": {
-                "i_cutoff": 11.489999771118164,
-                "i_enabled": 1.0,
-                "i_input": 0.0,
-                "i_order": 2.0,
-                "o_output": 0.3378945457406936
-            },
-            "type": "LowpassFloat",
-            "ui_data": {
-                "collapsed": false,
-                "pos": [
-                    -1259.0,
-                    2372.0
-                ],
-                "selected": false
-            }
-        },
-        {
-            "custom_ports": [],
-            "id": 48,
-            "manual_values": {
-                "i_height": 50.0,
-                "i_input": 0.0,
-                "i_max": 1.0,
-                "i_min": 0.0,
-                "i_time": 5.0,
-                "i_width": 200.0
-            },
-            "type": "Plot",
-            "ui_data": {
-                "collapsed": false,
-                "pos": [
-                    -975.0,
-                    2382.0
-                ],
-                "selected": false
-            }
-        },
-        {
-            "custom_ports": [
-                [
-                    "i_enabled",
-                    {
-                        "default": null,
-                        "dtype": "bool",
-                        "dtype_args": {
-                            "default": 1.0
-                        },
-                        "dummy": false,
-                        "group": "default",
-                        "hide": false,
-                        "manual_input": true,
-                        "name": "enabled",
-                        "widgets": []
-                    }
-                ],
-                [
-                    "i_n",
-                    {
-                        "default": null,
-                        "dtype": "int",
-                        "dtype_args": {
-                            "default": 4.0
-                        },
-                        "dummy": false,
-                        "group": "default",
-                        "hide": false,
-                        "manual_input": true,
-                        "name": "n",
-                        "widgets": []
-                    }
-                ],
-                [
-                    "i_offset",
-                    {
-                        "default": null,
-                        "dtype": "int",
-                        "dtype_args": {
-                            "default": 0.0
-                        },
-                        "dummy": false,
-                        "group": "default",
-                        "hide": false,
-                        "manual_input": true,
-                        "name": "offset",
-                        "widgets": []
-                    }
-                ],
-                [
-                    "i_p",
-                    {
-                        "default": null,
-                        "dtype": "float",
-                        "dtype_args": {
-                            "default": 1.0
-                        },
-                        "dummy": false,
-                        "group": "default",
-                        "hide": false,
-                        "manual_input": true,
-                        "name": "p",
-                        "widgets": []
-                    }
-                ],
-                [
-                    "o_event",
-                    {
-                        "default": null,
-                        "dtype": "event",
-                        "dtype_args": {},
-                        "dummy": false,
-                        "group": "default",
-                        "hide": false,
-                        "manual_input": true,
-                        "name": "event",
-                        "widgets": []
-                    }
-                ]
-            ],
-            "id": 49,
-            "manual_values": {
-                "i_enabled": 1.0,
-                "i_n": 4.0,
-                "i_offset": 0.0,
-                "i_p": 1.0,
-                "o_event": 0.0
-            },
-            "type": "EveryNBeat",
-            "ui_data": {
-                "collapsed": false,
-                "pos": [
-                    -1692.0,
-                    2287.0
-                ],
-                "selected": false
-            }
-        },
-        {
-            "custom_ports": [
-                [
-                    "i_filter_mask",
-                    {
-                        "default": null,
-                        "dtype": "tex2d",
-                        "dtype_args": {},
-                        "dummy": false,
-                        "group": "default",
-                        "hide": true,
-                        "manual_input": true,
-                        "name": "filter_mask",
-                        "widgets": []
-                    }
-                ],
-                [
-                    "i_filter_mode",
-                    {
-                        "default": null,
-                        "dtype": "int",
-                        "dtype_args": {
-                            "choices": [
-                                "input",
-                                "mask",
-                                "filtered",
-                                "input_filtered_masked",
-                                "input_masked",
-                                "filtered_masked"
-                            ],
-                            "default": 2.0
-                        },
-                        "dummy": false,
-                        "group": "default",
-                        "hide": true,
-                        "manual_input": true,
-                        "name": "filter_mode",
-                        "widgets": []
-                    }
-                ],
-                [
-                    "i_filter_bg",
-                    {
-                        "default": null,
-                        "dtype": "color",
-                        "dtype_args": {
-                            "default": [
-                                0.0,
-                                0.0,
-                                0.0,
-                                0.0
-                            ]
-                        },
-                        "dummy": false,
-                        "group": "default",
-                        "hide": true,
-                        "manual_input": true,
-                        "name": "filter_bg",
-                        "widgets": []
-                    }
-                ],
-                [
-                    "i_uTest",
-                    {
-                        "default": null,
-                        "dtype": "float",
-                        "dtype_args": {},
-                        "dummy": false,
-                        "group": "default",
-                        "hide": false,
-                        "manual_input": true,
-                        "name": "uTest",
-                        "widgets": []
-                    }
-                ]
-            ],
-            "id": 53,
-            "manual_values": {
-                "i_advanced_filtering": 0.0,
-                "i_enabled": 0.0,
-                "i_filter_bg": [
-                    0.0,
-                    0.0,
-                    0.0,
-                    0.0
-                ],
-                "i_filter_mask": "",
-                "i_filter_mode": 2.0,
-                "i_force_change": 42.0,
-                "i_input": "",
-                "i_interpolation": 1.0,
-                "i_sizeref": "",
-                "i_transformUV": [
-                    [
-                        1.0,
-                        0.0,
-                        0.0,
-                        0.0
-                    ],
-                    [
-                        0.0,
-                        1.0,
-                        0.0,
-                        0.0
-                    ],
-                    [
-                        0.0,
-                        0.0,
-                        1.0,
-                        0.0
-                    ],
-                    [
-                        0.0,
-                        0.0,
-                        0.0,
-                        1.0
-                    ]
-                ],
-                "i_uTest": 0.0,
-                "i_wrapping": 1.0,
-                "o_enabled": 0.0,
-                "o_output": ""
-            },
-            "type": "Invert",
-            "ui_data": {
-                "collapsed": false,
-                "pos": [
-                    -477.0,
-                    1729.0
+                    -256.0,
+                    1695.0
                 ],
                 "selected": false
             }
@@ -2123,7 +1689,7 @@
                     }
                 ]
             ],
-            "id": 54,
+            "id": 26,
             "manual_values": {
                 "i_advanced_filtering": 0.0,
                 "i_enabled": 1.0,
@@ -2165,8 +1731,8 @@
                         1.0
                     ]
                 ],
-                "i_uHue": 0.0,
-                "i_uSaturation": 0.0,
+                "i_uHue": 0.5,
+                "i_uSaturation": 0.33000001311302185,
                 "i_uValue": 1.0,
                 "i_wrapping": 1.0,
                 "o_enabled": 1.0,
@@ -2181,12 +1747,838 @@
                 ],
                 "selected": false
             }
+        },
+        {
+            "custom_ports": [],
+            "id": 27,
+            "manual_values": {
+                "i_a": 0.0,
+                "i_h": 0.7099999785423279,
+                "i_s": 1.0,
+                "i_v": 1.0,
+                "o_rgba": [
+                    0.0,
+                    0.8798940777778625,
+                    1.0,
+                    0.0
+                ]
+            },
+            "type": "HSV2RGBA",
+            "ui_data": {
+                "collapsed": false,
+                "pos": [
+                    -550.0,
+                    1996.0
+                ],
+                "selected": false
+            }
+        },
+        {
+            "custom_ports": [],
+            "id": 28,
+            "manual_values": {
+                "i_length": 1000.0,
+                "i_max": 1.0,
+                "i_min": 0.0,
+                "i_phase": 0.0,
+                "i_type": 1.0,
+                "o_output": 0.520017653465271
+            },
+            "type": "LFO",
+            "ui_data": {
+                "collapsed": true,
+                "pos": [
+                    -634.0,
+                    2011.0
+                ],
+                "selected": false
+            }
+        },
+        {
+            "custom_ports": [],
+            "id": 29,
+            "manual_values": {
+                "i_current": "image/mask/full/1rectcenter.png",
+                "i_next": 0.0,
+                "i_shuffle": 0.0,
+                "i_wildcard": "image/mask/full/*.png",
+                "o_last_texture": "",
+                "o_next": 0.0,
+                "o_texture": ""
+            },
+            "type": "LoadTextures",
+            "ui_data": {
+                "collapsed": false,
+                "pos": [
+                    -2021.0,
+                    2095.0
+                ],
+                "selected": false
+            }
+        },
+        {
+            "custom_ports": [],
+            "id": 30,
+            "manual_values": {
+                "i_alpha": 0.0,
+                "i_destination": "",
+                "i_enabled": 1.0,
+                "i_force_change": 42.0,
+                "i_input": "",
+                "i_interpolation": 1.0,
+                "i_sizeref": "",
+                "i_transformUV": [
+                    [
+                        1.0,
+                        0.0,
+                        0.0,
+                        0.0
+                    ],
+                    [
+                        0.0,
+                        1.0,
+                        0.0,
+                        0.0
+                    ],
+                    [
+                        0.0,
+                        0.0,
+                        1.0,
+                        0.0
+                    ],
+                    [
+                        0.0,
+                        0.0,
+                        0.0,
+                        1.0
+                    ]
+                ],
+                "i_wrapping": 1.0,
+                "o_enabled": 1.0,
+                "o_output": ""
+            },
+            "type": "LerpMixTexture",
+            "ui_data": {
+                "collapsed": false,
+                "pos": [
+                    -1612.0,
+                    2098.0
+                ],
+                "selected": false
+            }
+        },
+        {
+            "custom_ports": [],
+            "id": 31,
+            "manual_values": {
+                "i_duration": 1.0,
+                "i_reverse": 1.0,
+                "i_trigger": 0.0,
+                "o_output": 0.0
+            },
+            "type": "TransitionTimer",
+            "ui_data": {
+                "collapsed": true,
+                "pos": [
+                    -1816.0,
+                    2265.0
+                ],
+                "selected": false
+            }
+        },
+        {
+            "custom_ports": [
+                [
+                    "i_time",
+                    {
+                        "default": null,
+                        "dtype": "float",
+                        "dtype_args": {},
+                        "dummy": false,
+                        "group": "default",
+                        "hide": false,
+                        "manual_input": true,
+                        "name": "time",
+                        "widgets": []
+                    }
+                ],
+                [
+                    "i_time_mask",
+                    {
+                        "default": null,
+                        "dtype": "tex2d",
+                        "dtype_args": {},
+                        "dummy": false,
+                        "group": "default",
+                        "hide": true,
+                        "manual_input": true,
+                        "name": "time_mask",
+                        "widgets": []
+                    }
+                ],
+                [
+                    "i_time_d0",
+                    {
+                        "default": null,
+                        "dtype": "float",
+                        "dtype_args": {
+                            "default": 0.0
+                        },
+                        "dummy": false,
+                        "group": "default",
+                        "hide": true,
+                        "manual_input": true,
+                        "name": "time_d0",
+                        "widgets": []
+                    }
+                ],
+                [
+                    "i_time_d1",
+                    {
+                        "default": null,
+                        "dtype": "float",
+                        "dtype_args": {
+                            "default": 0.0
+                        },
+                        "dummy": false,
+                        "group": "default",
+                        "hide": true,
+                        "manual_input": true,
+                        "name": "time_d1",
+                        "widgets": []
+                    }
+                ],
+                [
+                    "i_uThreshold",
+                    {
+                        "default": null,
+                        "dtype": "float",
+                        "dtype_args": {
+                            "default": 0.68
+                        },
+                        "dummy": false,
+                        "group": "default",
+                        "hide": false,
+                        "manual_input": true,
+                        "name": "uThreshold",
+                        "widgets": []
+                    }
+                ],
+                [
+                    "i_uSoftness",
+                    {
+                        "default": null,
+                        "dtype": "float",
+                        "dtype_args": {
+                            "default": 0.06
+                        },
+                        "dummy": false,
+                        "group": "default",
+                        "hide": false,
+                        "manual_input": true,
+                        "name": "uSoftness",
+                        "widgets": []
+                    }
+                ],
+                [
+                    "i_uShadeContrast",
+                    {
+                        "default": null,
+                        "dtype": "float",
+                        "dtype_args": {
+                            "default": 0.55
+                        },
+                        "dummy": false,
+                        "group": "default",
+                        "hide": false,
+                        "manual_input": true,
+                        "name": "uShadeContrast",
+                        "widgets": []
+                    }
+                ],
+                [
+                    "i_uOffset",
+                    {
+                        "default": null,
+                        "dtype": "vec2",
+                        "dtype_args": {},
+                        "dummy": false,
+                        "group": "default",
+                        "hide": false,
+                        "manual_input": true,
+                        "name": "uOffset",
+                        "widgets": []
+                    }
+                ]
+            ],
+            "id": 32,
+            "manual_values": {
+                "i_enable_time_mask": 0.0,
+                "i_enabled": 1.0,
+                "i_force_change": 42.0,
+                "i_input": "",
+                "i_interpolation": 1.0,
+                "i_sizeref": "",
+                "i_time": 0.0,
+                "i_time_d0": 0.0,
+                "i_time_d1": 0.0,
+                "i_time_mask": "",
+                "i_transformUV": [
+                    [
+                        1.0,
+                        0.0,
+                        0.0,
+                        0.0
+                    ],
+                    [
+                        0.0,
+                        1.0,
+                        0.0,
+                        0.0
+                    ],
+                    [
+                        0.0,
+                        0.0,
+                        1.0,
+                        0.0
+                    ],
+                    [
+                        0.0,
+                        0.0,
+                        0.0,
+                        1.0
+                    ]
+                ],
+                "i_uOffset": [
+                    0.0,
+                    0.0
+                ],
+                "i_uShadeContrast": 0.55,
+                "i_uSoftness": 0.06,
+                "i_uThreshold": 0.68,
+                "i_wrapping": 1.0,
+                "o_enabled": 1.0,
+                "o_output": ""
+            },
+            "type": "Rorschach",
+            "ui_data": {
+                "collapsed": false,
+                "pos": [
+                    -1711.0,
+                    2427.0
+                ],
+                "selected": false
+            }
+        },
+        {
+            "custom_ports": [],
+            "id": 33,
+            "manual_values": {
+                "i_name": "ref_lowres",
+                "o_output": ""
+            },
+            "type": "GetTextureVar",
+            "ui_data": {
+                "collapsed": false,
+                "pos": [
+                    -2120.0,
+                    2417.0
+                ],
+                "selected": false
+            }
+        },
+        {
+            "custom_ports": [],
+            "id": 34,
+            "manual_values": {
+                "i_factor": 0.5099999904632568,
+                "i_mod": 0.0,
+                "i_reset": 0.0,
+                "o_output": 5.1042289256258755
+            },
+            "type": "Time",
+            "ui_data": {
+                "collapsed": false,
+                "pos": [
+                    -2050.0,
+                    2662.0
+                ],
+                "selected": false
+            }
+        },
+        {
+            "custom_ports": [],
+            "id": 35,
+            "manual_values": {
+                "i_uniform": 1.0,
+                "i_x": 1.190000057220459,
+                "i_y": 1.190000057220459,
+                "o_output": [
+                    [
+                        1.190000057220459,
+                        0.0,
+                        0.0,
+                        0.0
+                    ],
+                    [
+                        0.0,
+                        1.190000057220459,
+                        0.0,
+                        0.0
+                    ],
+                    [
+                        0.0,
+                        0.0,
+                        1.0,
+                        0.0
+                    ],
+                    [
+                        0.0,
+                        0.0,
+                        0.0,
+                        1.0
+                    ]
+                ]
+            },
+            "type": "Scale",
+            "ui_data": {
+                "collapsed": false,
+                "pos": [
+                    -1941.0,
+                    2341.0
+                ],
+                "selected": false
+            }
+        },
+        {
+            "custom_ports": [],
+            "id": 36,
+            "manual_values": {
+                "i_name": "ref_lowres",
+                "o_output": ""
+            },
+            "type": "GetTextureVar",
+            "ui_data": {
+                "collapsed": true,
+                "pos": [
+                    -1624.0,
+                    1606.0
+                ],
+                "selected": false
+            }
+        },
+        {
+            "custom_ports": [],
+            "id": 37,
+            "manual_values": {
+                "i_name": "fg_source",
+                "o_output": ""
+            },
+            "type": "GetTextureVar",
+            "ui_data": {
+                "collapsed": true,
+                "pos": [
+                    -494.0,
+                    1772.0
+                ],
+                "selected": false
+            }
+        },
+        {
+            "custom_ports": [],
+            "id": 38,
+            "manual_values": {
+                "i_t1": [
+                    [
+                        1.0,
+                        0.0,
+                        0.0,
+                        0.0
+                    ],
+                    [
+                        0.0,
+                        1.0,
+                        0.0,
+                        0.0
+                    ],
+                    [
+                        0.0,
+                        0.0,
+                        1.0,
+                        0.0
+                    ],
+                    [
+                        0.0,
+                        0.0,
+                        0.0,
+                        1.0
+                    ]
+                ],
+                "i_t2": [
+                    [
+                        1.0,
+                        0.0,
+                        0.0,
+                        0.0
+                    ],
+                    [
+                        0.0,
+                        1.0,
+                        0.0,
+                        0.0
+                    ],
+                    [
+                        0.0,
+                        0.0,
+                        1.0,
+                        0.0
+                    ],
+                    [
+                        0.0,
+                        0.0,
+                        0.0,
+                        1.0
+                    ]
+                ],
+                "o_output": [
+                    [
+                        1.2000000476837158,
+                        0.0,
+                        0.0,
+                        0.0
+                    ],
+                    [
+                        0.0,
+                        1.2000000476837158,
+                        0.0,
+                        0.0
+                    ],
+                    [
+                        0.0,
+                        0.0,
+                        1.0,
+                        0.0
+                    ],
+                    [
+                        429.7889709472656,
+                        0.0,
+                        0.0,
+                        1.0
+                    ]
+                ]
+            },
+            "type": "Dot",
+            "ui_data": {
+                "collapsed": false,
+                "pos": [
+                    -435.0,
+                    1561.0
+                ],
+                "selected": false
+            }
+        },
+        {
+            "custom_ports": [],
+            "id": 39,
+            "manual_values": {
+                "i_x": 0.0,
+                "i_y": 0.0,
+                "o_output": [
+                    [
+                        1.0,
+                        0.0,
+                        0.0,
+                        0.0
+                    ],
+                    [
+                        0.0,
+                        1.0,
+                        0.0,
+                        0.0
+                    ],
+                    [
+                        0.0,
+                        0.0,
+                        1.0,
+                        0.0
+                    ],
+                    [
+                        358.157470703125,
+                        0.0,
+                        0.0,
+                        1.0
+                    ]
+                ]
+            },
+            "type": "Translate",
+            "ui_data": {
+                "collapsed": false,
+                "pos": [
+                    -618.0,
+                    1550.0
+                ],
+                "selected": false
+            }
+        },
+        {
+            "custom_ports": [],
+            "id": 40,
+            "manual_values": {
+                "i_generate": 0.0,
+                "i_max": 1.0,
+                "i_min": -1.0,
+                "i_mod": 2.0,
+                "o_output": -1.0
+            },
+            "type": "RandomFloat",
+            "ui_data": {
+                "collapsed": true,
+                "pos": [
+                    -1359.0,
+                    1861.0
+                ],
+                "selected": false
+            }
+        },
+        {
+            "custom_ports": [],
+            "id": 41,
+            "manual_values": {
+                "i_factor": 11.710000038146973,
+                "i_mod": 0.0,
+                "i_reset": 0.0,
+                "o_output": 117.14894206539839
+            },
+            "type": "Time",
+            "ui_data": {
+                "collapsed": false,
+                "pos": [
+                    -1404.0,
+                    1735.0
+                ],
+                "selected": false
+            }
+        },
+        {
+            "custom_ports": [],
+            "id": 42,
+            "manual_values": {
+                "i_a": 0.0,
+                "i_b": 0.0,
+                "i_op": 2.0,
+                "o_out": -117.14894206539839
+            },
+            "type": "BinaryOpFloat",
+            "ui_data": {
+                "collapsed": false,
+                "pos": [
+                    -1127.0,
+                    1777.0
+                ],
+                "selected": false
+            }
+        },
+        {
+            "custom_ports": [],
+            "id": 43,
+            "manual_values": {
+                "o_output": 0.0
+            },
+            "type": "InputEvent",
+            "ui_data": {
+                "collapsed": false,
+                "pos": [
+                    -1704.0,
+                    1803.0
+                ],
+                "selected": false
+            }
+        },
+        {
+            "custom_ports": [],
+            "id": 44,
+            "manual_values": {
+                "i_a": 0.0,
+                "i_b": 0.0,
+                "i_op": 0.0,
+                "o_out": 358.1574748107432
+            },
+            "type": "BinaryOpFloat",
+            "ui_data": {
+                "collapsed": false,
+                "pos": [
+                    -900.0,
+                    1766.0
+                ],
+                "selected": false
+            }
+        },
+        {
+            "custom_ports": [],
+            "id": 45,
+            "manual_values": {
+                "i_generate": 0.0,
+                "i_max": 500.0,
+                "i_min": -500.0,
+                "i_mod": 0.0,
+                "o_output": 475.3064168761416
+            },
+            "type": "RandomFloat",
+            "ui_data": {
+                "collapsed": false,
+                "pos": [
+                    -1184.0,
+                    1910.0
+                ],
+                "selected": false
+            }
+        },
+        {
+            "custom_ports": [
+                [
+                    "i_filter_mask",
+                    {
+                        "default": null,
+                        "dtype": "tex2d",
+                        "dtype_args": {},
+                        "dummy": false,
+                        "group": "default",
+                        "hide": true,
+                        "manual_input": true,
+                        "name": "filter_mask",
+                        "widgets": []
+                    }
+                ],
+                [
+                    "i_filter_mode",
+                    {
+                        "default": null,
+                        "dtype": "int",
+                        "dtype_args": {
+                            "choices": [
+                                "input",
+                                "mask",
+                                "filtered",
+                                "input_filtered_masked",
+                                "input_masked",
+                                "filtered_masked"
+                            ],
+                            "default": 2.0
+                        },
+                        "dummy": false,
+                        "group": "default",
+                        "hide": true,
+                        "manual_input": true,
+                        "name": "filter_mode",
+                        "widgets": []
+                    }
+                ],
+                [
+                    "i_filter_bg",
+                    {
+                        "default": null,
+                        "dtype": "color",
+                        "dtype_args": {
+                            "default": [
+                                0.0,
+                                0.0,
+                                0.0,
+                                0.0
+                            ]
+                        },
+                        "dummy": false,
+                        "group": "default",
+                        "hide": true,
+                        "manual_input": true,
+                        "name": "filter_bg",
+                        "widgets": []
+                    }
+                ],
+                [
+                    "i_uMode",
+                    {
+                        "default": null,
+                        "dtype": "int",
+                        "dtype_args": {
+                            "choices": [
+                                "passthrough",
+                                "1",
+                                "2",
+                                "3"
+                            ],
+                            "default": 1.0
+                        },
+                        "dummy": false,
+                        "group": "default",
+                        "hide": false,
+                        "manual_input": true,
+                        "name": "uMode",
+                        "widgets": []
+                    }
+                ]
+            ],
+            "id": 46,
+            "manual_values": {
+                "i_advanced_filtering": 0.0,
+                "i_enabled": 0.0,
+                "i_filter_bg": [
+                    0.0,
+                    0.0,
+                    0.0,
+                    0.0
+                ],
+                "i_filter_mask": "",
+                "i_filter_mode": 2.0,
+                "i_force_change": 42.0,
+                "i_input": "",
+                "i_interpolation": 1.0,
+                "i_sizeref": "",
+                "i_transformUV": [
+                    [
+                        1.0,
+                        0.0,
+                        0.0,
+                        0.0
+                    ],
+                    [
+                        0.0,
+                        1.0,
+                        0.0,
+                        0.0
+                    ],
+                    [
+                        0.0,
+                        0.0,
+                        1.0,
+                        0.0
+                    ],
+                    [
+                        0.0,
+                        0.0,
+                        0.0,
+                        1.0
+                    ]
+                ],
+                "i_uMode": 1.0,
+                "i_wrapping": 1.0,
+                "o_enabled": 0.0,
+                "o_output": ""
+            },
+            "type": "Mirror",
+            "ui_data": {
+                "collapsed": false,
+                "pos": [
+                    98.0,
+                    1658.0
+                ],
+                "selected": false
+            }
         }
     ],
     "ui_data": {
         "offset": [
-            -2254.0,
-            494.0
+            -1849.0,
+            1278.0
         ]
     }
 }
