@@ -4,3 +4,6 @@
 [submodule "ext/glumpy"]
 	path = ext/glumpy
 	url = https://github.com/m0r13/glumpy.git
+[submodule "ext/pyopengl"]
+	path = ext/pyopengl
+	url = https://github.com/mcfletch/pyopengl.git

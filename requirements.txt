@@ -1,0 +1,12 @@
+numpy
+scipy
+Pillow
+cython
+noise
+mido
+rtmidi
+clipboard
+./ext/pyopengl
+./ext/pyopengl/accelerate
+./ext/glumpy
+./ext/pyimgui
