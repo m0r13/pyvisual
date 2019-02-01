@@ -36,6 +36,8 @@ vec2 polarMirror(vec2 polar, float n) {
     return polar;
 }
 
+uniform float uTest;
+
 vec4 filterFrag(vec2 uv, vec4 _) {
     vec2 polar = uvToPolar(uv);
 
@@ -50,7 +52,22 @@ vec4 filterFrag(vec2 uv, vec4 _) {
         vec2 uv1 = polarToUV(polar1);
 
         vec4 frag1 = texture2D(uInputTexture, uv1);
-        frag = max(frag, frag1);
+        // manchmal übersteuert
+        //frag = max(frag, frag1);
+        // hält farbe ganz nice
+        //frag = frag * frag1;
+        // etwas knallig übersteuerte farben, aber nice
+        //frag = (1 - (1 - frag) / frag1);
+        // auch etwas knallige farben, aber noch mehr details moduliert
+        frag = frag + frag1 - 1.0;
+        // overlay:
+        /*
+        float a = frag.a;
+        vec4 base = frag;
+        vec4 blend = frag1;
+        frag = mix(1.0 - 2.0 * (1.0 - base) * (1.0 - blend), 2.0 * base * blend, step(base, vec4(0.5)));
+        frag.a = a;
+        */
     }
 
     return vec4(frag.rgb, frag.a);

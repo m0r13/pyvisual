@@ -48,12 +48,13 @@ vec4 filterFrag(vec2 uv, vec4 frag) {
     uvOff = fract(uv + colOffset);
     float rnd = random2d(vec2(sTime + amount, 9545.0));
     if (rnd < 0.33){
-        outCol.r = texture2D(uInputTexture, uvOff).r;
-    }else if (rnd < 0.66){
+        outCol.rgb = texture2D(uInputTexture, uvOff).rgb;
+    } /* else if (rnd < 0.66){
         outCol.g = texture2D(uInputTexture, uvOff).g;
     } else{
         outCol.b = texture2D(uInputTexture, uvOff).b;
     }
+    */
     return vec4(outCol,1.0);
 }
 
