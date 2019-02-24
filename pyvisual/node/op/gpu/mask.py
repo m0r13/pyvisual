@@ -35,27 +35,26 @@ class Mask(Shader):
 class DualMask(Shader):
     class Meta:
         inputs = [
-            {"name" : "foreground", "dtype" : dtype.tex2d},
-            {"name" : "mask", "dtype" : dtype.tex2d},
+            #{"name" : "foreground", "dtype" : dtype.tex2d},
+            #{"name" : "mask", "dtype" : dtype.tex2d},
         ]
         options = {
-            "virtual" : False,
             "category" : "shader"
         }
 
     def __init__(self):
-        super().__init__("common/passthrough.vert", "common/dual_mask.frag")
+        super().__init__("common/passthrough.vert", "common/dual_mask.frag", handle_uniforms=True)
 
-    def set_uniforms(self, program):
-        foreground = self.get("foreground")
-        if foreground is None:
-            foreground = dummy
-        mask = self.get("mask")
-        if mask is None:
-            mask = dummy
-        # TODO interpolation/wrapping?
-        program["uInputTexture1"] = foreground
-        program["uMaskTexture"] = mask
+    #def set_uniforms(self, program):
+    #    foreground = self.get("foreground")
+    #    if foreground is None:
+    #        foreground = dummy
+    #    mask = self.get("mask")
+    #    if mask is None:
+    #        mask = dummy
+    #    # TODO interpolation/wrapping?
+    #    program["uInputTexture1"] = foreground
+    #    program["uMaskTexture"] = mask
 
 class MaskShadow(Shader):
     class Meta:
