@@ -4,6 +4,7 @@ uniform sampler2D uInputTexture; // {"skip" : true, "alias" : "input"}
 // alias these inputs as they are "built-in" into the filter nodes
 // and should appear different from the other uniform inputs
 uniform sampler2D uFilterMaskTexture; // {"alias" : "filter_mask"}
+uniform float uFilterMaskFactor; // {"alias" : "mask_factor", "default" : 1.0}
 uniform int uFilterMaskMode; // {"alias" : "filter_mode", "default" : 2, "choices" : ["input", "mask", "filtered", "input_filtered_masked", "input_masked", "filtered_masked"]}
 uniform vec4 uFilterBackgroundColor; // {"alias" : "filter_bg", "default" : [0.0, 0.0, 0.0, 0.0]}
 
@@ -25,7 +26,7 @@ void main( ) {
     vec4 fragFiltered = filterFrag(TexCoord0, frag);
 
 #ifdef ADVANCED_FILTERING
-    float mask = texture2D(uFilterMaskTexture, TexCoord0).r;
+    float mask = texture2D(uFilterMaskTexture, TexCoord0).r * uFilterMaskFactor;
 
     if (uFilterMaskMode == 0) {
         // only input

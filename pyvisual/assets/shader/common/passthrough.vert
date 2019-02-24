@@ -7,6 +7,7 @@ uniform mat4 uTransformUV; // {"skip" : true, "alias" : "transformUV"}
 in vec2 iPosition;
 in vec2 iTexCoord;
 
+out vec2 TexCoordi;
 out vec2 TexCoord0;
 
 void main(void) {
@@ -16,6 +17,7 @@ void main(void) {
     pixelTexCoords = (uTransformUV * vec4(pixelTexCoords, 0.0, 1.0)).xy;
     vec2 texCoords = (pixelTexCoords + uTextureSize * 0.5f) / uTextureSize;
     
+    TexCoordi = iTexCoord;
     TexCoord0 = texCoords;
 }
 

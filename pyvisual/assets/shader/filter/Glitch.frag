@@ -8,6 +8,8 @@ uniform float time;
 uniform float amount;
 uniform float speed;
 
+uniform float uAlpha; // {"default" : 1.0}
+
 float random1d(float n){
     return fract(sin(n) * 43758.5453);
 }
@@ -54,6 +56,6 @@ vec4 filterFrag(vec2 uv, vec4 frag) {
     } else{
         outCol.b = texture2D(uInputTexture, uvOff).b;
     }
-    return vec4(outCol,1.0);
+    return vec4(mix(frag.rgb, outCol.rgb, uAlpha),1.0);
 }
 

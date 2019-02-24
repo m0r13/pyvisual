@@ -13,6 +13,7 @@ uniform float uSoftness; // {"default" : 0.06}
 uniform float uShadeContrast; // {"default" : 0.55}
 
 uniform vec2 uOffset;
+uniform mat4 uNoiseTransform;
 
 #ifdef HQ_TIME
 float fbm(vec3 p) {
@@ -32,19 +33,24 @@ float fbm(vec2 p) {
 
 void generateFrag() {
     vec2 uv = 1.0 - pyvisualUV * 1.0;
-    uv.x = 1.0 - abs(1.0 - uv.x * 2.0); 
+    uv.x = 1.0 - abs(1.0 - uv.x * 2.0);
+
+    vec2 puv = uv;
+    puv -= vec2(0.25, 0.5);
+    puv = (uNoiseTransform * vec4(puv, 0.0, 1.0)).xy;
+    puv += vec2(0.25, 0.5);
 
 #ifdef HQ_TIME
-    vec3 p = vec3(uv + uOffset, pyvisualTime * 0.01);
+    vec3 p = vec3(puv + uOffset, pyvisualTime * 0.01);
 #else
-    vec2 p = uv + uOffset + vec2(pyvisualTime, 0.0);
+    vec2 p = puv + uOffset + vec2(pyvisualTime, 0.0);
 #endif
 
     float blot = fbm(p * 3.0 + 8.0);
     float shade = fbm(p * 2.0 + 16.0);
     float shadeContrast = uShadeContrast;
 
-    blot = blot + (sqrt(uv.x) - abs(0.5 - uv.y));
+    //blot = blot + (sqrt(uv.x) - abs(0.5 - uv.y));
     blot = smoothstep(uThreshold - uSoftness / 2.0, uThreshold + uSoftness / 2.0, blot) * max(1.0 - shade * shadeContrast, 0.0);
 
     pyvisualOutColor = vec4(vec3(blot), 1.0);

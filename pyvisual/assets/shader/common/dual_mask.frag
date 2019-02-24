@@ -1,9 +1,11 @@
 #version 150
 // uInputTexture is background
-uniform sampler2D uInputTexture;
+uniform sampler2D uInputTexture; // {"skip" : true, "alias" : "input"}
 // uInputTexture1 is foreground
-uniform sampler2D uInputTexture1;
-uniform sampler2D uMaskTexture;
+uniform sampler2D uInputTexture1; // {"alias" : "foreground"}
+uniform sampler2D uMaskTexture; // {"alias" : "mask"}
+
+uniform float uMaskFactor; // {"alias" : "factor"}
 
 in vec2 TexCoord0;
 
@@ -17,6 +19,6 @@ void main() {
     vec4 color1 = texture(uInputTexture1, TexCoord0);
     vec4 mask = texture(uMaskTexture, TexCoord0);
 
-    oFragColor = mix(color0, color1, mask.r);
+    oFragColor = mix(color0, color1, mask.r * uMaskFactor);
 }
 
