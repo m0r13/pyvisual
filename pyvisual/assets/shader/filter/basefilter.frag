@@ -8,6 +8,7 @@ uniform float uFilterMaskFactor; // {"alias" : "mask_factor", "default" : 1.0}
 uniform int uFilterMaskMode; // {"alias" : "filter_mode", "default" : 2, "choices" : ["input", "mask", "filtered", "input_filtered_masked", "input_masked", "filtered_masked"]}
 uniform vec4 uFilterBackgroundColor; // {"alias" : "filter_bg", "default" : [0.0, 0.0, 0.0, 0.0]}
 
+in vec2 TexCoordi;
 in vec2 TexCoord0;
 out vec4 oFragColor;
 
