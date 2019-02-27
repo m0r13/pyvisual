@@ -2,9 +2,12 @@
 
 uniform float uCountX;
 uniform float uCountY;
+uniform int uCenter; // {"default" : 1}
 
 void generateFrag() {
-    pyvisualUV -= vec2(0.5, 0.5);
+    if (uCenter > 0) {
+        pyvisualUV -= vec2(0.5, 0.5);
+    }
 
     float modX = 2.0 / (uCountX * 2.0 + 0.0001);
     float modY = 2.0 / (uCountY * 2.0 + 0.0001);
