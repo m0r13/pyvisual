@@ -87,9 +87,9 @@ class Button(Widget):
         self._reset_force_value = False
 
     def _show(self, value, read_only):
-        active = value.value or time.time() - self.last_active < Button.ACTIVE_TIME
+        active = value.value or time.time() - self._last_active < Button.ACTIVE_TIME
         if value.value:
-            self.last_active = time.time()
+            self._last_active = time.time()
         imgui.push_style_color(imgui.COLOR_BUTTON_ACTIVE, 1.0, 0.0, 0.0, 1.0)
         if active:
             imgui.push_style_color(imgui.COLOR_BUTTON, 1.0, 0.0, 0.0, 1.0)
