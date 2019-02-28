@@ -376,13 +376,15 @@ class ValueHolder:
         raise NotImplementedError()
 
     def copy_to(self, value):
-        if self.has_changed:
+        if self.has_changed_fast():
             value.value = self.value
 
 class SettableValueHolder(ValueHolder):
     def __init__(self, default_value):
         self._value = default_value
-        self._changed = False
+        self._changed = True
+
+        self.force_value = False
 
     @property
     def has_changed(self):
@@ -432,11 +434,7 @@ class InputValueHolder(ValueHolder):
 
     @property
     def has_changed(self):
-        if self.has_connection_changed:
-            return True
-        connected_changed = self.connected_value.has_changed if self.connected_value else False
-        manual_changed = self.manual_value.has_changed
-        return connected_changed or manual_changed
+        return (self.connected_value and self.connected_value.has_changed) or self.manual_value.has_changed or self.has_connection_changed
 
     @has_changed.setter
     def has_changed(self, changed):
@@ -446,9 +444,13 @@ class InputValueHolder(ValueHolder):
 
     @property
     def value(self):
-        if self.connected_value is not None:
-            return self.connected_value.value
-        return self.manual_value.value
+        connected_value = self.connected_value
+        manual_value = self.manual_value
+        # the manual value (like with button widget) can force a value
+        if connected_value is not None and not manual_value.force_value:
+            return connected_value.value
+        return manual_value.value
+
     @value.setter
     def value(self, value):
         self.manual_value.value = value

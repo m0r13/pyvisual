@@ -98,7 +98,7 @@ class LoadTextures(Node):
             wildcard = self.get("wildcard")
             current = self.get("current")
             if wildcard:
-                for i, path in enumerate(assets.glob_paths(wildcard)):
+                for i, path in enumerate(sorted(assets.glob_paths(wildcard))):
                     if path == current:
                         self.index = i
                     self.textures.append([path, None])

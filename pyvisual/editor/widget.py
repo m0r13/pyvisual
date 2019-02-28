@@ -3,6 +3,7 @@ import os
 import fnmatch
 import pyvisual.node as node_meta
 import pyvisual.node.dtype as dtypes
+from pyvisual.node.base import InputValueHolder
 from pyvisual import assets
 from PIL import Image
 import time
@@ -50,20 +51,20 @@ def create_widget(dtype, dtype_args, node):
     return None
 
 class Widget:
-    def __init__(self):
-        pass
+    def __init__(self, ignore_read_only=False):
+        self._ignore_read_only = ignore_read_only
 
     def _show(self):
         pass
 
     def show(self, value, read_only):
         # TODO also "gray-out" widget
-        if read_only:
+        if read_only and not self._ignore_read_only:
             imgui.push_item_flag(imgui.ITEM_DISABLED, True)
 
         self._show(value, read_only)
 
-        if read_only:
+        if read_only and not self._ignore_read_only:
             imgui.pop_item_flag()
 
 class Bool(Widget):
@@ -78,9 +79,12 @@ class Bool(Widget):
 class Button(Widget):
     ACTIVE_TIME = 0.1
     def __init__(self, node):
-        super().__init__()
+        super().__init__(ignore_read_only=True)
 
-        self.last_active = 0
+        # when the event was last triggered
+        self._last_active = 0
+        # whether to reset force value flag on manual input next frame
+        self._reset_force_value = False
 
     def _show(self, value, read_only):
         active = value.value or time.time() - self.last_active < Button.ACTIVE_TIME
@@ -95,15 +99,32 @@ class Button(Widget):
         if active:
             imgui.pop_style_color(2)
         imgui.pop_style_color(1)
+
         # TODO this might be a problem
         # events are reset by this widget!
-        if not read_only:
-            # set on click
-            if clicked:
-                value.value = 1.0
-            # reset otherwise if still active
-            if not clicked and value.value:
-                value.value = 0.0
+
+        # events are a special case!!
+        # this widget gets InputValueHolder value even when an input is connected
+        #   (to make sure that event trigger is displayed on the button)
+        # when button is pressed even though a value is connected:
+        # -> set force flag on manual value, don't forget to reset it
+        value_to_set = value
+        if isinstance(value, InputValueHolder):
+            value_to_set = value.manual_value
+
+        # set on click
+        if clicked:
+            value_to_set.value = 1.0
+            if read_only:
+                value_to_set.force_value = True
+                self._reset_force_value = True
+        elif self._reset_force_value:
+            value_to_set.force_value = False
+            self._reset_force_value = False
+
+        # reset otherwise if still active
+        if not clicked and value.value:
+            value_to_set.value = 0.0
 
 class Int(Widget):
     def __init__(self, node, minmax=[float("-inf"), float("inf")]):
