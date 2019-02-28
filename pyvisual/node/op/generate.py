@@ -7,6 +7,7 @@ from collections import OrderedDict
 from pyvisual.node.base import Node
 from pyvisual.node import dtype
 from pyvisual.editor import widget
+from pyvisual import util
 
 LFO_OSCILLATORS = OrderedDict(
     square=lambda t, length, phase: float(math.fmod(t - phase, length) < 0.5 * length),
@@ -14,22 +15,6 @@ LFO_OSCILLATORS = OrderedDict(
     triangle=lambda t, length, phase: float(2.0 / math.pi * math.asin(math.sin((2*math.pi*t - phase) / length))) * 0.5 + 0.5,
     sine=lambda t, length, phase: math.sin((2*math.pi*t - phase) / length) * 0.5 + 0.5
 )
-
-def scalable_timer():
-    _last_time = time.time()
-    _time = 0.0
-    def _timer(scale, reset=False):
-        if math.isnan(scale):
-            return 0
-        nonlocal _last_time, _time
-        t = time.time()
-        if reset:
-            _time = 0.0
-        dt = t - _last_time
-        _time += dt * scale
-        _last_time = t
-        return _time
-    return _timer
 
 class LFO(Node):
     OSCILLATORS = list(LFO_OSCILLATORS.values())
@@ -53,15 +38,12 @@ class LFO(Node):
     def __init__(self):
         super().__init__(always_evaluate=True)
 
-        self.timer = scalable_timer()
+        self._timer = util.time.ScalableTimer()
 
     def _evaluate(self):
         generator = int(self.get("type"))
         length = self.get("length")
-        if length == 0:
-            self.set("output", float("nan"))
-            return
-        t = self.timer(1.0 / length, False)
+        t = self._timer(1.0 / length, False)
         value = LFO.OSCILLATORS[generator](t, 1.0 + 0.0 * self.get("length"), self.get("phase"))
         value = self.get("min") + value * (self.get("max") - self.get("min"))
         self.set("output", value)
@@ -81,7 +63,7 @@ class PWM(Node):
     def __init__(self):
         super().__init__(always_evaluate=True)
 
-        self._timer = scalable_timer()
+        self._timer = util.time.ScalableTimer()
 
     def _evaluate(self):
         length = self.get("length")
@@ -112,16 +94,16 @@ class Time(Node):
     def __init__(self):
         super().__init__(always_evaluate=True)
 
-        self._last_time = time.time()
-        self._time = 0.0
+        self._timer = util.time.ScalableTimer()
 
     def _evaluate(self):
-        t = time.time()
-        if self.get("reset"):
-            self._time = 0.0
-        dt = t - self._last_time
-        self._time += dt * self.get("factor")
-        self._last_time = t
+        self._time = self._timer(self.get("factor"), self.get("reset"))
+        #t = time.time()
+        #if self.get("reset"):
+        #    self._time = 0.0
+        #dt = t - self._last_time
+        #self._time += dt * self.get("factor")
+        #self._last_time = t
 
         mod = self.get("mod")
         if mod > 0.00001:
@@ -245,6 +227,7 @@ class PoissonTimer(Node):
         self._next = 0
 
     def _evaluate(self):
+        # TODO careful here!
         t = time.time()
 
         if self._next < t and self.get("enabled"):

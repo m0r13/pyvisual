@@ -7,7 +7,7 @@ from pyvisual.node.base import Node
 from pyvisual.node.op.gpu.base import Shader
 from pyvisual.node import dtype
 from pyvisual.editor import widget
-from pyvisual import assets
+from pyvisual import assets, util
 from glumpy import gloo, gl, glm
 from PIL import Image
 
@@ -81,8 +81,6 @@ class SwipeMixTexture(MixTexture):
 
         program["uDirection"] = (self.get("x"), self.get("y"))
 
-# TODO node restructuring
-from pyvisual.node.op.generate import scalable_timer
 class TransitionTimer(Node):
     class Meta:
         inputs = [
@@ -97,7 +95,7 @@ class TransitionTimer(Node):
     def __init__(self):
         super().__init__(always_evaluate=True)
 
-        self.time = scalable_timer()
+        self._timer = util.time.ScalableTimer()
 
     def _evaluate(self):
         duration = self.get("duration")
@@ -106,11 +104,11 @@ class TransitionTimer(Node):
         #if self.get("trigger"):
         #    self.always_evaluate = True
         if self.get("reverse"):
-            t = max(0.0, 1.0 - self.time(scale, self.get("trigger")))
+            t = max(0.0, 1.0 - self._timer(scale, self.get("trigger")))
             #if t < 0.00001:
             #    self.always_evaluate = False
         else:
-            t = min(1.0, self.time(scale, self.get("trigger")))
+            t = min(1.0, self._timer(scale, self.get("trigger")))
             #if t > 1.0 - 0.00001:
             #    self.always_evaluate = False
         self.set("output", t)

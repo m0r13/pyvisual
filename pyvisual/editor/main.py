@@ -27,7 +27,7 @@ import pyvisual.editor.widget as node_widget
 import pyvisual.node.dtype as node_dtype
 from pyvisual.editor.graph import RootGraph, NodeGraph, NodeGraphListener
 from pyvisual.node.op.gpu.base import ShaderNodeLoader
-from pyvisual import assets
+from pyvisual import assets, util
 
 import cProfile
 profile = cProfile.Profile()
@@ -1676,6 +1676,16 @@ class NodeEditor(NodeGraphListener):
         if self.is_key_down(glfw.GLFW_KEY_F3):
             self.show_graph = not self.show_graph
             self.last_mouse_pos_changed = time.time()
+        if self.is_key_down(glfw.GLFW_KEY_F10):
+            output_texture = self.output_texture
+            if output_texture is not None:
+                util.image.save_screenshot(output_texture.get())
+                # TODO
+                # additionally save whole scene!!!
+
+        if self.is_key_down(glfw.GLFW_KEY_SPACE):
+            global_time = util.time.global_time
+            global_time.paused = not global_time.paused
 
         draw_list.channels_merge()
 
@@ -1793,6 +1803,19 @@ class NodeEditor(NodeGraphListener):
                     self.autoplay_last_remaining = self.autoplay_fade_duration
                     if self.autoplay_last_start is not None:
                         self.autoplay_last_start = time.time()
+
+                imgui.end()
+
+            if imgui.begin("misc", False, flags):
+                global_time = util.time.global_time
+
+                paused = global_time.paused
+                changed, paused = imgui.checkbox("pause time (space)", paused)
+                # let's try to not call that setter too often
+                if changed:
+                    global_time.paused = paused
+
+                changed, global_time.time_offset = imgui.drag_float("time offset", global_time.time_offset, 1.0)
 
                 imgui.end()
 

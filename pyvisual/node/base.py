@@ -241,21 +241,16 @@ class Node(metaclass=NodeMeta):
     def have_any_inputs_changed(self):
         for port_id, value in self.values.items():
             if port_id[:2] == "i_":
-                if value.has_changed:
+                if value.has_changed_fast():
                     return True
         return False
 
     def have_inputs_changed(self, *port_names):
         assert len(port_names) != 0, "Use have_any_inputs_changed instead"
         for port_name in port_names:
-            if self.get_input(port_name).has_changed:
+            if self.get_input(port_name).has_changed_fast():
                 return True
         return False
-
-    @property
-    def needs_evaluation(self):
-        # if any input has changed
-        return self._last_evaluated == 0.0 or self._force_evaluate or self.have_any_inputs_changed()
 
     @property
     def evaluated(self):

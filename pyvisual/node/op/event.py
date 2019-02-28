@@ -92,6 +92,10 @@ class ChooseEvent(Node):
     def __init__(self):
         super().__init__(always_evaluate=True)
 
+        # whether to unset all events in the next frame
+        # made so event values are not set every frame (which might override force button widget events)
+        self._unset_events = True
+
     def _update_custom_ports(self):
         custom_inputs = []
         custom_outputs = []
@@ -117,9 +121,12 @@ class ChooseEvent(Node):
             index = weighted_random(weights)
             for i, output in enumerate(outputs):
                 output.value = index == i
-        else:
+            # unset all these events in the next frame again
+            self._unset_events = True
+        elif self._unset_events:
             for _, output in self.yield_custom_output_values():
                 output.value = False
+            self._unset_events = False
 
 class EventSequencer(Node):
     class Meta:

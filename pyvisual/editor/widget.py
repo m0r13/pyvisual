@@ -4,7 +4,7 @@ import fnmatch
 import pyvisual.node as node_meta
 import pyvisual.node.dtype as dtypes
 from pyvisual.node.base import InputValueHolder
-from pyvisual import assets
+from pyvisual import assets, util
 from PIL import Image
 import time
 import contextlib
@@ -336,9 +336,7 @@ class Texture(Widget):
                     io.mouse_pos = pos
                 if imgui.begin_popup("context"):
                     if imgui.menu_item("save")[0]:
-                        image = Image.fromarray(texture.get())
-                        name = "%s.png" % (time.strftime("%Y-%m-%d_%H-%M-%S"))
-                        image.save(os.path.join(assets.SCREENSHOT_PATH, name))
+                        util.image.save_screenshot(texture.get())
                     imgui.menu_item("texture handle: %s" % texture._handle, None, False, False)
                     imgui.menu_item("texture shape: %s" % str(texture.shape), None, False, False)
                     imgui.end_popup()
