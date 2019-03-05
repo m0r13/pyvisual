@@ -1,7 +1,7 @@
 import math
 import time
 
-class PausableTimer:
+class ReferenceTimer:
     def __init__(self, initial_time=0.0):
         self.initial_time_offset = initial_time
         self.time_offset = 0.0
@@ -30,12 +30,12 @@ class PausableTimer:
             self._internal_offset = -(time.time() - self._paused_time)
         self._paused = paused
 
-global_time = PausableTimer()
+global_time = ReferenceTimer()
 
 # TODO what kind of interface should timers actually have?
-def ScalableTimer():
+def ScalableTimer(initial_time=0.0):
     _last_time = global_time.time()
-    _time = 0.0
+    _time = initial_time
     def _timer(scale, reset=False):
         if math.isnan(scale):
             return 0

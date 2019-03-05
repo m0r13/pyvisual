@@ -9,6 +9,10 @@ from pyvisual.node import dtype
 from pyvisual.editor import widget
 from pyvisual import util
 
+def random_time(node, a=-10000.0, b=10000.0):
+    alpha = random.random()
+    return (1.0-alpha)*a + alpha*b
+
 LFO_OSCILLATORS = OrderedDict(
     square=lambda t, length, phase: float(math.fmod(t - phase, length) < 0.5 * length),
     saw=lambda t, length, phase: float(2.0 / math.pi * math.atan(math.tan((2*math.pi*t - phase) / length))) * 0.5 + 0.5,
@@ -30,6 +34,12 @@ class LFO(Node):
         outputs = [
             {"name" : "output", "dtype" : dtype.float}
         ]
+        initial_state = {
+            "time" : 0.0
+        }
+        random_state = {
+            "time" : random_time
+        }
         options = {
             "category" : "generate",
             "show_title" : True
@@ -38,15 +48,22 @@ class LFO(Node):
     def __init__(self):
         super().__init__(always_evaluate=True)
 
-        self._timer = util.time.ScalableTimer()
+        self._time = 0.0
 
     def _evaluate(self):
         generator = int(self.get("type"))
         length = self.get("length")
-        t = self._timer(1.0 / length, False)
-        value = LFO.OSCILLATORS[generator](t, 1.0 + 0.0 * self.get("length"), self.get("phase"))
+        self._time = self._timer(1.0 / length, False)
+        value = LFO.OSCILLATORS[generator](self._time, 1.0 + 0.0 * self.get("length"), self.get("phase"))
         value = self.get("min") + value * (self.get("max") - self.get("min"))
         self.set("output", value)
+
+    def get_state(self):
+        return {"time" : self._time}
+
+    def set_state(self, state):
+        if "time" in state:
+            self._timer = util.time.ScalableTimer(state["time"])
 
 class PWM(Node):
     class Meta:
@@ -56,6 +73,12 @@ class PWM(Node):
             {"name" : "min", "dtype" : dtype.float, "dtype_args" : {"default" : 0.0}},
             {"name" : "max", "dtype" : dtype.float, "dtype_args" : {"default" : 1.0}},
         ]
+        initial_state = {
+            "time" : 0.0
+        }
+        random_state = {
+            "time" : random_time
+        }
         outputs = [
             {"name" : "output", "dtype" : dtype.float}
         ]
@@ -63,18 +86,25 @@ class PWM(Node):
     def __init__(self):
         super().__init__(always_evaluate=True)
 
-        self._timer = util.time.ScalableTimer()
+        self._time = 0.0
 
     def _evaluate(self):
         length = self.get("length")
         if length == 0:
             self.set("output", float("nan"))
             return
-        t = self._timer(1.0 / length, False)
-        if t % 1.0 < self.get("value"):
+        self._time = self._timer(1.0 / length, False)
+        if self._time % 1.0 < self.get("value"):
             self.set("output", self.get("max"))
         else:
             self.set("output", self.get("min"))
+
+    def get_state(self):
+        return {"time" : self._time}
+
+    def set_state(self, state):
+        if "time" in state:
+            self._timer = util.time.ScalableTimer(state["time"])
 
 class Time(Node):
     class Meta:
@@ -86,6 +116,12 @@ class Time(Node):
         outputs = [
             {"name" : "output", "dtype" : dtype.float}
         ]
+        initial_state = {
+            "time" : 0.0
+        }
+        random_state = {
+            "time" : random_time
+        }
         options = {
             "category" : "generate",
             "show_title" : True
@@ -94,16 +130,10 @@ class Time(Node):
     def __init__(self):
         super().__init__(always_evaluate=True)
 
-        self._timer = util.time.ScalableTimer()
+        self._time = 0.0
 
     def _evaluate(self):
         self._time = self._timer(self.get("factor"), self.get("reset"))
-        #t = time.time()
-        #if self.get("reset"):
-        #    self._time = 0.0
-        #dt = t - self._last_time
-        #self._time += dt * self.get("factor")
-        #self._last_time = t
 
         mod = self.get("mod")
         if mod > 0.00001:
@@ -113,10 +143,25 @@ class Time(Node):
         else:
             self.set("output", self._time)
 
+    def get_state(self):
+        return {"time" : self._time}
+
+    def set_state(self, state):
+        if "time" in state:
+            self._timer = util.time.ScalableTimer(state["time"])
+
 def random_float(a, b):
     alpha = random.random()
     value = a * (1.0-alpha) + b * alpha
     return value
+
+def state_initial_float(node):
+    if "i_min" in node.values:
+        return node.get("min")
+    return 0.0
+
+def state_random_float(node):
+    return node.generate_float()
 
 class RandomFloat(Node):
     class Meta:
@@ -129,26 +174,41 @@ class RandomFloat(Node):
         outputs = [
             {"name" : "output", "dtype" : dtype.float}
         ]
+        initial_state = {
+            "value" : state_initial_float
+        }
+        random_state = {
+            "value" : state_random_float
+        }
         options = {
             "category" : "generate",
             "show_title" : True
         }
 
     def _evaluate(self):
-        if self.get("generate") or self._last_evaluated == 0.0:
-            min_value = self.get("min")
-            max_value = self.get("max")
-            mod = self.get("mod")
+        if self.get("generate"):
+            self.randomize_state()
 
-            value = float("nan")
-            if mod < 0.00001:
-                value = random_float(min_value, max_value)
-            else:
-                n = (max_value - min_value) / mod
-                v = random.randint(0, int(n))
-                value = min_value + v * mod
+    def generate_float(self):
+        min_value = self.get("min")
+        max_value = self.get("max")
+        mod = self.get("mod")
 
-            self.set("output", value)
+        value = float("nan")
+        if mod < 0.00001:
+            value = random_float(min_value, max_value)
+        else:
+            n = (max_value - min_value) / mod
+            v = random.randint(0, int(n))
+            value = min_value + v * mod
+        return value
+
+    def get_state(self):
+        return {"value" : self.get_output("output").value}
+
+    def set_state(self, state):
+        if "value" in state:
+            self.set("output", state["value"])
 
 class Noise1D(Node):
     class Meta:
@@ -171,46 +231,6 @@ class Noise1D(Node):
         alpha = noise.pnoise1(self.get("x"), octaves=octaves, persistence=persistence, lacunarity=lacunarity) * 0.5 + 0.5
         self.set("output", (1.0 - alpha) * self.get("min") + alpha * self.get("max"))
 
-# TODO maybe also allow other time distributions
-class GlitchTimer(Node):
-    class Meta:
-        inputs = [
-            {"name" : "on_min", "dtype" : dtype.float, "dtype_args" : {"default" : 0.1}},
-            {"name" : "on_max", "dtype" : dtype.float, "dtype_args" : {"default" : 1.0}},
-            {"name" : "on_scale", "dtype" : dtype.float, "dtype_args" : {"default" : 0.5}},
-            {"name" : "off_min", "dtype" : dtype.float, "dtype_args" : {"default" : 0.1}},
-            {"name" : "off_max", "dtype" : dtype.float, "dtype_args" : {"default" : 1.0}},
-            {"name" : "off_scale", "dtype" : dtype.float, "dtype_args" : {"default" : 0.5}},
-        ]
-        outputs = [
-            {"name" : "output", "dtype" : dtype.float}
-        ]
-
-    def __init__(self, *args, **kwargs):
-        super().__init__(always_evaluate=True, *args, **kwargs)
-
-        self._status = 0.0
-        self._next_switch = 0
-
-    def _evaluate(self):
-        t = time.time()
-
-        old_status = self._status
-        if self._next_switch < t:
-            def sample_time(a, b, scale):
-                if scale < 10e-6:
-                    return np.random.uniform(low=a, high=b)
-                else:
-                    alpha = np.random.exponential(scale=scale)
-                    return (1.0 - alpha) * a + alpha * b
-            if not self._status:
-                self._next_switch = t + sample_time(self.get("on_min"), self.get("on_max"), self.get("on_scale"))
-            else:
-                self._next_switch = t + sample_time(self.get("off_min"), self.get("off_max"), self.get("off_scale"))
-            self._status = 1.0 - self._status
-
-        self.set("output", float(self._status))
-
 class PoissonTimer(Node):
     class Meta:
         inputs = [
@@ -227,8 +247,7 @@ class PoissonTimer(Node):
         self._next = 0
 
     def _evaluate(self):
-        # TODO careful here!
-        t = time.time()
+        t = util.time.global_time.time()
 
         if self._next < t and self.get("enabled"):
             per_minute = self.get("per_minute")

@@ -1448,6 +1448,8 @@ class NodeEditor(NodeGraphListener):
         self.autoplay_fade_in = lambda: 1.0
         self.autoplay_fade_out = lambda: min(1.0, self.autoplay_time / (self.autoplay_fade_duration + 0.0001))
 
+        self.random_seed = ""
+
         # rendering nodes caught from graph
         self.render_nodes = []
 
@@ -1679,9 +1681,9 @@ class NodeEditor(NodeGraphListener):
         if self.is_key_down(glfw.GLFW_KEY_F10):
             output_texture = self.output_texture
             if output_texture is not None:
-                util.image.save_screenshot(output_texture.get())
-                # TODO
-                # additionally save whole scene!!!
+                path = util.image.generate_screenshot_path()
+                util.image.save_screenshot(output_texture.get(), path=path)
+                self.session_graph.save_file(path.replace(".png", ".json"))
 
         if self.is_key_down(glfw.GLFW_KEY_SPACE):
             global_time = util.time.global_time
@@ -1807,15 +1809,36 @@ class NodeEditor(NodeGraphListener):
                 imgui.end()
 
             if imgui.begin("misc", False, flags):
-                global_time = util.time.global_time
+                if imgui.collapsing_header("time", flags=imgui.TREE_NODE_DEFAULT_OPEN)[0]:
+                    global_time = util.time.global_time
 
-                paused = global_time.paused
-                changed, paused = imgui.checkbox("pause time (space)", paused)
-                # let's try to not call that setter too often
-                if changed:
-                    global_time.paused = paused
+                    paused = global_time.paused
+                    changed, paused = imgui.checkbox("pause time (space)", paused)
+                    # let's try to not call that setter too often
+                    if changed:
+                        global_time.paused = paused
 
-                changed, global_time.time_offset = imgui.drag_float("time offset", global_time.time_offset, 1.0)
+                    changed, global_time.time_offset = imgui.drag_float("time offset", global_time.time_offset, 1.0)
+
+                if imgui.collapsing_header("states & presets", flags=imgui.TREE_NODE_DEFAULT_OPEN)[0]:
+                    changed, self.random_seed = imgui.input_text("random seed", self.random_seed, 255)
+
+                    if imgui.button("reset"):
+                        self.root_graph.apply_instances(lambda node: node.reset_preset())
+                        self.root_graph.apply_instances(lambda node: node.reset_state())
+
+                    if imgui.button("randomize"):
+                        seed = self.random_seed.strip()
+                        try:
+                            seed = int(seed)
+                        except ValueError:
+                            pass
+                        if type(seed) == str and len(seed) == 0:
+                            seed = None
+
+                        random.seed(seed)
+                        self.root_graph.apply_instances(lambda node: node.randomize_preset())
+                        self.root_graph.apply_instances(lambda node: node.randomize_state())
 
                 imgui.end()
 
@@ -1865,26 +1888,30 @@ def on_draw(event):
 
     # evaluate nodes
     start = time.time()
+    #profile.enable()
     editor.root_graph.evaluate(record_stats=PROFILE_STATS)
     processing_time += time.time() - start
+    #profile.disable()
 
     # render editor
     window.clear()
     editor.draw_output_texture(window.get_size())
 
     start = time.time()
+    #profile.enable()
     imgui_renderer.process_inputs()
     imgui.new_frame()
 
-    #profile.enable()
     editor.show()
-    editor_time += time.time() - start
     #profile.disable()
+    editor_time += time.time() - start
 
     start = time.time()
     imgui.render()
     draw = imgui.get_draw_data()
+    #profile.enable()
     imgui_renderer.render(draw)
+    #profile.disable()
     imgui_render_time += time.time() - start
 
     # performance stats

@@ -26,6 +26,10 @@ class SetVar(Node):
         # the order of who is duplicate vs. who is original might change
         self.duplicate = False
 
+        # TODO
+        self.value = 0.0
+        self.value_has_changed = False
+
     @property
     def valid(self):
         return not self.duplicate and bool(self.name)
@@ -66,6 +70,15 @@ class SetVar(Node):
                     self.duplicate = True
                     return
             self.duplicate = False
+
+        value = self.get_input("input")
+        if value.has_changed or self._last_evaluated == 0.0:
+            self.value = value.value
+            self.value_has_changed = True
+            # evaluate once more to trigger reset
+            self.force_evaluate()
+        else:
+            self.value_has_changed = False
 
     def stop(self):
         assert self.graph is not None
@@ -129,6 +142,8 @@ class GetVar(Node):
 
         if self.connected_node is not None:
             self.input_nodes.add(self.connected_node)
+        # TODO this is quite a hack
+        self.graph.parent.reset_sorted_instances()
 
     def evaluate(self, *args, **kwargs):
         if self.connected_node is not None:
@@ -141,7 +156,8 @@ class GetVar(Node):
         assert self.graph is not None
 
         input_name = self.get_input("name")
-        if input_name.has_changed:
+        input_name_changed = input_name.has_changed
+        if input_name_changed:
             name = input_name.value
 
             self.connected_node = None
@@ -164,13 +180,17 @@ class GetVar(Node):
             # set/get var nodes might create cycles in the node graph!! and fuck up has_changed semantics
             # especially with ChooseTexture
             # workaround for now: force update of float vars each time!
-            if self._force_value_update or self.FORCE_UPDATE:
-                self.set("output", self.connected_node.get("input"))
+            if self.FORCE_UPDATE or self._force_value_update:
+                self.set("output", self.connected_node.value)
                 self._force_value_update = False
             else:
-                self.connected_node.get_input("input").copy_to(self.get_output("output"))
+                # TODO clean this up!!
+                # this thing is *slightly* faster
+                if self.connected_node.value_has_changed:
+                    self.set("output", self.connected_node.value)
+                #self.connected_node.get_input("input").copy_to(self.get_output("output"))
 
-        if input_name.has_changed:
+        if input_name_changed:
             # see above where connected node is associated
             self._force_value_update = True
 

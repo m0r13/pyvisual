@@ -385,6 +385,16 @@ class BinaryOpFloat(Node):
     def get_presets(cls, graph):
         return BINARY_OP_PRESETS
 
+# TODO find consistent naming for these
+def state_initial_value(node):
+    # TODO this is a hack
+    # if set_initial_state is called as of yet there is no value set yet
+    # just return the default value 0.0 then
+    # if a graph is loaded from a file, the state is set accordingly later anyways
+    if "i_reset_value" in node.values:
+        return node.get("reset_value")
+    return 0.0
+
 class Counter(Node):
     class Meta:
         inputs = [
@@ -397,17 +407,21 @@ class Counter(Node):
         outputs = [
             {"name" : "out", "dtype" : dtype.float}
         ]
+        initial_state = {
+            "value" : state_initial_value
+        }
+        random_state = {
+            "value" : state_initial_value
+        }
 
     OPS = list(BINARY_OPS.values())
 
     def __init__(self):
         super().__init__()
 
-        self._value = 0.0
-
     def _evaluate(self):
-        if self.get("reset") or self._last_evaluated == 0.0:
-            self._value = self.get("reset_value")
+        if self.get("reset"):
+            self.reset_state()
 
         if self.get("operate"):
             op = int(self.get("op"))
@@ -419,6 +433,13 @@ class Counter(Node):
             self._value = self.OPS[op](a, b)
 
         self.set("out", self._value)
+
+    def get_state(self):
+        return {"value" : self._value}
+
+    def set_state(self, state):
+        if "value" in state:
+            self._value = state["value"]
 
 class FloatLambda(Lambda):
     class Meta:
@@ -490,21 +511,32 @@ class SetResetToggle(Node):
         outputs = [
             {"name" : "output", "dtype" : dtype.float},
         ]
+        initial_state = {
+            "value" : False
+        }
+        random_state = {
+            "value" : lambda node: bool(random.randint(0, 1))
+        }
 
     def __init__(self):
         super().__init__()
 
-        self._state = False
-
     def _evaluate(self):
-        if not self._state and self.get("set"):
-            self._state = True
-        if self._state and self.get("reset"):
-            self._state = False
+        if not self._value and self.get("set"):
+            self._value = True
+        if self._value and self.get("reset"):
+            self._value = False
         if self.get("toggle"):
-            self._state = not self._state
+            self._value = not self._value
 
-        self.set("output", self.get("v1") if self._state else self.get("v0"))
+        self.set("output", self.get("v1") if self._value else self.get("v0"))
+
+    def get_state(self):
+        return {"value" : self._value}
+
+    def set_state(self, state):
+        if "value" in state:
+            self._value = state["value"]
 
 #
 # Vec2 operations

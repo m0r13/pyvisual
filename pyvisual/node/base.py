@@ -1,5 +1,9 @@
-import time
+import clipboard
 import copy
+import imgui
+import json
+import time
+import random
 from collections import OrderedDict
 
 def find_node_base(bases):
@@ -50,14 +54,34 @@ def prepare_port_spec(port_spec, is_input):
     else:
         port_spec.setdefault("manual_input", False)
 
+# evaluate a set of key -> value pairs
+# may be passed as dictionary or callable (argument: node)
+# the values in the pairs might be functions too that return the actual value
+def evaluate_values(node, values_or_fn):
+    # evaluate if passed as function
+    values = values_or_fn(node) if callable(values_or_fn) else values_or_fn
+    # make a copy to not modify original dictionary
+    values = dict(values)
+    for key, value in values.items():
+        if callable(value):
+            values[key] = value(node)
+    return values
+
 class NodeTypeNotFound(Exception):
     pass
 
 class NodeSpec:
-    def __init__(self, cls=None, inputs=None, outputs=None, options={}):
+    def __init__(self, cls=None,
+            inputs=None, outputs=None,
+            presets=None,
+            initial_state=None, random_state=None,
+            options={}):
         self.cls = cls
         self.inputs = inputs if inputs is not None else []
         self.outputs = outputs if outputs is not None else []
+        self.presets = presets if presets is not None else []
+        self.initial_state = initial_state if initial_state is not None else {}
+        self.random_state = random_state if random_state is not None else {}
         self.options = dict(options)
 
     @property
@@ -92,6 +116,10 @@ class NodeSpec:
         self.cls = child_spec.cls
         self.inputs = self.inputs + child_spec.inputs
         self.outputs = self.outputs + child_spec.outputs
+        # TODO how should states / presets be inherited ?
+        self.presets = child_spec.presets
+        self.initial_state = child_spec.initial_state
+        self.random_state = child_spec.random_state
         self.options = child_spec.options
 
     def __repr__(self):
@@ -108,9 +136,16 @@ class NodeSpec:
         def parse(cls):
             inputs = getattr(cls.Meta, "inputs", [])
             outputs = getattr(cls.Meta, "outputs", [])
+            presets = getattr(cls.Meta, "presets", [])
+            initial_state = getattr(cls.Meta, "initial_state", {})
+            random_state = getattr(cls.Meta, "random_state", {})
             options = getattr(cls.Meta, "options", {})
-            return NodeSpec(cls=cls, inputs=inputs, outputs=outputs, options=options)
-        
+            return NodeSpec(cls=cls,
+                    inputs=inputs, outputs=outputs,
+                    presets=presets,
+                    initial_state=initial_state, random_state=random_state,
+                    options=options)
+
         spec = NodeSpec()
         for cls in bases:
             spec.append(parse(cls))
@@ -154,6 +189,12 @@ class Node(metaclass=NodeMeta):
         self.custom_input_ports = OrderedDict()
         self.custom_output_ports = OrderedDict()
         self.update_ports()
+
+        # set default state/extra information
+        self.set_state(evaluate_values(self, self.spec.initial_state))
+        self.set_extra({
+            "allow_preset_randomization" : False
+        })
 
     def update_ports(self):
         self.input_ports = OrderedDict()
@@ -262,8 +303,13 @@ class Node(metaclass=NodeMeta):
         # result in the nodes after them to be evaluated accordingly
         if not evaluated:
             for value in self.values.values():
-                value.has_changed = False
+                value.reset_changed()
         self._evaluated = evaluated
+
+    def reset_evaluated(self):
+        for value in self.values.values():
+            value.reset_changed()
+        self._evaluated = False
 
     def _create_value(self, port_id):
         assert port_id in self.ports, "Port %s not found" % port_id 
@@ -280,9 +326,7 @@ class Node(metaclass=NodeMeta):
         value = None
         if is_input:
             manual_input = SettableValueHolder(default_value)
-            manual_input.has_changed = True
             value = InputValueHolder(manual_input)
-            value.has_changed = True
         else:
             value = SettableValueHolder(default_value)
         return value
@@ -318,8 +362,9 @@ class Node(metaclass=NodeMeta):
 
     def evaluate(self):
         # update a node
-        # return if node needed update
-        if not self.evaluated and (self.always_evaluate or self.needs_evaluation):
+        # return True if node needed update
+
+        if not self._evaluated and (self.always_evaluate or self._last_evaluated == 0.0 or self._force_evaluate or self.have_any_inputs_changed()):
             self._force_evaluate = False
             self._evaluate()
             self._evaluated = True
@@ -343,7 +388,102 @@ class Node(metaclass=NodeMeta):
     def _show_custom_context(self):
         # called from ui-node to add custom entries in nodes context menu
         # called only when that context menu is visible
+
+        has_state = len(self.spec.initial_state) != 0
+        has_presets = len(self.spec.presets) != 0
+
+        if has_state:
+            imgui.separator()
+
+            if imgui.button("reset state"):
+                self.reset_state()
+            imgui.same_line()
+            if imgui.button("randomize state"):
+                self.randomize_state()
+
+        if has_presets:
+            imgui.separator()
+
+            if imgui.button("default preset"):
+                self.reset_preset(force=True)
+            imgui.same_line()
+            if imgui.button("random preset"):
+                self.randomize_preset(force=True)
+            imgui.same_line()
+            if imgui.button("choose preset..."):
+                imgui.open_popup("choose_preset")
+            if imgui.begin_popup("choose_preset"):
+                for name, values in self.spec.presets:
+                    if imgui.button(name):
+                        self.set_preset(values)
+                imgui.end_popup()
+
+            changed, self.allow_preset_randomization = imgui.checkbox("allow preset randomization", self.allow_preset_randomization)
+
+        if imgui.button("copy current as preset"):
+            # copy only keys that are contained in (first) preset
+            # TODO see how this behavior works
+            keys = None if not has_presets else list(self.spec.presets[0][1].keys())
+            values = OrderedDict()
+            for port_id, value in self.values.items():
+                if not is_input(port_id):
+                    continue
+                name = port_name(port_id)
+                if keys is not None and name not in keys:
+                    continue
+                values[name] = value.value
+            preset = ["name", values]
+            clipboard.copy(json.dumps(preset))
+
+    # overwrite if necessary
+    def get_state(self):
+        return {}
+
+    # overwrite if necessary
+    # sets state (dict with input name -> value pairs) on node
+    # use evaluate_values before passing values here!!
+    def set_state(self, state):
         pass
+
+    def set_preset(self, values):
+        values = evaluate_values(self, values)
+        for key, value in values.items():
+            self.get_input(key).value = value
+
+    def reset_preset(self, force=False):
+        # TODO how to handle randomization here?
+        # --> maybe apply the default value?
+        if len(self.spec.presets) == 0:
+            return
+        if not force and not self.allow_preset_randomization:
+            return
+        name, values = self.spec.presets[0]
+        self.set_preset(values)
+
+    def randomize_preset(self, force=False):
+        # force argument is because auto randomization (when applied to all nodes)
+        # can be disabled for single nodes
+        # force is set to True when preset is randomized with click on button in node context
+        if len(self.spec.presets) == 0:
+            return
+        if not force and not self.allow_preset_randomization:
+            return
+        name, values = random.choice(self.spec.presets)
+        self.set_preset(values)
+
+    def reset_state(self):
+        self.set_state(evaluate_values(self, self.spec.initial_state))
+        self.force_evaluate()
+    def randomize_state(self):
+        self.set_state(evaluate_values(self, self.spec.random_state))
+        self.force_evaluate()
+
+    def get_extra(self):
+        return {"allow_preset_randomization" : self.allow_preset_randomization}
+
+    def set_extra(self, values):
+        if "allow_preset_randomization" in values:
+            self.allow_preset_randomization = values["allow_preset_randomization"]
 
     @classmethod
     def get_subclass_nodes(cls, include_self=True):
@@ -391,6 +531,11 @@ class SettableValueHolder(ValueHolder):
     def has_changed(self, changed):
         self._changed = changed
 
+    def has_changed_fast(self):
+        return self._changed
+    def reset_changed(self):
+        self._changed = False
+
     @property
     def value(self):
         return self._value
@@ -408,7 +553,7 @@ class InputValueHolder(ValueHolder):
         # and the value so we don't have to look it up from the node every time
         self.connected_node = None
         self.connected_value = None
-        self.has_connection_changed = False
+        self.has_connection_changed = True
     
     @property
     def is_connected(self):
@@ -436,6 +581,15 @@ class InputValueHolder(ValueHolder):
         if not changed:
             self.has_connection_changed = False
             self.manual_value.has_changed = False
+
+    # TODO remove property at some time and use only functions?
+    # properties have some calling overhead and change check is called often
+    def has_changed_fast(self):
+        return (self.connected_value and self.connected_value.has_changed) or self.manual_value.has_changed or self.has_connection_changed
+
+    def reset_changed(self):
+        self.has_connection_changed = False
+        self.manual_value.reset_changed()
 
     @property
     def value(self):

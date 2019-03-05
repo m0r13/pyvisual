@@ -4,8 +4,10 @@ import traceback
 import random
 import imgui
 import os
+import json
 from pyvisual.node.base import Node
 from pyvisual.node import dtype
+from pyvisual.node.op.gpu import custom_meta
 from pyvisual.editor import widget
 from pyvisual import assets
 from glumpy import gloo, gl, glm
@@ -291,8 +293,10 @@ class BaseShader(RenderNode):
             imgui.set_tooltip(self.shader_error)
 
     def _show_custom_context(self):
-        if imgui.menu_item("reload shaders")[0]:
+        if imgui.button("reload shaders"):
             self.update_program()
+
+        super()._show_custom_context()
 
 class Shader(BaseShader):
     class Meta:
@@ -305,9 +309,6 @@ class Shader(BaseShader):
         fragment_path = assets.get_shader_path(fragment)
 
         super().__init__(assets.FileShaderSource(vertex_path), assets.FileShaderSource(fragment_path), **kwargs)
-
-class GeneratedMeta:
-    pass
 
 class ShaderNodeLoader():
 
@@ -339,8 +340,16 @@ class ShaderNodeLoader():
                 else:
                     # filter class already exist, no need to recreate it for now
                     continue
+
+            meta = None
+            meta_name = "%sMeta" % name
+            if meta_name in dir(custom_meta):
+                meta = getattr(custom_meta, meta_name)
+            else:
+                meta = type("Meta", tuple(), {})
+
             fragment_path = path.replace("shader" + os.path.sep, "")
-            attrs = {"FRAGMENT" : fragment_path, "Meta" : GeneratedMeta, "__module__" : module}
+            attrs = {"FRAGMENT" : fragment_path, "Meta" : meta, "__module__" : module}
             filter_class = type(name, (baseclass,), attrs)
             g[name] = filter_class
             del filter_class

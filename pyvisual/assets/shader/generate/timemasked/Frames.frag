@@ -3,9 +3,11 @@
 uniform float uCount;
 uniform float uFrameSize; // {"default" : 1.0}
 uniform float uAspectCorrection; // {"default" : 0.0}
-uniform int uInsideOut; // {"default" : 0}
 
 uniform int uMode; // {"default" : 0, "choices" : ["square frames", "inside-out square frames", "round frames"]}
+uniform float uSoftness0; // {"default" : 0.005}
+uniform float uSoftness1; // {"default" : 0.005}
+uniform int uInvert; // {"default" : 0}
 
 void generateFrag() {
     vec2 uv = (pyvisualUV - vec2(0.5)) * 2.0;
@@ -26,9 +28,13 @@ void generateFrag() {
 
     float softness = 0.005;
     float edge = uFrameSize * modValue * 0.5;
-    float softValue = 1.0 - smoothstep(edge-softness*0.5, edge+softness*0.5, v);
-    softValue *= smoothstep(0.0, softness, v);
+    float softValue = 1.0 - smoothstep(edge-uSoftness0*0.5, edge+uSoftness0*0.5, v);
+    softValue *= smoothstep(0.0, uSoftness1, v);
 
-    pyvisualOutColor = vec4(vec3(softValue), 1.0);
+    if (uInvert == 0) {
+        pyvisualOutColor = vec4(vec3(softValue), 1.0);
+    } else {
+        pyvisualOutColor = vec4(vec3(1.0 - softValue), 1.0);
+    }
 }
 

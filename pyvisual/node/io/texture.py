@@ -16,9 +16,6 @@ class LoadTexture(Node):
         outputs = [
             {"name" : "output", "dtype" : dtype.tex2d},
         ]
-        options = {
-            "category" : "input"
-        }
 
     def __init__(self):
         super().__init__()
@@ -64,15 +61,17 @@ class LoadTextures(Node):
             {"name" : "wildcard", "dtype" : dtype.assetpath, "dtype_args" : {"prefix" : "image"}},
             {"name" : "next", "dtype" : dtype.event},
             {"name" : "shuffle", "dtype" : dtype.bool, "dtype_args" : {"default" : 1.0}},
-            {"name" : "current", "dtype" : dtype.str, "hide" : True},
         ]
         outputs = [
             {"name" : "texture", "dtype" : dtype.tex2d},
             {"name" : "last_texture", "dtype" : dtype.tex2d},
             {"name" : "next", "dtype" : dtype.event},
         ]
-        options = {
-            "category" : "input"
+        initial_state = {
+            "index" : 0
+        }
+        random_state = {
+            "index" : lambda node: random.randint(0, 10000)
         }
 
     def __init__(self):
@@ -81,7 +80,8 @@ class LoadTextures(Node):
         # available textures as tuples (path, glumpy-texture)
         # glumpy-textures are None until loaded for the first time
         self.textures = []
-        self.index = 0
+        # index is set by state
+        #self.index = 0
 
         self.last_texture = None
 
@@ -91,16 +91,23 @@ class LoadTextures(Node):
         texture.deactivate()
         return texture
 
+    # TODO refactor whole mechanism of choosing texture together with state!
+    def _set_index(self, index):
+        self.index = index % len(self.textures)
+
+        tt = self.textures[self.index]
+        if tt[1] is None:
+            print("Loading %s" % tt[0])
+            tt[1] = self._load_texture(tt[0])
+        self.set("texture", tt[1])
+        self.set("last_texture", self.last_texture)
+
     def _evaluate(self):
         if self.have_inputs_changed("wildcard"):
             self.textures = []
-            self.index = 0
             wildcard = self.get("wildcard")
-            current = self.get("current")
             if wildcard:
                 for i, path in enumerate(sorted(assets.glob_paths(wildcard))):
-                    if path == current:
-                        self.index = i
                     self.textures.append([path, None])
 
         if len(self.textures) == 0:
@@ -113,20 +120,20 @@ class LoadTextures(Node):
             shuffle = self.get("shuffle")
             self.last_texture = self.textures[self.index][1]
             if shuffle and len(self.textures) > 1:
-                self.index = (self.index + random.randint(1, len(self.textures) - 1)) % len(self.textures)
+                index = (self.index + random.randint(1, len(self.textures) - 1)) % len(self.textures)
             else:
-                self.index = (self.index + 1) % len(self.textures)
+                index = (self.index + 1) % len(self.textures)
 
-            #print(self.index, self.textures[self.index][0])
-            name = self.textures[self.index][0]
-            self.get_input("current").value = name
+            self.index = index
 
-        tt = self.textures[self.index]
-        if tt[1] is None:
-            print("Loading %s" % tt[0])
-            tt[1] = self._load_texture(tt[0])
-        self.set("texture", tt[1])
-        self.set("last_texture", self.last_texture)
+        self._set_index(self.index)
+
+    def get_state(self):
+        return {"index" : self.index}
+
+    def set_state(self, state):
+        if "index" in state:
+            self.index = state["index"]
 
 class DummyTexture(Node):
     class Meta:
@@ -186,6 +193,13 @@ class ChooseTexture(Node):
             {"name" : "dummy0", "dtype" : dtype.int, "dummy" : True},
             {"name" : "out", "dtype" : dtype.tex2d},
         ]
+        initial_state = {
+            "index" : 0
+        }
+        # TODO refactor state handling here too!!!!
+        random_state = {
+            "index" : lambda node: random.randint(0, 10000)
+        }
 
     def __init__(self):
         super().__init__()
@@ -196,7 +210,8 @@ class ChooseTexture(Node):
         # only in the next frame that texture is delegated and set as current
         # (to prevent weird glitches when a generator is not enabled yet)
         self._current_index = -1
-        self._next_index = -1
+        # set by state
+        #self._next_index = -1
 
     def _choose_next(self):
         if self.get("shuffle"):
@@ -219,12 +234,17 @@ class ChooseTexture(Node):
         self.set_custom_inputs(custom_inputs)
         self.set_custom_outputs(custom_outputs)
 
-        if self._current_index >= self._count or self._current_index == -1:
+        if (self._current_index >= self._count or self._current_index == -1) and self._next_index == -1:
             self._choose_next()
 
     def _evaluate(self):
+        if self.have_inputs_changed("count") or self._last_evaluated == 0.0:
+            self._update_custom_ports()
+
         if self._next_index != -1:
-            self._current_index = self._next_index
+            self._current_index = self._next_index % self._count
+            # just to be sure for now
+            self.get_output("enabled%d" % self._current_index).value = True
             self._next_index = -1
 
             # update all enabled-flags, necessary after choosing new texture
@@ -235,9 +255,6 @@ class ChooseTexture(Node):
                 if enabled:
                     self.set("out", in_texture.value)
 
-        if self.have_inputs_changed("count") or self._last_evaluated == 0.0:
-            self._update_custom_ports()
-
         if self.get("next"):
             self._choose_next()
 
@@ -245,4 +262,12 @@ class ChooseTexture(Node):
             in_texture = self.get_input("in%d" % self._current_index)
             out_texture = self.get_output("out")
             in_texture.copy_to(out_texture)
+
+    def get_state(self):
+        return {"index" : self._current_index}
+
+    def set_state(self, state):
+        if "index" not in state:
+            return
+        self._next_index = state["index"]
 

@@ -129,7 +129,15 @@ class Graph:
 
     def reset_instances(self):
         for instance in self.instances:
-            instance.evaluated = False
+            instance.reset_evaluated()
+
+    # apply a function to each instance
+    # instances are sorted by key before (to ensure same results with randomization and seeds involved)
+    def apply_instances(self, fn):
+        instances = list(self.instances)
+        instances.sort(key=lambda instance: instance.id)
+        for instance in instances:
+            fn(instance)
 
     def get_stats(self):
         collected_stats = {}
@@ -259,6 +267,9 @@ class NodeGraph(Graph):
                 custom_ports.append((port_id, format_port_spec(port_spec)))
             node_data["custom_ports"] = custom_ports
 
+            node_data["state"] = node.get_state()
+            node_data["extra"] = node.get_extra()
+
             nodes.append(node_data)
 
         for src_node, outgoing_connections in self.connections_from.items():
@@ -305,6 +316,7 @@ class NodeGraph(Graph):
                 ignore_ids.add(node_save_id)
                 continue
 
+            # TODO pass initial values and custom ports in constructor!!
             node = self.create_node(spec, ui_data=node_data["ui_data"])
             new_nodes.append(node)
             id_map[node_save_id] = node.id
@@ -325,6 +337,9 @@ class NodeGraph(Graph):
                 port_spec = node.ports[port_id]
                 dtype = port_spec["dtype"]
                 node.initial_manual_values[port_id] = dtype.base_type.unserialize(json_value)
+
+            node.set_state(node_data.get("state", {}))
+            node.set_extra(node_data.get("extra", {}))
 
         # handle new nodes being 
         if as_selected:
