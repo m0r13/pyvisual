@@ -1,921 +1,903 @@
 {
     "connections": [
         {
-            "dst_node_id": 182,
-            "dst_port_id": "i_destination",
-            "src_node_id": 180,
-            "src_port_id": "o_last_texture"
-        },
-        {
-            "dst_node_id": 182,
-            "dst_port_id": "i_input",
-            "src_node_id": 180,
-            "src_port_id": "o_texture"
-        },
-        {
-            "dst_node_id": 183,
+            "dst_node_id": 3,
             "dst_port_id": "i_trigger",
-            "src_node_id": 180,
+            "src_node_id": 0,
             "src_port_id": "o_next"
         },
         {
-            "dst_node_id": 182,
+            "dst_node_id": 2,
+            "dst_port_id": "i_destination",
+            "src_node_id": 0,
+            "src_port_id": "o_last_texture"
+        },
+        {
+            "dst_node_id": 2,
+            "dst_port_id": "i_input",
+            "src_node_id": 0,
+            "src_port_id": "o_texture"
+        },
+        {
+            "dst_node_id": 2,
             "dst_port_id": "i_alpha",
-            "src_node_id": 183,
+            "src_node_id": 3,
             "src_port_id": "o_output"
         },
         {
-            "dst_node_id": 187,
+            "dst_node_id": 9,
             "dst_port_id": "i_input",
-            "src_node_id": 186,
+            "src_node_id": 6,
             "src_port_id": "o_output"
         },
         {
-            "dst_node_id": 191,
+            "dst_node_id": 10,
             "dst_port_id": "i_t1",
-            "src_node_id": 188,
+            "src_node_id": 7,
             "src_port_id": "o_output"
         },
         {
-            "dst_node_id": 188,
+            "dst_node_id": 7,
             "dst_port_id": "i_theta",
-            "src_node_id": 189,
+            "src_node_id": 8,
             "src_port_id": "o_output"
         },
         {
-            "dst_node_id": 190,
+            "dst_node_id": 9,
+            "dst_port_id": "i_uInputTransform",
+            "src_node_id": 10,
+            "src_port_id": "o_output"
+        },
+        {
+            "dst_node_id": 19,
             "dst_port_id": "i_input",
-            "src_node_id": 187,
+            "src_node_id": 9,
             "src_port_id": "o_output"
         },
         {
-            "dst_node_id": 187,
-            "dst_port_id": "i_transformUV",
-            "src_node_id": 191,
-            "src_port_id": "o_output"
-        },
-        {
-            "dst_node_id": 200,
-            "dst_port_id": "i_input",
-            "src_node_id": 190,
-            "src_port_id": "o_output"
-        },
-        {
-            "dst_node_id": 190,
-            "dst_port_id": "i_transformUV",
-            "src_node_id": 192,
-            "src_port_id": "o_output"
-        },
-        {
-            "dst_node_id": 191,
+            "dst_node_id": 10,
             "dst_port_id": "i_t2",
-            "src_node_id": 194,
+            "src_node_id": 13,
             "src_port_id": "o_output"
         },
         {
-            "dst_node_id": 194,
+            "dst_node_id": 13,
             "dst_port_id": "i_x",
-            "src_node_id": 193,
+            "src_node_id": 12,
             "src_port_id": "o_output"
         },
         {
-            "dst_node_id": 181,
+            "dst_node_id": 1,
             "dst_port_id": "i_texture",
-            "src_node_id": 195,
+            "src_node_id": 14,
             "src_port_id": "o_output"
         },
         {
-            "dst_node_id": 208,
+            "dst_node_id": 26,
             "dst_port_id": "i_t2",
-            "src_node_id": 196,
+            "src_node_id": 15,
             "src_port_id": "o_output"
         },
         {
-            "dst_node_id": 210,
+            "dst_node_id": 28,
             "dst_port_id": "i_input",
-            "src_node_id": 199,
+            "src_node_id": 18,
             "src_port_id": "o_output"
         },
         {
-            "dst_node_id": 195,
+            "dst_node_id": 14,
             "dst_port_id": "i_input",
-            "src_node_id": 200,
+            "src_node_id": 19,
             "src_port_id": "o_output"
         },
         {
-            "dst_node_id": 199,
+            "dst_node_id": 18,
             "dst_port_id": "i_uColor",
-            "src_node_id": 201,
+            "src_node_id": 20,
             "src_port_id": "o_rgba"
         },
         {
-            "dst_node_id": 265,
+            "dst_node_id": 83,
             "dst_port_id": "i_in3",
-            "src_node_id": 203,
+            "src_node_id": 22,
             "src_port_id": "o_texture"
         },
         {
-            "dst_node_id": 204,
+            "dst_node_id": 23,
             "dst_port_id": "i_input",
-            "src_node_id": 205,
+            "src_node_id": 24,
             "src_port_id": "o_output"
         },
         {
-            "dst_node_id": 204,
+            "dst_node_id": 23,
             "dst_port_id": "i_time",
-            "src_node_id": 206,
+            "src_node_id": 25,
             "src_port_id": "o_output"
         },
         {
-            "dst_node_id": 187,
-            "dst_port_id": "i_sizeref",
-            "src_node_id": 207,
-            "src_port_id": "o_output"
-        },
-        {
-            "dst_node_id": 208,
+            "dst_node_id": 26,
             "dst_port_id": "i_t1",
-            "src_node_id": 209,
+            "src_node_id": 27,
             "src_port_id": "o_output"
         },
         {
-            "dst_node_id": 199,
+            "dst_node_id": 18,
             "dst_port_id": "i_transformUV",
-            "src_node_id": 208,
+            "src_node_id": 26,
             "src_port_id": "o_output"
         },
         {
-            "dst_node_id": 212,
+            "dst_node_id": 30,
             "dst_port_id": "i_toggle",
-            "src_node_id": 211,
+            "src_node_id": 29,
             "src_port_id": "o_event"
         },
         {
-            "dst_node_id": 213,
+            "dst_node_id": 31,
             "dst_port_id": "i_factor",
-            "src_node_id": 214,
+            "src_node_id": 32,
             "src_port_id": "o_out"
         },
         {
-            "dst_node_id": 341,
+            "dst_node_id": 159,
             "dst_port_id": "i_alpha",
-            "src_node_id": 212,
+            "src_node_id": 30,
             "src_port_id": "o_output"
         },
         {
-            "dst_node_id": 293,
+            "dst_node_id": 111,
             "dst_port_id": "i_input",
-            "src_node_id": 212,
+            "src_node_id": 30,
             "src_port_id": "o_output"
         },
         {
-            "dst_node_id": 216,
+            "dst_node_id": 34,
             "dst_port_id": "i_a",
-            "src_node_id": 213,
+            "src_node_id": 31,
             "src_port_id": "o_output"
         },
         {
-            "dst_node_id": 216,
+            "dst_node_id": 34,
             "dst_port_id": "i_b",
-            "src_node_id": 215,
+            "src_node_id": 33,
             "src_port_id": "o_out"
         },
         {
-            "dst_node_id": 222,
-            "dst_port_id": "i_input",
-            "src_node_id": 216,
-            "src_port_id": "o_out"
-        },
-        {
-            "dst_node_id": 209,
+            "dst_node_id": 27,
             "dst_port_id": "i_x",
-            "src_node_id": 216,
+            "src_node_id": 34,
             "src_port_id": "o_out"
         },
         {
-            "dst_node_id": 265,
+            "dst_node_id": 40,
+            "dst_port_id": "i_input",
+            "src_node_id": 34,
+            "src_port_id": "o_out"
+        },
+        {
+            "dst_node_id": 83,
             "dst_port_id": "i_in0",
-            "src_node_id": 204,
+            "src_node_id": 23,
             "src_port_id": "o_output"
         },
         {
-            "dst_node_id": 185,
+            "dst_node_id": 4,
             "dst_port_id": "i_input",
-            "src_node_id": 182,
+            "src_node_id": 2,
             "src_port_id": "o_output"
         },
         {
-            "dst_node_id": 184,
+            "dst_node_id": 5,
             "dst_port_id": "i_input",
-            "src_node_id": 182,
+            "src_node_id": 2,
             "src_port_id": "o_output"
         },
         {
-            "dst_node_id": 195,
+            "dst_node_id": 14,
             "dst_port_id": "i_foreground",
-            "src_node_id": 210,
+            "src_node_id": 28,
             "src_port_id": "o_output"
         },
         {
-            "dst_node_id": 299,
+            "dst_node_id": 117,
             "dst_port_id": "i_input",
-            "src_node_id": 217,
+            "src_node_id": 35,
             "src_port_id": "o_output"
         },
         {
-            "dst_node_id": 217,
+            "dst_node_id": 35,
             "dst_port_id": "i_time",
-            "src_node_id": 218,
+            "src_node_id": 36,
             "src_port_id": "o_output"
         },
         {
-            "dst_node_id": 220,
+            "dst_node_id": 38,
             "dst_port_id": "i_condition",
-            "src_node_id": 221,
+            "src_node_id": 39,
             "src_port_id": "o_output"
         },
         {
-            "dst_node_id": 220,
+            "dst_node_id": 38,
             "dst_port_id": "i_input",
-            "src_node_id": 219,
+            "src_node_id": 37,
             "src_port_id": "o_event"
         },
         {
-            "dst_node_id": 217,
+            "dst_node_id": 35,
             "dst_port_id": "i_enabled",
-            "src_node_id": 220,
+            "src_node_id": 38,
             "src_port_id": "o_output"
         },
         {
-            "dst_node_id": 224,
+            "dst_node_id": 42,
             "dst_port_id": "i_a",
-            "src_node_id": 223,
+            "src_node_id": 41,
             "src_port_id": "o_output"
         },
         {
-            "dst_node_id": 328,
+            "dst_node_id": 146,
             "dst_port_id": "i_x",
-            "src_node_id": 224,
+            "src_node_id": 42,
             "src_port_id": "o_out"
         },
         {
-            "dst_node_id": 224,
+            "dst_node_id": 42,
             "dst_port_id": "i_b",
-            "src_node_id": 225,
+            "src_node_id": 43,
             "src_port_id": "o_out"
         },
         {
-            "dst_node_id": 269,
+            "dst_node_id": 87,
             "dst_port_id": "i_input",
-            "src_node_id": 226,
+            "src_node_id": 44,
             "src_port_id": "o_output"
         },
         {
-            "dst_node_id": 228,
+            "dst_node_id": 46,
             "dst_port_id": "i_input",
-            "src_node_id": 229,
+            "src_node_id": 47,
             "src_port_id": "o_output"
         },
         {
-            "dst_node_id": 215,
+            "dst_node_id": 33,
             "dst_port_id": "i_operand",
-            "src_node_id": 227,
+            "src_node_id": 45,
             "src_port_id": "o_output"
         },
         {
-            "dst_node_id": 230,
+            "dst_node_id": 48,
             "dst_port_id": "i_input",
-            "src_node_id": 231,
+            "src_node_id": 49,
             "src_port_id": "o_output"
         },
         {
-            "dst_node_id": 323,
+            "dst_node_id": 141,
             "dst_port_id": "i_b",
-            "src_node_id": 232,
+            "src_node_id": 50,
             "src_port_id": "o_output"
         },
         {
-            "dst_node_id": 234,
+            "dst_node_id": 52,
             "dst_port_id": "i_input",
-            "src_node_id": 236,
+            "src_node_id": 54,
             "src_port_id": "o_output"
         },
         {
-            "dst_node_id": 233,
+            "dst_node_id": 51,
             "dst_port_id": "i_input",
-            "src_node_id": 235,
+            "src_node_id": 53,
             "src_port_id": "o_output"
         },
         {
-            "dst_node_id": 211,
+            "dst_node_id": 29,
             "dst_port_id": "i_n",
-            "src_node_id": 237,
+            "src_node_id": 55,
             "src_port_id": "o_output"
         },
         {
-            "dst_node_id": 211,
+            "dst_node_id": 29,
             "dst_port_id": "i_p",
-            "src_node_id": 238,
+            "src_node_id": 56,
             "src_port_id": "o_output"
         },
         {
-            "dst_node_id": 239,
+            "dst_node_id": 57,
             "dst_port_id": "i_input",
-            "src_node_id": 240,
+            "src_node_id": 58,
             "src_port_id": "o_output"
         },
         {
-            "dst_node_id": 241,
+            "dst_node_id": 59,
             "dst_port_id": "i_input",
-            "src_node_id": 242,
+            "src_node_id": 60,
             "src_port_id": "o_output"
         },
         {
-            "dst_node_id": 243,
+            "dst_node_id": 61,
             "dst_port_id": "i_n",
-            "src_node_id": 244,
+            "src_node_id": 62,
             "src_port_id": "o_output"
         },
         {
-            "dst_node_id": 243,
+            "dst_node_id": 61,
             "dst_port_id": "i_p",
-            "src_node_id": 245,
+            "src_node_id": 63,
             "src_port_id": "o_output"
         },
         {
-            "dst_node_id": 215,
+            "dst_node_id": 33,
             "dst_port_id": "i_operate",
-            "src_node_id": 243,
+            "src_node_id": 61,
             "src_port_id": "o_event"
         },
         {
-            "dst_node_id": 329,
+            "dst_node_id": 147,
             "dst_port_id": "i_t2",
-            "src_node_id": 246,
+            "src_node_id": 64,
             "src_port_id": "o_output"
         },
         {
-            "dst_node_id": 246,
+            "dst_node_id": 64,
             "dst_port_id": "i_theta",
-            "src_node_id": 247,
+            "src_node_id": 65,
             "src_port_id": "o_output"
         },
         {
-            "dst_node_id": 248,
+            "dst_node_id": 66,
             "dst_port_id": "i_alpha",
-            "src_node_id": 249,
+            "src_node_id": 67,
             "src_port_id": "o_output"
         },
         {
-            "dst_node_id": 342,
+            "dst_node_id": 160,
             "dst_port_id": "i_input",
-            "src_node_id": 248,
+            "src_node_id": 66,
             "src_port_id": "o_output"
         },
         {
-            "dst_node_id": 189,
+            "dst_node_id": 8,
             "dst_port_id": "i_length",
-            "src_node_id": 250,
+            "src_node_id": 68,
             "src_port_id": "o_out"
         },
         {
-            "dst_node_id": 252,
+            "dst_node_id": 70,
             "dst_port_id": "i_input",
-            "src_node_id": 251,
+            "src_node_id": 69,
             "src_port_id": "o_out"
         },
         {
-            "dst_node_id": 189,
+            "dst_node_id": 8,
             "dst_port_id": "i_phase",
-            "src_node_id": 252,
+            "src_node_id": 70,
             "src_port_id": "o_output"
         },
         {
-            "dst_node_id": 251,
+            "dst_node_id": 69,
             "dst_port_id": "i_operate",
-            "src_node_id": 253,
+            "src_node_id": 71,
             "src_port_id": "o_event"
         },
         {
-            "dst_node_id": 255,
+            "dst_node_id": 73,
             "dst_port_id": "i_input",
-            "src_node_id": 254,
+            "src_node_id": 72,
             "src_port_id": "o_output"
         },
         {
-            "dst_node_id": 257,
+            "dst_node_id": 75,
             "dst_port_id": "i_input",
-            "src_node_id": 256,
+            "src_node_id": 74,
             "src_port_id": "o_output"
         },
         {
-            "dst_node_id": 259,
+            "dst_node_id": 77,
             "dst_port_id": "i_input",
-            "src_node_id": 258,
+            "src_node_id": 76,
             "src_port_id": "o_output"
         },
         {
-            "dst_node_id": 253,
+            "dst_node_id": 71,
             "dst_port_id": "i_n",
-            "src_node_id": 260,
+            "src_node_id": 78,
             "src_port_id": "o_output"
         },
         {
-            "dst_node_id": 253,
+            "dst_node_id": 71,
             "dst_port_id": "i_p",
-            "src_node_id": 261,
+            "src_node_id": 79,
             "src_port_id": "o_output"
         },
         {
-            "dst_node_id": 263,
+            "dst_node_id": 81,
             "dst_port_id": "i_input",
-            "src_node_id": 262,
+            "src_node_id": 80,
             "src_port_id": "o_output"
         },
         {
-            "dst_node_id": 247,
+            "dst_node_id": 65,
             "dst_port_id": "i_factor",
-            "src_node_id": 263,
+            "src_node_id": 81,
             "src_port_id": "o_output"
         },
         {
-            "dst_node_id": 262,
+            "dst_node_id": 80,
             "dst_port_id": "i_alpha",
-            "src_node_id": 264,
+            "src_node_id": 82,
             "src_port_id": "o_output"
         },
         {
-            "dst_node_id": 204,
+            "dst_node_id": 23,
             "dst_port_id": "i_enabled",
-            "src_node_id": 265,
+            "src_node_id": 83,
             "src_port_id": "o_enabled0"
         },
         {
-            "dst_node_id": 217,
-            "dst_port_id": "i_input",
-            "src_node_id": 265,
-            "src_port_id": "o_out"
-        },
-        {
-            "dst_node_id": 285,
+            "dst_node_id": 103,
             "dst_port_id": "i_enabled",
-            "src_node_id": 265,
+            "src_node_id": 83,
             "src_port_id": "o_enabled1"
         },
         {
-            "dst_node_id": 267,
+            "dst_node_id": 35,
+            "dst_port_id": "i_input",
+            "src_node_id": 83,
+            "src_port_id": "o_out"
+        },
+        {
+            "dst_node_id": 85,
             "dst_port_id": "i_condition",
-            "src_node_id": 268,
+            "src_node_id": 86,
             "src_port_id": "o_output"
         },
         {
-            "dst_node_id": 267,
+            "dst_node_id": 85,
             "dst_port_id": "i_input",
-            "src_node_id": 266,
+            "src_node_id": 84,
             "src_port_id": "o_event"
         },
         {
-            "dst_node_id": 269,
+            "dst_node_id": 87,
             "dst_port_id": "i_enabled",
-            "src_node_id": 267,
+            "src_node_id": 85,
             "src_port_id": "o_output"
         },
         {
-            "dst_node_id": 199,
+            "dst_node_id": 18,
             "dst_port_id": "i_input",
-            "src_node_id": 269,
+            "src_node_id": 87,
             "src_port_id": "o_output"
         },
         {
-            "dst_node_id": 269,
+            "dst_node_id": 87,
             "dst_port_id": "i_time",
-            "src_node_id": 270,
+            "src_node_id": 88,
             "src_port_id": "o_output"
         },
         {
-            "dst_node_id": 210,
+            "dst_node_id": 28,
             "dst_port_id": "i_uCenter",
-            "src_node_id": 271,
+            "src_node_id": 89,
             "src_port_id": "o_output"
         },
         {
-            "dst_node_id": 273,
+            "dst_node_id": 91,
             "dst_port_id": "i_toggle",
-            "src_node_id": 272,
+            "src_node_id": 90,
             "src_port_id": "o_event"
         },
         {
-            "dst_node_id": 210,
+            "dst_node_id": 28,
             "dst_port_id": "i_uCenterSwitch",
-            "src_node_id": 273,
+            "src_node_id": 91,
             "src_port_id": "o_output"
         },
         {
-            "dst_node_id": 210,
+            "dst_node_id": 28,
             "dst_port_id": "i_uStripeOffset",
-            "src_node_id": 274,
+            "src_node_id": 92,
             "src_port_id": "o_output"
         },
         {
-            "dst_node_id": 195,
+            "dst_node_id": 14,
             "dst_port_id": "i_mask",
-            "src_node_id": 198,
+            "src_node_id": 17,
             "src_port_id": "o_output"
         },
         {
-            "dst_node_id": 276,
+            "dst_node_id": 94,
             "dst_port_id": "i_input",
-            "src_node_id": 278,
+            "src_node_id": 96,
             "src_port_id": "o_output"
         },
         {
-            "dst_node_id": 275,
+            "dst_node_id": 93,
             "dst_port_id": "i_input",
-            "src_node_id": 277,
+            "src_node_id": 95,
             "src_port_id": "o_output"
         },
         {
-            "dst_node_id": 266,
+            "dst_node_id": 84,
             "dst_port_id": "i_n",
-            "src_node_id": 279,
+            "src_node_id": 97,
             "src_port_id": "o_output"
         },
         {
-            "dst_node_id": 266,
+            "dst_node_id": 84,
             "dst_port_id": "i_p",
-            "src_node_id": 280,
+            "src_node_id": 98,
             "src_port_id": "o_output"
         },
         {
-            "dst_node_id": 281,
+            "dst_node_id": 99,
             "dst_port_id": "i_generate",
-            "src_node_id": 283,
+            "src_node_id": 101,
             "src_port_id": "o_o0"
         },
         {
-            "dst_node_id": 282,
+            "dst_node_id": 100,
             "dst_port_id": "i_generate",
-            "src_node_id": 283,
+            "src_node_id": 101,
             "src_port_id": "o_o1"
         },
         {
-            "dst_node_id": 283,
+            "dst_node_id": 101,
             "dst_port_id": "i_event",
-            "src_node_id": 284,
+            "src_node_id": 102,
             "src_port_id": "o_event"
         },
         {
-            "dst_node_id": 285,
+            "dst_node_id": 103,
             "dst_port_id": "i_time",
-            "src_node_id": 286,
+            "src_node_id": 104,
             "src_port_id": "o_output"
         },
         {
-            "dst_node_id": 287,
+            "dst_node_id": 105,
             "dst_port_id": "i_input",
-            "src_node_id": 288,
+            "src_node_id": 106,
             "src_port_id": "o_output"
         },
         {
-            "dst_node_id": 306,
+            "dst_node_id": 124,
             "dst_port_id": "i_input",
-            "src_node_id": 289,
+            "src_node_id": 107,
             "src_port_id": "o_output"
         },
         {
-            "dst_node_id": 287,
+            "dst_node_id": 105,
             "dst_port_id": "i_transformUV",
-            "src_node_id": 290,
+            "src_node_id": 108,
             "src_port_id": "o_output"
         },
         {
-            "dst_node_id": 292,
+            "dst_node_id": 110,
             "dst_port_id": "i_x",
-            "src_node_id": 291,
+            "src_node_id": 109,
             "src_port_id": "o_output"
         },
         {
-            "dst_node_id": 298,
+            "dst_node_id": 116,
             "dst_port_id": "i_t1",
-            "src_node_id": 292,
+            "src_node_id": 110,
             "src_port_id": "o_output"
         },
         {
-            "dst_node_id": 295,
+            "dst_node_id": 113,
             "dst_port_id": "i_a",
-            "src_node_id": 294,
+            "src_node_id": 112,
             "src_port_id": "o_output"
         },
         {
-            "dst_node_id": 286,
+            "dst_node_id": 104,
             "dst_port_id": "i_factor",
-            "src_node_id": 295,
+            "src_node_id": 113,
             "src_port_id": "o_out"
         },
         {
-            "dst_node_id": 298,
+            "dst_node_id": 116,
             "dst_port_id": "i_t2",
-            "src_node_id": 297,
+            "src_node_id": 115,
             "src_port_id": "o_output"
         },
         {
-            "dst_node_id": 285,
+            "dst_node_id": 103,
             "dst_port_id": "i_transformUV",
-            "src_node_id": 298,
+            "src_node_id": 116,
             "src_port_id": "o_output"
         },
         {
-            "dst_node_id": 300,
+            "dst_node_id": 120,
             "dst_port_id": "i_input",
-            "src_node_id": 301,
+            "src_node_id": 119,
             "src_port_id": "o_output"
         },
         {
-            "dst_node_id": 302,
+            "dst_node_id": 118,
             "dst_port_id": "i_input",
-            "src_node_id": 301,
+            "src_node_id": 119,
             "src_port_id": "o_output"
         },
         {
-            "dst_node_id": 307,
+            "dst_node_id": 125,
             "dst_port_id": "i_in2",
-            "src_node_id": 302,
+            "src_node_id": 120,
             "src_port_id": "o_output"
         },
         {
-            "dst_node_id": 197,
+            "dst_node_id": 16,
             "dst_port_id": "i_input",
-            "src_node_id": 299,
+            "src_node_id": 117,
             "src_port_id": "o_output"
         },
         {
-            "dst_node_id": 204,
+            "dst_node_id": 23,
             "dst_port_id": "i_transformUV",
-            "src_node_id": 303,
+            "src_node_id": 121,
             "src_port_id": "o_output"
         },
         {
-            "dst_node_id": 265,
+            "dst_node_id": 83,
             "dst_port_id": "i_in1",
-            "src_node_id": 296,
+            "src_node_id": 114,
             "src_port_id": "o_output"
         },
         {
-            "dst_node_id": 296,
+            "dst_node_id": 114,
             "dst_port_id": "i_input",
-            "src_node_id": 285,
+            "src_node_id": 103,
             "src_port_id": "o_output"
         },
         {
-            "dst_node_id": 289,
+            "dst_node_id": 114,
+            "dst_port_id": "i_enabled",
+            "src_node_id": 103,
+            "src_port_id": "o_enabled"
+        },
+        {
+            "dst_node_id": 107,
             "dst_port_id": "i_factor",
-            "src_node_id": 305,
+            "src_node_id": 123,
             "src_port_id": "o_out"
         },
         {
-            "dst_node_id": 287,
+            "dst_node_id": 105,
             "dst_port_id": "i_time",
-            "src_node_id": 306,
+            "src_node_id": 124,
             "src_port_id": "o_output"
         },
         {
-            "dst_node_id": 307,
+            "dst_node_id": 125,
             "dst_port_id": "i_in0",
-            "src_node_id": 308,
+            "src_node_id": 126,
             "src_port_id": "o_texture"
         },
         {
-            "dst_node_id": 299,
+            "dst_node_id": 117,
             "dst_port_id": "i_filter_mask",
-            "src_node_id": 307,
+            "src_node_id": 125,
             "src_port_id": "o_out"
         },
         {
-            "dst_node_id": 315,
+            "dst_node_id": 133,
             "dst_port_id": "i_input",
-            "src_node_id": 307,
+            "src_node_id": 125,
             "src_port_id": "o_out"
         },
         {
-            "dst_node_id": 307,
+            "dst_node_id": 125,
             "dst_port_id": "i_in1",
-            "src_node_id": 300,
+            "src_node_id": 118,
             "src_port_id": "o_output"
         },
         {
-            "dst_node_id": 318,
+            "dst_node_id": 136,
             "dst_port_id": "i_input",
-            "src_node_id": 317,
+            "src_node_id": 135,
             "src_port_id": "o_output"
         },
         {
-            "dst_node_id": 316,
+            "dst_node_id": 134,
             "dst_port_id": "i_input",
-            "src_node_id": 319,
+            "src_node_id": 137,
             "src_port_id": "o_output"
         },
         {
-            "dst_node_id": 219,
+            "dst_node_id": 37,
             "dst_port_id": "i_n",
-            "src_node_id": 320,
+            "src_node_id": 138,
             "src_port_id": "o_output"
         },
         {
-            "dst_node_id": 219,
+            "dst_node_id": 37,
             "dst_port_id": "i_p",
-            "src_node_id": 321,
+            "src_node_id": 139,
             "src_port_id": "o_output"
         },
         {
-            "dst_node_id": 334,
+            "dst_node_id": 152,
             "dst_port_id": "i_v1",
-            "src_node_id": 322,
+            "src_node_id": 140,
             "src_port_id": "o_output"
         },
         {
-            "dst_node_id": 323,
+            "dst_node_id": 141,
             "dst_port_id": "i_alpha",
-            "src_node_id": 324,
+            "src_node_id": 142,
             "src_port_id": "o_output"
         },
         {
-            "dst_node_id": 326,
+            "dst_node_id": 144,
             "dst_port_id": "i_input",
-            "src_node_id": 325,
+            "src_node_id": 143,
             "src_port_id": "o_output"
         },
         {
-            "dst_node_id": 323,
+            "dst_node_id": 141,
             "dst_port_id": "i_a",
-            "src_node_id": 327,
+            "src_node_id": 145,
             "src_port_id": "o_output"
         },
         {
-            "dst_node_id": 214,
+            "dst_node_id": 32,
             "dst_port_id": "i_b",
-            "src_node_id": 323,
+            "src_node_id": 141,
             "src_port_id": "o_output"
         },
         {
-            "dst_node_id": 204,
+            "dst_node_id": 23,
             "dst_port_id": "i_uNoiseTransform",
-            "src_node_id": 329,
+            "src_node_id": 147,
             "src_port_id": "o_output"
         },
         {
-            "dst_node_id": 329,
+            "dst_node_id": 147,
             "dst_port_id": "i_t1",
-            "src_node_id": 328,
+            "src_node_id": 146,
             "src_port_id": "o_output"
         },
         {
-            "dst_node_id": 337,
+            "dst_node_id": 155,
             "dst_port_id": "i_v0",
-            "src_node_id": 331,
+            "src_node_id": 149,
             "src_port_id": "o_output"
         },
         {
-            "dst_node_id": 330,
+            "dst_node_id": 148,
             "dst_port_id": "i_input",
-            "src_node_id": 332,
+            "src_node_id": 150,
             "src_port_id": "o_output"
         },
         {
-            "dst_node_id": 334,
+            "dst_node_id": 152,
             "dst_port_id": "i_v0",
-            "src_node_id": 333,
+            "src_node_id": 151,
             "src_port_id": "o_output"
         },
         {
-            "dst_node_id": 335,
+            "dst_node_id": 153,
             "dst_port_id": "i_input",
-            "src_node_id": 336,
+            "src_node_id": 154,
             "src_port_id": "o_output"
         },
         {
-            "dst_node_id": 337,
+            "dst_node_id": 155,
             "dst_port_id": "i_v1",
-            "src_node_id": 338,
+            "src_node_id": 156,
             "src_port_id": "o_output"
         },
         {
-            "dst_node_id": 340,
+            "dst_node_id": 158,
             "dst_port_id": "i_event",
-            "src_node_id": 339,
+            "src_node_id": 157,
             "src_port_id": "o_out"
         },
         {
-            "dst_node_id": 310,
+            "dst_node_id": 127,
             "dst_port_id": "i_input",
-            "src_node_id": 340,
-            "src_port_id": "o_o2"
-        },
-        {
-            "dst_node_id": 309,
-            "dst_port_id": "i_input",
-            "src_node_id": 340,
+            "src_node_id": 158,
             "src_port_id": "o_o1"
         },
         {
-            "dst_node_id": 313,
+            "dst_node_id": 128,
             "dst_port_id": "i_input",
-            "src_node_id": 340,
+            "src_node_id": 158,
+            "src_port_id": "o_o2"
+        },
+        {
+            "dst_node_id": 131,
+            "dst_port_id": "i_input",
+            "src_node_id": 158,
             "src_port_id": "o_o0"
         },
         {
-            "dst_node_id": 214,
+            "dst_node_id": 32,
             "dst_port_id": "i_a",
-            "src_node_id": 341,
+            "src_node_id": 159,
             "src_port_id": "o_output"
         },
         {
-            "dst_node_id": 250,
+            "dst_node_id": 68,
             "dst_port_id": "i_b",
-            "src_node_id": 342,
+            "src_node_id": 160,
             "src_port_id": "o_output"
         },
         {
-            "dst_node_id": 296,
+            "dst_node_id": 114,
             "dst_port_id": "i_sizeref",
-            "src_node_id": 343,
+            "src_node_id": 161,
             "src_port_id": "o_output"
         },
         {
-            "dst_node_id": 285,
+            "dst_node_id": 103,
             "dst_port_id": "i_input",
-            "src_node_id": 344,
+            "src_node_id": 162,
             "src_port_id": "o_out"
         },
         {
-            "dst_node_id": 302,
+            "dst_node_id": 120,
             "dst_port_id": "i_transformUV",
-            "src_node_id": 346,
+            "src_node_id": 164,
             "src_port_id": "o_output"
         },
         {
-            "dst_node_id": 348,
+            "dst_node_id": 166,
             "dst_port_id": "i_input",
-            "src_node_id": 347,
+            "src_node_id": 165,
             "src_port_id": "o_output"
         },
         {
-            "dst_node_id": 307,
+            "dst_node_id": 125,
             "dst_port_id": "i_in3",
-            "src_node_id": 350,
+            "src_node_id": 168,
             "src_port_id": "o_output"
         },
         {
-            "dst_node_id": 350,
+            "dst_node_id": 168,
             "dst_port_id": "i_input",
-            "src_node_id": 349,
+            "src_node_id": 167,
             "src_port_id": "o_output"
         },
         {
-            "dst_node_id": 349,
+            "dst_node_id": 167,
             "dst_port_id": "i_input",
-            "src_node_id": 348,
+            "src_node_id": 166,
             "src_port_id": "o_output"
         },
         {
-            "dst_node_id": 349,
+            "dst_node_id": 167,
             "dst_port_id": "i_uRadiusFactor",
-            "src_node_id": 351,
+            "src_node_id": 169,
             "src_port_id": "o_vec2"
         },
         {
-            "dst_node_id": 360,
+            "dst_node_id": 177,
             "dst_port_id": "i_input",
-            "src_node_id": 353,
+            "src_node_id": 170,
             "src_port_id": "o_output"
         },
         {
-            "dst_node_id": 299,
+            "dst_node_id": 117,
             "dst_port_id": "i_sizeref",
-            "src_node_id": 356,
+            "src_node_id": 173,
             "src_port_id": "o_output"
         },
         {
-            "dst_node_id": 358,
+            "dst_node_id": 175,
             "dst_port_id": "i_event",
-            "src_node_id": 357,
+            "src_node_id": 174,
             "src_port_id": "o_o0"
         },
         {
-            "dst_node_id": 360,
+            "dst_node_id": 177,
             "dst_port_id": "i_uRotation",
-            "src_node_id": 355,
+            "src_node_id": 172,
             "src_port_id": "o_output"
         },
         {
-            "dst_node_id": 190,
-            "dst_port_id": "i_angle",
-            "src_node_id": 359,
-            "src_port_id": "o_output"
-        },
-        {
-            "dst_node_id": 265,
+            "dst_node_id": 83,
             "dst_port_id": "i_in2",
-            "src_node_id": 360,
+            "src_node_id": 177,
             "src_port_id": "o_output"
         }
     ],
@@ -925,7 +907,7 @@
             "extra": {
                 "allow_preset_randomization": false
             },
-            "id": 180,
+            "id": 0,
             "manual_values": {
                 "i_next": 0.0,
                 "i_shuffle": 0.0,
@@ -935,7 +917,7 @@
                 "o_texture": ""
             },
             "state": {
-                "index": 1
+                "index": 0
             },
             "type": "LoadTextures",
             "ui_data": {
@@ -952,7 +934,7 @@
             "extra": {
                 "allow_preset_randomization": false
             },
-            "id": 181,
+            "id": 1,
             "manual_values": {
                 "i_texture": ""
             },
@@ -972,7 +954,7 @@
             "extra": {
                 "allow_preset_randomization": false
             },
-            "id": 182,
+            "id": 2,
             "manual_values": {
                 "i_alpha": 0.0,
                 "i_destination": "",
@@ -1027,7 +1009,7 @@
             "extra": {
                 "allow_preset_randomization": false
             },
-            "id": 183,
+            "id": 3,
             "manual_values": {
                 "i_duration": 0.5699999928474426,
                 "i_reverse": 1.0,
@@ -1050,7 +1032,7 @@
             "extra": {
                 "allow_preset_randomization": false
             },
-            "id": 184,
+            "id": 4,
             "manual_values": {
                 "i_input": "",
                 "i_name": "bg_source"
@@ -1060,8 +1042,8 @@
             "ui_data": {
                 "collapsed": true,
                 "pos": [
-                    -1169.0,
-                    566.0
+                    -1084.0,
+                    458.0
                 ],
                 "selected": false
             }
@@ -1071,7 +1053,7 @@
             "extra": {
                 "allow_preset_randomization": false
             },
-            "id": 185,
+            "id": 5,
             "manual_values": {
                 "i_input": "",
                 "i_name": "fg_source"
@@ -1081,8 +1063,8 @@
             "ui_data": {
                 "collapsed": true,
                 "pos": [
-                    -1187.0,
-                    609.0
+                    -1115.0,
+                    601.0
                 ],
                 "selected": false
             }
@@ -1092,7 +1074,7 @@
             "extra": {
                 "allow_preset_randomization": false
             },
-            "id": 186,
+            "id": 6,
             "manual_values": {
                 "i_name": "bg_source",
                 "o_output": ""
@@ -1102,147 +1084,8 @@
             "ui_data": {
                 "collapsed": true,
                 "pos": [
-                    -1613.0,
-                    1660.0
-                ],
-                "selected": false
-            }
-        },
-        {
-            "custom_ports": [
-                [
-                    "i_filter_mask",
-                    {
-                        "default": null,
-                        "dtype": "tex2d",
-                        "dtype_args": {},
-                        "dummy": false,
-                        "group": "default",
-                        "hide": true,
-                        "manual_input": true,
-                        "name": "filter_mask",
-                        "widgets": []
-                    }
-                ],
-                [
-                    "i_mask_factor",
-                    {
-                        "default": null,
-                        "dtype": "float",
-                        "dtype_args": {
-                            "default": 1.0
-                        },
-                        "dummy": false,
-                        "group": "default",
-                        "hide": false,
-                        "manual_input": true,
-                        "name": "mask_factor",
-                        "widgets": []
-                    }
-                ],
-                [
-                    "i_filter_mode",
-                    {
-                        "default": null,
-                        "dtype": "int",
-                        "dtype_args": {
-                            "choices": [
-                                "input",
-                                "mask",
-                                "filtered",
-                                "input_filtered_masked",
-                                "input_masked",
-                                "filtered_masked"
-                            ],
-                            "default": 2.0
-                        },
-                        "dummy": false,
-                        "group": "default",
-                        "hide": true,
-                        "manual_input": true,
-                        "name": "filter_mode",
-                        "widgets": []
-                    }
-                ],
-                [
-                    "i_filter_bg",
-                    {
-                        "default": null,
-                        "dtype": "color",
-                        "dtype_args": {
-                            "default": [
-                                0.0,
-                                0.0,
-                                0.0,
-                                0.0
-                            ]
-                        },
-                        "dummy": false,
-                        "group": "default",
-                        "hide": true,
-                        "manual_input": true,
-                        "name": "filter_bg",
-                        "widgets": []
-                    }
-                ]
-            ],
-            "extra": {
-                "allow_preset_randomization": false
-            },
-            "id": 187,
-            "manual_values": {
-                "i_advanced_filtering": 0.0,
-                "i_enabled": 1.0,
-                "i_filter_bg": [
-                    0.0,
-                    0.0,
-                    0.0,
-                    0.0
-                ],
-                "i_filter_mask": "",
-                "i_filter_mode": 2.0,
-                "i_force_change": 42.0,
-                "i_input": "",
-                "i_interpolation": 1.0,
-                "i_mask_factor": 1.0,
-                "i_sizeref": "",
-                "i_transformUV": [
-                    [
-                        1.0,
-                        0.0,
-                        0.0,
-                        0.0
-                    ],
-                    [
-                        0.0,
-                        1.0,
-                        0.0,
-                        0.0
-                    ],
-                    [
-                        0.0,
-                        0.0,
-                        1.0,
-                        0.0
-                    ],
-                    [
-                        0.0,
-                        0.0,
-                        0.0,
-                        1.0
-                    ]
-                ],
-                "i_wrapping": 1.0,
-                "o_enabled": 1.0,
-                "o_output": ""
-            },
-            "state": {},
-            "type": "SampleTexture",
-            "ui_data": {
-                "collapsed": false,
-                "pos": [
-                    -1426.0,
-                    1521.0
+                    -1129.0,
+                    1594.0
                 ],
                 "selected": false
             }
@@ -1252,19 +1095,19 @@
             "extra": {
                 "allow_preset_randomization": false
             },
-            "id": 188,
+            "id": 7,
             "manual_values": {
                 "i_theta": 0.0,
                 "o_output": [
                     [
-                        0.8431534171104431,
-                        -0.5376730561256409,
+                        0.8425981402397156,
+                        0.5385428667068481,
                         0.0,
                         0.0
                     ],
                     [
-                        0.5376730561256409,
-                        0.8431534171104431,
+                        -0.5385428667068481,
+                        0.8425981402397156,
                         0.0,
                         0.0
                     ],
@@ -1287,8 +1130,8 @@
             "ui_data": {
                 "collapsed": false,
                 "pos": [
-                    -1741.0,
-                    1431.0
+                    -1548.0,
+                    1467.0
                 ],
                 "selected": false
             }
@@ -1298,24 +1141,24 @@
             "extra": {
                 "allow_preset_randomization": false
             },
-            "id": 189,
+            "id": 8,
             "manual_values": {
                 "i_length": 500.0,
                 "i_max": 45.0,
                 "i_min": -45.0,
                 "i_phase": 0.0,
                 "i_type": 3.0,
-                "o_output": -32.52537441312383
+                "o_output": 32.584499426526335
             },
             "state": {
-                "time": -637.37143059021
+                "time": 9881.371127697801
             },
             "type": "LFO",
             "ui_data": {
                 "collapsed": false,
                 "pos": [
-                    -2001.0,
-                    1411.0
+                    -1808.0,
+                    1447.0
                 ],
                 "selected": false
             }
@@ -1394,6 +1237,36 @@
                         "hide": true,
                         "manual_input": true,
                         "name": "filter_bg",
+                        "widgets": []
+                    }
+                ],
+                [
+                    "i_uInputTransform",
+                    {
+                        "default": null,
+                        "dtype": "mat4",
+                        "dtype_args": {},
+                        "dummy": false,
+                        "group": "default",
+                        "hide": false,
+                        "manual_input": true,
+                        "name": "uInputTransform",
+                        "widgets": []
+                    }
+                ],
+                [
+                    "i_uAspectAdjust",
+                    {
+                        "default": null,
+                        "dtype": "float",
+                        "dtype_args": {
+                            "default": 1.0
+                        },
+                        "dummy": false,
+                        "group": "default",
+                        "hide": false,
+                        "manual_input": true,
+                        "name": "uAspectAdjust",
                         "widgets": []
                     }
                 ],
@@ -1483,11 +1356,11 @@
             "extra": {
                 "allow_preset_randomization": false
             },
-            "id": 190,
+            "id": 9,
             "manual_values": {
                 "i_advanced_filtering": 0.0,
-                "i_angle": 7.159999847412109,
-                "i_axis_angle": 90.0,
+                "i_angle": 0.0,
+                "i_axis_angle": 0.0,
                 "i_enabled": 1.0,
                 "i_filter_bg": [
                     0.0,
@@ -1501,8 +1374,8 @@
                 "i_input": "",
                 "i_interpolation": 1.0,
                 "i_mask_factor": 1.0,
-                "i_segments": 2.0,
-                "i_segments1": 3.0,
+                "i_segments": 4.0,
+                "i_segments1": 0.0,
                 "i_sizeref": "",
                 "i_transformUV": [
                     [
@@ -1530,8 +1403,35 @@
                         1.0
                     ]
                 ],
+                "i_uAspectAdjust": 0.0,
+                "i_uInputTransform": [
+                    [
+                        1.0,
+                        0.0,
+                        0.0,
+                        0.0
+                    ],
+                    [
+                        0.0,
+                        1.0,
+                        0.0,
+                        0.0
+                    ],
+                    [
+                        0.0,
+                        0.0,
+                        1.0,
+                        0.0
+                    ],
+                    [
+                        0.0,
+                        0.0,
+                        0.0,
+                        1.0
+                    ]
+                ],
                 "i_uTest": 0.0,
-                "i_wrapping": 0.0,
+                "i_wrapping": 1.0,
                 "o_enabled": 1.0,
                 "o_output": ""
             },
@@ -1541,7 +1441,7 @@
                 "collapsed": false,
                 "pos": [
                     -790.0,
-                    1354.0
+                    1350.0
                 ],
                 "selected": false
             }
@@ -1551,7 +1451,7 @@
             "extra": {
                 "allow_preset_randomization": false
             },
-            "id": 191,
+            "id": 10,
             "manual_values": {
                 "i_t1": [
                     [
@@ -1607,14 +1507,14 @@
                 ],
                 "o_output": [
                     [
-                        0.8431534171104431,
-                        -0.5376730561256409,
+                        0.8425981402397156,
+                        0.5385428667068481,
                         0.0,
                         0.0
                     ],
                     [
-                        0.5376730561256409,
-                        0.8431534171104431,
+                        -0.5385428667068481,
+                        0.8425981402397156,
                         0.0,
                         0.0
                     ],
@@ -1625,7 +1525,7 @@
                         0.0
                     ],
                     [
-                        -4853.9736328125,
+                        12247.578125,
                         0.0,
                         0.0,
                         1.0
@@ -1637,8 +1537,8 @@
             "ui_data": {
                 "collapsed": false,
                 "pos": [
-                    -1576.0,
-                    1441.0
+                    -1384.0,
+                    1548.0
                 ],
                 "selected": false
             }
@@ -1648,7 +1548,7 @@
             "extra": {
                 "allow_preset_randomization": false
             },
-            "id": 192,
+            "id": 11,
             "manual_values": {
                 "i_uniform": 1.0,
                 "i_x": 0.8100000023841858,
@@ -1696,22 +1596,22 @@
             "extra": {
                 "allow_preset_randomization": false
             },
-            "id": 193,
+            "id": 12,
             "manual_values": {
                 "i_factor": 5.0,
                 "i_mod": 0.0,
                 "i_reset": 0.0,
-                "o_output": -4853.973402395555
+                "o_output": 12247.578369778143
             },
             "state": {
-                "time": -4853.973402395555
+                "time": 12247.578369778143
             },
             "type": "Time",
             "ui_data": {
                 "collapsed": false,
                 "pos": [
-                    -1986.0,
-                    1626.0
+                    -1793.0,
+                    1662.0
                 ],
                 "selected": false
             }
@@ -1721,7 +1621,7 @@
             "extra": {
                 "allow_preset_randomization": false
             },
-            "id": 194,
+            "id": 13,
             "manual_values": {
                 "i_x": 0.0,
                 "i_y": 0.0,
@@ -1745,7 +1645,7 @@
                         0.0
                     ],
                     [
-                        -4853.9736328125,
+                        12247.578125,
                         0.0,
                         0.0,
                         1.0
@@ -1757,8 +1657,8 @@
             "ui_data": {
                 "collapsed": true,
                 "pos": [
-                    -1721.0,
-                    1551.0
+                    -1528.0,
+                    1587.0
                 ],
                 "selected": false
             }
@@ -1811,7 +1711,7 @@
             "extra": {
                 "allow_preset_randomization": false
             },
-            "id": 195,
+            "id": 14,
             "manual_values": {
                 "i_enabled": 1.0,
                 "i_factor": 1.0,
@@ -1867,7 +1767,7 @@
             "extra": {
                 "allow_preset_randomization": false
             },
-            "id": 196,
+            "id": 15,
             "manual_values": {
                 "i_uniform": 1.0,
                 "i_x": 1.2599999904632568,
@@ -1915,7 +1815,7 @@
             "extra": {
                 "allow_preset_randomization": false
             },
-            "id": 197,
+            "id": 16,
             "manual_values": {
                 "i_input": "",
                 "i_name": "mask"
@@ -1925,8 +1825,8 @@
             "ui_data": {
                 "collapsed": true,
                 "pos": [
-                    -178.0,
-                    2847.0
+                    -151.0,
+                    2841.0
                 ],
                 "selected": false
             }
@@ -1936,7 +1836,7 @@
             "extra": {
                 "allow_preset_randomization": false
             },
-            "id": 198,
+            "id": 17,
             "manual_values": {
                 "i_name": "mask",
                 "o_output": ""
@@ -2071,7 +1971,7 @@
             "extra": {
                 "allow_preset_randomization": false
             },
-            "id": 199,
+            "id": 18,
             "manual_values": {
                 "i_advanced_filtering": 0.0,
                 "i_enabled": 1.0,
@@ -2273,7 +2173,7 @@
             "extra": {
                 "allow_preset_randomization": false
             },
-            "id": 200,
+            "id": 19,
             "manual_values": {
                 "i_advanced_filtering": 0.0,
                 "i_enabled": 1.0,
@@ -2339,7 +2239,7 @@
             "extra": {
                 "allow_preset_randomization": false
             },
-            "id": 201,
+            "id": 20,
             "manual_values": {
                 "i_a": 0.4399999976158142,
                 "i_h": 3.3499999046325684,
@@ -2368,17 +2268,17 @@
             "extra": {
                 "allow_preset_randomization": false
             },
-            "id": 202,
+            "id": 21,
             "manual_values": {
                 "i_length": 1000.0,
                 "i_max": 1.0,
                 "i_min": 0.0,
                 "i_phase": 0.949999988079071,
                 "i_type": 1.0,
-                "o_output": 0.5284965781267386
+                "o_output": 0.11598196703711666
             },
             "state": {
-                "time": -3977.334554516897
+                "time": -9974.040811822442
             },
             "type": "LFO",
             "ui_data": {
@@ -2395,7 +2295,7 @@
             "extra": {
                 "allow_preset_randomization": false
             },
-            "id": 203,
+            "id": 22,
             "manual_values": {
                 "i_next": 0.0,
                 "i_shuffle": 1.0,
@@ -2405,7 +2305,7 @@
                 "o_texture": ""
             },
             "state": {
-                "index": 3
+                "index": 2
             },
             "type": "LoadTextures",
             "ui_data": {
@@ -2559,7 +2459,7 @@
             "extra": {
                 "allow_preset_randomization": false
             },
-            "id": 204,
+            "id": 23,
             "manual_values": {
                 "i_enable_time_mask": 0.0,
                 "i_enabled": 1.0,
@@ -2631,7 +2531,7 @@
                 "i_uSoftness": 0.009999999776482582,
                 "i_uThreshold": 0.23000000417232513,
                 "i_wrapping": 1.0,
-                "o_enabled": 0.0,
+                "o_enabled": 1.0,
                 "o_output": ""
             },
             "state": {},
@@ -2639,8 +2539,8 @@
             "ui_data": {
                 "collapsed": false,
                 "pos": [
-                    -1633.0,
-                    2763.0
+                    -1635.0,
+                    2760.0
                 ],
                 "selected": false
             }
@@ -2650,15 +2550,15 @@
             "extra": {
                 "allow_preset_randomization": false
             },
-            "id": 205,
+            "id": 24,
             "manual_values": {
-                "i_name": "ref_lowres",
+                "i_name": "ref_noise",
                 "o_output": ""
             },
             "state": {},
             "type": "GetTextureVar",
             "ui_data": {
-                "collapsed": true,
+                "collapsed": false,
                 "pos": [
                     -2050.0,
                     2774.0
@@ -2671,15 +2571,15 @@
             "extra": {
                 "allow_preset_randomization": false
             },
-            "id": 206,
+            "id": 25,
             "manual_values": {
                 "i_factor": 0.09000000357627869,
                 "i_mod": 0.0,
                 "i_reset": 0.0,
-                "o_output": -6311.477331280057
+                "o_output": 1853.744012852791
             },
             "state": {
-                "time": -6311.477331280057
+                "time": 1853.744012852791
             },
             "type": "Time",
             "ui_data": {
@@ -2696,28 +2596,7 @@
             "extra": {
                 "allow_preset_randomization": false
             },
-            "id": 207,
-            "manual_values": {
-                "i_name": "ref_lowres",
-                "o_output": ""
-            },
-            "state": {},
-            "type": "GetTextureVar",
-            "ui_data": {
-                "collapsed": true,
-                "pos": [
-                    -1624.0,
-                    1606.0
-                ],
-                "selected": false
-            }
-        },
-        {
-            "custom_ports": [],
-            "extra": {
-                "allow_preset_randomization": false
-            },
-            "id": 208,
+            "id": 26,
             "manual_values": {
                 "i_t1": [
                     [
@@ -2791,7 +2670,7 @@
                         0.0
                     ],
                     [
-                        -2130.54345703125,
+                        3575.76806640625,
                         0.0,
                         0.0,
                         1.0
@@ -2814,7 +2693,7 @@
             "extra": {
                 "allow_preset_randomization": false
             },
-            "id": 209,
+            "id": 27,
             "manual_values": {
                 "i_x": 0.0,
                 "i_y": 0.0,
@@ -2838,7 +2717,7 @@
                         0.0
                     ],
                     [
-                        -1690.9075927734375,
+                        2837.9111328125,
                         0.0,
                         0.0,
                         1.0
@@ -3007,7 +2886,7 @@
             "extra": {
                 "allow_preset_randomization": false
             },
-            "id": 210,
+            "id": 28,
             "manual_values": {
                 "i_advanced_filtering": 0.0,
                 "i_enabled": 1.0,
@@ -3153,7 +3032,7 @@
             "extra": {
                 "allow_preset_randomization": false
             },
-            "id": 211,
+            "id": 29,
             "manual_values": {
                 "i_enabled": 1.0,
                 "i_n": 8.0,
@@ -3177,17 +3056,17 @@
             "extra": {
                 "allow_preset_randomization": false
             },
-            "id": 212,
+            "id": 30,
             "manual_values": {
                 "i_reset": 0.0,
                 "i_set": 0.0,
                 "i_toggle": 0.0,
                 "i_v0": -1.0,
                 "i_v1": 1.0,
-                "o_output": -1.0
+                "o_output": 1.0
             },
             "state": {
-                "value": false
+                "value": true
             },
             "type": "SetResetToggle",
             "ui_data": {
@@ -3204,15 +3083,15 @@
             "extra": {
                 "allow_preset_randomization": false
             },
-            "id": 213,
+            "id": 31,
             "manual_values": {
                 "i_factor": 1.0,
                 "i_mod": 0.0,
                 "i_reset": 0.0,
-                "o_output": -1690.907651518805
+                "o_output": 2837.9110808364203
             },
             "state": {
-                "time": -1690.907651518805
+                "time": 2837.9110808364203
             },
             "type": "Time",
             "ui_data": {
@@ -3229,12 +3108,12 @@
             "extra": {
                 "allow_preset_randomization": false
             },
-            "id": 214,
+            "id": 32,
             "manual_values": {
                 "i_a": 0.0,
                 "i_b": 7.119999885559082,
                 "i_op": 2.0,
-                "o_out": -3.3399999141693115
+                "o_out": 1.6699999570846558
             },
             "state": {},
             "type": "BinaryOpFloat",
@@ -3252,7 +3131,7 @@
             "extra": {
                 "allow_preset_randomization": false
             },
-            "id": 215,
+            "id": 33,
             "manual_values": {
                 "i_op": 0.0,
                 "i_operand": 50.0,
@@ -3279,12 +3158,12 @@
             "extra": {
                 "allow_preset_randomization": false
             },
-            "id": 216,
+            "id": 34,
             "manual_values": {
                 "i_a": 0.0,
                 "i_b": 0.0,
                 "i_op": 0.0,
-                "o_out": -1690.907651518805
+                "o_out": 2837.9110808364203
             },
             "state": {},
             "type": "BinaryOpFloat",
@@ -3420,7 +3299,7 @@
             "extra": {
                 "allow_preset_randomization": false
             },
-            "id": 217,
+            "id": 35,
             "manual_values": {
                 "i_advanced_filtering": 0.0,
                 "i_amount": 0.41999998688697815,
@@ -3486,15 +3365,15 @@
             "extra": {
                 "allow_preset_randomization": false
             },
-            "id": 218,
+            "id": 36,
             "manual_values": {
                 "i_factor": 1.0,
                 "i_mod": 0.0,
                 "i_reset": 0.0,
-                "o_output": 3017.0342405663673
+                "o_output": -1746.3338441099095
             },
             "state": {
-                "time": 3017.0342405663673
+                "time": -1746.3338441099095
             },
             "type": "Time",
             "ui_data": {
@@ -3590,7 +3469,7 @@
             "extra": {
                 "allow_preset_randomization": false
             },
-            "id": 219,
+            "id": 37,
             "manual_values": {
                 "i_enabled": 1.0,
                 "i_n": 8.0,
@@ -3614,7 +3493,7 @@
             "extra": {
                 "allow_preset_randomization": false
             },
-            "id": 220,
+            "id": 38,
             "manual_values": {
                 "i_condition": 1.0,
                 "i_duration": 0.2,
@@ -3637,7 +3516,7 @@
             "extra": {
                 "allow_preset_randomization": false
             },
-            "id": 221,
+            "id": 39,
             "manual_values": {
                 "i_name": "beat_on",
                 "o_output": 0.0
@@ -3658,7 +3537,7 @@
             "extra": {
                 "allow_preset_randomization": false
             },
-            "id": 222,
+            "id": 40,
             "manual_values": {
                 "i_input": 0.0,
                 "i_name": "masktranslate"
@@ -3679,10 +3558,10 @@
             "extra": {
                 "allow_preset_randomization": false
             },
-            "id": 223,
+            "id": 41,
             "manual_values": {
                 "i_name": "masktranslate",
-                "o_output": -1690.907651518805
+                "o_output": 2837.9110808364203
             },
             "state": {},
             "type": "GetFloatVar",
@@ -3700,12 +3579,12 @@
             "extra": {
                 "allow_preset_randomization": false
             },
-            "id": 224,
+            "id": 42,
             "manual_values": {
                 "i_a": 0.0,
                 "i_b": 1920.0,
                 "i_op": 3.0,
-                "o_out": -3.5227242739975106
+                "o_out": 5.912314751742542
             },
             "state": {},
             "type": "BinaryOpFloat",
@@ -3723,7 +3602,7 @@
             "extra": {
                 "allow_preset_randomization": false
             },
-            "id": 225,
+            "id": 43,
             "manual_values": {
                 "i_a": 1920.0,
                 "i_b": 0.25,
@@ -3746,7 +3625,7 @@
             "extra": {
                 "allow_preset_randomization": false
             },
-            "id": 226,
+            "id": 44,
             "manual_values": {
                 "i_name": "fg_source",
                 "o_output": ""
@@ -3767,7 +3646,7 @@
             "extra": {
                 "allow_preset_randomization": false
             },
-            "id": 227,
+            "id": 45,
             "manual_values": {
                 "i_name": "mask_jump_amount",
                 "o_output": 50.0
@@ -3788,7 +3667,7 @@
             "extra": {
                 "allow_preset_randomization": false
             },
-            "id": 228,
+            "id": 46,
             "manual_values": {
                 "i_input": 0.0,
                 "i_name": "mask_jump_amount"
@@ -3809,7 +3688,7 @@
             "extra": {
                 "allow_preset_randomization": false
             },
-            "id": 229,
+            "id": 47,
             "manual_values": {
                 "o_output": 50.0
             },
@@ -3829,7 +3708,7 @@
             "extra": {
                 "allow_preset_randomization": false
             },
-            "id": 230,
+            "id": 48,
             "manual_values": {
                 "i_input": 7.0,
                 "i_name": "mask_speed"
@@ -3850,7 +3729,7 @@
             "extra": {
                 "allow_preset_randomization": false
             },
-            "id": 231,
+            "id": 49,
             "manual_values": {
                 "o_output": 7.579999923706055
             },
@@ -3870,7 +3749,7 @@
             "extra": {
                 "allow_preset_randomization": false
             },
-            "id": 232,
+            "id": 50,
             "manual_values": {
                 "i_name": "mask_speed",
                 "o_output": 7.579999923706055
@@ -3891,7 +3770,7 @@
             "extra": {
                 "allow_preset_randomization": false
             },
-            "id": 233,
+            "id": 51,
             "manual_values": {
                 "i_input": 0.0,
                 "i_name": "mask_changedir_everyn"
@@ -3912,7 +3791,7 @@
             "extra": {
                 "allow_preset_randomization": false
             },
-            "id": 234,
+            "id": 52,
             "manual_values": {
                 "i_input": 0.0,
                 "i_name": "mask_changedir_p"
@@ -3933,7 +3812,7 @@
             "extra": {
                 "allow_preset_randomization": false
             },
-            "id": 235,
+            "id": 53,
             "manual_values": {
                 "o_output": 8.0
             },
@@ -3953,7 +3832,7 @@
             "extra": {
                 "allow_preset_randomization": false
             },
-            "id": 236,
+            "id": 54,
             "manual_values": {
                 "o_output": 1.0
             },
@@ -3973,7 +3852,7 @@
             "extra": {
                 "allow_preset_randomization": false
             },
-            "id": 237,
+            "id": 55,
             "manual_values": {
                 "i_name": "mask_changedir_everyn",
                 "o_output": 8.0
@@ -3994,7 +3873,7 @@
             "extra": {
                 "allow_preset_randomization": false
             },
-            "id": 238,
+            "id": 56,
             "manual_values": {
                 "i_name": "mask_changedir_p",
                 "o_output": 1.0
@@ -4015,7 +3894,7 @@
             "extra": {
                 "allow_preset_randomization": false
             },
-            "id": 239,
+            "id": 57,
             "manual_values": {
                 "i_input": 0.0,
                 "i_name": "mask_jump_everyn"
@@ -4036,7 +3915,7 @@
             "extra": {
                 "allow_preset_randomization": false
             },
-            "id": 240,
+            "id": 58,
             "manual_values": {
                 "o_output": 8.0
             },
@@ -4056,7 +3935,7 @@
             "extra": {
                 "allow_preset_randomization": false
             },
-            "id": 241,
+            "id": 59,
             "manual_values": {
                 "i_input": 0.0,
                 "i_name": "mask_jump_p"
@@ -4077,7 +3956,7 @@
             "extra": {
                 "allow_preset_randomization": false
             },
-            "id": 242,
+            "id": 60,
             "manual_values": {
                 "o_output": 1.0
             },
@@ -4176,7 +4055,7 @@
             "extra": {
                 "allow_preset_randomization": false
             },
-            "id": 243,
+            "id": 61,
             "manual_values": {
                 "i_enabled": 1.0,
                 "i_n": 4.0,
@@ -4200,7 +4079,7 @@
             "extra": {
                 "allow_preset_randomization": false
             },
-            "id": 244,
+            "id": 62,
             "manual_values": {
                 "i_name": "mask_jump_everyn",
                 "o_output": 8.0
@@ -4221,7 +4100,7 @@
             "extra": {
                 "allow_preset_randomization": false
             },
-            "id": 245,
+            "id": 63,
             "manual_values": {
                 "i_name": "mask_jump_p",
                 "o_output": 1.0
@@ -4242,19 +4121,19 @@
             "extra": {
                 "allow_preset_randomization": false
             },
-            "id": 246,
+            "id": 64,
             "manual_values": {
                 "i_theta": -0.5,
                 "o_output": [
                     [
-                        -0.39971667528152466,
-                        0.9166387319564819,
+                        0.28459829092025757,
+                        0.9586468935012817,
                         0.0,
                         0.0
                     ],
                     [
-                        -0.9166387319564819,
-                        -0.39971667528152466,
+                        -0.9586468935012817,
+                        0.28459829092025757,
                         0.0,
                         0.0
                     ],
@@ -4288,15 +4167,15 @@
             "extra": {
                 "allow_preset_randomization": false
             },
-            "id": 247,
+            "id": 65,
             "manual_values": {
                 "i_factor": 1.350000023841858,
                 "i_mod": 0.0,
                 "i_reset": 0.0,
-                "o_output": 2993.5604673653
+                "o_output": -8926.534837907488
             },
             "state": {
-                "time": 2993.5604673653
+                "time": -8926.534837907488
             },
             "type": "Time",
             "ui_data": {
@@ -4313,7 +4192,7 @@
             "extra": {
                 "allow_preset_randomization": false
             },
-            "id": 248,
+            "id": 66,
             "manual_values": {
                 "i_a": 1.2599999904632568,
                 "i_alpha": 0.0,
@@ -4327,8 +4206,8 @@
             "ui_data": {
                 "collapsed": false,
                 "pos": [
-                    -2597.0,
-                    1405.0
+                    -2403.0,
+                    1442.0
                 ],
                 "selected": false
             }
@@ -4338,7 +4217,7 @@
             "extra": {
                 "allow_preset_randomization": false
             },
-            "id": 249,
+            "id": 67,
             "manual_values": {
                 "i_name": "beat_running",
                 "o_output": 0.0
@@ -4348,8 +4227,8 @@
             "ui_data": {
                 "collapsed": true,
                 "pos": [
-                    -2812.0,
-                    1475.0
+                    -2618.0,
+                    1512.0
                 ],
                 "selected": false
             }
@@ -4359,20 +4238,20 @@
             "extra": {
                 "allow_preset_randomization": false
             },
-            "id": 250,
+            "id": 68,
             "manual_values": {
                 "i_a": 500.0,
                 "i_b": 1.0099999904632568,
                 "i_op": 3.0,
-                "o_out": 396.8255770759757
+                "o_out": 396.82651951660193
             },
             "state": {},
             "type": "BinaryOpFloat",
             "ui_data": {
                 "collapsed": true,
                 "pos": [
-                    -2162.0,
-                    1452.0
+                    -1968.0,
+                    1487.0
                 ],
                 "selected": false
             }
@@ -4382,7 +4261,7 @@
             "extra": {
                 "allow_preset_randomization": false
             },
-            "id": 251,
+            "id": 69,
             "manual_values": {
                 "i_op": 1.0,
                 "i_operand": 0.20999999344348907,
@@ -4398,8 +4277,8 @@
             "ui_data": {
                 "collapsed": true,
                 "pos": [
-                    -2365.0,
-                    1577.0
+                    -2168.0,
+                    1612.0
                 ],
                 "selected": false
             }
@@ -4409,7 +4288,7 @@
             "extra": {
                 "allow_preset_randomization": false
             },
-            "id": 252,
+            "id": 70,
             "manual_values": {
                 "i_cutoff": 2.5,
                 "i_enabled": 1.0,
@@ -4422,8 +4301,8 @@
             "ui_data": {
                 "collapsed": true,
                 "pos": [
-                    -2165.0,
-                    1567.0
+                    -1968.0,
+                    1602.0
                 ],
                 "selected": false
             }
@@ -4512,7 +4391,7 @@
             "extra": {
                 "allow_preset_randomization": false
             },
-            "id": 253,
+            "id": 71,
             "manual_values": {
                 "i_enabled": 0.0,
                 "i_n": 8.0,
@@ -4525,8 +4404,8 @@
             "ui_data": {
                 "collapsed": false,
                 "pos": [
-                    -2659.0,
-                    1575.0
+                    -2463.0,
+                    1612.0
                 ],
                 "selected": false
             }
@@ -4536,7 +4415,7 @@
             "extra": {
                 "allow_preset_randomization": false
             },
-            "id": 254,
+            "id": 72,
             "manual_values": {
                 "o_output": 8.0
             },
@@ -4556,7 +4435,7 @@
             "extra": {
                 "allow_preset_randomization": false
             },
-            "id": 255,
+            "id": 73,
             "manual_values": {
                 "i_input": 0.0,
                 "i_name": "fg_jump_everyn"
@@ -4577,7 +4456,7 @@
             "extra": {
                 "allow_preset_randomization": false
             },
-            "id": 256,
+            "id": 74,
             "manual_values": {
                 "o_output": 0.0
             },
@@ -4597,7 +4476,7 @@
             "extra": {
                 "allow_preset_randomization": false
             },
-            "id": 257,
+            "id": 75,
             "manual_values": {
                 "i_input": 0.0,
                 "i_name": ""
@@ -4618,7 +4497,7 @@
             "extra": {
                 "allow_preset_randomization": false
             },
-            "id": 258,
+            "id": 76,
             "manual_values": {
                 "o_output": 1.0
             },
@@ -4638,7 +4517,7 @@
             "extra": {
                 "allow_preset_randomization": false
             },
-            "id": 259,
+            "id": 77,
             "manual_values": {
                 "i_input": 0.0,
                 "i_name": "fg_jump_p"
@@ -4659,7 +4538,7 @@
             "extra": {
                 "allow_preset_randomization": false
             },
-            "id": 260,
+            "id": 78,
             "manual_values": {
                 "i_name": "fg_jump_everyn",
                 "o_output": 8.0
@@ -4669,8 +4548,8 @@
             "ui_data": {
                 "collapsed": true,
                 "pos": [
-                    -2888.0,
-                    1622.0
+                    -2693.0,
+                    1657.0
                 ],
                 "selected": false
             }
@@ -4680,7 +4559,7 @@
             "extra": {
                 "allow_preset_randomization": false
             },
-            "id": 261,
+            "id": 79,
             "manual_values": {
                 "i_name": "fg_jump_p",
                 "o_output": 1.0
@@ -4690,8 +4569,8 @@
             "ui_data": {
                 "collapsed": true,
                 "pos": [
-                    -2848.0,
-                    1672.0
+                    -2653.0,
+                    1707.0
                 ],
                 "selected": false
             }
@@ -4701,7 +4580,7 @@
             "extra": {
                 "allow_preset_randomization": false
             },
-            "id": 262,
+            "id": 80,
             "manual_values": {
                 "i_a": -0.009999999776482582,
                 "i_alpha": 0.0,
@@ -4726,13 +4605,13 @@
             "extra": {
                 "allow_preset_randomization": false
             },
-            "id": 263,
+            "id": 81,
             "manual_values": {
                 "i_cutoff": 0.5699999928474426,
                 "i_enabled": 1.0,
                 "i_input": 0.0,
                 "i_order": 2.0,
-                "o_output": -0.009991233375420043
+                "o_output": -0.010025025033364025
             },
             "state": {},
             "type": "LowpassFloat",
@@ -4750,7 +4629,7 @@
             "extra": {
                 "allow_preset_randomization": false
             },
-            "id": 264,
+            "id": 82,
             "manual_values": {
                 "i_name": "beat_running",
                 "o_output": 0.0
@@ -4884,7 +4763,7 @@
             "extra": {
                 "allow_preset_randomization": false
             },
-            "id": 265,
+            "id": 83,
             "manual_values": {
                 "i_count": 4.0,
                 "i_in0": "",
@@ -4894,14 +4773,14 @@
                 "i_next": 0.0,
                 "i_shuffle": 0.0,
                 "o_dummy0": 0.0,
-                "o_enabled0": 0.0,
+                "o_enabled0": 1.0,
                 "o_enabled1": 0.0,
-                "o_enabled2": 1.0,
+                "o_enabled2": 0.0,
                 "o_enabled3": 0.0,
                 "o_out": ""
             },
             "state": {
-                "index": 2
+                "index": 0
             },
             "type": "ChooseTexture",
             "ui_data": {
@@ -4997,7 +4876,7 @@
             "extra": {
                 "allow_preset_randomization": false
             },
-            "id": 266,
+            "id": 84,
             "manual_values": {
                 "i_enabled": 1.0,
                 "i_n": 4.0,
@@ -5021,7 +4900,7 @@
             "extra": {
                 "allow_preset_randomization": false
             },
-            "id": 267,
+            "id": 85,
             "manual_values": {
                 "i_condition": 1.0,
                 "i_duration": 0.2,
@@ -5044,7 +4923,7 @@
             "extra": {
                 "allow_preset_randomization": false
             },
-            "id": 268,
+            "id": 86,
             "manual_values": {
                 "i_name": "beat_on",
                 "o_output": 0.0
@@ -5199,7 +5078,7 @@
             "extra": {
                 "allow_preset_randomization": false
             },
-            "id": 269,
+            "id": 87,
             "manual_values": {
                 "i_advanced_filtering": 0.0,
                 "i_amount": 0.11999999731779099,
@@ -5266,15 +5145,15 @@
             "extra": {
                 "allow_preset_randomization": false
             },
-            "id": 270,
+            "id": 88,
             "manual_values": {
                 "i_factor": 0.4099999964237213,
                 "i_mod": 0.0,
                 "i_reset": 0.0,
-                "o_output": 2927.0881714242164
+                "o_output": 1841.5336596799418
             },
             "state": {
-                "time": 2927.0881714242164
+                "time": 1841.5336596799418
             },
             "type": "Time",
             "ui_data": {
@@ -5291,17 +5170,17 @@
             "extra": {
                 "allow_preset_randomization": false
             },
-            "id": 271,
+            "id": 89,
             "manual_values": {
                 "i_length": 200.0,
                 "i_max": 0.5,
                 "i_min": 0.0,
                 "i_phase": 0.0,
                 "i_type": 2.0,
-                "o_output": 0.2854326416571262
+                "o_output": 0.22745538628697357
             },
             "state": {
-                "time": -5342.964567358343
+                "time": -4328.477455386287
             },
             "type": "LFO",
             "ui_data": {
@@ -5397,7 +5276,7 @@
             "extra": {
                 "allow_preset_randomization": false
             },
-            "id": 272,
+            "id": 90,
             "manual_values": {
                 "i_enabled": 1.0,
                 "i_n": 8.0,
@@ -5421,17 +5300,17 @@
             "extra": {
                 "allow_preset_randomization": false
             },
-            "id": 273,
+            "id": 91,
             "manual_values": {
                 "i_reset": 0.0,
                 "i_set": 0.0,
                 "i_toggle": 0.0,
                 "i_v0": 0.0,
                 "i_v1": 1.0,
-                "o_output": 1.0
+                "o_output": 0.0
             },
             "state": {
-                "value": true
+                "value": false
             },
             "type": "SetResetToggle",
             "ui_data": {
@@ -5448,17 +5327,17 @@
             "extra": {
                 "allow_preset_randomization": false
             },
-            "id": 274,
+            "id": 92,
             "manual_values": {
                 "i_length": 500.0,
                 "i_max": 1.0,
                 "i_min": 0.0,
                 "i_phase": 0.0,
                 "i_type": 3.0,
-                "o_output": 0.7925100574706898
+                "o_output": 0.5897523743292301
             },
             "state": {
-                "time": 6625.400543302632
+                "time": -4247.971275238466
             },
             "type": "LFO",
             "ui_data": {
@@ -5475,7 +5354,7 @@
             "extra": {
                 "allow_preset_randomization": false
             },
-            "id": 275,
+            "id": 93,
             "manual_values": {
                 "i_input": 0.0,
                 "i_name": "fg_glitch_everyn"
@@ -5496,7 +5375,7 @@
             "extra": {
                 "allow_preset_randomization": false
             },
-            "id": 276,
+            "id": 94,
             "manual_values": {
                 "i_input": 0.0,
                 "i_name": "fg_glitch_p"
@@ -5517,7 +5396,7 @@
             "extra": {
                 "allow_preset_randomization": false
             },
-            "id": 277,
+            "id": 95,
             "manual_values": {
                 "o_output": 4.0
             },
@@ -5537,7 +5416,7 @@
             "extra": {
                 "allow_preset_randomization": false
             },
-            "id": 278,
+            "id": 96,
             "manual_values": {
                 "o_output": 0.25
             },
@@ -5557,7 +5436,7 @@
             "extra": {
                 "allow_preset_randomization": false
             },
-            "id": 279,
+            "id": 97,
             "manual_values": {
                 "i_name": "fg_glitch_everyn",
                 "o_output": 4.0
@@ -5578,7 +5457,7 @@
             "extra": {
                 "allow_preset_randomization": false
             },
-            "id": 280,
+            "id": 98,
             "manual_values": {
                 "i_name": "fg_glitch_p",
                 "o_output": 0.25
@@ -5599,16 +5478,16 @@
             "extra": {
                 "allow_preset_randomization": false
             },
-            "id": 281,
+            "id": 99,
             "manual_values": {
                 "i_generate": 0.0,
                 "i_max": 8.0,
                 "i_min": 2.0,
                 "i_mod": 2.0,
-                "o_output": 8.0
+                "o_output": 6.0
             },
             "state": {
-                "value": 8.0
+                "value": 6.0
             },
             "type": "RandomFloat",
             "ui_data": {
@@ -5625,16 +5504,16 @@
             "extra": {
                 "allow_preset_randomization": false
             },
-            "id": 282,
+            "id": 100,
             "manual_values": {
                 "i_generate": 0.0,
                 "i_max": 12.0,
                 "i_min": 3.0,
                 "i_mod": 1.0,
-                "o_output": 6.0
+                "o_output": 8.0
             },
             "state": {
-                "value": 6.0
+                "value": 8.0
             },
             "type": "RandomFloat",
             "ui_data": {
@@ -5720,7 +5599,7 @@
             "extra": {
                 "allow_preset_randomization": false
             },
-            "id": 283,
+            "id": 101,
             "manual_values": {
                 "i_count": 2.0,
                 "i_event": 0.0,
@@ -5826,7 +5705,7 @@
             "extra": {
                 "allow_preset_randomization": false
             },
-            "id": 284,
+            "id": 102,
             "manual_values": {
                 "i_enabled": 1.0,
                 "i_n": 16.0,
@@ -5925,7 +5804,7 @@
             "extra": {
                 "allow_preset_randomization": false
             },
-            "id": 285,
+            "id": 103,
             "manual_values": {
                 "i_enable_time_mask": 0.0,
                 "i_enabled": 1.0,
@@ -5989,15 +5868,15 @@
             "extra": {
                 "allow_preset_randomization": false
             },
-            "id": 286,
+            "id": 104,
             "manual_values": {
                 "i_factor": 0.7099999785423279,
                 "i_mod": 0.0,
                 "i_reset": 0.0,
-                "o_output": -4532.658055604632
+                "o_output": 3985.8347501792814
             },
             "state": {
-                "time": -4532.658055604632
+                "time": 3985.8347501792814
             },
             "type": "Time",
             "ui_data": {
@@ -6075,7 +5954,7 @@
             "extra": {
                 "allow_preset_randomization": false
             },
-            "id": 287,
+            "id": 105,
             "manual_values": {
                 "i_enable_time_mask": 0.0,
                 "i_enabled": 0.0,
@@ -6133,7 +6012,7 @@
             "extra": {
                 "allow_preset_randomization": false
             },
-            "id": 288,
+            "id": 106,
             "manual_values": {
                 "i_name": "ref_lowres",
                 "o_output": ""
@@ -6154,15 +6033,15 @@
             "extra": {
                 "allow_preset_randomization": false
             },
-            "id": 289,
+            "id": 107,
             "manual_values": {
                 "i_factor": 1.909999966621399,
                 "i_mod": 0.0,
                 "i_reset": 0.0,
-                "o_output": 4213.821479747057
+                "o_output": -2490.2495768406316
             },
             "state": {
-                "time": 4213.821479747057
+                "time": -2490.2495768406316
             },
             "type": "Time",
             "ui_data": {
@@ -6179,7 +6058,7 @@
             "extra": {
                 "allow_preset_randomization": false
             },
-            "id": 290,
+            "id": 108,
             "manual_values": {
                 "i_uniform": 1.0,
                 "i_x": 0.6000000238418579,
@@ -6227,10 +6106,10 @@
             "extra": {
                 "allow_preset_randomization": false
             },
-            "id": 291,
+            "id": 109,
             "manual_values": {
                 "i_name": "masktranslate",
-                "o_output": -1690.907651518805
+                "o_output": 2837.9110808364203
             },
             "state": {},
             "type": "GetFloatVar",
@@ -6248,7 +6127,7 @@
             "extra": {
                 "allow_preset_randomization": false
             },
-            "id": 292,
+            "id": 110,
             "manual_values": {
                 "i_x": 0.0,
                 "i_y": 0.0,
@@ -6272,7 +6151,7 @@
                         0.0
                     ],
                     [
-                        -1690.9075927734375,
+                        2837.9111328125,
                         0.0,
                         0.0,
                         1.0
@@ -6295,7 +6174,7 @@
             "extra": {
                 "allow_preset_randomization": false
             },
-            "id": 293,
+            "id": 111,
             "manual_values": {
                 "i_input": 0.0,
                 "i_name": "maskdir"
@@ -6316,10 +6195,10 @@
             "extra": {
                 "allow_preset_randomization": false
             },
-            "id": 294,
+            "id": 112,
             "manual_values": {
                 "i_name": "maskdir",
-                "o_output": -1.0
+                "o_output": 1.0
             },
             "state": {},
             "type": "GetFloatVar",
@@ -6337,12 +6216,12 @@
             "extra": {
                 "allow_preset_randomization": false
             },
-            "id": 295,
+            "id": 113,
             "manual_values": {
                 "i_a": 0.0,
                 "i_b": 0.25,
                 "i_op": 2.0,
-                "o_out": -0.25
+                "o_out": 0.25
             },
             "state": {},
             "type": "BinaryOpFloat",
@@ -6506,7 +6385,7 @@
             "extra": {
                 "allow_preset_randomization": false
             },
-            "id": 296,
+            "id": 114,
             "manual_values": {
                 "i_advanced_filtering": 0.0,
                 "i_enabled": 1.0,
@@ -6554,7 +6433,7 @@
                 "i_uMode": 1.0,
                 "i_uStripeOffset": 0.0,
                 "i_wrapping": 1.0,
-                "o_enabled": 1.0,
+                "o_enabled": 0.0,
                 "o_output": ""
             },
             "state": {},
@@ -6573,7 +6452,7 @@
             "extra": {
                 "allow_preset_randomization": false
             },
-            "id": 297,
+            "id": 115,
             "manual_values": {
                 "i_uniform": 1.0,
                 "i_x": 0.44999998807907104,
@@ -6621,7 +6500,7 @@
             "extra": {
                 "allow_preset_randomization": false
             },
-            "id": 298,
+            "id": 116,
             "manual_values": {
                 "i_t1": [
                     [
@@ -6695,7 +6574,7 @@
                         0.0
                     ],
                     [
-                        -760.9083862304688,
+                        1277.0599365234375,
                         0.0,
                         0.0,
                         1.0
@@ -6794,7 +6673,7 @@
             "extra": {
                 "allow_preset_randomization": false
             },
-            "id": 299,
+            "id": 117,
             "manual_values": {
                 "i_advanced_filtering": 1.0,
                 "i_enabled": 1.0,
@@ -6846,8 +6725,8 @@
             "ui_data": {
                 "collapsed": false,
                 "pos": [
-                    -442.0,
-                    2823.0
+                    -418.0,
+                    2813.0
                 ],
                 "selected": false
             }
@@ -6989,40 +6868,12 @@
                         "name": "uSoftness1",
                         "widgets": []
                     }
-                ],
-                [
-                    "i_uTest",
-                    {
-                        "default": null,
-                        "dtype": "float",
-                        "dtype_args": {},
-                        "dummy": false,
-                        "group": "default",
-                        "hide": false,
-                        "manual_input": true,
-                        "name": "uTest",
-                        "widgets": []
-                    }
-                ],
-                [
-                    "i_uTest2",
-                    {
-                        "default": null,
-                        "dtype": "float",
-                        "dtype_args": {},
-                        "dummy": false,
-                        "group": "default",
-                        "hide": false,
-                        "manual_input": true,
-                        "name": "uTest2",
-                        "widgets": []
-                    }
                 ]
             ],
             "extra": {
                 "allow_preset_randomization": true
             },
-            "id": 300,
+            "id": 118,
             "manual_values": {
                 "i_enable_time_mask": 0.0,
                 "i_enabled": 1.0,
@@ -7061,12 +6912,10 @@
                     ]
                 ],
                 "i_uCenter": 0.0,
-                "i_uCountX": 3.5,
-                "i_uCountY": 0.0,
+                "i_uCountX": 0.0,
+                "i_uCountY": 2.5,
                 "i_uSoftness0": 0.005,
-                "i_uSoftness1": 0.2,
-                "i_uTest": 0.0,
-                "i_uTest2": 0.0,
+                "i_uSoftness1": 0.005,
                 "i_wrapping": 1.0,
                 "o_enabled": 1.0,
                 "o_output": ""
@@ -7087,7 +6936,7 @@
             "extra": {
                 "allow_preset_randomization": false
             },
-            "id": 301,
+            "id": 119,
             "manual_values": {
                 "i_name": "ref_lowres",
                 "o_output": ""
@@ -7284,7 +7133,7 @@
             "extra": {
                 "allow_preset_randomization": true
             },
-            "id": 302,
+            "id": 120,
             "manual_values": {
                 "i_enable_time_mask": 0.0,
                 "i_enabled": 1.0,
@@ -7328,7 +7177,7 @@
                 "i_uInvert": 1.0,
                 "i_uMode": 1.0,
                 "i_uSoftness0": 0.005,
-                "i_uSoftness1": 0.005,
+                "i_uSoftness1": 0.2,
                 "i_wrapping": 1.0,
                 "o_enabled": 1.0,
                 "o_output": ""
@@ -7349,7 +7198,7 @@
             "extra": {
                 "allow_preset_randomization": false
             },
-            "id": 303,
+            "id": 121,
             "manual_values": {
                 "i_uniform": 1.0,
                 "i_x": 0.2800000011920929,
@@ -7397,10 +7246,10 @@
             "extra": {
                 "allow_preset_randomization": false
             },
-            "id": 304,
+            "id": 122,
             "manual_values": {
                 "i_name": "maskdir",
-                "o_output": -1.0
+                "o_output": 1.0
             },
             "state": {},
             "type": "GetFloatVar",
@@ -7418,7 +7267,7 @@
             "extra": {
                 "allow_preset_randomization": false
             },
-            "id": 305,
+            "id": 123,
             "manual_values": {
                 "i_a": 1.0,
                 "i_b": 1.5,
@@ -7441,13 +7290,13 @@
             "extra": {
                 "allow_preset_randomization": false
             },
-            "id": 306,
+            "id": 124,
             "manual_values": {
                 "i_cutoff": 10.0,
                 "i_enabled": 1.0,
                 "i_input": 0.0,
                 "i_order": 2.0,
-                "o_output": 4213.786921264011
+                "o_output": -2490.3039132586564
             },
             "state": {},
             "type": "LowpassFloat",
@@ -7578,7 +7427,7 @@
             "extra": {
                 "allow_preset_randomization": false
             },
-            "id": 307,
+            "id": 125,
             "manual_values": {
                 "i_count": 4.0,
                 "i_in0": "",
@@ -7588,14 +7437,14 @@
                 "i_next": 0.0,
                 "i_shuffle": 0.0,
                 "o_dummy0": 0.0,
-                "o_enabled0": 1.0,
+                "o_enabled0": 0.0,
                 "o_enabled1": 0.0,
-                "o_enabled2": 0.0,
+                "o_enabled2": 1.0,
                 "o_enabled3": 0.0,
                 "o_out": ""
             },
             "state": {
-                "index": 0
+                "index": 2
             },
             "type": "ChooseTexture",
             "ui_data": {
@@ -7612,7 +7461,7 @@
             "extra": {
                 "allow_preset_randomization": false
             },
-            "id": 308,
+            "id": 126,
             "manual_values": {
                 "i_next": 0.0,
                 "i_shuffle": 1.0,
@@ -7622,7 +7471,7 @@
                 "o_texture": ""
             },
             "state": {
-                "index": 4
+                "index": 2
             },
             "type": "LoadTextures",
             "ui_data": {
@@ -7639,7 +7488,7 @@
             "extra": {
                 "allow_preset_randomization": false
             },
-            "id": 309,
+            "id": 127,
             "manual_values": {
                 "i_input": 0.0,
                 "i_name": "next_mask"
@@ -7660,7 +7509,7 @@
             "extra": {
                 "allow_preset_randomization": false
             },
-            "id": 310,
+            "id": 128,
             "manual_values": {
                 "i_input": 0.0,
                 "i_name": "next_invertmask"
@@ -7681,7 +7530,7 @@
             "extra": {
                 "allow_preset_randomization": false
             },
-            "id": 311,
+            "id": 129,
             "manual_values": {
                 "i_name": "next_mask",
                 "o_output": 0.0
@@ -7702,7 +7551,7 @@
             "extra": {
                 "allow_preset_randomization": false
             },
-            "id": 312,
+            "id": 130,
             "manual_values": {
                 "i_name": "next_invertmask",
                 "o_output": 0.0
@@ -7723,7 +7572,7 @@
             "extra": {
                 "allow_preset_randomization": false
             },
-            "id": 313,
+            "id": 131,
             "manual_values": {
                 "i_input": 0.0,
                 "i_name": "next_fg"
@@ -7744,7 +7593,7 @@
             "extra": {
                 "allow_preset_randomization": false
             },
-            "id": 314,
+            "id": 132,
             "manual_values": {
                 "i_name": "next_fg",
                 "o_output": 0.0
@@ -7765,7 +7614,7 @@
             "extra": {
                 "allow_preset_randomization": false
             },
-            "id": 315,
+            "id": 133,
             "manual_values": {
                 "i_input": "",
                 "i_name": "maskinvert"
@@ -7786,7 +7635,7 @@
             "extra": {
                 "allow_preset_randomization": false
             },
-            "id": 316,
+            "id": 134,
             "manual_values": {
                 "i_input": 0.0,
                 "i_name": "mask_glitch_everyn"
@@ -7807,7 +7656,7 @@
             "extra": {
                 "allow_preset_randomization": false
             },
-            "id": 317,
+            "id": 135,
             "manual_values": {
                 "o_output": 0.5
             },
@@ -7827,7 +7676,7 @@
             "extra": {
                 "allow_preset_randomization": false
             },
-            "id": 318,
+            "id": 136,
             "manual_values": {
                 "i_input": 0.0,
                 "i_name": "mask_glitch_p"
@@ -7848,7 +7697,7 @@
             "extra": {
                 "allow_preset_randomization": false
             },
-            "id": 319,
+            "id": 137,
             "manual_values": {
                 "o_output": 8.0
             },
@@ -7868,7 +7717,7 @@
             "extra": {
                 "allow_preset_randomization": false
             },
-            "id": 320,
+            "id": 138,
             "manual_values": {
                 "i_name": "mask_glitch_everyn",
                 "o_output": 8.0
@@ -7889,7 +7738,7 @@
             "extra": {
                 "allow_preset_randomization": false
             },
-            "id": 321,
+            "id": 139,
             "manual_values": {
                 "i_name": "mask_glitch_p",
                 "o_output": 0.5
@@ -7910,7 +7759,7 @@
             "extra": {
                 "allow_preset_randomization": false
             },
-            "id": 322,
+            "id": 140,
             "manual_values": {
                 "i_name": "next_mask",
                 "o_output": 0.0
@@ -7931,7 +7780,7 @@
             "extra": {
                 "allow_preset_randomization": false
             },
-            "id": 323,
+            "id": 141,
             "manual_values": {
                 "i_a": 0.0,
                 "i_alpha": 0.0,
@@ -7956,7 +7805,7 @@
             "extra": {
                 "allow_preset_randomization": false
             },
-            "id": 324,
+            "id": 142,
             "manual_values": {
                 "i_name": "beat_running",
                 "o_output": 0.0
@@ -7977,7 +7826,7 @@
             "extra": {
                 "allow_preset_randomization": false
             },
-            "id": 325,
+            "id": 143,
             "manual_values": {
                 "o_output": 3.3399999141693115
             },
@@ -7997,7 +7846,7 @@
             "extra": {
                 "allow_preset_randomization": false
             },
-            "id": 326,
+            "id": 144,
             "manual_values": {
                 "i_input": 0.0,
                 "i_name": "mask_speed_beatoff"
@@ -8018,7 +7867,7 @@
             "extra": {
                 "allow_preset_randomization": false
             },
-            "id": 327,
+            "id": 145,
             "manual_values": {
                 "i_name": "mask_speed_beatoff",
                 "o_output": 3.3399999141693115
@@ -8039,7 +7888,7 @@
             "extra": {
                 "allow_preset_randomization": false
             },
-            "id": 328,
+            "id": 146,
             "manual_values": {
                 "i_x": 0.30000001192092896,
                 "i_y": 0.0,
@@ -8063,7 +7912,7 @@
                         0.0
                     ],
                     [
-                        -3.5227243900299072,
+                        5.9123148918151855,
                         0.0,
                         0.0,
                         1.0
@@ -8086,7 +7935,7 @@
             "extra": {
                 "allow_preset_randomization": false
             },
-            "id": 329,
+            "id": 147,
             "manual_values": {
                 "i_t1": [
                     [
@@ -8142,14 +7991,14 @@
                 ],
                 "o_output": [
                     [
-                        -0.39971667528152466,
-                        0.9166387319564819,
+                        0.28459829092025757,
+                        0.9586468935012817,
                         0.0,
                         0.0
                     ],
                     [
-                        -0.9166387319564819,
-                        -0.39971667528152466,
+                        -0.9586468935012817,
+                        0.28459829092025757,
                         0.0,
                         0.0
                     ],
@@ -8160,8 +8009,8 @@
                         0.0
                     ],
                     [
-                        1.40809166431427,
-                        -3.2290656566619873,
+                        1.682634711265564,
+                        5.667822360992432,
                         0.0,
                         1.0
                     ]
@@ -8183,7 +8032,7 @@
             "extra": {
                 "allow_preset_randomization": false
             },
-            "id": 330,
+            "id": 148,
             "manual_values": {
                 "i_input": 0.0,
                 "i_name": "next_mask_static"
@@ -8204,7 +8053,7 @@
             "extra": {
                 "allow_preset_randomization": false
             },
-            "id": 331,
+            "id": 149,
             "manual_values": {
                 "i_name": "next_invertmask",
                 "o_output": 0.0
@@ -8225,7 +8074,7 @@
             "extra": {
                 "allow_preset_randomization": false
             },
-            "id": 332,
+            "id": 150,
             "manual_values": {
                 "o_output": 0.0
             },
@@ -8245,7 +8094,7 @@
             "extra": {
                 "allow_preset_randomization": false
             },
-            "id": 333,
+            "id": 151,
             "manual_values": {
                 "i_name": "next_mask_static",
                 "o_output": 0.0
@@ -8266,7 +8115,7 @@
             "extra": {
                 "allow_preset_randomization": false
             },
-            "id": 334,
+            "id": 152,
             "manual_values": {
                 "i_v0": 0.0,
                 "i_v1": 0.0,
@@ -8288,7 +8137,7 @@
             "extra": {
                 "allow_preset_randomization": false
             },
-            "id": 335,
+            "id": 153,
             "manual_values": {
                 "i_input": 0.0,
                 "i_name": "next_invertmask_static"
@@ -8309,7 +8158,7 @@
             "extra": {
                 "allow_preset_randomization": false
             },
-            "id": 336,
+            "id": 154,
             "manual_values": {
                 "o_output": 0.0
             },
@@ -8329,7 +8178,7 @@
             "extra": {
                 "allow_preset_randomization": false
             },
-            "id": 337,
+            "id": 155,
             "manual_values": {
                 "i_v0": 0.0,
                 "i_v1": 0.0,
@@ -8351,7 +8200,7 @@
             "extra": {
                 "allow_preset_randomization": false
             },
-            "id": 338,
+            "id": 156,
             "manual_values": {
                 "i_name": "next_invertmask_static",
                 "o_output": 0.0
@@ -8372,7 +8221,7 @@
             "extra": {
                 "allow_preset_randomization": false
             },
-            "id": 339,
+            "id": 157,
             "manual_values": {
                 "i_enabled": 0.0,
                 "i_force": 0.0,
@@ -8499,7 +8348,7 @@
             "extra": {
                 "allow_preset_randomization": false
             },
-            "id": 340,
+            "id": 158,
             "manual_values": {
                 "i_count": 3.0,
                 "i_event": 0.0,
@@ -8528,14 +8377,14 @@
             "extra": {
                 "allow_preset_randomization": false
             },
-            "id": 341,
+            "id": 159,
             "manual_values": {
                 "i_a": -1.0,
                 "i_alpha": 0.0,
                 "i_alpha0": -1.0,
                 "i_alpha1": 1.0,
                 "i_b": 0.5,
-                "o_output": -1.0
+                "o_output": 0.5
             },
             "state": {},
             "type": "MixFloat",
@@ -8553,21 +8402,21 @@
             "extra": {
                 "allow_preset_randomization": false
             },
-            "id": 342,
+            "id": 160,
             "manual_values": {
                 "i_cutoff": 1.6299999952316284,
                 "i_enabled": 1.0,
                 "i_input": 0.0,
                 "i_order": 2.0,
-                "o_output": 1.259999427668622
+                "o_output": 1.259996435240971
             },
             "state": {},
             "type": "LowpassFloat",
             "ui_data": {
                 "collapsed": true,
                 "pos": [
-                    -2377.0,
-                    1425.0
+                    -2183.0,
+                    1462.0
                 ],
                 "selected": false
             }
@@ -8577,7 +8426,7 @@
             "extra": {
                 "allow_preset_randomization": false
             },
-            "id": 343,
+            "id": 161,
             "manual_values": {
                 "i_name": "ref_highres",
                 "o_output": ""
@@ -8598,7 +8447,7 @@
             "extra": {
                 "allow_preset_randomization": false
             },
-            "id": 344,
+            "id": 162,
             "manual_values": {
                 "i_aspect": "16:9",
                 "i_height": 720.0,
@@ -8620,17 +8469,17 @@
             "extra": {
                 "allow_preset_randomization": false
             },
-            "id": 345,
+            "id": 163,
             "manual_values": {
                 "i_length": 100.0,
                 "i_max": 200.0,
                 "i_min": -200.0,
                 "i_phase": 0.0,
                 "i_type": 3.0,
-                "o_output": 153.40250439547611
+                "o_output": 68.86475514558413
             },
             "state": {
-                "time": -5713.860871198096
+                "time": -6437.555945894436
             },
             "type": "LFO",
             "ui_data": {
@@ -8647,7 +8496,7 @@
             "extra": {
                 "allow_preset_randomization": false
             },
-            "id": 346,
+            "id": 164,
             "manual_values": {
                 "i_x": -1.4199999570846558,
                 "i_y": 0.0,
@@ -8694,7 +8543,7 @@
             "extra": {
                 "allow_preset_randomization": false
             },
-            "id": 347,
+            "id": 165,
             "manual_values": {
                 "i_name": "ref_lowres",
                 "o_output": ""
@@ -8715,7 +8564,7 @@
             "extra": {
                 "allow_preset_randomization": false
             },
-            "id": 348,
+            "id": 166,
             "manual_values": {
                 "i_enabled": 1.0,
                 "i_force_change": 42.0,
@@ -8945,7 +8794,7 @@
             "extra": {
                 "allow_preset_randomization": false
             },
-            "id": 349,
+            "id": 167,
             "manual_values": {
                 "i_advanced_filtering": 0.0,
                 "i_enabled": 1.0,
@@ -9092,7 +8941,7 @@
             "extra": {
                 "allow_preset_randomization": false
             },
-            "id": 350,
+            "id": 168,
             "manual_values": {
                 "i_advanced_filtering": 0.0,
                 "i_enabled": 1.0,
@@ -9155,7 +9004,7 @@
             "extra": {
                 "allow_preset_randomization": false
             },
-            "id": 351,
+            "id": 169,
             "manual_values": {
                 "i_x": 1.899999976158142,
                 "i_y": 1.0,
@@ -9180,7 +9029,7 @@
             "extra": {
                 "allow_preset_randomization": false
             },
-            "id": 353,
+            "id": 170,
             "manual_values": {
                 "i_name": "ref_lowres",
                 "o_output": ""
@@ -9201,7 +9050,7 @@
             "extra": {
                 "allow_preset_randomization": false
             },
-            "id": 354,
+            "id": 171,
             "manual_values": {
                 "i_uniform": 1.0,
                 "i_x": 1.0,
@@ -9249,15 +9098,15 @@
             "extra": {
                 "allow_preset_randomization": false
             },
-            "id": 355,
+            "id": 172,
             "manual_values": {
                 "i_factor": 0.3700000047683716,
                 "i_mod": 0.0,
                 "i_reset": 0.0,
-                "o_output": 8406.612791591646
+                "o_output": -4297.699675553335
             },
             "state": {
-                "time": 8406.612791591646
+                "time": -4297.699675553335
             },
             "type": "Time",
             "ui_data": {
@@ -9274,7 +9123,7 @@
             "extra": {
                 "allow_preset_randomization": false
             },
-            "id": 356,
+            "id": 173,
             "manual_values": {
                 "i_name": "ref_highres",
                 "o_output": ""
@@ -9284,8 +9133,8 @@
             "ui_data": {
                 "collapsed": true,
                 "pos": [
-                    -563.0,
-                    2666.0
+                    -630.0,
+                    2661.0
                 ],
                 "selected": false
             }
@@ -9330,7 +9179,7 @@
             "extra": {
                 "allow_preset_randomization": false
             },
-            "id": 357,
+            "id": 174,
             "manual_values": {
                 "i_count": 1.0,
                 "i_event": 0.0,
@@ -9390,7 +9239,7 @@
             "extra": {
                 "allow_preset_randomization": false
             },
-            "id": 358,
+            "id": 175,
             "manual_values": {
                 "i_count": 1.0,
                 "i_event": 0.0,
@@ -9415,16 +9264,16 @@
             "extra": {
                 "allow_preset_randomization": false
             },
-            "id": 359,
+            "id": 176,
             "manual_values": {
                 "i_generate": 0.0,
                 "i_max": 360.0,
                 "i_min": 0.0,
                 "i_mod": 0.0,
-                "o_output": 40.13268453535548
+                "o_output": 111.79841918611898
             },
             "state": {
-                "value": 40.13268453535548
+                "value": 111.79841918611898
             },
             "type": "RandomFloat",
             "ui_data": {
@@ -9550,10 +9399,10 @@
             "extra": {
                 "allow_preset_randomization": false
             },
-            "id": 360,
+            "id": 177,
             "manual_values": {
                 "i_enable_time_mask": 0.0,
-                "i_enabled": 1.0,
+                "i_enabled": 0.0,
                 "i_force_change": 42.0,
                 "i_input": "",
                 "i_interpolation": 1.0,
@@ -9592,7 +9441,7 @@
                 "i_uRotation": 0.0,
                 "i_uScale": 2.25,
                 "i_wrapping": 1.0,
-                "o_enabled": 1.0,
+                "o_enabled": 0.0,
                 "o_output": ""
             },
             "state": {},
@@ -9609,8 +9458,8 @@
     ],
     "ui_data": {
         "offset": [
-            -1927.0,
-            3791.0
+            -1413.0,
+            3451.0
         ]
     }
 }
