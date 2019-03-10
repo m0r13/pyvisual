@@ -1760,6 +1760,7 @@ class NodeEditor(NodeGraphListener):
         self.current_graph_index = (self.current_graph_index + 1) % len(self.graphs)
         self.current_graph = self.graphs[self.current_graph_index]
         self.current_ui_graph = self.ui_graphs[self.current_graph_index]
+        self.current_ui_graph.reset_cached_positions()
 
     def show(self):
         # create editor window
@@ -2065,9 +2066,9 @@ def on_draw(event):
             print("=== ===")
             profile_time_count = 0
 
-@external_window.event
+@window.event
 def on_resize(width, height):
-    pass
+    editor.current_ui_graph.reset_cached_positions()
 
 @external_window.event
 def on_draw(event):

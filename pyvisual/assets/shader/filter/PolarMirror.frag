@@ -43,8 +43,6 @@ vec2 polarMirror(vec2 polar, float n) {
     return polar;
 }
 
-uniform float uTest;
-
 vec4 filterFrag(vec2 uv, vec4 _) {
     vec2 size = textureSize(uInputTexture, 0);
 
