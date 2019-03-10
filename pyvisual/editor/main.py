@@ -191,6 +191,8 @@ class UIConnection:
         self.src_port_id = src_port_id
         self.dst_node = dst_node
         self.dst_port_id = dst_port_id
+        # is set by connect()
+        self.dtype = None
         self.color = 0
         self.connect()
 
@@ -198,23 +200,32 @@ class UIConnection:
         self.p1 = None
         self.visible = None
 
+    @property
+    def mouse_node(self):
+        if isinstance(self.src_node, MouseDummyNode):
+            return self.src_node
+        elif isinstance(self.dst_node, MouseDummyNode):
+            return self.dst_node
+        assert False
+
     def connect(self):
         self.src_node.attach_connection(self.src_port_id, self)
         self.dst_node.attach_connection(self.dst_port_id, self)
 
-        dtype = None
+        self.dtype = None
         if self.src_port_id is not None:
-            dtype = self.src_node.instance.ports[self.src_port_id]["dtype"]
+            self.dtype = self.src_node.instance.ports[self.src_port_id]["dtype"]
         elif self.dst_port_id is not None:
-            dtype = self.dst_node.instance.ports[self.dst_port_id]["dtype"]
+            self.dtype = self.dst_node.instance.ports[self.dst_port_id]["dtype"]
         else:
             assert False
-        self.color = get_connection_color(dtype)
+        self.color = get_connection_color(self.dtype)
 
     def disconnect(self):
         self.src_node.detach_connection(self.src_port_id, self)
         self.dst_node.detach_connection(self.dst_port_id, self)
 
+        self.dtype = None
         self.color = 0
 
     def update_position(self):
@@ -311,13 +322,21 @@ class UIConnection:
                     dst_node=MouseDummyNode(), dst_port_id=None)
 
 class MouseDummyNode:
+    def __init__(self):
+        self._position = None
+
+    def keep_position(self):
+        self._position = self.get_port_position(None)
+
     def attach_connection(self, *args):
         pass
     def detach_connection(self, *args):
         pass
 
     def get_port_position(self, port_id):
-        return imgui.get_io().mouse_pos
+        if self._position is None:
+            return imgui.get_io().mouse_pos
+        return self._position
 
 class UINode:
     
@@ -366,6 +385,12 @@ class UINode:
         self.dragging_node_start = None
         self.hovered = False
 
+        # information that the node's position should be set so that a specific port is at a specific position
+        self._align_port_id = None
+        self._align_port_pos = None
+        # set to 1 then because ui node needs one frame to calculate correct size
+        self._align_port_counter = 0
+
         # TODO this is not so nice, have all ui data attributes with setters and call this automatically
         # trigger update of ui data
         self.ui_graph.update_node_ui_state(self)
@@ -399,6 +424,14 @@ class UINode:
             end = start[0]+size[0], start[1]+size[1]
             self.visible = not t_cull(start, end)
         return self.visible
+
+    # set the nodes position (as soon as size and position of port is known)
+    # such that the specific port is at a specific position
+    def align_port_at(self, port_id, pos):
+        self._align_port_id = port_id
+        self._align_port_pos = pos
+        # see where _align_port_counter is also used
+        self._align_port_counter = 1
 
     def touch_z_index(self):
         self.z_index = self.ui_graph.touch_z_index()
@@ -567,7 +600,7 @@ class UINode:
             highlight_color = COLOR_PORT_HIGHLIGHT_POSITIVE_ACTIVE
             imgui.set_tooltip("Drop connection")
             if imgui.is_mouse_released(0):
-                self.ui_graph.drop_connection(self, port_id)
+                self.ui_graph.finish_dragging_connection(self, port_id)
         elif not is_dragging_connection and hovered_connector:
             imgui.set_tooltip("Create connection")
             if imgui.is_mouse_clicked(0):
@@ -833,6 +866,24 @@ class UINode:
         imgui.pop_id()
         imgui.set_cursor_pos(old_cursor_pos)
 
+        # if the node's position should be set such that a port is at a specific position...
+        if self._align_port_id is not None:
+            # set node position only after one frame where correct size is determined
+            if self._align_port_counter > 0:
+                self._align_port_counter -= 1
+            else:
+                port_id = self._align_port_id
+                port_pos0 = self.get_port_position(port_id)
+                port_pos1 = self._align_port_pos
+
+                offset = t_sub(port_pos1, port_pos0)
+                self.pos = t_add(self.pos, offset)
+                self.ui_graph.update_node_ui_state(self)
+
+                self._align_port_id = None
+                self._align_port_pos = None
+                self._align_port_counter = 0
+
         return interacted
 
 # data that needs to be shared across rendered ui graphs
@@ -841,6 +892,7 @@ class UIGraphData:
         # information about which node types are available
         self.base_node = base_node
         self.node_specs = []
+        self.filtered_node_specs = []
         self.update_available_nodes()
 
         # shared clipboard among graphs
@@ -859,6 +911,15 @@ class UIGraphData:
         settings["node_bg_alpha"] = self.node_bg_alpha
         settings["node_alpha"] = self.node_alpha
         return settings
+
+    # search for node types that have input/output port with specific dtype
+    # and put them into filtered_node_specs
+    def filter_available_nodes(self, dtype, is_input):
+        def has_specific_port(node_spec):
+            ports = node_spec.inputs if is_input else node_spec.outputs
+            return any([ port_spec["dtype"] == dtype for port_spec in ports ])
+
+        self.filtered_node_specs = [ node_spec for node_spec in self.node_specs if has_specific_port(node_spec) ]
 
     def update_available_nodes(self):
         # sort by node categories and then by names
@@ -934,6 +995,29 @@ class UIGraph(NodeGraphListener):
     def created_node(self, graph, node, ui_data):
         ui_node = UINode(self, node, ui_data)
         self.ui_nodes[node.id] = ui_node
+
+        if self.is_dragging_connection():
+            dtype = self.dragging_connection.dtype
+            mouse_node = self.dragging_connection.mouse_node
+            # whether loose end / "mouse node" of the connection is an input
+            is_input = self.dragging_connection.dst_node == mouse_node
+
+            # search for possible port that can be connected to the connection
+            # TODO consider base types too?
+            port_ids = []
+            for port_id, port_spec in node.ports.items():
+                if node_meta.is_input(port_id) == is_input and port_spec["dtype"] == dtype:
+                    port_ids.append(port_id)
+
+            assert len(port_ids) > 0
+            # TODO allow choosing a port or use better heuristic!
+            port_id = port_ids[0]
+            if "i_input" in port_ids:
+                port_id = "i_input"
+
+            # finish the connection and align node so that port is that connection position
+            self.finish_dragging_connection(ui_node, port_id)
+            ui_node.align_port_at(port_id, mouse_node.get_port_position(None))
 
     def removed_node(self, graph, node):
         assert node.id in self.ui_nodes
@@ -1050,7 +1134,7 @@ class UIGraph(NodeGraphListener):
             other_port_spec = connection.dst_node.instance.ports[connection.dst_port_id]
         return port_spec["dtype"].base_type == other_port_spec["dtype"].base_type
 
-    def drop_connection(self, node, port_id):
+    def finish_dragging_connection(self, node, port_id):
         assert self.is_dragging_connection()
         assert self.is_connection_droppable(node, port_id)
 
@@ -1071,6 +1155,11 @@ class UIGraph(NodeGraphListener):
 
         c = connection
         self.graph.create_connection(c.src_node.instance, c.src_port_id, c.dst_node.instance, c.dst_port_id)
+
+    def abort_dragging_connection(self):
+        if self.is_dragging_connection():
+            self.dragging_connection.disconnect()
+            self.dragging_connection = None
 
     #
     # selection management
@@ -1102,7 +1191,7 @@ class UIGraph(NodeGraphListener):
     # actual graph rendering
     #
 
-    def show_context_menu(self):
+    def show_context_menu(self, create_node_from_connection=False):
         io = self.io
         key_map = self.key_map
         key_g = glfw.GLFW_KEY_G
@@ -1113,12 +1202,16 @@ class UIGraph(NodeGraphListener):
         just_opened_popup = False
         reopen_popup = False
 
-        # context menu
+        # note about the last condition:
+        # - don't allow right-click on top of another node to open context menu
+        # - BUT: if you drag a new connection on top of another node, the context menu should still open
         no_node_hovered = lambda: not any(map(lambda n: n.hovered, self.nodes))
         if imgui.is_window_hovered() \
-                and (imgui.is_mouse_clicked(1) or self.is_key_down(key_g)) \
-                and no_node_hovered():
-            context_name = "context_import" if io.key_shift else "context_create_nodes"
+                and (imgui.is_mouse_clicked(1) or self.is_key_down(key_g) or create_node_from_connection) \
+                and (create_node_from_connection or no_node_hovered()):
+            context_name = "context_create_nodes"
+            if io.key_shift and not create_node_from_connection:
+                context_name = "context_import"
             # remember where context menu was opened
             # (to place node there)
             self.context_mouse_pos = io.mouse_pos
@@ -1132,7 +1225,9 @@ class UIGraph(NodeGraphListener):
             # handle when user right-clicked outside of the popup
             # this should close the popup and re-open it at the new position
             # re-opening must be handled outside of begin_popup()/end_popup()
-            if not just_opened_popup and not imgui.is_window_hovered() and imgui.is_mouse_clicked(1):
+            # NOTE: is_window_hovered doesn't work for popups. so right-clicking inside the popup will work too, but who cares
+            if not just_opened_popup and imgui.is_mouse_clicked(1):
+                self.abort_dragging_connection()
                 reopen_popup = True
 
             # set keyboard focus only once
@@ -1143,7 +1238,13 @@ class UIGraph(NodeGraphListener):
 
             def filter_nodes(text):
                 filtered = []
-                for i, spec in enumerate(self.ui_graph_data.node_specs):
+
+                # use a set of filtered nodes when creating a node from a connection
+                node_specs = self.ui_graph_data.node_specs
+                if self.is_dragging_connection():
+                    node_specs = self.ui_graph_data.filtered_node_specs
+
+                for i, spec in enumerate(node_specs):
                     label = "%s (%s)" % (spec.name, spec.module_name)
                     contained, n = match_substring_partly(text.lower(), label.lower())
                     if contained:
@@ -1154,6 +1255,7 @@ class UIGraph(NodeGraphListener):
                         contained, n = match_substring_partly(text.lower(), label.lower())
                         if contained:
                             filtered.append((n, (label, spec, preset_values)))
+
                 filtered.sort(key = lambda item: item[0])
                 return [ item[1] for item in filtered ]
 
@@ -1164,6 +1266,8 @@ class UIGraph(NodeGraphListener):
             if self.is_key_down(key_down_arrow):
                 self.context_index += 1
             if self.is_key_down(key_escape):
+                # make sure to remove dragged connection (if any)
+                self.abort_dragging_connection()
                 imgui.close_current_popup()
 
             self.context_index = max(0, min(len(entries) - 1, self.context_index))
@@ -1176,6 +1280,8 @@ class UIGraph(NodeGraphListener):
                 if imgui.is_item_clicked() or (is_selected and changed):
                     pos = self.screen_to_local(self.context_mouse_pos)
                     self.graph.create_node(spec, values=preset_values, ui_data={"pos" : pos})
+                    # in case the node was created with dragging a connection, the connection will
+                    # be connected where the ui node is created
                     # TODO it would be nice to set the mouse position back to where the node is now
                     imgui.close_current_popup()
                 imgui.pop_id()
@@ -1193,6 +1299,11 @@ class UIGraph(NodeGraphListener):
             if imgui.menu_item("reset offset")[0]:
                 self.ui_offset = (0, 0)
                 self.update_ui_state()
+
+            # is_mouse_clicked(0) here means that left mouse button was clicked outside of popup
+            # popup will be closed then, so we have to remove the dragging connection (if any)
+            if imgui.is_mouse_clicked(0):
+                self.abort_dragging_connection()
 
             imgui.end_popup()
 
@@ -1300,10 +1411,28 @@ class UIGraph(NodeGraphListener):
 
         # dropping connection to ports is handled by nodes
         # we're checking here if a connection was dropped into nowhere
+        create_node_from_connection = False
         if self.is_dragging_connection() and imgui.is_mouse_released(0):
-            self.dragging_connection.disconnect()
-            #self.ui_connections.remove(self.dragging_connection)
-            self.dragging_connection = None
+            c = self.dragging_connection
+            assert c.p0 is not None
+            assert c.p1 is not None
+            d = (c.p0[0] - c.p1[0])**2 + (c.p0[1] - c.p1[1]) ** 2
+            # if the connection was dragged a bit (at least 50px), let the user create a new node here
+            # which gets attached to the connection directly
+            if d > 50**2 and not io.key_shift:
+                # make connection stay at the current position
+                mouse_node = self.dragging_connection.mouse_node
+                mouse_node.keep_position()
+
+                # filter currently available nodes
+                dtype = self.dragging_connection.dtype
+                is_input = self.dragging_connection.dst_node == mouse_node
+                self.ui_graph_data.filter_available_nodes(dtype, is_input)
+
+                create_node_from_connection = True
+            else:
+                self.abort_dragging_connection()
+
             if self.dragging_connection_to_remove is not None:
                 self.remove_connection(self.dragging_connection_to_remove)
             self.dragging_connection_to_remove = None
@@ -1389,7 +1518,7 @@ class UIGraph(NodeGraphListener):
             self.dragging_position = False
 
         # show context
-        self.show_context_menu()
+        self.show_context_menu(create_node_from_connection=create_node_from_connection)
 
         stats = {
             "connections" : (rendered_connections, len(self.ui_connections)),
