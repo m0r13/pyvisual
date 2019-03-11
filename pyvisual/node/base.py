@@ -171,6 +171,12 @@ class Node(metaclass=NodeMeta):
         inputs = []
         outputs = []
 
+    # Forces this node type to be executed as early as possible in the graph.
+    # This means possibly even before the nodes where its input values come from.
+    # Required for delaying a value by a frame in preventing problems with circular connections.
+    # See also: DelayFloat
+    FORCE_EARLY_EXECUTION = False
+
     def __init__(self, always_evaluate=False):
         self.always_evaluate = always_evaluate
         self.graph = None
@@ -378,6 +384,11 @@ class Node(metaclass=NodeMeta):
     def _evaluate(self):
         # to be implemented by child nodes
         # never call from outside! use evaluate() instead
+        pass
+
+    def _after_evaluate(self):
+        # Called after all nodes have been evaluated, but values (more precise: their has_changed state) haven't been resetted yet!
+        # Useful for DelayFloat value.
         pass
 
     def _show_custom_ui(self):

@@ -616,3 +616,38 @@ class HSV2RGBA(Node):
         h, s, v = self.get("h"), self.get("s"), self.get("v")
         r, g, b = colorsys.hsv_to_rgb(h, s, v)
         self.set("rgba", np.float32([r, g, b, self.get("a")]))
+
+#
+# Misc / Meta operations
+#
+
+class DelayFloat(Node):
+    class Meta:
+        inputs = [
+            {"name" : "input", "dtype" : dtype.float}
+        ]
+        outputs = [
+            {"name" : "output", "dtype" : dtype.float}
+        ]
+
+    FORCE_EARLY_EXECUTION = True
+
+    def __init__(self):
+        super().__init__()
+
+        # The value None has special meaning here: indicates that there is no next value.
+        # Consequence: The value shouldn't take the value None!!
+        self._next_value = None
+
+    def _evaluate(self):
+        if self._next_value is not None:
+            self.set("output", self._next_value)
+            self._next_value = None
+
+    def _after_evaluate(self):
+        # Called after evaluation of all nodes, changed values in the previous frame are forwarded like this!
+        value = self.get_input("input")
+        if value.has_changed:
+            self._next_value = value.value
+            self.force_evaluate()
+

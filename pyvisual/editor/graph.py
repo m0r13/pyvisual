@@ -88,12 +88,15 @@ class Graph:
             if instance in visited_instances:
                 return
             visited_instances.add(instance)
-            for instance_before in instance.input_nodes:
-                #if instance_before in visited_instances:
-                #    circular = True
-                if not self.evaluate_all and instance_before.graph != self:
-                    continue
-                dfs(instance_before)
+            # Some nodes should be executed as early as possible, even before the nodes providing their input values.
+            # See DelayFloat why.
+            if not instance.FORCE_EARLY_EXECUTION:
+                for instance_before in instance.input_nodes:
+                    #if instance_before in visited_instances:
+                    #    circular = True
+                    if not self.evaluate_all and instance_before.graph != self:
+                        continue
+                    dfs(instance_before)
             instance.dfs_index = len(sorted_instances)
             sorted_instances.append(instance)
 
@@ -128,6 +131,8 @@ class Graph:
         return active_instances
 
     def reset_instances(self):
+        for instance in self.instances:
+            instance._after_evaluate()
         for instance in self.instances:
             instance.reset_evaluated()
 
