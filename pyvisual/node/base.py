@@ -360,7 +360,7 @@ class Node(metaclass=NodeMeta):
         self._force_evaluate = True
 
     @property
-    def collapsed_title(self):
+    def descriptive_title(self):
         return None
 
     def start(self, graph):

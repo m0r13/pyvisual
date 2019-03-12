@@ -728,8 +728,8 @@ class UINode:
             imgui.text(self.spec.name)
             #imgui.text(self.spec.name + " (%d)" % self.instance.dfs_index)
         elif self.collapsed:
-            imgui.text(self.instance.collapsed_title)
-            #imgui.text(self.instance.collapsed_title + " (%d)" % self.instance.dfs_index)
+            imgui.text(self.instance.descriptive_title)
+            #imgui.text(self.instance.descriptive_title + " (%d)" % self.instance.dfs_index)
         if not self.collapsed:
             port_filter = lambda port: not port[1]["hide"] and port[1]["group"] == "default"
             inputs = list(filter(port_filter, self.instance.input_ports.items()))
@@ -776,7 +776,7 @@ class UINode:
         # handle clicks / scrolling on the node
         if not self.ui_graph.is_dragging_connection() and self.hovered and not imgui.is_any_item_active():
             # handle collapsing/expanding
-            collapsible = self.spec.options["show_title"] or self.instance.collapsed_title is not None
+            collapsible = self.spec.options["show_title"] or self.instance.descriptive_title is not None
             if collapsible:
                 if self.collapsed and io.mouse_wheel < 0:
                     self.collapsed = False
@@ -964,7 +964,8 @@ class UIGraph(NodeGraphListener):
         # save position where context menu was opened
         # (for spawning nodes exactly where menu was opened)
         self.context_mouse_pos = None
-        self.context_search_test = ""
+        self.context_search_text = ""
+        self.context_search_text = ""
 
         self.io = imgui.get_io()
         self.key_map = list(self.io.key_map)
@@ -1191,13 +1192,12 @@ class UIGraph(NodeGraphListener):
     # actual graph rendering
     #
 
-    def show_context_menu(self, create_node_from_connection=False):
+    def show_context_menus(self, create_node_from_connection=False):
+        self.show_context_menu_create(create_node_from_connection)
+        self.show_context_menu_search()
+
+    def show_context_menu_create(self, create_node_from_connection):
         io = self.io
-        key_map = self.key_map
-        key_g = glfw.GLFW_KEY_G
-        key_up_arrow = key_map[imgui.KEY_UP_ARROW]
-        key_down_arrow = key_map[imgui.KEY_DOWN_ARROW]
-        key_escape = key_map[imgui.KEY_ESCAPE]
 
         just_opened_popup = False
         reopen_popup = False
@@ -1207,9 +1207,9 @@ class UIGraph(NodeGraphListener):
         # - BUT: if you drag a new connection on top of another node, the context menu should still open
         no_node_hovered = lambda: not any(map(lambda n: n.hovered, self.nodes))
         if imgui.is_window_hovered() \
-                and (imgui.is_mouse_clicked(1) or self.is_key_down(key_g) or create_node_from_connection) \
+                and (imgui.is_mouse_clicked(1) or self.is_key_down(glfw.GLFW_KEY_G) or create_node_from_connection) \
                 and (create_node_from_connection or no_node_hovered()):
-            context_name = "context_create_nodes"
+            context_name = "context_create"
             if io.key_shift and not create_node_from_connection:
                 context_name = "context_import"
             # remember where context menu was opened
@@ -1217,10 +1217,10 @@ class UIGraph(NodeGraphListener):
             self.context_mouse_pos = io.mouse_pos
             imgui.open_popup(context_name)
             self.context_search_text = ""
-            self.context_index = 0
+            self.context_create_index = 0
             just_opened_popup = True
 
-        if imgui.begin_popup("context_create_nodes"):
+        if imgui.begin_popup("context_create"):
             assert self.context_mouse_pos is not None
             # handle when user right-clicked outside of the popup
             # this should close the popup and re-open it at the new position
@@ -1261,17 +1261,17 @@ class UIGraph(NodeGraphListener):
 
             entries = filter_nodes(self.context_search_text)
 
-            if self.is_key_down(key_up_arrow):
-                self.context_index -= 1
-            if self.is_key_down(key_down_arrow):
-                self.context_index += 1
-            if self.is_key_down(key_escape):
+            if self.is_key_down(glfw.GLFW_KEY_UP):
+                self.context_create_index -= 1
+            if self.is_key_down(glfw.GLFW_KEY_DOWN):
+                self.context_create_index += 1
+            if self.is_key_down(glfw.GLFW_KEY_ESCAPE):
                 # make sure to remove dragged connection (if any)
                 self.abort_dragging_connection()
                 imgui.close_current_popup()
 
-            self.context_index = max(0, min(len(entries) - 1, self.context_index))
-            selected = self.context_index
+            self.context_create_index = max(0, min(len(entries) - 1, self.context_create_index))
+            selected = self.context_create_index
             imgui.listbox_header("", 250, 300)
             for i, (label, spec, preset_values) in enumerate(entries):
                 imgui.push_id(i)
@@ -1314,9 +1314,73 @@ class UIGraph(NodeGraphListener):
 
         if reopen_popup:
             imgui.close_current_popup()
-            imgui.open_popup("context_create_nodes")
+            imgui.open_popup("context_create")
 
-        #profile.disable()
+    def show_context_menu_search(self):
+        io = self.io
+
+        if imgui.is_window_hovered() \
+                and io.key_ctrl and self.is_key_down(glfw.GLFW_KEY_F):
+            imgui.open_popup("context_search")
+            self.context_mouse_pos = io.mouse_pos
+            self.context_search_text = ""
+            self.context_search_index = 0
+
+        if imgui.begin_popup("context_search"):
+            # set keyboard focus only once
+            if not imgui.is_any_item_active():
+                imgui.set_keyboard_focus_here()
+            imgui.push_item_width(250)
+            changed, self.context_search_text = imgui.input_text("", self.context_search_text, 255, imgui.INPUT_TEXT_ENTER_RETURNS_TRUE)
+
+            def filter_nodes(text):
+                filtered = []
+
+                for i, ui_node in enumerate(self.ui_nodes.values()):
+                    instance = ui_node.instance
+                    spec = instance.spec
+                    t = instance.descriptive_title
+                    if t is not None:
+                        label = t
+                    else:
+                        label = "%s #%d" % (spec.name, instance.id)
+                    contained, n = match_substring_partly(text.lower(), label.lower())
+                    if contained:
+                        filtered.append((n, (label, ui_node)))
+
+                filtered.sort(key = lambda item: item[0])
+                return [ item[1] for item in filtered ]
+
+            entries = filter_nodes(self.context_search_text)
+
+            if self.is_key_down(glfw.GLFW_KEY_UP):
+                self.context_search_index -= 1
+            if self.is_key_down(glfw.GLFW_KEY_DOWN):
+                self.context_search_index += 1
+            if self.is_key_down(glfw.GLFW_KEY_ESCAPE):
+                imgui.close_current_popup()
+
+            self.context_search_index = max(0, min(len(entries) - 1, self.context_search_index))
+            selected = self.context_search_index
+            imgui.listbox_header("", 250, 300)
+            for i, (label, ui_node) in enumerate(entries):
+                imgui.push_id(i)
+                is_selected = selected == 0
+                imgui.selectable(label, is_selected)
+                # as soon as the search text is not empty, move view to search result node
+                if imgui.is_item_clicked() or (is_selected and self.context_search_text != ""):
+                    # move view so that the resulting node is displayed 200px left and up from context menu
+                    mouse_pos = self.context_mouse_pos
+                    self.ui_offset = t_sub(ui_node.pos, t_sub(mouse_pos, (200, 200)))
+                    self.update_ui_state()
+                    if changed:
+                       imgui.close_current_popup()
+                imgui.pop_id()
+                selected -= 1
+            if len(entries) == 0:
+                imgui.text("Nothing found.")
+            imgui.listbox_footer()
+            imgui.end_popup()
 
     def show(self, draw_list):
         io = self.io
@@ -1518,7 +1582,7 @@ class UIGraph(NodeGraphListener):
             self.dragging_position = False
 
         # show context
-        self.show_context_menu(create_node_from_connection=create_node_from_connection)
+        self.show_context_menus(create_node_from_connection=create_node_from_connection)
 
         stats = {
             "connections" : (rendered_connections, len(self.ui_connections)),
