@@ -1,4 +1,4 @@
-from . import value, audio, texture, util, module, midi, var
+from . import value, audio, texture, util, module, midi, var, video
 
 
 
