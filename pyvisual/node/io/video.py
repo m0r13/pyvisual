@@ -178,7 +178,7 @@ class PlayVideo(Node):
             "time" : 0.0
         }
         random_state = {
-            "time" : 0.0
+            "time" : lambda node: random.random() * 100000.0
         }
 
     def __init__(self):
@@ -231,5 +231,11 @@ class PlayVideo(Node):
 
     def set_state(self, state):
         if "time" in state:
-            self._video_thread.time = state["time"]
+            time = state["time"]
+            # if a video is loaded, take time modulo duration
+            # so we can just generate a arbitrarily large number as random state
+            if self._video_thread.has_video_loaded:
+                duration = self._video_thread.duration
+                time = time % duration
+            self._video_thread.time = time
 
