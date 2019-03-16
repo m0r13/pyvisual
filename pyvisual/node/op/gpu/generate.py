@@ -79,6 +79,8 @@ class TimeMaskedGenerate(BaseShader):
 
         super().__init__(vertex_source, fragment_source, handle_uniforms=True)
 
+        self._has_randomize_preset = "i_randomize_preset" in self.input_ports
+
     def _process_uniform_inputs(self, port_specs):
         # like in Filter class
         for port_spec in port_specs:
@@ -88,6 +90,9 @@ class TimeMaskedGenerate(BaseShader):
     def _evaluate(self):
         if self.have_inputs_changed("enable_time_mask"):
             self.fragment_source.set("ENABLE_TIME_MASK", self.get("enable_time_mask"))
+
+        if self._has_randomize_preset and self.get("randomize_preset"):
+            self.randomize_preset(force=True)
 
         super()._evaluate()
 

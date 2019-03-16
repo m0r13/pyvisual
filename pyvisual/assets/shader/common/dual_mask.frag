@@ -5,7 +5,7 @@ uniform sampler2D uInputTexture; // {"skip" : true, "alias" : "input"}
 uniform sampler2D uInputTexture1; // {"alias" : "foreground"}
 uniform sampler2D uMaskTexture; // {"alias" : "mask"}
 
-uniform float uMaskFactor; // {"alias" : "factor"}
+uniform float uMaskFactor; // {"alias" : "factor", "default" : 1.0}
 
 in vec2 TexCoord0;
 

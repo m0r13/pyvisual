@@ -169,22 +169,24 @@ float scene(vec3 p) {
     float testPrism = sdTriPrism(p, vec2(0.5, 0.3));
     float octa = sdOctahedron(p, 0.5);
     float torus = sdTorus(p, vec2(0.4, 0.015 * 5.0));
-    float test = octa;
+
+    float time = sin(pyvisualTime * 0.1);
+    // alpha from -0.5 to 1.5
+    float alpha = time + 0.5;
+    float test = mix(octa, testPrism, alpha);
     
     return test;
 }
 
 vec3 estimateSceneNormal(vec3 p) {
-    vec2 e = vec2(0.01, 0.0);
-    return normalize((vec3(scene(p+e.xyy), scene(p+e.yxy), scene(p+e.yyx)) - scene(p)) / e.x);
+    //vec2 e = vec2(0.01, 0.0);
+    //return normalize((vec3(scene(p+e.xyy), scene(p+e.yxy), scene(p+e.yyx)) - scene(p)) / e.x);
 
-    /*
     vec3 eps = vec3(0.01, 0.0, 0.0);
     float nx = scene(p + eps.xyy) - scene(p - eps.xyy); 
     float ny = scene(p + eps.yxy) - scene(p - eps.yxy); 
     float nz = scene(p + eps.yyx) - scene(p - eps.yyx); 
     return normalize(vec3(nx, ny, nz));
-    */
 }
 
 vec4 sceneColor(vec3 p, float camDist, vec4 bgColor) {

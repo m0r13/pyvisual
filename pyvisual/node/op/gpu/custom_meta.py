@@ -1,4 +1,12 @@
+from pyvisual.node import dtype
 import random
+
+# add a button to the node to randomize the preset here
+# is handled in Filter / TimeMaskedGenerate node clases
+# TODO a bit hacky as code is duplicated
+INPUTS = [
+    {"name" : "randomize_preset", "dtype" : dtype.event}
+]
 
 def checkerboard_values_with_softness(base_values):
     def _generate(node):
@@ -23,6 +31,7 @@ def checkerboard_values_with_softness(base_values):
     return _generate
 
 class CheckerboardMeta:
+    inputs = INPUTS
     presets = [
         ("vertical stripes", checkerboard_values_with_softness({
             "uCountX" : 3.5,
@@ -64,6 +73,7 @@ def frame_values_with_softness(base_values):
     return _generate
 
 class FramesMeta:
+    inputs = INPUTS
     presets = [
         ("square frame blah", frame_values_with_softness({
             "uCount" : 1.97,

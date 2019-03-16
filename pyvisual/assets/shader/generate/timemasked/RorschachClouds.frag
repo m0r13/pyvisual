@@ -23,7 +23,7 @@ float fbm(vec2 p) {
     float f = 0.0;
     float frequency = 1.0; // 1.0
     float amplitude = 0.5; // 0.5
-    for (int i = 0; i < 4; i++) {
+    for (int i = 0; i < 8; i++) {
         f += snoise(p * frequency) * amplitude;
         amplitude *= 0.5;
         frequency *= 2.0 + float(i) / 100.0;
@@ -33,7 +33,7 @@ float fbm(vec2 p) {
 
 void generateFrag() {
     vec2 uv = 1.0 - pyvisualUV * 1.0;
-    uv.x = 1.0 - abs(1.0 - uv.x * 2.0);
+    //uv.x = 1.0 - abs(1.0 - uv.x * 2.0);
 
     vec2 puv = uv;
     puv -= vec2(0.25, 0.5);
@@ -47,7 +47,6 @@ void generateFrag() {
 #endif
 
     float blot = fbm(p * 3.0 + 8.0);
-    // disable shade for now, because it's not needed and needs extra performance
     //float shade = fbm(p * 2.0 + 16.0);
     float shade = 0.0;
     float shadeContrast = uShadeContrast;

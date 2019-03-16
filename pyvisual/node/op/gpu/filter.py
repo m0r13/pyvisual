@@ -34,6 +34,8 @@ class Filter(BaseShader):
 
         super().__init__(vertex_source, fragment_source, handle_uniforms=True)
 
+        self._has_randomize_preset = "i_randomize_preset" in self.input_ports
+
     def _process_uniform_inputs(self, port_specs):
         # called by Shader class when custom node inputs for uniforms are created
         # show advanced filter related inputs only when advanced filtering is enabled
@@ -44,6 +46,9 @@ class Filter(BaseShader):
     def _evaluate(self):
         if self.have_inputs_changed("advanced_filtering"):
             self.fragment_source.set("ADVANCED_FILTERING", self.get("advanced_filtering"))
+
+        if self._has_randomize_preset and self.get("randomize_preset"):
+            self.randomize_preset(force=True)
 
         super()._evaluate()
 
