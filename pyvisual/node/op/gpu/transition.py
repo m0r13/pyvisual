@@ -81,6 +81,14 @@ class SwipeMixTexture(MixTexture):
 
         program["uDirection"] = (self.get("x"), self.get("y"))
 
+class TestTransition(MixTexture):
+    class Meta:
+        inputs = [
+        ]
+
+    def __init__(self):
+        super().__init__("common/passthrough.vert", "transition/test.frag", handle_uniforms=True)
+
 class TransitionTimer(Node):
     class Meta:
         inputs = [

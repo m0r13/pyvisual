@@ -152,6 +152,7 @@ float opSmoothIntersection( float d1, float d2, float k ) {
     return mix( d2, d1, h ) + k*h*(1.0-h); }
 
 uniform float uRotation;
+uniform float uAlpha; // {"default" : 1.0}
 
 // mirroring enabled, but uMirrorCount == 0.0 should be as mirroring disabled
 // both looks and performance
@@ -194,7 +195,7 @@ vec4 sceneColor(vec3 p, float camDist, vec4 bgColor) {
     vec3 ro = vec3(0.0, 0.0, 2.0); 
     vec3 r = reflect(normalize(p - ro),n); 
     vec3 h = -normalize(n + p - ro);
-    return vec4(vec3(dot(n, normalize(vec3(1, 1, 1))) * 0.6 + 0.4), 1.0);
+    return vec4(vec3(dot(n, normalize(vec3(1, 1, 1))) * 0.6 + 0.4) * uAlpha, 1.0);
 }
 
 vec4 backgroundColor(vec2 uv) {
