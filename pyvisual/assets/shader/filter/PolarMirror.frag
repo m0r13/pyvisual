@@ -7,8 +7,8 @@ uniform mat4 uInputTransform;
 uniform float uAspectAdjust; // {"default" : 1.0}
 uniform float uAxisAngle; // {"alias" : "axis_angle"}
 uniform float uAngleOffset; // {"alias" : "angle"}
-uniform int uSegmentCount; // {"alias" : "segments", "default" : 5, "range" : [0, Infinity]}
-uniform int uSecondarySegmentCount; // {"alias" : "segments1", "default" : 0, "range" : [0, Infinity]}
+uniform int uSegmentCount; // {"alias" : "segments", "default" : 4, "range" : [0, Infinity]}
+uniform int uSecondarySegmentCount; // {"alias" : "segments1", "default" : 2, "range" : [0, Infinity]}
 
 vec2 uvToPolar(vec2 uv) {
     ivec2 size = textureSize(uInputTexture, 0);
