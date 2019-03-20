@@ -1,3 +1,13 @@
+#define RAYMARCHING_DITHERING
+#define RAYMARCHING_STEPS 64
+
+// Forms:
+// form 0: round one
+// form 1: more abstact and edgy
+#define FORM_TYPE 1
+
+#define FORM_FOG
+
 #include <generate/timemasked/raymarching/base.frag>
 
 float sdSphere(vec3 p, float s) {
@@ -6,6 +16,16 @@ float sdSphere(vec3 p, float s) {
 
 float sdBox(vec3 p, vec3 s) {
     return length(max(abs(p) - s, 0.0));
+}
+
+float sdTriPrism( vec3 p, vec2 h ) {
+    vec3 q = abs(p);
+    return max(q.z-h.y,max(q.x*0.866025+p.y*0.5,-p.y)-h.x*0.5);
+}
+
+float sdOctahedron( in vec3 p, in float s) {
+    p = abs(p);
+    return (p.x+p.y+p.z-s)*0.57735027;
 }
 
 vec3 opRotateX(in vec3 p, float ang) {
@@ -121,6 +141,7 @@ float opSmoothIntersection( float d1, float d2, float k ) {
 
 uniform float uRotation;
 uniform float uDisplace; // {"default" : 1.0, "range": [-1.0, 1.0]}
+uniform float uDisplaceOffset;
 uniform float uAlpha; // {"default" : 1.0, "range" : [0.0, 1.0]}
 
 uniform float uMirrorCount; // {"default" : 4.0, "range" : [0.0, Infinity]}
@@ -179,14 +200,32 @@ float scene(vec3 p) {
     }
 #endif
 
-    float displace = clamp(sin((p.x+p.y+p.z)*20.0)*0.03, 0.0, 1.0) * uDisplace;
+#if FORM_TYPE == 0
+    float displace = clamp(sin((p.x+p.y+p.z + uDisplaceOffset)*20.0)*0.03, 0.0, 1.0) * uDisplace;
     float sphere = sdSphere(p, 0.5);
     float box = sdBox(p, vec3(0.5, 0.5, 0.5)) - 0.05;
     float time = sin(pyvisualTime * 0.2 + timeOffset);
     time = time * 0.75 - 0.5;
     float form = mix(box + displace, sphere, time);
     return form;
-    //return opIntersection(form, sliceFormBox);
+#elif FORM_TYPE == 1
+    float testBox = sdBox(p, vec3(0.25));
+    float testPrism = sdTriPrism(p, vec2(0.5, 0.3));
+    float octa = sdOctahedron(p, 0.5);
+
+    float time = sin(pyvisualTime * 0.1 + timeOffset);
+    // alpha from -0.5 to 1.5
+    float alpha = time + 0.5;
+    float test = mix(octa, testPrism, alpha);
+    //float displace = clamp(sin((p.x+p.y+p.z)*20.0)*0.03, 0.0, 1.0) * uDisplace;
+    
+    float displaceArg = (p.y) * 4.2 + uDisplaceOffset;
+    float displace = 2.0 / 3.14159 * asin(sin((2.0*3.14159*displaceArg) / 1.0)) * 0.1 * uDisplace;
+
+    return test + displace;
+#else
+    return 0.0;
+#endif
 }
 
 vec3 estimateSceneNormal(vec3 p) {
@@ -203,6 +242,21 @@ vec3 estimateSceneNormal(vec3 p) {
 }
 
 vec4 sceneColor(vec3 p, float camDist, vec4 bgColor) {
+#ifdef FORM_FOG
+    // nearest dist: 1.7
+    // farthest dist: 2.5
+    float minDist = 1.5;
+    float maxDist = 2.0;
+    float dist = (camDist - minDist) / (minDist - maxDist);
+    dist = 1.0 - clamp(dist*dist, 0.0, 1.0);
+    /*
+    if (camDist < minDist) {
+        return vec4(1.0, 0.0, 0.0, 1.0);
+    }
+    */
+    //return vec4(vec3(dist), 1.0);
+#endif
+
     float fr = finalPP.y < uSliceTime ? 1.0 : 0.0;
     float fg = 1.0 - fr;
 
@@ -225,6 +279,10 @@ vec4 sceneColor(vec3 p, float camDist, vec4 bgColor) {
     float amb = 0.2 + p.y; 
     vec3 cubeColor = diff*vec3(1,1,1) + diff2*vec3(fr,fg,0)  + diff3*vec3(fr,fg,1) + spec*vec3(1,1,1)  + amb*vec3(0.2,0.2,0.2);
     cubeColor /= camDist;
+#ifdef FORM_FOG
+    cubeColor = mix(bgColor.rgb, cubeColor, dist);
+#endif
+    //cubeColor *= dist;
     // count of iterations until convergance as color
     //cubeColor = mix(vec3(1.0, 0.0, 0.0), vec3(0.0, 1.0, 0.0), step(8.0, float(i)));
     // normal as color
@@ -234,8 +292,22 @@ vec4 sceneColor(vec3 p, float camDist, vec4 bgColor) {
     return mix(bgColor, vec4(cubeColor, 1.0), uAlpha);
 }
 
+#define MOD3 vec3(443.8975,397.2973, 491.1871)
+float hash12(vec2 p) {
+    vec3 p3  = fract(vec3(p.xyx) * MOD3);
+    p3 += dot(p3, p3.yzx + 19.19);
+    return fract((p3.x + p3.y) * p3.z);
+}
+
 vec4 backgroundColor(vec2 uv) {
-    return vec4((1.0 - vec3(length(uv*0.5)))*0.2, 1.0);
+    float value = (1.0 - length(uv*0.5))*0.2;
+
+    vec2 seed = uv;
+    vec3 rnd = vec3(hash12( seed ) + hash12(seed + 0.59374) - 0.5 );
+
+    value = value + rnd.x/255.0;
+
+    return vec4(vec3(value), 1.0);
     return vec4(0.0, 0.0, 0.0, 1.0);
 }
 

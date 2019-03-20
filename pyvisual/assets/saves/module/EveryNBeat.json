@@ -1,70 +1,73 @@
 {
     "connections": [
         {
-            "dst_node_id": 156,
+            "dst_node_id": 203,
             "dst_port_id": "i_reset",
-            "src_node_id": 159,
+            "src_node_id": 206,
             "src_port_id": "o_output"
         },
         {
-            "dst_node_id": 156,
+            "dst_node_id": 203,
             "dst_port_id": "i_next",
-            "src_node_id": 158,
+            "src_node_id": 205,
             "src_port_id": "o_output"
         },
         {
-            "dst_node_id": 156,
+            "dst_node_id": 203,
             "dst_port_id": "i_index",
-            "src_node_id": 157,
+            "src_node_id": 204,
             "src_port_id": "o_output"
         },
         {
-            "dst_node_id": 156,
+            "dst_node_id": 203,
             "dst_port_id": "i_n",
-            "src_node_id": 160,
+            "src_node_id": 207,
             "src_port_id": "o_value"
         },
         {
-            "dst_node_id": 156,
+            "dst_node_id": 203,
             "dst_port_id": "i_offset",
-            "src_node_id": 161,
+            "src_node_id": 208,
             "src_port_id": "o_value"
         },
         {
-            "dst_node_id": 156,
+            "dst_node_id": 203,
             "dst_port_id": "i_p",
-            "src_node_id": 162,
+            "src_node_id": 209,
             "src_port_id": "o_value"
         },
         {
-            "dst_node_id": 156,
-            "dst_port_id": "i_reset_p",
-            "src_node_id": 162,
-            "src_port_id": "o_value"
-        },
-        {
-            "dst_node_id": 165,
+            "dst_node_id": 212,
             "dst_port_id": "i_v1",
-            "src_node_id": 156,
+            "src_node_id": 203,
             "src_port_id": "o_out"
         },
         {
-            "dst_node_id": 165,
+            "dst_node_id": 212,
             "dst_port_id": "i_v0",
-            "src_node_id": 164,
+            "src_node_id": 211,
             "src_port_id": "o_value"
         },
         {
-            "dst_node_id": 163,
+            "dst_node_id": 210,
             "dst_port_id": "i_value",
-            "src_node_id": 165,
+            "src_node_id": 212,
             "src_port_id": "o_output"
+        },
+        {
+            "dst_node_id": 203,
+            "dst_port_id": "i_reset_p",
+            "src_node_id": 213,
+            "src_port_id": "o_value"
         }
     ],
     "nodes": [
         {
             "custom_ports": [],
-            "id": 156,
+            "extra": {
+                "allow_preset_randomization": false
+            },
+            "id": 203,
             "manual_values": {
                 "i_index": 0.0,
                 "i_n": 1.0,
@@ -75,6 +78,7 @@
                 "i_reset_p": 1.0,
                 "o_out": 0.0
             },
+            "state": {},
             "type": "EveryNSequencer",
             "ui_data": {
                 "collapsed": false,
@@ -87,11 +91,15 @@
         },
         {
             "custom_ports": [],
-            "id": 157,
+            "extra": {
+                "allow_preset_randomization": false
+            },
+            "id": 204,
             "manual_values": {
                 "i_name": "sequencer_index",
-                "o_output": 13.0
+                "o_output": 19.0
             },
+            "state": {},
             "type": "GetFloatVar",
             "ui_data": {
                 "collapsed": true,
@@ -104,11 +112,15 @@
         },
         {
             "custom_ports": [],
-            "id": 158,
+            "extra": {
+                "allow_preset_randomization": false
+            },
+            "id": 205,
             "manual_values": {
                 "i_name": "sequencer_next",
                 "o_output": 0.0
             },
+            "state": {},
             "type": "GetFloatVar",
             "ui_data": {
                 "collapsed": true,
@@ -121,11 +133,15 @@
         },
         {
             "custom_ports": [],
-            "id": 159,
+            "extra": {
+                "allow_preset_randomization": false
+            },
+            "id": 206,
             "manual_values": {
                 "i_name": "sequencer_reset",
                 "o_output": 0.0
             },
+            "state": {},
             "type": "GetFloatVar",
             "ui_data": {
                 "collapsed": true,
@@ -181,7 +197,10 @@
                     }
                 ]
             ],
-            "id": 160,
+            "extra": {
+                "allow_preset_randomization": false
+            },
+            "id": 207,
             "manual_values": {
                 "i_default_value": 4.0,
                 "i_dtype": 2.0,
@@ -190,6 +209,7 @@
                 "i_test_value": 4.0,
                 "o_value": 4.0
             },
+            "state": {},
             "type": "ModuleInput",
             "ui_data": {
                 "collapsed": false,
@@ -245,7 +265,10 @@
                     }
                 ]
             ],
-            "id": 161,
+            "extra": {
+                "allow_preset_randomization": false
+            },
+            "id": 208,
             "manual_values": {
                 "i_default_value": 0.0,
                 "i_dtype": 2.0,
@@ -254,6 +277,7 @@
                 "i_test_value": 0.0,
                 "o_value": 0.0
             },
+            "state": {},
             "type": "ModuleInput",
             "ui_data": {
                 "collapsed": false,
@@ -309,7 +333,10 @@
                     }
                 ]
             ],
-            "id": 162,
+            "extra": {
+                "allow_preset_randomization": false
+            },
+            "id": 209,
             "manual_values": {
                 "i_default_value": 1.0,
                 "i_dtype": 3.0,
@@ -318,12 +345,13 @@
                 "i_test_value": 1.0,
                 "o_value": 1.0
             },
+            "state": {},
             "type": "ModuleInput",
             "ui_data": {
                 "collapsed": false,
                 "pos": [
-                    -416.0,
-                    828.0
+                    -512.0,
+                    836.0
                 ],
                 "selected": false
             }
@@ -359,7 +387,10 @@
                     }
                 ]
             ],
-            "id": 163,
+            "extra": {
+                "allow_preset_randomization": false
+            },
+            "id": 210,
             "manual_values": {
                 "i_dtype": 1.0,
                 "i_name": "event",
@@ -367,6 +398,7 @@
                 "i_value": 0.0,
                 "o_test_value": 0.0
             },
+            "state": {},
             "type": "ModuleOutput",
             "ui_data": {
                 "collapsed": false,
@@ -422,7 +454,10 @@
                     }
                 ]
             ],
-            "id": 164,
+            "extra": {
+                "allow_preset_randomization": false
+            },
+            "id": 211,
             "manual_values": {
                 "i_default_value": 1.0,
                 "i_dtype": 0.0,
@@ -431,6 +466,7 @@
                 "i_test_value": 1.0,
                 "o_value": 1.0
             },
+            "state": {},
             "type": "ModuleInput",
             "ui_data": {
                 "collapsed": false,
@@ -443,12 +479,16 @@
         },
         {
             "custom_ports": [],
-            "id": 165,
+            "extra": {
+                "allow_preset_randomization": false
+            },
+            "id": 212,
             "manual_values": {
                 "i_v0": 0.0,
                 "i_v1": 0.0,
                 "o_output": 0.0
             },
+            "state": {},
             "type": "And",
             "ui_data": {
                 "collapsed": false,
@@ -458,12 +498,80 @@
                 ],
                 "selected": false
             }
+        },
+        {
+            "custom_ports": [
+                [
+                    "i_default_value",
+                    {
+                        "default": null,
+                        "dtype": "float",
+                        "dtype_args": {},
+                        "dummy": false,
+                        "group": "default",
+                        "hide": false,
+                        "manual_input": true,
+                        "name": "default_value",
+                        "widgets": []
+                    }
+                ],
+                [
+                    "i_test_value",
+                    {
+                        "default": null,
+                        "dtype": "float",
+                        "dtype_args": {},
+                        "dummy": false,
+                        "group": "default",
+                        "hide": false,
+                        "manual_input": true,
+                        "name": "test_value",
+                        "widgets": []
+                    }
+                ],
+                [
+                    "o_value",
+                    {
+                        "default": null,
+                        "dtype": "float",
+                        "dtype_args": {},
+                        "dummy": false,
+                        "group": "default",
+                        "hide": false,
+                        "manual_input": true,
+                        "name": "value",
+                        "widgets": []
+                    }
+                ]
+            ],
+            "extra": {
+                "allow_preset_randomization": false
+            },
+            "id": 213,
+            "manual_values": {
+                "i_default_value": 1.0,
+                "i_dtype": 3.0,
+                "i_name": "reset_p",
+                "i_order": 4.0,
+                "i_test_value": 1.0,
+                "o_value": 1.0
+            },
+            "state": {},
+            "type": "ModuleInput",
+            "ui_data": {
+                "collapsed": false,
+                "pos": [
+                    -360.0,
+                    997.0
+                ],
+                "selected": false
+            }
         }
     ],
     "ui_data": {
         "offset": [
-            -829.0,
-            -114.0
+            -951.0,
+            214.0
         ]
     }
 }

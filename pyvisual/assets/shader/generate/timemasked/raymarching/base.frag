@@ -1,5 +1,9 @@
 #include <generate/timemasked/base.frag>
 
+#ifndef RAYMARCHING_STEPS
+#  define RAYMARCHING_STEPS 64
+#endif
+
 // uniforms
 
 uniform float uScale; // {"default" : 1.0, "range" : [0.0001, Infinity]}
@@ -10,6 +14,7 @@ vec4 backgroundColor(vec2 uv);
 
 float rand(vec2 co) { return fract(sin(dot(co*0.123,vec2(12.9898,78.233))) * 43758.5453); }
 
+uniform float uDitheringAmount; // {"default" : 0.0}
 uniform float uDitheringTime;
 
 void generateFrag() {
@@ -19,7 +24,7 @@ void generateFrag() {
     vec3 ro = vec3(0.0, 0.0, 2.0); 
     vec3 rd = normalize(vec3(uv.x, uv.y, -1.4 * uScale)); 
 
-    const int steps = 64;
+    const int steps = RAYMARCHING_STEPS;
     const float epsilon = 0.001;
 
     vec3 pos = ro; 
@@ -27,8 +32,7 @@ void generateFrag() {
     float dscene = 0.0;
     float lr = 0.8;
 
-    //#define DITHER
-    #ifdef DITHER
+    #ifdef RAYMARCHING_DITHERING
     vec2 dpos = ( (vec2(pyvisualUV.x, 1.0 - pyvisualUV.y) * pyvisualResolution).xy / pyvisualResolution.xy );
     vec2 num = vec2(1000.0);
     num.x *= pyvisualResolution.x / pyvisualResolution.y;
@@ -36,8 +40,8 @@ void generateFrag() {
     #endif
     for (int i = 0; i < steps; i++) {
         dscene = scene(pos);
-        #ifdef DITHER
-        dscene *= (0.25+0.5*rand(seed*vec2(i)));
+        #ifdef RAYMARCHING_DITHERING
+        dscene *= mix(1.0, (0.25+0.5*rand(seed*vec2(i))), uDitheringAmount);
         #endif 
         if (abs(dscene) < epsilon) {
             break;
