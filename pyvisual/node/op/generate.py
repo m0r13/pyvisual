@@ -210,6 +210,36 @@ class RandomFloat(Node):
         if "value" in state:
             self.set("output", state["value"])
 
+class RandomBool(Node):
+    class Meta:
+        inputs = [
+            {"name" : "generate", "dtype" : dtype.event},
+            {"name" : "p", "dtype" : dtype.float, "dtype_args" : {"default" : 0.5, "range" : [0.0, 1.0]}},
+        ]
+        outputs = [
+            {"name" : "output", "dtype" : dtype.bool}
+        ]
+        initial_state = {
+            "value" : lambda node: random.random() > 0.5
+        }
+        random_state = {
+            "value" : lambda node: node.generate_bool()
+        }
+
+    def _evaluate(self):
+        if self.get("generate"):
+            self.randomize_state()
+
+    def generate_bool(self):
+        return random.random() < self.get("p")
+
+    def get_state(self):
+        return {"value" : self.get_output("output").value}
+
+    def set_state(self, state):
+        if "value" in state:
+            self.set("output", state["value"])
+
 class Noise1D(Node):
     class Meta:
         inputs = [

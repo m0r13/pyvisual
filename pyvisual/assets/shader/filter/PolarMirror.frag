@@ -4,6 +4,7 @@
 #include <lib/transform.glsl>
 
 uniform mat4 uInputTransform;
+uniform int uInputWrapping; // {"choices" : ["none", "repeat", "mirrored repeat"], "default" : 2}
 uniform float uAspectAdjust; // {"default" : 1.0}
 uniform float uAxisAngle; // {"alias" : "axis_angle"}
 uniform float uAngleOffset; // {"alias" : "angle"}
@@ -43,6 +44,23 @@ vec2 polarMirror(vec2 polar, float n) {
     return polar;
 }
 
+vec4 sampleMirroredFrag(vec2 uv) {
+    if (uInputWrapping == 0) {
+        if (uv.x < 0.0 || uv.y < 0.0 || uv.x > 1.0 || uv.y > 1.0) {
+            return vec4(0.0);
+        }
+    } else if (uInputWrapping == 1) {
+        uv = fract(uv);
+    } else if (uInputWrapping == 2) {
+        // TODO haha
+        // I was too lazy to find out a formula for mirrored repeat
+        // it's already mirrored repeated when the input texture is on that by default
+    }
+
+    uv = transformUV(uv, uInputTransform, textureSize(uInputTexture, 0));
+    return texture2D(uInputTexture, uv);
+}
+
 vec4 filterFrag(vec2 uv, vec4 _) {
     vec2 size = textureSize(uInputTexture, 0);
 
@@ -52,13 +70,13 @@ vec4 filterFrag(vec2 uv, vec4 _) {
     polar0.x += radians(uAngleOffset) - 3.141595;
     vec2 uv0 = polarToUV(polar0);
 
-    vec4 frag = texture2D(uInputTexture, transformUV(uv0, uInputTransform, size));
+    vec4 frag = sampleMirroredFrag(uv0);
     if (uSecondarySegmentCount != 0) {
         vec2 polar1 = polarMirror(polar, uSecondarySegmentCount);
         polar1.x += radians(uAngleOffset) - 3.141595;
         vec2 uv1 = polarToUV(polar1);
 
-        vec4 frag1 = texture2D(uInputTexture, transformUV(uv1, uInputTransform, size));
+        vec4 frag1 = sampleMirroredFrag(uv1);
         // manchmal übersteuert
         frag = max(frag, frag1);
         // hält farbe ganz nice

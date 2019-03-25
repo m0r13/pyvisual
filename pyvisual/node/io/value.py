@@ -42,6 +42,26 @@ class OutputEvent(Node):
             "show_title" : False
         }
 
+class InputInt(Node):
+    class Meta:
+        outputs = [
+            {"name" : "output", "dtype" : dtype.int, "manual_input" : True}
+        ]
+        options = {
+            "category" : "input",
+            "show_title" : False
+        }
+
+class OutputInt(Node):
+    class Meta:
+        inputs = [
+            {"name" : "input", "dtype" : dtype.int, "manual_input" : False}
+        ]
+        options = {
+            "category" : "output",
+            "show_title" : False
+        }
+
 class InputFloat(Node):
     class Meta:
         outputs = [

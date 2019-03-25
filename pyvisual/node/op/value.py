@@ -618,9 +618,48 @@ class HSV2RGBA(Node):
         self.set("rgba", np.float32([r, g, b, self.get("a")]))
 
 #
+# String operations
+#
+
+class ChooseString(Node):
+    class Meta:
+        inputs = [
+            {"name" : "choices", "dtype" : dtype.str, "hide" : True},
+            {"name" : "index", "dtype" : dtype.int, "dtype_args" : {"range" : [0, float("inf")]}},
+        ]
+        outputs = [
+            {"name" : "output", "dtype" : dtype.str}
+        ]
+
+    def __init__(self):
+        super().__init__()
+
+        self._choices = []
+
+    def _evaluate(self):
+        choices = self.get_input("choices")
+        if choices.has_changed:
+            self._choices = choices.value.strip().split("\n")
+
+        i = int(self.get("index"))
+        if i < 0 or i >= len(self._choices):
+            i = max(0, min(len(self._choices) - 1, i))
+            self.get_input("index").value = i
+        self.set("output", self._choices[i])
+
+    def _show_custom_context(self):
+        changed, text = imgui.input_text_multiline("", self.get("choices"), 1024)
+        if changed:
+            self.get_input("choices").value = text
+
+        super()._show_custom_context()
+
+#
 # Misc / Meta operations
 #
 
+# Delays a float value by one frame
+# Always required for cyclic connections in the graph!
 class DelayFloat(Node):
     class Meta:
         inputs = [

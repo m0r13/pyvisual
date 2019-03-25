@@ -11,8 +11,8 @@ class Plot(Node):
             {"name" : "min", "dtype" : dtype.float, "dtype_args" : {"default" : 0.0}},
             {"name" : "max", "dtype" : dtype.float, "dtype_args" : {"default" : 1.0}},
             {"name" : "time", "dtype" : dtype.float, "dtype_args" : {"default" : 5.0}},
-            {"name" : "width", "dtype" : dtype.int, "dtype_args" : {"default" : 200}, "group" : "additional"},
-            {"name" : "height", "dtype" : dtype.int, "dtype_args" : {"default" : 50}, "group" : "additional"},
+            {"name" : "width", "dtype" : dtype.int, "dtype_args" : {"default" : 300}, "group" : "additional"},
+            {"name" : "height", "dtype" : dtype.int, "dtype_args" : {"default" : 100}, "group" : "additional"},
         ]
         options = {
             "category" : "math",

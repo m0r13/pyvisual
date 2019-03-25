@@ -200,6 +200,7 @@ def imgui_pick_file(name, base_path, wildcard="*"):
             return path
         imgui.end_popup()
 
+WILDCARDS = ["*.jpg", "*.png"]
 def _imgui_pick_file_menu(base_path, wildcard="*"):
     MAX_FILE_DISPLAY_LENGTH = 60
 
@@ -214,6 +215,12 @@ def _imgui_pick_file_menu(base_path, wildcard="*"):
         changed, value = imgui.input_text("", "", 255, imgui.INPUT_TEXT_ENTER_RETURNS_TRUE)
         if changed:
             return os.path.join(base_path, value)
+        imgui.separator()
+        for w in WILDCARDS:
+            if imgui.button(w):
+                return os.path.join(base_path, w)
+            imgui.same_line()
+        imgui.dummy(0, 0)
         imgui.separator()
 
         if len(entries) == 0:

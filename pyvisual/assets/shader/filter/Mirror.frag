@@ -1,10 +1,9 @@
 #define DONT_SAMPLE_FRAGMENT
 #include <filter/basefilter.frag>
 
-uniform int uMode; // {"default" : 1, "choices" : ["passthrough", "1", "2", "3"]}
-uniform float uCenter; // {"default" : 0.5}
-uniform int uCenterSwitch; // {"default" : 0}
-uniform float uStripeOffset; // {"default" : 0.0}
+uniform int uMode; // {"default" : 1, "choices" : ["passthrough", "1", "2", "3", "4", "5"]}
+// only for modes 4 and 5
+uniform float uDoubleCenter; // {"default" : 0.2, "range" : [0.0, 0.5]}
 
 vec4 filterFrag(vec2 uv, vec4 frag) {
     vec2 texCoords = uv;
@@ -47,6 +46,20 @@ vec4 filterFrag(vec2 uv, vec4 frag) {
         }
         if (texCoords.y > 0.5) {
             texCoords.y = 0.5 - (texCoords.y - 0.5);
+        }
+    } else if (uMode == 4) {
+        if (texCoords.x < uDoubleCenter) {
+            texCoords.x = uDoubleCenter + (-1.0) * (texCoords.x - uDoubleCenter);
+        } else if (texCoords.x > 1.0 - uDoubleCenter) {
+            float t = 1.0 - uDoubleCenter;
+            texCoords.x = t + (-1.0) * (texCoords.x - t);
+        }
+    } else if (uMode == 5) {
+        if (texCoords.y < uDoubleCenter) {
+            texCoords.y = uDoubleCenter + (-1.0) * (texCoords.y - uDoubleCenter);
+        } else if (texCoords.y > 1.0 - uDoubleCenter) {
+            float t = 1.0 - uDoubleCenter;
+            texCoords.y = t + (-1.0) * (texCoords.y - t);
         }
     }
 

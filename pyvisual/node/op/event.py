@@ -3,6 +3,7 @@ import time
 from pyvisual.node.base import Node
 from pyvisual.node.op.module import Module
 from pyvisual.node import dtype
+from pyvisual import util
 from collections import OrderedDict
 
 def weighted_random(weights):
@@ -32,7 +33,7 @@ class TimerEvent(Node):
         self._next_event = None
 
     def _evaluate(self):
-        t = time.time()
+        t = util.time.global_time.time()
         if (self.get("enabled") and self._next_event is not None and t > self._next_event) \
                 or self.get("force"):
             self._next_event = None
