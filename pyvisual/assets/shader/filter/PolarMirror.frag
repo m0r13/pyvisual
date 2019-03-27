@@ -19,7 +19,7 @@ vec2 uvToPolar(vec2 uv) {
     float radius = length(texCoords);
     // this was an accident: interesting WTF
     // float angle = radians(atan(texCoords.y, texCoords.x)) + 3.141595;
-    float angle = atan(texCoords.y, texCoords.x) + 3.141595;
+    float angle = atan(texCoords.y, texCoords.x) + 3.141595 * 0.5;
 
     return vec2(angle, radius);
 }
@@ -67,13 +67,13 @@ vec4 filterFrag(vec2 uv, vec4 _) {
     vec2 polar = uvToPolar(uv);
 
     vec2 polar0 = polarMirror(polar, uSegmentCount);
-    polar0.x += radians(uAngleOffset) - 3.141595;
+    polar0.x += radians(uAngleOffset) - 3.141595 * 0.5;
     vec2 uv0 = polarToUV(polar0);
 
     vec4 frag = sampleMirroredFrag(uv0);
     if (uSecondarySegmentCount != 0) {
         vec2 polar1 = polarMirror(polar, uSecondarySegmentCount);
-        polar1.x += radians(uAngleOffset) - 3.141595;
+        polar1.x += radians(uAngleOffset) - 3.141595 * 0.5;
         vec2 uv1 = polarToUV(polar1);
 
         vec4 frag1 = sampleMirroredFrag(uv1);
