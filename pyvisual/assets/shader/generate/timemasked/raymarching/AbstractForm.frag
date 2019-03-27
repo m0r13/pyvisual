@@ -219,8 +219,11 @@ float scene(vec3 p) {
     float test = mix(octa, testPrism, alpha);
     //float displace = clamp(sin((p.x+p.y+p.z)*20.0)*0.03, 0.0, 1.0) * uDisplace;
     
-    float displaceArg = (p.y) * 4.2 + uDisplaceOffset;
-    float displace = 2.0 / 3.14159 * asin(sin((2.0*3.14159*displaceArg) / 1.0)) * 0.1 * uDisplace;
+    float displaceArg = (p.x+p.y+p.z) * 4.2 + uDisplaceOffset;
+    //float displace = 2.0 / 3.14159 * asin(sin((2.0*3.14159*displaceArg) / 1.0)) * 0.1 * uDisplace;
+    float amplitude = 2 * 0.1 * uDisplace;
+    float period = 1.0;
+    float displace = (2*amplitude) / period * abs(mod(displaceArg, period) - period/2.0) - (2*amplitude) / 4.0;
 
     return test + displace;
 #else
