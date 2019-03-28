@@ -12,6 +12,8 @@ from pyvisual.node import dtype
 from pyvisual.editor import widget
 from pyvisual.audio import util
 
+from glumpy.app import clock
+
 #
 # Base operation nodes
 #
@@ -475,7 +477,8 @@ class LowpassFloat(Node):
 
     def _create_filter(self, order, cutoff):
         try:
-            filter = util.Filter(signal.butter, order, cutoff, 60, {"btype" : "low", "analog" : False})
+            fps = clock.get_default().get_fps_limit()
+            filter = util.Filter(signal.butter, order, cutoff, fps, {"btype" : "low", "analog" : False})
             self.status = None
             return filter
         except ValueError as e:
