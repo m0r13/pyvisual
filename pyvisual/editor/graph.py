@@ -150,17 +150,18 @@ class Graph:
         for instance, timings in self.stats.items():
             min_time = min(timings)
             max_time = max(timings)
-            avg_time = sum(timings) / len(timings)
-            total += avg_time
-            collected_stats[instance] = {"min" : min_time, "max" : max_time, "avg" : avg_time, "count" : 1}
+            tot_time = sum(timings)
+            avg_time = tot_time / len(timings)
+            total += tot_time
+            collected_stats[instance] = {"min" : min_time, "max" : max_time, "tot" : tot_time, "avg" : avg_time, "count" : 1}
         for instance, values in collected_stats.items():
-            values["rel"] = values["avg"] / total
+            values["rel"] = values["tot"] / total
 
         def sort_and_cum(collected_stats):
             grouped_stats = []
             for key, values in collected_stats.items():
                 grouped_stats.append((key, values))
-            grouped_stats.sort(key = lambda p: p[1]["avg"], reverse=True)
+            grouped_stats.sort(key = lambda p: p[1]["tot"], reverse=True)
 
             cum = 1.0
             for key, values in grouped_stats:
@@ -175,6 +176,7 @@ class Graph:
             return {
                 "min" : min(values0["min"], values1["min"]),
                 "max" : max(values0["max"], values1["max"]),
+                "tot" : values0["tot"] + values1["tot"],
                 "avg" : values0["avg"] + values1["avg"],
                 "rel" : values0["rel"] + values1["rel"],
                 "count" : values0["count"] + values1["count"],
