@@ -1,5 +1,7 @@
 #include <generate/timemasked/base.frag>
 
+#include <lib/noise3D.glsl>
+
 float sdCircle(vec2 p, float r) {
   return length(p) - r;
 }
@@ -56,6 +58,14 @@ float opSmoothIntersection( float d1, float d2, float k ) {
     float h = clamp( 0.5 - 0.5*(d2-d1)/k, 0.0, 1.0 );
     return mix( d2, d1, h ) + k*h*(1.0-h); }
 
+float v;
+
+uniform float uNoiseScale; // {"default" : 1.0, "range" : [0.0, Infinity]}
+uniform float uNoiseOffset; // {"default" : 0.0}
+uniform float uDisplaceScale; // {"default" : 1.0}
+
+uniform float uMaskScale; // {"default" : 1.0}
+
 float scene(vec2 p) {
     /*
     float xoff = sin(pyvisualTime);
@@ -83,13 +93,16 @@ float scene(vec2 p) {
     return opSmoothUnion(circle, box, 0.25);
     */
 
+    /*
     float cut = sin(pyvisualTime) * 0.5 * 0.0;
     vec3 pp = vec3(p, cut);
     pp = opRotate3(pp, vec3(0.2, 0.3, 0.4) * pyvisualTime * 0.2 * vec3(1.0, 1.0, 1.0));
     float displace = clamp(sin((pp.x+pp.y+pp.z)*20.0)*0.03, 0.0, 1.0) * 5.0;
     float box = sdBox3(pp, vec3(0.5));
     float sphere = sdSphere3(pp, 0.5);
+    v = pp.y;
     return box;
+    */
 
     /*
     float time = sin(pyvisualTime * 0.2);
@@ -97,6 +110,31 @@ float scene(vec2 p) {
     float form = mix(box + displace, sphere, time);
     return form;
     */
+
+    //v = 1.0;
+
+    float t = uMaskScale * uMaskScale;
+    float circle = sdCircle(p, 0.6 * 1.0 / t);
+
+    vec2 perlinP = p;
+    // version 1: use position as noise position
+    //perlinP *= uNoiseScale;
+    // version 2: offsets are along a circle in the noise space (depending on polar angle of position)
+    float angle = atan(p.y, p.x);
+    perlinP = vec2(sin(angle + uNoiseOffset), cos(angle + uNoiseOffset)) * uNoiseScale;
+
+    float noise = snoise(vec3(perlinP, pyvisualTime));
+
+    float amplitude = 0.2 * noise * uDisplaceScale;
+    // triangle waveform offset, not so much (yet)e;
+    //float period = 3.14159 / 3.0;
+    //float displace = (2*amplitude) / period * abs(mod(angle, period) - period/2.0) * 2.0 - (2*amplitude) / 4.0;
+    float displace = sin(angle * 6.0) * amplitude;
+
+    // two versions here also possible
+    // - multiply noise by sin/triangle/etc. waveform (seems nicer for now)
+    // - just take noise as offset
+    return circle + displace * t;
 }
 
 void generateFrag() {
@@ -105,6 +143,7 @@ void generateFrag() {
 
     float d = scene(uv);
     float value = 1.0 - smoothstep(0.0, 0.02, d);
+    value *= smoothstep(-0.5, 0.0, v) * (1.0-smoothstep(0.0, 0.5, v));
 
     pyvisualOutColor = vec4(vec3(value), 1.0);
 }
