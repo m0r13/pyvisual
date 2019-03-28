@@ -19,6 +19,6 @@ void main() {
     vec4 color1 = texture(uInputTexture1, TexCoord0);
     vec4 mask = texture(uMaskTexture, TexCoord0);
 
-    oFragColor = mix(color0, color1, mask.r * uMaskFactor);
+    oFragColor = mix(color0, color1, mask.rgbr * uMaskFactor);
 }
 

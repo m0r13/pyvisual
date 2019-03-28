@@ -1,5 +1,7 @@
 #include <generate/timemasked/base.frag>
 
+#include <lib/transform.glsl>
+
 #define HQ_TIME
 
 #ifdef HQ_TIME
@@ -37,7 +39,7 @@ void generateFrag() {
 
     vec2 puv = uv;
     puv -= vec2(0.25, 0.5);
-    puv = (uNoiseTransform * vec4(puv, 0.0, 1.0)).xy;
+    puv = transformNoiseUV(puv, uNoiseTransform, textureSize(uInputTexture, 0));
     puv += vec2(0.25, 0.5);
 
 #ifdef HQ_TIME

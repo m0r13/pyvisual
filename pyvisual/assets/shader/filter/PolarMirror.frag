@@ -47,7 +47,7 @@ vec2 polarMirror(vec2 polar, float n) {
 vec4 sampleMirroredFrag(vec2 uv) {
     if (uInputWrapping == 0) {
         if (uv.x < 0.0 || uv.y < 0.0 || uv.x > 1.0 || uv.y > 1.0) {
-            return vec4(0.0);
+            return vec4(vec3(0.0), 1.0);
         }
     } else if (uInputWrapping == 1) {
         uv = fract(uv);
