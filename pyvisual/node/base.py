@@ -201,6 +201,9 @@ class Node(metaclass=NodeMeta):
         self.set_extra({
             "allow_preset_randomization" : False
         })
+        # TODO make this persistent?
+        # question: also add temporary version of this?
+        self.allow_state_randomization = True
 
     def update_ports(self):
         self.input_ports = OrderedDict()
@@ -407,10 +410,12 @@ class Node(metaclass=NodeMeta):
             imgui.separator()
 
             if imgui.button("reset state"):
-                self.reset_state()
+                self.reset_state(force=True)
             imgui.same_line()
             if imgui.button("randomize state"):
-                self.randomize_state()
+                self.randomize_state(force=True)
+
+            changed, self.allow_state_randomization= imgui.checkbox("allow state randomization", self.allow_state_randomization)
 
         if has_presets:
             imgui.separator()
@@ -482,12 +487,15 @@ class Node(metaclass=NodeMeta):
         name, values = random.choice(self.spec.presets)
         self.set_preset(values)
 
-    def reset_state(self):
-        self.set_state(evaluate_values(self, self.spec.initial_state))
-        self.force_evaluate()
-    def randomize_state(self):
-        self.set_state(evaluate_values(self, self.spec.random_state))
-        self.force_evaluate()
+    def reset_state(self, force=False):
+        # TODO does the force parameter make sense here?!
+        if force or self.allow_state_randomization:
+            self.set_state(evaluate_values(self, self.spec.initial_state))
+            self.force_evaluate()
+    def randomize_state(self, force=False):
+        if force or self.allow_state_randomization:
+            self.set_state(evaluate_values(self, self.spec.random_state))
+            self.force_evaluate()
 
     def get_extra(self):
         return {"allow_preset_randomization" : self.allow_preset_randomization}
