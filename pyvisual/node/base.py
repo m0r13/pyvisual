@@ -177,6 +177,8 @@ class Node(metaclass=NodeMeta):
     # See also: DelayFloat
     FORCE_EARLY_EXECUTION = False
 
+    USES_OPENGL = False
+
     def __init__(self, always_evaluate=False):
         self.always_evaluate = always_evaluate
         self.graph = None

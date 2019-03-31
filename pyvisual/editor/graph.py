@@ -119,7 +119,8 @@ class Graph:
             if instance.evaluate():
                 active_instances.add(instance)
             if record_stats:
-                gl.glFinish()
+                if instance.USES_OPENGL:
+                    gl.glFinish()
                 end = time.time()
                 self.stats[instance].append(end - start)
 

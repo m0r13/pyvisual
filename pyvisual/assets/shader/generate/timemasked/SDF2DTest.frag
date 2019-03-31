@@ -65,6 +65,7 @@ uniform float uNoiseOffset; // {"default" : 0.0}
 uniform float uDisplaceScale; // {"default" : 1.0}
 
 uniform float uMaskScale; // {"default" : 1.0}
+uniform float uAlpha; // {"default" : 1.0}
 
 float scene(vec2 p) {
     /*
@@ -145,6 +146,6 @@ void generateFrag() {
     float value = 1.0 - smoothstep(0.0, 0.02, d);
     value *= smoothstep(-0.5, 0.0, v) * (1.0-smoothstep(0.0, 0.5, v));
 
-    pyvisualOutColor = vec4(vec3(value), 1.0);
+    pyvisualOutColor = vec4(vec3(value * uAlpha), 1.0);
 }
 

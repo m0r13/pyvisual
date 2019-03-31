@@ -19,6 +19,8 @@ class RenderNode(Node):
             "virtual" : True
         }
 
+    USES_OPENGL = True
+
     def __init__(self):
         super().__init__()
 

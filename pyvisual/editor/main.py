@@ -2076,6 +2076,9 @@ profile_time_count = 0
 
 PROFILE_STATS = "--profile-nodes" in sys.argv
 
+if "--paused" in sys.argv:
+    util.time.global_time.paused = True
+
 @window.event
 def on_draw(event):
     global editor_time, imgui_render_time, processing_time, time_count, profile_time_count

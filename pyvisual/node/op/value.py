@@ -477,7 +477,7 @@ class LowpassFloat(Node):
 
     def _create_filter(self, order, cutoff):
         try:
-            fps = clock.get_default().get_fps_limit()
+            fps = clock.get_default().get_fps_limit() * 0.75
             filter = util.Filter(signal.butter, order, cutoff, fps, {"btype" : "low", "analog" : False})
             self.status = None
             return filter
