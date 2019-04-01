@@ -62,6 +62,54 @@ class Wolfenstein(Shader):
     def set_uniforms(self, program):
         program["uTime"] = self.get("uTime")
 
+empty_ssbo = np.array([0.0], dtype=np.float32).view(gloo.buffer.ShaderStorageBuffer)
+
+class SSBOBars(Shader):
+    class Meta:
+        inputs = [
+            {"name" : "ssbo", "dtype" : dtype.ssbo}
+        ]
+
+    def __init__(self):
+        super().__init__("common/passthrough.vert", "generate/ssbo/SSBOBars.frag", handle_uniforms=True)
+
+    def set_uniforms(self, program):
+        super().set_uniforms(program)
+
+        ssbo = self.get("ssbo")
+        if ssbo is None:
+            ssbo = empty_ssbo
+        ssbo.activate()
+
+        b = ssbo._handle
+        gl.glBindBuffer(gl.GL_SHADER_STORAGE_BUFFER, b)
+        gl.glBindBufferBase(gl.GL_SHADER_STORAGE_BUFFER, 0, b)
+
+        program["uCount"] = len(ssbo)
+
+class SSBOLines(Shader):
+    class Meta:
+        inputs = [
+            {"name" : "ssbo", "dtype" : dtype.ssbo}
+        ]
+
+    def __init__(self):
+        super().__init__("common/passthrough.vert", "generate/ssbo/SSBOLines.frag", handle_uniforms=True)
+
+    def set_uniforms(self, program):
+        super().set_uniforms(program)
+
+        ssbo = self.get("ssbo")
+        if ssbo is None:
+            ssbo = empty_ssbo
+        ssbo.activate()
+
+        b = ssbo._handle
+        gl.glBindBuffer(gl.GL_SHADER_STORAGE_BUFFER, b)
+        gl.glBindBufferBase(gl.GL_SHADER_STORAGE_BUFFER, 0, b)
+
+        program["uCount"] = len(ssbo)
+
 class TimeMaskedGenerate(BaseShader):
     class Meta:
         inputs = [
