@@ -1,13 +1,15 @@
 from pyvisual.node.base import Node
 from pyvisual.node import dtype
-from pyvisual.node.io.audio import AudioData, DEFAULT_SAMPLE_RATE
+from pyvisual.node.io.audio import AudioData, FFTData, DEFAULT_SAMPLE_RATE
 from pyvisual.node.op.module import Module
 from pyvisual.audio import util
 from scipy import signal
+from glumpy import gloo
 import math
 import time
 import numpy as np
 import imgui
+import librosa
 
 AUDIO_FILTER_TYPES = ["low", "high"]
 class AudioFilter(Node):
@@ -139,6 +141,61 @@ class SampleAudio(Node):
 
         block = input_audio.blocks[-1]
         self.set("output", block[-1])
+
+class SampleAudioSSBO(Node):
+    class Meta:
+        inputs = [
+            {"name" : "enabled", "dtype" : dtype.bool, "dtype_args" : {"default" : True}},
+            {"name" : "input", "dtype" : dtype.audio},
+            {"name" : "count", "dtype" : dtype.int, "dtype_args": {"default" : 100, "range" : [1, float("inf")]}},
+            {"name" : "scale", "dtype" : dtype.float, "dtype_args" : {"default" : 1.0}}
+        ]
+        outputs = [
+            {"name" : "output", "dtype" : dtype.ssbo},
+        ]
+
+    def __init__(self):
+        super().__init__()
+
+        self._blocks = []
+        self._ssbo = None
+
+    def _update_ssbo(self, count):
+        self._ssbo = np.zeros((count,), dtype=np.float32).view(gloo.ShaderStorageBuffer)
+
+    def _evaluate(self):
+        count = self.get_input("count")
+        if count.has_changed or self._ssbo is None:
+            self._update_ssbo(int(count.value))
+
+        input_audio = self.get("input")
+        if input_audio is None:
+            #self.set("output", 0.0)
+            return
+
+        if len(input_audio.blocks) == 0:
+            return
+
+        for block in input_audio.blocks:
+            self._blocks.append(block)
+
+        c = count.value
+        total_length = lambda: sum([ len(b) for b in self._blocks ])
+        # TODO that hardcoded 512!
+        while total_length() > c+512:
+            self._blocks.pop(0)
+
+        # have that skip here so we always remove excess blocks
+        if not self.get("enabled"):
+            return
+
+        if total_length() < c:
+            return
+
+        # TODO not very efficient
+        samples = np.concatenate(self._blocks)
+        self._ssbo[:] = samples[-int(c):] * self.get("scale")
+        self.set("output", self._ssbo)
 
 class VUNormalizer(Node):
     class Meta:
@@ -275,3 +332,311 @@ class BeatDetection(Module):
     def __init__(self):
         super().__init__("BeatDetection.json")
 
+WINDOW_NAMES = ["hamming", "hanning", "cosine"]
+WINDOW_FN = [np.hamming, np.hanning, signal.cosine]
+
+class FFT(Node):
+    class Meta:
+        inputs = [
+            {"name" : "input", "dtype" : dtype.audio},
+            {"name" : "smooth_count", "dtype" : dtype.int, "dtype_args" : {"range" : [1, float("inf")], "default" : 1}},
+            {"name" : "smooth_sigma", "dtype" : dtype.float, "dtype_args" : {"default" : 0.5, "range" : [0.0001, float("inf")]}},
+            {"name" : "window", "dtype" : dtype.int, "dtype_args" : {"choices" : WINDOW_NAMES}},
+            {"name" : "scale_db", "dtype" : dtype.float, "dtype_args" : {"default" : 0.0, "range" : [0.0, 1.0]}},
+        ]
+        outputs = [
+            {"name" : "output", "dtype" : dtype.fft},
+        ]
+
+    def __init__(self):
+        super().__init__()
+
+        self._blocks = []
+
+        self._fft_len = None
+        self._recent_magnitudes = []
+        self._recent_magnitudes_kernel = None
+
+    def _process_fft(self, blocks, samplerate):
+        samples = np.concatenate(blocks)
+        M = len(samples)
+        window = WINDOW_FN[int(self.get("window"))](M)
+        samples = samples * window
+
+        smooth_count = int(self.get("smooth_count"))
+        smooth_sigma = self.get("smooth_sigma")
+
+        Fs = samplerate
+        magnitudes = np.abs(np.fft.fft(samples, axis=0)[:M // 2 + 1:-1])
+        if self._fft_len is None or self._fft_len != len(magnitudes):
+            self._fft_len = len(magnitudes)
+            self._recent_magnitudes = []
+
+            # gauss kernel
+            kernel = np.flip(1.0 / (np.sqrt(2*math.pi) * smooth_sigma) * np.exp(- np.arange(0, smooth_count)**2 / (2*smooth_sigma**2)))
+            kernel = (kernel / kernel.sum())[:, np.newaxis]
+            self._recent_magnitudes_kernel = kernel
+
+        self._recent_magnitudes.append(magnitudes)
+
+        while len(self._recent_magnitudes) > smooth_count:
+            self._recent_magnitudes.pop(0)
+        if len(self._recent_magnitudes) < smoothcount:
+            return
+
+        magnitudes = np.sum(np.array(self._recent_magnitudes) * self._recent_magnitudes_kernel, axis=0)
+
+        scale_db = self.get("scale_db")
+        if self.get("scale_db"):
+            magnitudes = 20*np.log10(magnitudes)
+
+        frequencies = np.arange(0, len(magnitudes)) * Fs / M
+        fft = FFTData(magnitudes, frequencies, frequencies[1])
+        self.set("output", fft)
+
+    def _evaluate(self):
+        input_audio = self.get("input")
+        if input_audio is None:
+            self.set("output", None)
+            return
+
+        # TODO expose this!
+        N = 8
+        overlap = 6
+        for block in input_audio.blocks:
+            self._blocks.append(block)
+        while len(self._blocks) >= N:
+            fft_blocks = self._blocks[:N]
+            process = True
+
+            to_pop = N - overlap
+            remaining = len(self._blocks) - to_pop
+            assert remaining >= 0
+            if remaining >= N:
+                process = False
+
+            for i in range(N):
+                self._blocks.pop(0)
+
+            if process or True:
+                #print("Processing blocks: %d" % len(fft_blocks))
+                self._process_fft(fft_blocks, input_audio.sample_rate)
+            else:
+                #print("Skipping that one!")
+                pass
+
+class BandpassFFT(Node):
+    class Meta:
+        inputs = [
+            {"name" : "input", "dtype" : dtype.fft},
+            {"name" : "min", "dtype" : dtype.float, "dtype_args" : {"default" : 0.0}},
+            {"name" : "max", "dtype" : dtype.float, "dtype_args" : {"default" : 22050.0}},
+        ]
+        outputs = [
+            {"name" : "output", "dtype" : dtype.fft}
+        ]
+
+    def _evaluate(self):
+        fft = self.get("input")
+        if fft is None:
+            self.set("output", None)
+            return
+
+        min_freq, max_freq = self.get("min"), self.get("max")
+
+        mask = (fft.frequencies > min_freq) & (fft.frequencies <= max_freq)
+        new_fft = FFTData(fft.magnitudes[mask], fft.frequencies[mask], fft.bin_resolution)
+        if len(new_fft.frequencies) == 0:
+            new_fft = None
+        self.set("output", new_fft)
+
+class AWeightingFFT(Node):
+    class Meta:
+        inputs = [
+            {"name" : "input", "dtype" : dtype.fft},
+        ]
+        outputs = [
+            {"name" : "output", "dtype" : dtype.fft}
+        ]
+
+    def _evaluate(self):
+        fft = self.get("input")
+        if fft is None:
+            self.set("output", None)
+            return
+
+        weighting = librosa.A_weighting(fft.frequencies + fft.bin_resolution * 0.5)
+
+        new_fft = fft.copy()
+        new_fft.magnitudes *= 10**(weighting / 10.0)
+        # for db it would be like this:
+        #new_fft.magnitudes += weighting
+        self.set("output", new_fft)
+
+class QuantizeFFT(Node):
+    class Meta:
+        inputs = [
+            {"name" : "input", "dtype" : dtype.fft},
+            {"name" : "count", "dtype" : dtype.int, "dtype_args" : {"default" : 10, "range" : [1, float("inf")]}},
+            {"name" : "gamma", "dtype" : dtype.float, "dtype_args" : {"default" : 1, "range" : [0.0001, float("inf")]}},
+            {"name" : "min_freq", "dtype" : dtype.float, "dtype_args" : {"default" : 0.0}},
+            {"name" : "max_freq", "dtype" : dtype.float, "dtype_args" : {"default" : 22100.0}},
+            {"name" : "db", "dtype" : dtype.bool, "dtype_args" : {"default" : False}},
+        ]
+        outputs = [
+            {"name" : "output", "dtype" : dtype.fft}
+        ]
+
+    def __init__(self):
+        super().__init__()
+
+        self._freqs = []
+
+    def _evaluate(self):
+        fft = self.get("input")
+        if fft is None:
+            self.set("output", None)
+            return
+
+        count = int(self.get("count"))
+        count = max(0, count)
+        gamma = self.get("gamma")
+
+        min_freq, max_freq = self.get("min_freq"), self.get("max_freq")
+
+        mask = (fft.frequencies > min_freq) & (fft.frequencies <= max_freq)
+        filtered_fft = FFTData(fft.magnitudes[mask], fft.frequencies[mask], fft.bin_resolution)
+
+        magnitudes = np.zeros((count,), dtype=np.float32)
+        frequencies = np.zeros((count,), dtype=np.float32)
+
+        self._freqs = []
+        # take count of already filtered fft!
+        factor = len(filtered_fft.magnitudes) / count
+        for i in range(count):
+            # https://dlbeer.co.nz/articles/fftvis.html for gamma formula
+            first_index = int(((i / count) ** (1 / gamma)) * len(filtered_fft.magnitudes))
+            last_index = int((((i+1) / count) ** (1 / gamma)) * len(filtered_fft.magnitudes))
+            magnitudes[i] = filtered_fft.magnitudes[first_index:last_index].mean()
+            frequencies[i] = filtered_fft.frequencies[last_index - 1]
+            self._freqs.append((i, first_index, last_index, frequencies[i]))
+
+        if self.get("db"):
+            magnitudes = 20*np.log10(magnitudes)
+
+        # one peak normalization
+        #magnitudes = magnitudes * 1.0 / (np.nanmax(magnitudes) + 0.01)
+
+        filtered_fft = FFTData(magnitudes, frequencies, fft.bin_resolution)
+        self.set("output", filtered_fft)
+
+    def _show_custom_context(self):
+        for freq in self._freqs:
+            imgui.text(str(freq))
+
+        super()._show_custom_context()
+
+class FFT2SSBO(Node):
+    class Meta:
+        inputs = [
+            {"name" : "input", "dtype" : dtype.fft},
+            {"name" : "scale", "dtype" : dtype.float, "dtype_args" : {"default" : 1.0, "range" : [0.00001, float("inf")]}},
+        ]
+        outputs = [
+            {"name" : "output", "dtype" : dtype.ssbo},
+        ]
+
+    def __init__(self):
+        super().__init__()
+
+        self._buffer = None
+
+    def _evaluate(self):
+        fft = self.get("input")
+        if fft is None:
+            self.set("output", None)
+            return
+
+        fft_len = len(fft.frequencies)
+        if self._buffer is None or fft_len != len(self._buffer):
+            self._buffer = np.zeros((fft_len,), dtype=np.float32).view(gloo.buffer.ShaderStorageBuffer)
+
+        self._buffer[:] = fft.magnitudes * self.get("scale")
+        self.set("output", self._buffer)
+
+#class ChromaFeaturesFFT(Node):
+#    class Meta:
+#        inputs = [
+#            {"name" : "input", "dtype" : dtype.fft},
+#        ]
+#        outputs = [
+#            {"name" : "test", "dtype" : dtype.float}
+#        ]
+#
+#    def __init__(self):
+#        super().__init__()
+#
+#        #self.test = open("test.dat", "w")
+#
+#    def _evaluate(self):
+#        fft = self.get("input")
+#        if fft is None:
+#            self.set("test", 0.0)
+#            return
+#
+#        S = np.expand_dims(fft.magnitudes, 1)
+#        chroma = librosa.feature.chroma_stft(S=S, sr=22050)
+#
+#        test = chroma[:, 0].tolist()
+#        #self.test.write(" ".join(map(str, test)) + "\n")
+
+#class SpectralCentroidFFT(Node):
+#    class Meta:
+#        inputs = [
+#            {"name" : "input", "dtype" : dtype.fft},
+#        ]
+#        outputs = [
+#            {"name" : "output", "dtype" : dtype.float}
+#        ]
+#
+#    def _evaluate(self):
+#        fft = self.get("input")
+#        if fft is None:
+#            self.set("output", 0.0)
+#            return
+#
+#        rel_frequencies = np.linspace(0, 1, len(fft.frequencies))
+#        normalized_magnitudes = fft.magnitudes / sum(fft.magnitudes)
+#        spectral_centroid = sum(normalized_magnitudes * rel_frequencies)
+#        self.set("output", spectral_centroid)
+
+#class EnergyFFT(Node):
+#    class Meta:
+#        inputs = [
+#            {"name" : "input", "dtype" : dtype.fft}
+#        ]
+#        outputs = [
+#            {"name" : "output", "dtype" : dtype.float}
+#        ]
+#
+#    def _evaluate(self):
+#        fft = self.get("input")
+#        if fft is None:
+#            self.set("output", 0.0)
+#            return
+#
+#        energy = np.sum(fft.magnitudes * fft.magnitudes) / len(fft.magnitudes)
+#        self.set("output", energy)
+
+#class ExportFFT(Node):
+#    class Meta:
+#        inputs = [
+#            {"name" : "input", "dtype" : dtype.fft}
+#        ]
+#
+#    def _evaluate(self):
+#        fft = self.get("input")
+#        if fft is None:
+#            return
+#
+#        fft.magnitudes.tofile("fft.dat")

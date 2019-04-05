@@ -204,7 +204,7 @@ class BaseShader(RenderNode):
         try:
             if self.quad:
                 self.quad.delete()
-            self.quad = gloo.Program(vertex, fragment, version="130", count=4)
+            self.quad = gloo.Program(vertex, fragment, version="430", count=4)
             self.quad["iPosition"] = [(-1,-1), (-1,+1), (+1,-1), (+1,+1)]
             self.quad["iTexCoord"] = [( 0, 1), ( 0, 0), ( 1, 1), ( 1, 0)]
 
@@ -382,7 +382,7 @@ class Blend(RenderNode):
 
         vertex = assets.load_shader(vertex_path)
         fragment = assets.load_shader(fragment_path)
-        self.quad = gloo.Program(vertex, fragment, version="130", count=4)
+        self.quad = gloo.Program(vertex, fragment, version="430", count=4)
         self.quad["iPosition"] = [(-1,-1), (-1,+1), (+1,-1), (+1,+1)]
         self.quad["iTexCoord"] = [( 0, 1), ( 0, 0), ( 1, 1), ( 1, 0)]
 

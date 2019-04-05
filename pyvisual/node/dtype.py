@@ -42,6 +42,7 @@ base_tex2d = BaseType("tex2d", *dummy_serializer())
 base_ssbo = BaseType("ssbo", *dummy_serializer())
 base_audio = BaseType("audio", *dummy_serializer())
 base_midi = BaseType("midi", *dummy_serializer())
+base_fft = BaseType("fft", *dummy_serializer())
 
 Type = namedtuple("DType", ["name", "base_type", "default"])
 
@@ -58,8 +59,9 @@ tex2d = Type("tex2d", base_tex2d, lambda: None)
 ssbo = Type("ssbo", base_ssbo, lambda: None)
 audio = Type("audio", base_audio, lambda: None)
 midi = Type("midi", base_midi, lambda: [])
+fft = Type("fft", base_fft, lambda: None)
 
 dtypes = {}
-for dtype in (bool, event, int, float, str, assetpath, vec2, color, mat4, tex2d, ssbo, audio, midi):
+for dtype in (bool, event, int, float, str, assetpath, vec2, color, mat4, tex2d, ssbo, audio, midi, fft):
     dtypes[dtype.name] = dtype
 

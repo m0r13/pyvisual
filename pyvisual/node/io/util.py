@@ -1,5 +1,6 @@
 import imgui
 import time
+import numpy as np
 from pyvisual.node.base import Node
 from pyvisual.node import dtype
 from pyvisual.audio import analyzer
@@ -30,6 +31,48 @@ class Plot(Node):
         width = int(self.get("width"))
         height = int(self.get("height"))
         imgui.plot_lines("", self.buffer.contents, float(self.get("min")), float(self.get("max")), (width, height))
+
+class PlotFFT(Node):
+    class Meta:
+        inputs = [
+            {"name" : "input", "dtype" : dtype.fft},
+            {"name" : "min_freq", "dtype" : dtype.float, "dtype_args" : {"default" : 0.0}},
+            {"name" : "max_freq", "dtype" : dtype.float, "dtype_args" : {"default" : 22100.0}},
+            {"name" : "scale", "dtype" : dtype.float, "dtype_args" : {"default" : 1.0}},
+            {"name" : "offset", "dtype" : dtype.float},
+            {"name" : "width", "dtype" : dtype.int, "dtype_args" : {"default" : 500}, "group" : "additional"},
+            {"name" : "height", "dtype" : dtype.int, "dtype_args" : {"default" : 200}, "group" : "additional"},
+        ]
+        options = {
+            "category" : "math",
+            "virtual" : False
+        }
+
+    def __init__(self):
+        super().__init__(always_evaluate=True)
+
+        self._fft = ([], [])
+
+    def _evaluate(self):
+        self._fft = self.get("input")
+
+    def _show_custom_ui(self):
+        if self._fft is None:
+            imgui.text("No fft data!")
+            return
+
+        fft = self._fft
+        width = int(self.get("width"))
+        height = int(self.get("height"))
+        min_freq = self.get("min_freq")
+        max_freq = self.get("max_freq")
+
+        freq_mask = (fft.frequencies >= min_freq) & (fft.frequencies < max_freq)
+        frequencies = fft.frequencies[freq_mask]
+        magnitudes = fft.magnitudes[freq_mask]
+
+        imgui.plot_lines("", magnitudes * self.get("scale") + self.get("offset"), 0.0, 1.0, (width, height))
+        imgui.text("%d FFT bins: %0.2fHz - %0.2fHz, resolution: %0.2fHz" % (len(frequencies), frequencies[0], frequencies[-1], fft.bin_resolution))
 
 class BeatMonitor(Node):
     class Meta:

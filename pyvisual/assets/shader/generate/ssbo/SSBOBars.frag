@@ -9,6 +9,9 @@ layout(std430, binding=0) buffer uBuffer {
 };
 uniform int uCount; // {"skip" : true}
 
+uniform float uScale; // {"default" : 1.0}
+uniform float uOffset; // {"default" : 0.0}
+
 uniform float uSpacing; // {"default" : 0.0, "range" : [0.0, 1.0]}
 
 void main() {
@@ -24,8 +27,7 @@ void main() {
         discard;
     }
 
-    float value = data[i];
-
+    float value = (data[i] * uScale) + uOffset;
     if ((1.0 - uv.y) < value) {
         oFragColor = vec4(vec3(1.0), 1.0);
     } else {

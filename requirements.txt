@@ -6,6 +6,7 @@ noise
 mido
 rtmidi
 clipboard
+librosa
 ./ext/pyopengl
 ./ext/pyopengl/accelerate
 ./ext/glumpy

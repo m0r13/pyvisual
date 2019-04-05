@@ -18,6 +18,18 @@ class AudioData:
     def clear(self):
         self.blocks = []
 
+class FFTData:
+    def __init__(self, magnitudes, frequencies, bin_resolution):
+        self.magnitudes = magnitudes
+        self.frequencies = frequencies
+        self.bin_resolution = bin_resolution
+
+    def copy(self):
+        return FFTData(self.magnitudes.copy(), self.frequencies.copy(), self.bin_resolution)
+
+    def __len__(self):
+        return len(self.magnitudes)
+
 class InputPulseAudio(Node):
     class Meta:
         inputs = [
