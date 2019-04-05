@@ -621,6 +621,41 @@ class HSV2RGBA(Node):
         self.set("rgba", np.float32([r, g, b, self.get("a")]))
 
 #
+# Texture operations
+#
+
+from glumpy import gloo
+
+class HoldTexture(Node):
+    class Meta:
+        inputs = [
+            {"name" : "input", "dtype" : dtype.tex2d},
+            {"name" : "hold", "dtype" : dtype.event},
+            ]
+        outputs = [
+            {"name" : "output", "dtype" : dtype.tex2d},
+        ]
+
+    def __init__(self):
+        super().__init__()
+
+        self._texture = None
+
+    def _evaluate(self):
+        if self.get("hold"):
+            texture = self.get("input")
+            if texture is None:
+                self._texture = None
+            else:
+                # take detour by CPU for now
+                # - as glumpy doesn't make it so easy to copy texture data
+                t = texture.get().copy().view(gloo.Texture2D)
+                t.activate()
+                t.deactivate()
+                self._texture = t
+            self.set("output", self._texture)
+
+#
 # String operations
 #
 
