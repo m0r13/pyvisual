@@ -1,2 +1,2 @@
-from . import audio, bool, event, generate, gpu, transform, value, module
+from . import audio, bool, event, generate, gpu, ssbo, transform, value, module
 

@@ -67,7 +67,7 @@ class AudioFilter(Node):
                 or self.output.sample_rate != input_audio.sample_rate \
                 or self._last_evaluated == 0.0:
             self.build_filter(sample_rate=input_audio.sample_rate)
-            self.output = AudioData(sample_rate=input_audio.sample_rate)
+            self.output = AudioData(input_audio.sample_rate, input_audio.block_size)
 
         if self.filter is None:
             self.set("output", None)
@@ -113,7 +113,7 @@ class AbsAudio(Node):
             self.set("output", None)
             return
 
-        output = AudioData(input_audio.sample_rate)
+        output = AudioData(input_audio.sample_rate, input_audio.block_size)
         for block in input_audio.blocks:
             output.append(np.abs(block))
         self.set("output", output)
@@ -142,13 +142,23 @@ class SampleAudio(Node):
         block = input_audio.blocks[-1]
         self.set("output", block[-1])
 
+def create_gauss_kernel(count, sigma):
+    # gauss kernel, flipped, normalized, in rows
+    kernel = 1.0 / (np.sqrt(2*math.pi) * sigma) * np.exp(- np.arange(0, count)**2 / (2*sigma**2))
+    kernel = np.flip(kernel)
+    kernel = kernel / kernel.sum()
+    return kernel[:, np.newaxis]
+
 class SampleAudioSSBO(Node):
     class Meta:
         inputs = [
             {"name" : "enabled", "dtype" : dtype.bool, "dtype_args" : {"default" : True}},
             {"name" : "input", "dtype" : dtype.audio},
-            {"name" : "count", "dtype" : dtype.int, "dtype_args": {"default" : 100, "range" : [1, float("inf")]}},
-            {"name" : "scale", "dtype" : dtype.float, "dtype_args" : {"default" : 1.0}}
+            {"name" : "size", "dtype" : dtype.int, "dtype_args": {"default" : 1024, "range" : [1, float("inf")]}},
+            {"name" : "smooth_count", "dtype" : dtype.int, "dtype_args" : {"range" : [1, float("inf")], "default" : 8}},
+            {"name" : "smooth_sigma", "dtype" : dtype.float, "dtype_args" : {"default" : 1, "range" : [0.0001, float("inf")]}},
+            {"name" : "tune_frequency", "dtype" : dtype.float, "dtype_args" : {"default" : 50, "range" : [0.0001, float("inf")]}},
+            {"name" : "scale", "dtype" : dtype.float, "dtype_args" : {"default" : 1.0}},
         ]
         outputs = [
             {"name" : "output", "dtype" : dtype.ssbo},
@@ -157,44 +167,82 @@ class SampleAudioSSBO(Node):
     def __init__(self):
         super().__init__()
 
+        # global sample index where sample of first block starts
+        self._blocks_index = 0
         self._blocks = []
+
+        self._last_samples_size = None
+        self._last_samples = []
+        self._last_samples_kernel = None
         self._ssbo = None
 
-    def _update_ssbo(self, count):
-        self._ssbo = np.zeros((count,), dtype=np.float32).view(gloo.ShaderStorageBuffer)
+    def _update_ssbo(self, size):
+        self._ssbo = np.zeros((size,), dtype=np.float32).view(gloo.ShaderStorageBuffer)
 
     def _evaluate(self):
-        count = self.get_input("count")
-        if count.has_changed or self._ssbo is None:
-            self._update_ssbo(int(count.value))
+        size = self.get_input("size")
+        if size.has_changed or self._ssbo is None:
+            self._update_ssbo(int(size.value))
 
         input_audio = self.get("input")
-        if input_audio is None:
-            #self.set("output", 0.0)
+        if input_audio is None or len(input_audio.blocks) == 0:
             return
+        self._blocks.extend(input_audio.blocks)
 
-        if len(input_audio.blocks) == 0:
-            return
+        # number of samples to be sampled
+        c = size.value
+        # if samples are always taken from the same index mod some value for a frequency
+        # then that frequency always appear with the same phase
+        index_mod = input_audio.sample_rate / self.get("tune_frequency") * 4
 
-        for block in input_audio.blocks:
-            self._blocks.append(block)
-
-        c = count.value
         total_length = lambda: sum([ len(b) for b in self._blocks ])
-        # TODO that hardcoded 512!
-        while total_length() > c+512:
-            self._blocks.pop(0)
+        # remove excess blocks, s.t. there are max. index_mod + c samples
+        # (index_mod + c should ensure that we can always get c samples starting from some index_mod offset)
+        while total_length() - input_audio.block_size > index_mod + c:
+            block = self._blocks.pop(0)
+            self._blocks_index += len(block)
 
-        # have that skip here so we always remove excess blocks
-        if not self.get("enabled"):
+        last_index = self._blocks_index + total_length()
+        # i is index relative to current blocks
+        # (and it's the first possible index where (i mod index_mod) == 0)
+        i = round(index_mod * math.ceil(self._blocks_index / index_mod)) - self._blocks_index
+        assert i >= 0
+        # it might happen that there are not enough samples yet
+        if i + c >= total_length():
             return
 
-        if total_length() < c:
+        # TODO perhaps performance improvement, but it's okay for now
+        all_samples = np.concatenate(self._blocks)
+        samples = all_samples[i:i+int(c)]
+        # clear last samples if sample size has changed
+        if len(samples) != self._last_samples_size:
+            self._last_samples_size = len(samples)
+            self._last_samples = []
+
+        # take samples if enabled, otherwise do smoothing by repeating current samples + gauss kernel
+        if self.get("enabled") or len(self._last_samples) == 0:
+            self._last_samples.append(samples)
+        else:
+            self._last_samples.append(self._last_samples[-1])
+        self._last_samples_size = len(self._last_samples[0])
+
+        smooth_count = int(self.get("smooth_count"))
+        smooth_sigma = self.get("smooth_sigma")
+        if self.have_inputs_changed("smooth_count", "smooth_sigma") \
+                or self._last_samples_kernel is None \
+                or len(self._last_samples_kernel) != smooth_count:
+            self._last_samples_kernel = create_gauss_kernel(smooth_count, smooth_sigma)
+
+        # have exactly smooth_count of sample sets ready
+        while len(self._last_samples) > smooth_count:
+            self._last_samples.pop(0)
+        if len(self._last_samples) < smooth_count:
             return
 
-        # TODO not very efficient
-        samples = np.concatenate(self._blocks)
-        self._ssbo[:] = samples[-int(c):] * self.get("scale")
+        # smooth samples by applying gauss kernel over last sample sets
+        samples = np.sum(self._last_samples * self._last_samples_kernel, axis=0)
+
+        self._ssbo[:] = samples * self.get("scale")
         self.set("output", self._ssbo)
 
 class VUNormalizer(Node):
@@ -339,8 +387,8 @@ class FFT(Node):
     class Meta:
         inputs = [
             {"name" : "input", "dtype" : dtype.audio},
-            {"name" : "smooth_count", "dtype" : dtype.int, "dtype_args" : {"range" : [1, float("inf")], "default" : 1}},
-            {"name" : "smooth_sigma", "dtype" : dtype.float, "dtype_args" : {"default" : 0.5, "range" : [0.0001, float("inf")]}},
+            {"name" : "smooth_count", "dtype" : dtype.int, "dtype_args" : {"range" : [4, float("inf")], "default" : 8}},
+            {"name" : "smooth_sigma", "dtype" : dtype.float, "dtype_args" : {"default" : 1, "range" : [0.0001, float("inf")]}},
             {"name" : "window", "dtype" : dtype.int, "dtype_args" : {"choices" : WINDOW_NAMES}},
             {"name" : "scale_db", "dtype" : dtype.float, "dtype_args" : {"default" : 0.0, "range" : [0.0, 1.0]}},
         ]
@@ -352,12 +400,17 @@ class FFT(Node):
         super().__init__()
 
         self._blocks = []
-
+        self._sample_rate = None
+        self._block_size = None
+        
         self._fft_len = None
-        self._recent_magnitudes = []
-        self._recent_magnitudes_kernel = None
+        self._last_magnitudes = []
+        self._last_magnitudes_size = None
+        self._last_magnitudes_kernel = None
 
     def _process_fft(self, blocks, samplerate):
+        # smoothing here works similar as in SampleAudioSSBO
+
         samples = np.concatenate(blocks)
         M = len(samples)
         window = WINDOW_FN[int(self.get("window"))](M)
@@ -368,23 +421,25 @@ class FFT(Node):
 
         Fs = samplerate
         magnitudes = np.abs(np.fft.fft(samples, axis=0)[:M // 2 + 1:-1])
-        if self._fft_len is None or self._fft_len != len(magnitudes):
-            self._fft_len = len(magnitudes)
-            self._recent_magnitudes = []
 
-            # gauss kernel
-            kernel = np.flip(1.0 / (np.sqrt(2*math.pi) * smooth_sigma) * np.exp(- np.arange(0, smooth_count)**2 / (2*smooth_sigma**2)))
-            kernel = (kernel / kernel.sum())[:, np.newaxis]
-            self._recent_magnitudes_kernel = kernel
+        if len(magnitudes) != self._last_magnitudes_size:
+            self._last_magnitudes_size = len(magnitudes)
+            self._last_magnitudes = []
+        self._last_magnitudes.append(magnitudes)
 
-        self._recent_magnitudes.append(magnitudes)
+        # update gauss kernel if smooth count/sigma changed
+        if self.have_inputs_changed("smooth_count", "smooth_sigma") \
+                or self._fft_len is None or self._fft_len != len(magnitudes) \
+                or len(self._last_magnitudes_kernel) != smooth_count:
+            self._last_magnitudes_kernel = create_gauss_kernel(smooth_count, smooth_sigma)
 
-        while len(self._recent_magnitudes) > smooth_count:
-            self._recent_magnitudes.pop(0)
-        if len(self._recent_magnitudes) < smoothcount:
+        while len(self._last_magnitudes) > smooth_count:
+            self._last_magnitudes.pop(0)
+        if len(self._last_magnitudes) < smooth_count:
             return
 
-        magnitudes = np.sum(np.array(self._recent_magnitudes) * self._recent_magnitudes_kernel, axis=0)
+        last_magnitudes = np.array(self._last_magnitudes)
+        magnitudes = np.sum(last_magnitudes * self._last_magnitudes_kernel, axis=0)
 
         scale_db = self.get("scale_db")
         if self.get("scale_db"):
@@ -400,30 +455,44 @@ class FFT(Node):
             self.set("output", None)
             return
 
+        #print("Got %d blocks" % len(input_audio.blocks))
         # TODO expose this!
-        N = 8
-        overlap = 6
+        N = 4
+        overlap = N - 1
         for block in input_audio.blocks:
             self._blocks.append(block)
+        self._sample_rate = input_audio.sample_rate
+        self._block_size = input_audio.block_size
+
+        generated_fft = False
         while len(self._blocks) >= N:
             fft_blocks = self._blocks[:N]
             process = True
 
-            to_pop = N - overlap
-            remaining = len(self._blocks) - to_pop
-            assert remaining >= 0
-            if remaining >= N:
-                process = False
+            #to_pop = N - overlap
+            #remaining = len(self._blocks) - to_pop
+            #assert remaining >= 0
+            #if remaining >= N:
+            #    process = False
 
             for i in range(N):
                 self._blocks.pop(0)
 
-            if process or True:
-                #print("Processing blocks: %d" % len(fft_blocks))
-                self._process_fft(fft_blocks, input_audio.sample_rate)
-            else:
-                #print("Skipping that one!")
-                pass
+            #if process or True:
+            self._process_fft(fft_blocks, input_audio.sample_rate)
+            generated_fft = True
+            #else:
+            #    pass
+
+        # add current fft value to last fft results for smoothing
+        if not generated_fft and len(self._last_magnitudes) != 0:
+            self._last_magnitudes.append(self._last_magnitudes[-1])
+
+    def _show_custom_context(self):
+        imgui.text("FFT's per frame: ~%.2f" % (self._sample_rate / self._block_size / 60.0))
+        imgui.text("Smoothing kernel: %s" % str(", ".join([ "%.3f" % f for f in self._last_magnitudes_kernel ])))
+
+        super()._show_custom_context()
 
 class BandpassFFT(Node):
     class Meta:
@@ -454,6 +523,7 @@ class AWeightingFFT(Node):
     class Meta:
         inputs = [
             {"name" : "input", "dtype" : dtype.fft},
+            {"name" : "alpha", "dtype" : dtype.float, "dtype_args" : {"default" : 1.0, "range": [0.0, 1.0]}},
         ]
         outputs = [
             {"name" : "output", "dtype" : dtype.fft}
@@ -468,7 +538,7 @@ class AWeightingFFT(Node):
         weighting = librosa.A_weighting(fft.frequencies + fft.bin_resolution * 0.5)
 
         new_fft = fft.copy()
-        new_fft.magnitudes *= 10**(weighting / 10.0)
+        new_fft.magnitudes *= 10**(self.get("alpha") * weighting / 10.0)
         # for db it would be like this:
         #new_fft.magnitudes += weighting
         self.set("output", new_fft)
@@ -478,7 +548,7 @@ class QuantizeFFT(Node):
         inputs = [
             {"name" : "input", "dtype" : dtype.fft},
             {"name" : "count", "dtype" : dtype.int, "dtype_args" : {"default" : 10, "range" : [1, float("inf")]}},
-            {"name" : "gamma", "dtype" : dtype.float, "dtype_args" : {"default" : 1, "range" : [0.0001, float("inf")]}},
+            {"name" : "gamma", "dtype" : dtype.float, "dtype_args" : {"default" : 1, "range" : [0.5001, float("inf")]}},
             {"name" : "min_freq", "dtype" : dtype.float, "dtype_args" : {"default" : 0.0}},
             {"name" : "max_freq", "dtype" : dtype.float, "dtype_args" : {"default" : 22100.0}},
             {"name" : "db", "dtype" : dtype.bool, "dtype_args" : {"default" : False}},

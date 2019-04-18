@@ -4,6 +4,7 @@ from pyvisual.node.base import Node
 from pyvisual.node.op.module import Module
 from pyvisual.node import dtype
 from pyvisual import util
+from glumpy.app import clock
 from collections import OrderedDict
 
 def weighted_random(weights):
@@ -48,6 +49,43 @@ class TimerEvent(Node):
             max_interval = self.get("max")
             alpha = random.random()
             self._next_event = t + min_interval * (1.0-alpha) + max_interval * alpha
+
+class FPSTimerEvent(Node):
+    class Meta:
+        inputs = [
+            {"name" : "enabled", "dtype" : dtype.bool, "dtype_args" : {"default" : True}},
+            {"name" : "force", "dtype" : dtype.event},
+            {"name" : "fps_fraction", "dtype" : dtype.float, "dtype_args" : {"default" : 10.0, "range" : [0.0001, float("inf")]}},
+        ]
+        outputs = [
+            {"name" : "out", "dtype" : dtype.event},
+        ]
+
+    def __init__(self):
+        super().__init__(always_evaluate=True)
+
+        self._next_event = None
+        # have a better way of getting fps
+        self._fps = None
+
+    def _evaluate(self):
+        t = util.time.global_time.time()
+        if (self.get("enabled") and self._next_event is not None and t > self._next_event) \
+                or self.get("force"):
+            self._next_event = None
+            self.set("out", True)
+        else:
+            self.set("out", False)
+
+        if not self.get("enabled"):
+            self._next_event = None
+        if self._next_event is None:
+            if self._fps is None:
+                self._fps = clock.get_default().get_fps_limit()
+            f = self.get("fps_fraction")
+            if f <= 0.0:
+                f = 1.0
+            self._next_event = t + 1.0 / (self._fps * f)
 
 class EveryNEvent(Node):
     class Meta:

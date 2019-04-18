@@ -8,9 +8,10 @@ DEFAULT_SAMPLE_RATE = 5000
 DEFAULT_BLOCK_SIZE = 64
 
 class AudioData:
-    def __init__(self, sample_rate):
+    def __init__(self, sample_rate, block_size):
         self.blocks = []
         self.sample_rate = sample_rate
+        self.block_size = block_size
 
     def append(self, block):
         self.blocks.append(block)
@@ -50,9 +51,9 @@ class InputPulseAudio(Node):
 
         self.create(sr, bs)
 
-    def create(self, samplerate, blocksize):
-        self.pulse = pulse.PulseAudioContext(self._process_block, sample_rate=samplerate, block_size=blocksize)
-        self.output = AudioData(sample_rate=samplerate)
+    def create(self, sample_rate, block_size):
+        self.pulse = pulse.PulseAudioContext(self._process_block, sample_rate=sample_rate, block_size=block_size)
+        self.output = AudioData(sample_rate=sample_rate, block_size=block_size)
         self.next_blocks = []
         self.blocks = 0
 
@@ -99,4 +100,9 @@ class InputPulseAudio(Node):
                 if is_selected:
                     imgui.set_item_default_focus()
             imgui.end_combo()
+
+    def _show_custom_context(self):
+        if self.output is not None:
+            imgui.text("Sample rate: %dHz" % self.output.sample_rate)
+            imgui.text("Block size: %d" % self.output.block_size)
 
