@@ -28,6 +28,13 @@ class Plot(Node):
         self.buffer.append(self.get("input"))
 
     def _show_custom_ui(self):
+        if self.have_inputs_changed("time"):
+            t = self.get("time")
+            count = int(self.get("time") * 60)
+            if count <= 0:
+                count = 1
+            self.buffer = analyzer.RingBuffer(count)
+
         width = int(self.get("width"))
         height = int(self.get("height"))
         imgui.plot_lines("", self.buffer.contents, float(self.get("min")), float(self.get("max")), (width, height))
