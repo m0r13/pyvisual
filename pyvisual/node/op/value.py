@@ -549,7 +549,7 @@ class RotatedVec2(Node):
     class Meta:
         inputs = [
             {"name" : "length", "dtype" : dtype.float, "dtype_args" : {"default" : 1.0}},
-            {"name" : "angle", "dtype" : dtype.float},
+            {"name" : "angle", "dtype" : dtype.float, "dtype_args" : {"unit" : "deg"}},
         ]
         outputs = [
             {"name" : "output", "dtype" : dtype.vec2}

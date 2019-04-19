@@ -26,6 +26,12 @@ def read_only_widget(read_only):
 
 WIDGET_WIDTH = 80
 
+DEFAULT_UNIT_DRAG_FACTOR = 1.0
+UNIT_DRAG_FACTORS = {
+    "px" : 25.0,
+    "deg" : 5.0,
+}
+
 def create_widget(dtype, dtype_args, node):
     widget_types = {
         dtypes.bool: Bool,
@@ -39,6 +45,8 @@ def create_widget(dtype, dtype_args, node):
 
     # TODO maybe just pass dtype_args to widget?
     kwargs = {}
+    if dtype == dtypes.float:
+        kwargs["drag_factor"] = UNIT_DRAG_FACTORS.get(dtype_args.get("unit", ""), DEFAULT_UNIT_DRAG_FACTOR)
     if "range" in dtype_args:
         kwargs["minmax"] = dtype_args["range"]
 
@@ -155,17 +163,18 @@ class Choice(Widget):
             value.value = v
 
 class Float(Widget):
-    def __init__(self, node, minmax=[float("-inf"), float("inf")]):
+    def __init__(self, node, drag_factor=1.0, minmax=[float("-inf"), float("inf")]):
         super().__init__()
 
         self.node = node
+        self.drag_factor = 0.01 * drag_factor
         self.minmax = minmax
         self.clamper = clamper(minmax)
 
     def _show(self, value, read_only):
         imgui.push_item_width(WIDGET_WIDTH * 0.75)
         changed, v = imgui.drag_float("", value.value,
-                change_speed=0.01, min_value=self.minmax[0], max_value=self.minmax[1], format="%0.4f")
+                change_speed=self.drag_factor, min_value=self.minmax[0], max_value=self.minmax[1], format="%0.4f")
         if changed and not read_only:
             value.value = self.clamper(v)
 

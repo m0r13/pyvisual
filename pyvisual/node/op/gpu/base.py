@@ -175,6 +175,8 @@ class BaseShader(RenderNode):
                 dtype_args["default"] = port_spec["dtype"].base_type.unserialize(kwargs["default"])
             if "range" in kwargs:
                 dtype_args["range"] = kwargs["range"]
+            if "unit" in kwargs:
+                dtype_args["unit"] = kwargs["unit"]
             port_spec["dtype_args"] = dtype_args
 
             input_uniform_mapping.append((input_name, uniform_name, port_spec["dtype"]))

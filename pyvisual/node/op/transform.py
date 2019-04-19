@@ -32,7 +32,7 @@ class Scale(Node):
 class Rotate(Node):
     class Meta:
         inputs = [
-            {"name" : "theta", "dtype" : dtype.float},
+            {"name" : "theta", "dtype" : dtype.float, "dtype_args": {"unit" : "deg"}},
         ]
         outputs = [
             {"name" : "output", "dtype" : dtype.mat4},
@@ -51,8 +51,8 @@ class Rotate(Node):
 class Translate(Node):
     class Meta:
         inputs = [
-            {"name" : "x", "dtype" : dtype.float},
-            {"name" : "y", "dtype" : dtype.float},
+            {"name" : "x", "dtype" : dtype.float, "dtype_args" : {"unit" : "px"}},
+            {"name" : "y", "dtype" : dtype.float, "dtype_args" : {"unit" : "px"}},
         ]
         outputs = [
             {"name" : "output", "dtype" : dtype.mat4},

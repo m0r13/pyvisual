@@ -6,8 +6,8 @@
 uniform mat4 uInputTransform;
 uniform int uInputWrapping; // {"choices" : ["none", "repeat", "mirrored repeat"], "default" : 2}
 uniform float uAspectAdjust; // {"default" : 1.0}
-uniform float uAxisAngle; // {"alias" : "axis_angle"}
-uniform float uAngleOffset; // {"alias" : "angle"}
+uniform float uAxisAngle; // {"alias" : "axis_angle", "unit" : "deg"}
+uniform float uAngleOffset; // {"alias" : "angle", "unit" : "deg"}
 uniform int uSegmentCount; // {"alias" : "segments", "default" : 4, "range" : [0, Infinity]}
 uniform int uSecondarySegmentCount; // {"alias" : "segments1", "default" : 2, "range" : [0, Infinity]}
 
