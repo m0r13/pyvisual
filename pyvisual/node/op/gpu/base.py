@@ -242,6 +242,8 @@ class BaseShader(RenderNode):
             value = self.get(input_name)
             if dt == dtype.tex2d and value is None:
                 value = dummy
+            elif dt == dtype.bool:
+                value = int(value)
             program[uniform_name] = value
 
     def evaluate(self):
