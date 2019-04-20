@@ -3,9 +3,13 @@ import numpy as np
 from pyvisual.node.base import Node
 from pyvisual.node import dtype
 
+def dot(input_transform, transform):
+    return np.dot(transform, input_transform)
+
 class Scale(Node):
     class Meta:
         inputs = [
+            {"name" : "input", "dtype" : dtype.mat4},
             {"name" : "x", "dtype" : dtype.float, "dtype_args" : {"default" : 1.0}},
             {"name" : "y", "dtype" : dtype.float, "dtype_args" : {"default" : 1.0}},
             {"name" : "uniform", "dtype" : dtype.bool, "dtype_args" : {"default" : True}, "group" : "additional"},
@@ -27,11 +31,12 @@ class Scale(Node):
                               [0.0, self.get("y"), 0.0, 0.0],
                               [0.0, 0.0, 1.0, 0.0],
                               [0.0, 0.0, 0.0, 1.0]], dtype=np.float32).T
-        self.set("output", transform)
+        self.set("output", dot(self.get("input"), transform))
 
 class Rotate(Node):
     class Meta:
         inputs = [
+            {"name" : "input", "dtype" : dtype.mat4},
             {"name" : "theta", "dtype" : dtype.float, "dtype_args": {"unit" : "deg"}},
         ]
         outputs = [
@@ -46,11 +51,12 @@ class Rotate(Node):
                               [sinT, cosT, 0.0, 0.0],
                               [0.0, 0.0, 1.0, 0.0],
                               [0.0, 0.0, 0.0, 1.0]], dtype=np.float32).T
-        self.set("output", transform)
+        self.set("output", dot(self.get("input"), transform))
 
 class Translate(Node):
     class Meta:
         inputs = [
+            {"name" : "input", "dtype" : dtype.mat4},
             {"name" : "x", "dtype" : dtype.float, "dtype_args" : {"unit" : "px"}},
             {"name" : "y", "dtype" : dtype.float, "dtype_args" : {"unit" : "px"}},
         ]
@@ -63,7 +69,7 @@ class Translate(Node):
                               [0.0, 1.0, 0.0, self.get("y")],
                               [0.0, 0.0, 1.0, 0.0],
                               [0.0, 0.0, 0.0, 1.0]], dtype=np.float32).T
-        self.set("output", transform)
+        self.set("output", dot(self.get("input"), transform))
 
 class Dot(Node):
     class Meta:
