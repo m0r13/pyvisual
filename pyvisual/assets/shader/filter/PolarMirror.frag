@@ -10,6 +10,7 @@ uniform float uAxisAngle; // {"alias" : "axis_angle", "unit" : "deg"}
 uniform float uAngleOffset; // {"alias" : "angle", "unit" : "deg"}
 uniform int uSegmentCount; // {"alias" : "segments", "default" : 4, "range" : [0, Infinity]}
 uniform int uSecondarySegmentCount; // {"alias" : "segments1", "default" : 2, "range" : [0, Infinity]}
+uniform bool uGuide; // {"default" : 0}
 
 vec2 uvToPolar(vec2 uv) {
     ivec2 size = textureSize(uInputTexture, 0);
@@ -61,6 +62,31 @@ vec4 sampleMirroredFrag(vec2 uv) {
     return texture2D(uInputTexture, uv);
 }
 
+vec4 samplePolarMirrorGuide(vec2 polar, vec4 frag) {
+    // some things are similar to polarMirror function above
+    float modAngle = radians(360.0) / uSegmentCount;
+    vec2 adjustedPolar = polar;
+    adjustedPolar.x += radians(uAngleOffset) - 3.141595 * 0.5 + radians(uAxisAngle);
+    frag = sampleMirroredFrag(polarToUV(adjustedPolar));
+    float aa = mod(polar.x + radians(uAxisAngle), radians(360.0));
+    float a = mod(aa, modAngle);
+
+    float width = radians(1.5);
+    // red lines show primary axes
+    if (a < width || a > modAngle - width) {
+        frag = mix(frag, vec4(1.0, 0.0, 0.0, 1.0), 0.5);
+    }
+    // blue lines show mirroring between primary axes
+    if (abs(a - modAngle / 2) < width) {
+        frag = mix(frag, vec4(0.0, 0.0, 1.0, 1.0), 0.5);
+    }
+    // green overlay for the original image area that is repeated
+    if (aa >= 0.0 && aa < modAngle / 2) {
+        frag = mix(frag, vec4(0.0, 1.0, 0.0, 1.0), 0.25);
+    }
+    return frag;
+}
+
 vec4 filterFrag(vec2 uv, vec4 _) {
     vec2 size = textureSize(uInputTexture, 0);
 
@@ -71,7 +97,9 @@ vec4 filterFrag(vec2 uv, vec4 _) {
     vec2 uv0 = polarToUV(polar0);
 
     vec4 frag = sampleMirroredFrag(uv0);
-    if (uSecondarySegmentCount != 0) {
+    if (uGuide) {
+        frag = samplePolarMirrorGuide(polar, frag);
+    } else if (uSecondarySegmentCount != 0) {
         vec2 polar1 = polarMirror(polar, uSecondarySegmentCount);
         polar1.x += radians(uAngleOffset) - 3.141595 * 0.5;
         vec2 uv1 = polarToUV(polar1);
