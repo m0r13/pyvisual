@@ -273,3 +273,29 @@ class GetTextureVar(GetVar):
 
     SetVar = SetTextureVar
 
+class SetAudioVar(SetVar):
+    class Meta:
+        inputs = [
+            {"name" : "name", "dtype" : dtype.str, "hide" : True},
+            {"name" : "input", "dtype" : dtype.audio}
+        ]
+        options = {
+            "show_title" : False
+        }
+
+    instances = defaultdict(lambda: set())
+
+class GetAudioVar(GetVar):
+    class Meta:
+        inputs = [
+            {"name" : "name", "dtype" : dtype.str, "hide" : True}
+        ]
+        outputs = [
+            {"name" : "output", "dtype" : dtype.audio}
+        ]
+        options = {
+            "show_title" : False
+        }
+
+    SetVar = SetAudioVar
+

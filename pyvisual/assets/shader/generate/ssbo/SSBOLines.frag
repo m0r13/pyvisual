@@ -19,9 +19,9 @@ uniform float uSoftness; // {"default" : 1.0}
 // https://iquilezles.org/www/articles/distfunctions2d/distfunctions2d.htm
 float sdLine( in vec2 p, in vec2 a, in vec2 b )
 {
-	vec2 pa = p-a, ba = b-a;
-	float h = clamp( dot(pa,ba)/dot(ba,ba), 0.0, 1.0 );
-	return length( pa - ba*h );
+    vec2 pa = p-a, ba = b-a;
+    float h = clamp( dot(pa,ba)/dot(ba,ba), 0.0, 1.0 );
+    return length( pa - ba*h );
 }
 
 vec3 line( in vec3 buf, in vec2 a, in vec2 b, in vec2 p, in vec2 w, in vec4 col )
@@ -41,6 +41,8 @@ void main() {
     int initialI = int(floor(uv.x * uCount));
     float value = 0.0;
 
+    float minDistance = 9999.0;
+    //bool above = false;
     for (int i = initialI-radius; i <= initialI+radius; i++) {
         float y0 = data[i] * uScale + uOffset;
         float y1 = data[i+1] * uScale + uOffset;
@@ -54,6 +56,12 @@ void main() {
         float alpha = uv.x * uCount - float(i);
         float y = mix(y0, y1, alpha);
         float pos = 1.0 - uv.y - mix(0.0, 0.5, uCenter);
+
+        /*
+        if (i == initialI) {
+            above = pos > y;
+        }
+        */
 
         // very naive vertical distance point-line
         //float d = pos - y;
@@ -72,10 +80,32 @@ void main() {
         vec2 p = uv;
         p.x *= aspectAdjust;
         p.y = pos;
-        float d = line(vec3(0.0), vec2(x0, y0), vec2(x1, y1), p, vec2(0.01 * uThickness, uSoftness), vec4(1.0)).r;
-        value += d;
+        //float d = line(vec3(0.0), vec2(x0, y0), vec2(x1, y1), p, vec2(0.01 * uThickness, uSoftness), vec4(1.0)).r;
+        //value += d;
+
+        // this is better again:
+        float d = sdLine(p, vec2(x0, y0), vec2(x1, y1));
+        //value += d < uThickness * 0.01 ? 1.0 : 0.0;
+        //value += 1.0 - smoothstep(uThickness * 0.01, (uThickness + uSoftness) * 0.01, d);
+        minDistance = min(d, minDistance);
+
+        // this might be cool too, but causes the line not to be of equal thickness somehow
+        //value += 1.0 / (d * 500.0 + 0.001);
     }
 
+    value = 1.0 - smoothstep(uThickness * 0.01, (uThickness + uSoftness) * 0.01, minDistance);
     oFragColor = vec4(vec3(value), 1.0);
+
+    /*
+    vec4 colorAbove = vec4(1.0, 0.0, 0.0, 1.0);
+    vec4 color = vec4(1.0, 1.0, 1.0, 1.0);
+    vec4 colorBelow = vec4(0.0, 1.0, 0.0, 1.0);
+
+    if (above) {
+        oFragColor = mix(colorAbove, color, value);
+    } else {
+        oFragColor = mix(colorBelow, color, value);
+    }
+    */
 }
 

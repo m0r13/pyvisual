@@ -5,11 +5,15 @@ from glumpy import gloo
 from scipy import interpolate
 import numpy as np
 
+RESAMPLE_INTERPOLATIONS = ["nearest", "linear", "quadratic", "cubic"]
+
 class ResampleSSBO(Node):
     class Meta:
         inputs = [
+            {"name" : "enabled", "dtype" : dtype.bool, "dtype_args" : {"default" : True}},
             {"name" : "ssbo", "dtype" : dtype.ssbo},
             {"name" : "size", "dtype" : dtype.int, "dtype_args" : {"default" : 256, "range" : [0, float("inf")]}},
+            {"name" : "interpolation", "dtype" : dtype.int, "dtype_args" : {"default" : 1, "choices" : RESAMPLE_INTERPOLATIONS}},
         ]
         outputs = [
             {"name" : "ssbo", "dtype" : dtype.ssbo},
@@ -27,16 +31,20 @@ class ResampleSSBO(Node):
             return
 
         size = int(self.get("size"))
-        if size < 1:
+        if size < 2 or not self.get("enabled"):
             self.set("ssbo", ssbo)
             return
 
         if self._ssbo is None or size != len(self._ssbo):
             self._ssbo = np.zeros((size,), dtype=np.float32).view(gloo.ShaderStorageBuffer)
 
+        interpolation = int(self.get("interpolation"))
+        interpolation = max(0, min(len(RESAMPLE_INTERPOLATIONS) - 1, interpolation))
+        interpolation = RESAMPLE_INTERPOLATIONS[interpolation]
+
         x0 = np.linspace(0.0, 1.0, num=len(ssbo))
         x1 = np.linspace(0.0, 1.0, num=size)
-        self._ssbo[:] = interpolate.interp1d(x0, ssbo, kind="linear")(x1)
+        self._ssbo[:] = interpolate.interp1d(x0, ssbo, kind=interpolation)(x1)
         self.set("ssbo", self._ssbo)
 
 class AddSSBO(Node):

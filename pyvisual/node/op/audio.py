@@ -159,6 +159,7 @@ class SampleAudioSSBO(Node):
             {"name" : "smooth_sigma", "dtype" : dtype.float, "dtype_args" : {"default" : 1, "range" : [0.0001, float("inf")]}},
             {"name" : "tune_frequency", "dtype" : dtype.float, "dtype_args" : {"default" : 50, "range" : [0.0001, float("inf")]}},
             {"name" : "scale", "dtype" : dtype.float, "dtype_args" : {"default" : 1.0}},
+            {"name" : "smooth_to_zero", "dtype": dtype.bool, "dtype_args" : {"default" : False}},
         ]
         outputs = [
             {"name" : "output", "dtype" : dtype.ssbo},
@@ -223,7 +224,10 @@ class SampleAudioSSBO(Node):
         if self.get("enabled") or len(self._last_samples) == 0:
             self._last_samples.append(samples)
         else:
-            self._last_samples.append(self._last_samples[-1])
+            if self.get("smooth_to_zero"):
+                self._last_samples.append(np.zeros_like(self._last_samples[-1]))
+            else:
+                self._last_samples.append(self._last_samples[-1])
         self._last_samples_size = len(self._last_samples[0])
 
         smooth_count = int(self.get("smooth_count"))
