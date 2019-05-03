@@ -7,7 +7,8 @@ from collections import OrderedDict
 from pyvisual.node.base import Node
 from pyvisual.node import dtype
 from pyvisual.editor import widget
-from pyvisual import util
+from pyvisual import util, assets
+import imgui
 
 def random_time(node, a=-10000.0, b=10000.0):
     alpha = random.random()
@@ -239,6 +240,74 @@ class RandomBool(Node):
     def set_state(self, state):
         if "value" in state:
             self.set("output", state["value"])
+
+class RandomFile(Node):
+    class Meta:
+        inputs = [
+            {"name" : "wildcard", "dtype" : dtype.assetpath},
+            {"name" : "shuffle", "dtype" : dtype.bool, "dtype_args" : {"default" : True}},
+            {"name" : "next", "dtype" : dtype.event},
+        ]
+        outputs = [
+            {"name" : "output", "dtype" : dtype.str},
+        ]
+        initial_state = {
+            "index" : lambda node: 0
+        }
+        random_state = {
+            "index" : lambda node: node.generate_index()
+        }
+
+    def __init__(self):
+        self._files = None
+        self._index = 0
+
+        super().__init__()
+
+    def generate_index(self, shuffle=True):
+        count = len(self._files)
+        if count == 0:
+            return 0
+        if shuffle and count > 1:
+            return (self._index + random.randint(1, count - 1)) % count
+        else:
+            return (self._index + 1) % count
+
+    def _evaluate(self):
+        if self.have_inputs_changed("wildcard") or self._last_evaluated == 0.0:
+            wildcard = self.get("wildcard").strip()
+            if not wildcard:
+                self._files = []
+            else:
+                self._files = sorted(assets.glob_paths(self.get("wildcard")))
+                self.set_state({"index" : 0})
+
+        if self.get("next"):
+            self.set_state({"index" : self.generate_index(shuffle=self.get("shuffle"))})
+
+    def _show_custom_ui(self):
+        super()._show_custom_ui()
+
+        if imgui.button("choose file"):
+            imgui.open_popup("choose_file")
+        if imgui.begin_popup("choose_file"):
+            for i, path in enumerate(self._files):
+                if imgui.menu_item(path, "", False, True)[0]:
+                    self.set_state({"index" : i})
+            imgui.end_popup()
+
+    def get_state(self):
+        return {"index" : self._index}
+
+    def set_state(self, state):
+        if "index" in state:
+            self._index = state["index"]
+            if self._files is None:
+                return
+            if self._index < len(self._files):
+                self.set("output", self._files[self._index])
+            else:
+                self.set("output", "")
 
 class Noise1D(Node):
     class Meta:
