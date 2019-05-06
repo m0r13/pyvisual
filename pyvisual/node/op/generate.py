@@ -241,12 +241,12 @@ class RandomBool(Node):
         if "value" in state:
             self.set("output", state["value"])
 
-class RandomFile(Node):
+class ChooseFile(Node):
     class Meta:
         inputs = [
             {"name" : "wildcard", "dtype" : dtype.assetpath},
-            {"name" : "shuffle", "dtype" : dtype.bool, "dtype_args" : {"default" : True}},
             {"name" : "next", "dtype" : dtype.event},
+            {"name" : "randomize", "dtype" : dtype.event},
         ]
         outputs = [
             {"name" : "output", "dtype" : dtype.str},
@@ -255,7 +255,7 @@ class RandomFile(Node):
             "index" : lambda node: 0
         }
         random_state = {
-            "index" : lambda node: node.generate_index()
+            "index" : lambda node: node.generate_index(shuffle=True)
         }
 
     def __init__(self):
@@ -266,9 +266,9 @@ class RandomFile(Node):
 
     def generate_index(self, shuffle=True):
         count = len(self._files)
-        if count == 0:
+        if count == 0 or count == 1:
             return 0
-        if shuffle and count > 1:
+        if shuffle:
             return (self._index + random.randint(1, count - 1)) % count
         else:
             return (self._index + 1) % count
@@ -280,10 +280,12 @@ class RandomFile(Node):
                 self._files = []
             else:
                 self._files = sorted(assets.glob_paths(self.get("wildcard")))
-                self.set_state({"index" : 0})
+            self.set_state({"index" : 0})
 
         if self.get("next"):
-            self.set_state({"index" : self.generate_index(shuffle=self.get("shuffle"))})
+            self.set_state({"index" : self.generate_index(shuffle=False)})
+        if self.get("randomize"):
+            self.randomize_state()
 
     def _show_custom_ui(self):
         super()._show_custom_ui()
