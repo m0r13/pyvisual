@@ -186,12 +186,14 @@ class ChooseTexture(Node):
     class Meta:
         inputs = [
             {"name" : "count", "dtype" : dtype.int, "dtype_args" : {"default" : 2, "range" : [0, float("inf")]}, "group" : "additional"},
+            {"name" : "index", "dtype" : dtype.int, "dtype_args" : {"default" : 0, "range" : [-1, float("inf")]}},
             {"name" : "next", "dtype" : dtype.event},
-            {"name" : "shuffle", "dtype" : dtype.bool, "dtype_args" : {"default" : True}},
+            {"name" : "randomize", "dtype" : dtype.event},
         ]
         outputs = [
-            {"name" : "dummy0", "dtype" : dtype.int, "dummy" : True},
             {"name" : "out", "dtype" : dtype.tex2d},
+            {"name" : "dummy0", "dtype" : dtype.int, "dummy" : True},
+            {"name" : "dummy1", "dtype" : dtype.int, "dummy" : True},
         ]
         initial_state = {
             "index" : 0
@@ -202,9 +204,10 @@ class ChooseTexture(Node):
         }
 
     def __init__(self):
+        self._count = None
+
         super().__init__()
 
-        self._count = 0
         # keep current index and next index
         # when a new texture should be choosen, next index is choosen randomly and that enable flag is set
         # only in the next frame that texture is delegated and set as current
@@ -213,12 +216,10 @@ class ChooseTexture(Node):
         # set by state
         #self._next_index = -1
 
-    def _choose_next(self):
-        if self.get("shuffle"):
-            self._next_index = (self._current_index + random.randint(1, self._count - 1)) % self._count
-        else:
-            self._next_index = (self._current_index + 1) % self._count
+    def _set_next(self, index):
+        self._next_index = index % self._count
 
+        self.get_input("index").value = self._next_index
         self.get_output("enabled%d" % self._next_index).value = True
 
     def _update_custom_ports(self):
@@ -235,7 +236,7 @@ class ChooseTexture(Node):
         self.set_custom_outputs(custom_outputs)
 
         if (self._current_index >= self._count or self._current_index == -1) and self._next_index == -1:
-            self._choose_next()
+            self._set_next(0)
 
     def _evaluate(self):
         if self.have_inputs_changed("count") or self._last_evaluated == 0.0:
@@ -243,8 +244,6 @@ class ChooseTexture(Node):
 
         if self._next_index != -1:
             self._current_index = self._next_index % self._count
-            # just to be sure for now
-            self.get_output("enabled%d" % self._current_index).value = True
             self._next_index = -1
 
             # update all enabled-flags, necessary after choosing new texture
@@ -255,8 +254,13 @@ class ChooseTexture(Node):
                 if enabled:
                     self.set("out", in_texture.value)
 
+        if self.have_inputs_changed("index"):
+            self.set_state({"index" : self.get("index")})
         if self.get("next"):
-            self._choose_next()
+            self.set_state({"index" : self._current_index + 1})
+        if self.get("randomize"):
+            index = (self._current_index + random.randint(1, self._count - 1)) % self._count
+            self.set_state({"index" : index})
 
         if self._current_index != -1:
             in_texture = self.get_input("in%d" % self._current_index)
@@ -267,7 +271,11 @@ class ChooseTexture(Node):
         return {"index" : self._current_index}
 
     def set_state(self, state):
-        if "index" not in state:
-            return
-        self._next_index = state["index"]
+        if "index" in state:
+            # may be called before count is available, so just set next index
+            if self._count is None:
+                self._next_index = state["index"]
+            else:
+                self._set_next(state["index"])
+                self.force_evaluate()
 
