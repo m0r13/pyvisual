@@ -4,6 +4,7 @@ import random
 import threading
 import cv2
 import time
+import ctypes
 from pyvisual.node.base import Node
 from pyvisual.node import dtype
 from pyvisual import assets, util
@@ -11,6 +12,8 @@ import imgui
 from glumpy import gloo, gl, glm, app
 from PIL import Image
 import random
+
+USE_PBO_TRANSFER = True
 
 class VideoThread(threading.Thread):
     def __init__(self, video_path=""):
@@ -103,11 +106,18 @@ class VideoThread(threading.Thread):
     def _update_video(self):
         self._video = None
         self._video_path_changed = False
-        if not self._video_path:
-            self.frame = np.zeros((1, 1, 3), dtype=np.uint8).view(gloo.Texture2D)
+
+        self._fps = 30.0
+        self._duration = 0.0
+
+        path = os.path.join(assets.ASSET_PATH, self._video_path or "")
+        if not self._video_path or not os.path.exists(path):
+            self.frame = np.zeros((1, 1, 4), dtype=np.uint8)
+            if not USE_PBO_TRANSFER:
+                self.frame = self.frame.view(gloo.Texture2D)
             return
 
-        self._video = cv2.VideoCapture(os.path.join(assets.ASSET_PATH, self._video_path))
+        self._video = cv2.VideoCapture(path)
         self._force_read = True
 
         width = int(self._video.get(cv2.CAP_PROP_FRAME_WIDTH))
@@ -117,7 +127,9 @@ class VideoThread(threading.Thread):
 
         self._fps = fps
         self._duration = max(0.0, (frame_count - 1) / fps)
-        self.frame = np.zeros((height, width, 3), dtype=np.uint8).view(gloo.Texture2D)
+        self.frame = np.zeros((height, width, 4), dtype=np.uint8)
+        if not USE_PBO_TRANSFER:
+            self.frame = self.frame.view(gloo.Texture2D)
 
     def run(self):
         self._update_video()
@@ -151,8 +163,8 @@ class VideoThread(threading.Thread):
                 continue
             self._frame_grabbed = True
 
-            frame_rgb = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
-            self.frame[:, :, :] = frame_rgb
+            frame_rgba = cv2.cvtColor(frame, cv2.COLOR_BGR2RGBA)
+            self.frame[:, :, :] = frame_rgba
 
     def stop(self):
         self._running = False
@@ -189,7 +201,62 @@ class PlayVideo(Node):
 
         self._video_thread.start()
 
-    def evaluate(self):
+        self._pbo_shape = None
+        self._pbo_index = 0
+        self._pbos = None
+
+        self._frame = None
+
+    def _transfer_frame_pbo(self):
+        # generate PBO's 
+        if self._video_thread.has_video_loaded and (self._pbo_shape != self._video_thread.frame.shape):
+            if self._pbos is not None:
+                gl.glDeleteBuffers(2, self._pbos)
+
+            self._pbo_shape = self._video_thread.frame.shape
+            self._pbos = gl.glGenBuffers(2)
+
+            h, w, b = self._pbo_shape
+            num_bytes = h*w*b
+            for pbo in self._pbos:
+                gl.glBindBuffer(gl.GL_PIXEL_UNPACK_BUFFER, pbo)
+                gl.glBufferData(gl.GL_PIXEL_UNPACK_BUFFER, num_bytes, None, gl.GL_STREAM_DRAW)
+            gl.glBindBuffer(gl.GL_PIXEL_UNPACK_BUFFER, 0)
+
+        # generate/update OpenGL texture
+        if (self._frame is None or self._frame.shape != self._pbo_shape) and self._pbo_shape is not None:
+            self._frame = np.zeros(self._pbo_shape, dtype=np.uint8).view(gloo.Texture2D)
+            self._frame.activate()
+            self._frame.deactivate()
+
+        # do the transfer of pixel data from cpu to gpu using PBO's
+        # inspired by this: https://gist.github.com/roxlu/4663550
+        if self._video_thread.has_video_loaded:
+            pbo = self._pbos[self._pbo_index]
+            gl.glBindBuffer(gl.GL_PIXEL_UNPACK_BUFFER, pbo)
+            t = self._frame._handle
+            h, w, b = self._pbo_shape
+            assert t != None and t != 0
+            gl.glBindTexture(gl.GL_TEXTURE_2D, t)
+            gl.glTexSubImage2D(gl.GL_TEXTURE_2D, 0, 0, 0, w, h, gl.GL_RGBA, gl.GL_UNSIGNED_BYTE, None)
+
+            h, w, b = self._pbo_shape
+            num_bytes = h*w*b
+
+            self._pbo_index = (self._pbo_index + 1) % 2
+            pbo = self._pbos[self._pbo_index]
+            gl.glBindBuffer(gl.GL_PIXEL_UNPACK_BUFFER, pbo)
+            gl.glBufferData(gl.GL_PIXEL_UNPACK_BUFFER, num_bytes, None, gl.GL_STREAM_DRAW)
+            ptr = gl.glMapBuffer(gl.GL_PIXEL_UNPACK_BUFFER, gl.GL_WRITE_ONLY)
+            if ptr != 0:
+                ctypes.memmove(ctypes.c_voidp(ptr), ctypes.c_void_p(self._video_thread.frame.ctypes.data), num_bytes)
+                gl.glUnmapBuffer(gl.GL_PIXEL_UNPACK_BUFFER)
+            gl.glBindBuffer(gl.GL_PIXEL_UNPACK_BUFFER, 0)
+
+    def _evaluate(self):
+        if USE_PBO_TRANSFER:
+            self._transfer_frame_pbo()
+
         video = self.get_input("video")
         if video.has_changed:
             self._video_thread.video_path = video.value
@@ -217,7 +284,10 @@ class PlayVideo(Node):
                 time = random.random() * duration
                 self._video_thread.time = time
 
-        self.set("frame", self._video_thread.frame)
+        if USE_PBO_TRANSFER:
+            self.set("frame", self._frame)
+        else:
+            self.set("frame", self._video_thread.frame)
         self.set("is_over", self._video_thread.is_over)
         self.set("time", self._video_thread.time)
         self.set("duration", self._video_thread.duration)
