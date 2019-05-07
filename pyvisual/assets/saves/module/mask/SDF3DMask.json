@@ -1,0 +1,1444 @@
+{
+    "connections": [
+        {
+            "dst_node_id": 577,
+            "dst_port_id": "i_default_value",
+            "src_node_id": 578,
+            "src_port_id": "o_output"
+        },
+        {
+            "dst_node_id": 577,
+            "dst_port_id": "i_test_value",
+            "src_node_id": 578,
+            "src_port_id": "o_output"
+        },
+        {
+            "dst_node_id": 583,
+            "dst_port_id": "i_input",
+            "src_node_id": 577,
+            "src_port_id": "o_value"
+        },
+        {
+            "dst_node_id": 587,
+            "dst_port_id": "i_a",
+            "src_node_id": 582,
+            "src_port_id": "o_output"
+        },
+        {
+            "dst_node_id": 595,
+            "dst_port_id": "i_input",
+            "src_node_id": 583,
+            "src_port_id": "o_output"
+        },
+        {
+            "dst_node_id": 586,
+            "dst_port_id": "i_a",
+            "src_node_id": 585,
+            "src_port_id": "o_output"
+        },
+        {
+            "dst_node_id": 582,
+            "dst_port_id": "i_factor",
+            "src_node_id": 586,
+            "src_port_id": "o_out"
+        },
+        {
+            "dst_node_id": 587,
+            "dst_port_id": "i_b",
+            "src_node_id": 588,
+            "src_port_id": "o_output"
+        },
+        {
+            "dst_node_id": 604,
+            "dst_port_id": "i_a",
+            "src_node_id": 590,
+            "src_port_id": "o_output"
+        },
+        {
+            "dst_node_id": 583,
+            "dst_port_id": "i_uRotation",
+            "src_node_id": 591,
+            "src_port_id": "o_output"
+        },
+        {
+            "dst_node_id": 595,
+            "dst_port_id": "i_transformUV",
+            "src_node_id": 596,
+            "src_port_id": "o_output"
+        },
+        {
+            "dst_node_id": 596,
+            "dst_port_id": "i_x",
+            "src_node_id": 598,
+            "src_port_id": "o_out"
+        },
+        {
+            "dst_node_id": 583,
+            "dst_port_id": "i_time",
+            "src_node_id": 602,
+            "src_port_id": "o_output"
+        },
+        {
+            "dst_node_id": 604,
+            "dst_port_id": "i_alpha",
+            "src_node_id": 603,
+            "src_port_id": "o_output"
+        },
+        {
+            "dst_node_id": 595,
+            "dst_port_id": "i_enabled",
+            "src_node_id": 603,
+            "src_port_id": "o_output"
+        },
+        {
+            "dst_node_id": 589,
+            "dst_port_id": "i_x",
+            "src_node_id": 604,
+            "src_port_id": "o_output"
+        },
+        {
+            "dst_node_id": 583,
+            "dst_port_id": "i_transformUV",
+            "src_node_id": 589,
+            "src_port_id": "o_output"
+        },
+        {
+            "dst_node_id": 603,
+            "dst_port_id": "i_generate",
+            "src_node_id": 605,
+            "src_port_id": "o_output"
+        },
+        {
+            "dst_node_id": 579,
+            "dst_port_id": "i_value",
+            "src_node_id": 595,
+            "src_port_id": "o_output"
+        },
+        {
+            "dst_node_id": 583,
+            "dst_port_id": "i_uAlphaFactor",
+            "src_node_id": 607,
+            "src_port_id": "o_value"
+        },
+        {
+            "dst_node_id": 593,
+            "dst_port_id": "i_b",
+            "src_node_id": 608,
+            "src_port_id": "o_value"
+        },
+        {
+            "dst_node_id": 598,
+            "dst_port_id": "i_b",
+            "src_node_id": 608,
+            "src_port_id": "o_value"
+        },
+        {
+            "dst_node_id": 583,
+            "dst_port_id": "i_uScale",
+            "src_node_id": 593,
+            "src_port_id": "o_out"
+        }
+    ],
+    "nodes": [
+        {
+            "custom_ports": [
+                [
+                    "i_default_value",
+                    {
+                        "default": null,
+                        "dtype": "tex2d",
+                        "dtype_args": {},
+                        "dummy": false,
+                        "group": "default",
+                        "hide": false,
+                        "manual_input": true,
+                        "name": "default_value",
+                        "widgets": []
+                    }
+                ],
+                [
+                    "i_test_value",
+                    {
+                        "default": null,
+                        "dtype": "tex2d",
+                        "dtype_args": {},
+                        "dummy": false,
+                        "group": "default",
+                        "hide": false,
+                        "manual_input": true,
+                        "name": "test_value",
+                        "widgets": []
+                    }
+                ],
+                [
+                    "o_value",
+                    {
+                        "default": null,
+                        "dtype": "tex2d",
+                        "dtype_args": {},
+                        "dummy": false,
+                        "group": "default",
+                        "hide": false,
+                        "manual_input": true,
+                        "name": "value",
+                        "widgets": []
+                    }
+                ]
+            ],
+            "extra": {
+                "allow_preset_randomization": false
+            },
+            "id": 577,
+            "manual_values": {
+                "i_default_value": "",
+                "i_dtype": 9.0,
+                "i_name": "sizeref",
+                "i_order": 0.0,
+                "i_test_value": "",
+                "o_value": ""
+            },
+            "state": {},
+            "type": "ModuleInput",
+            "ui_data": {
+                "collapsed": false,
+                "pos": [
+                    -2162.0,
+                    1794.0
+                ],
+                "selected": false
+            }
+        },
+        {
+            "custom_ports": [],
+            "extra": {
+                "allow_preset_randomization": false
+            },
+            "id": 578,
+            "manual_values": {
+                "i_name": "ref_highres",
+                "o_output": ""
+            },
+            "state": {},
+            "type": "GetTextureVar",
+            "ui_data": {
+                "collapsed": true,
+                "pos": [
+                    -2452.0,
+                    1859.0
+                ],
+                "selected": false
+            }
+        },
+        {
+            "custom_ports": [
+                [
+                    "i_value",
+                    {
+                        "default": null,
+                        "dtype": "tex2d",
+                        "dtype_args": {},
+                        "dummy": false,
+                        "group": "default",
+                        "hide": false,
+                        "manual_input": true,
+                        "name": "value",
+                        "widgets": []
+                    }
+                ],
+                [
+                    "o_test_value",
+                    {
+                        "default": null,
+                        "dtype": "tex2d",
+                        "dtype_args": {},
+                        "dummy": false,
+                        "group": "default",
+                        "hide": false,
+                        "manual_input": true,
+                        "name": "test_value",
+                        "widgets": []
+                    }
+                ]
+            ],
+            "extra": {
+                "allow_preset_randomization": false
+            },
+            "id": 579,
+            "manual_values": {
+                "i_dtype": 9.0,
+                "i_name": "output",
+                "i_order": 0.0,
+                "i_value": "",
+                "o_test_value": ""
+            },
+            "state": {},
+            "type": "ModuleOutput",
+            "ui_data": {
+                "collapsed": false,
+                "pos": [
+                    -767.0,
+                    2264.0
+                ],
+                "selected": false
+            }
+        },
+        {
+            "custom_ports": [],
+            "extra": {
+                "allow_preset_randomization": false
+            },
+            "id": 582,
+            "manual_values": {
+                "i_factor": 0.3700000047683716,
+                "i_mod": 0.0,
+                "i_reset": 0.0,
+                "o_output": -218.00294769657467
+            },
+            "state": {
+                "time": -218.00294769657467
+            },
+            "type": "Time",
+            "ui_data": {
+                "collapsed": false,
+                "pos": [
+                    -1879.0,
+                    2413.0
+                ],
+                "selected": false
+            }
+        },
+        {
+            "custom_ports": [
+                [
+                    "i_time",
+                    {
+                        "default": null,
+                        "dtype": "float",
+                        "dtype_args": {},
+                        "dummy": false,
+                        "group": "default",
+                        "hide": false,
+                        "manual_input": true,
+                        "name": "time",
+                        "widgets": []
+                    }
+                ],
+                [
+                    "i_time_mask",
+                    {
+                        "default": null,
+                        "dtype": "tex2d",
+                        "dtype_args": {},
+                        "dummy": false,
+                        "group": "default",
+                        "hide": true,
+                        "manual_input": true,
+                        "name": "time_mask",
+                        "widgets": []
+                    }
+                ],
+                [
+                    "i_time_d0",
+                    {
+                        "default": null,
+                        "dtype": "float",
+                        "dtype_args": {
+                            "default": 0.0
+                        },
+                        "dummy": false,
+                        "group": "default",
+                        "hide": true,
+                        "manual_input": true,
+                        "name": "time_d0",
+                        "widgets": []
+                    }
+                ],
+                [
+                    "i_time_d1",
+                    {
+                        "default": null,
+                        "dtype": "float",
+                        "dtype_args": {
+                            "default": 0.0
+                        },
+                        "dummy": false,
+                        "group": "default",
+                        "hide": true,
+                        "manual_input": true,
+                        "name": "time_d1",
+                        "widgets": []
+                    }
+                ],
+                [
+                    "i_uScale",
+                    {
+                        "default": null,
+                        "dtype": "float",
+                        "dtype_args": {
+                            "default": 1.0,
+                            "range": [
+                                0.0001,
+                                Infinity
+                            ]
+                        },
+                        "dummy": false,
+                        "group": "default",
+                        "hide": false,
+                        "manual_input": true,
+                        "name": "uScale",
+                        "widgets": []
+                    }
+                ],
+                [
+                    "i_uDitheringAmount",
+                    {
+                        "default": null,
+                        "dtype": "float",
+                        "dtype_args": {
+                            "default": 0.0
+                        },
+                        "dummy": false,
+                        "group": "default",
+                        "hide": false,
+                        "manual_input": true,
+                        "name": "uDitheringAmount",
+                        "widgets": []
+                    }
+                ],
+                [
+                    "i_uDitheringTime",
+                    {
+                        "default": null,
+                        "dtype": "float",
+                        "dtype_args": {},
+                        "dummy": false,
+                        "group": "default",
+                        "hide": false,
+                        "manual_input": true,
+                        "name": "uDitheringTime",
+                        "widgets": []
+                    }
+                ],
+                [
+                    "i_uRotation",
+                    {
+                        "default": null,
+                        "dtype": "float",
+                        "dtype_args": {},
+                        "dummy": false,
+                        "group": "default",
+                        "hide": false,
+                        "manual_input": true,
+                        "name": "uRotation",
+                        "widgets": []
+                    }
+                ],
+                [
+                    "i_uAlpha",
+                    {
+                        "default": null,
+                        "dtype": "float",
+                        "dtype_args": {
+                            "default": 1.0
+                        },
+                        "dummy": false,
+                        "group": "default",
+                        "hide": false,
+                        "manual_input": true,
+                        "name": "uAlpha",
+                        "widgets": []
+                    }
+                ],
+                [
+                    "i_uAlphaFactor",
+                    {
+                        "default": null,
+                        "dtype": "float",
+                        "dtype_args": {
+                            "default": 1.0
+                        },
+                        "dummy": false,
+                        "group": "default",
+                        "hide": false,
+                        "manual_input": true,
+                        "name": "uAlphaFactor",
+                        "widgets": []
+                    }
+                ]
+            ],
+            "extra": {
+                "allow_preset_randomization": false
+            },
+            "id": 583,
+            "manual_values": {
+                "i_enable_time_mask": 0.0,
+                "i_enabled": 1.0,
+                "i_force_change": 42.0,
+                "i_input": "",
+                "i_interpolation": 1.0,
+                "i_sizeref": "",
+                "i_time": 82.52999877929688,
+                "i_time_d0": 0.0,
+                "i_time_d1": 0.0,
+                "i_time_mask": "",
+                "i_transformUV": [
+                    [
+                        1.0,
+                        0.0,
+                        0.0,
+                        0.0
+                    ],
+                    [
+                        0.0,
+                        1.0,
+                        0.0,
+                        0.0
+                    ],
+                    [
+                        0.0,
+                        0.0,
+                        1.0,
+                        0.0
+                    ],
+                    [
+                        0.0,
+                        0.0,
+                        0.0,
+                        1.0
+                    ]
+                ],
+                "i_uAlpha": 1.3300000429153442,
+                "i_uAlphaFactor": 1.6100000143051147,
+                "i_uDitheringAmount": 0.0,
+                "i_uDitheringTime": 0.0,
+                "i_uRotation": 6.320000171661377,
+                "i_uScale": 2.1500000953674316,
+                "i_wrapping": 1.0,
+                "o_enabled": 1.0,
+                "o_output": ""
+            },
+            "state": {},
+            "type": "SDF3DTestMask",
+            "ui_data": {
+                "collapsed": false,
+                "pos": [
+                    -1389.0,
+                    2253.0
+                ],
+                "selected": false
+            }
+        },
+        {
+            "custom_ports": [],
+            "extra": {
+                "allow_preset_randomization": false
+            },
+            "id": 585,
+            "manual_values": {
+                "i_name": "_mask_dir",
+                "o_output": 1.0
+            },
+            "state": {},
+            "type": "GetFloatVar",
+            "ui_data": {
+                "collapsed": true,
+                "pos": [
+                    -2199.0,
+                    2418.0
+                ],
+                "selected": false
+            }
+        },
+        {
+            "custom_ports": [],
+            "extra": {
+                "allow_preset_randomization": false
+            },
+            "id": 586,
+            "manual_values": {
+                "i_a": 0.0,
+                "i_b": 0.27000001072883606,
+                "i_op": 2.0,
+                "o_out": 0.27000001072883606
+            },
+            "state": {},
+            "type": "BinaryOpFloat",
+            "ui_data": {
+                "collapsed": true,
+                "pos": [
+                    -2039.0,
+                    2478.0
+                ],
+                "selected": false
+            }
+        },
+        {
+            "custom_ports": [],
+            "extra": {
+                "allow_preset_randomization": false
+            },
+            "id": 587,
+            "manual_values": {
+                "i_a": 0.0,
+                "i_b": 0.0,
+                "i_op": 0.0,
+                "o_out": 5776.179930555201
+            },
+            "state": {},
+            "type": "BinaryOpFloat",
+            "ui_data": {
+                "collapsed": false,
+                "pos": [
+                    -1674.0,
+                    2468.0
+                ],
+                "selected": false
+            }
+        },
+        {
+            "custom_ports": [],
+            "extra": {
+                "allow_preset_randomization": false
+            },
+            "id": 588,
+            "manual_values": {
+                "i_factor": 0.10000000149011612,
+                "i_mod": 0.0,
+                "i_reset": 0.0,
+                "o_output": 5994.182878251776
+            },
+            "state": {
+                "time": 5994.182878251776
+            },
+            "type": "Time",
+            "ui_data": {
+                "collapsed": false,
+                "pos": [
+                    -1954.0,
+                    2583.0
+                ],
+                "selected": false
+            }
+        },
+        {
+            "custom_ports": [],
+            "extra": {
+                "allow_preset_randomization": false
+            },
+            "id": 589,
+            "manual_values": {
+                "i_input": [
+                    [
+                        1.0,
+                        0.0,
+                        0.0,
+                        0.0
+                    ],
+                    [
+                        0.0,
+                        1.0,
+                        0.0,
+                        0.0
+                    ],
+                    [
+                        0.0,
+                        0.0,
+                        1.0,
+                        0.0
+                    ],
+                    [
+                        0.0,
+                        0.0,
+                        0.0,
+                        1.0
+                    ]
+                ],
+                "i_x": 500.0,
+                "i_y": 0.0,
+                "o_output": [
+                    [
+                        1.0,
+                        0.0,
+                        0.0,
+                        0.0
+                    ],
+                    [
+                        0.0,
+                        1.0,
+                        0.0,
+                        0.0
+                    ],
+                    [
+                        0.0,
+                        0.0,
+                        1.0,
+                        0.0
+                    ],
+                    [
+                        0.0,
+                        0.0,
+                        0.0,
+                        1.0
+                    ]
+                ]
+            },
+            "state": {},
+            "type": "Translate",
+            "ui_data": {
+                "collapsed": true,
+                "pos": [
+                    -1674.0,
+                    2188.0
+                ],
+                "selected": false
+            }
+        },
+        {
+            "custom_ports": [],
+            "extra": {
+                "allow_preset_randomization": false
+            },
+            "id": 590,
+            "manual_values": {
+                "i_length": 250.0,
+                "i_max": 500.0,
+                "i_min": -500.0,
+                "i_phase": 0.0,
+                "i_type": 3.0,
+                "o_output": 494.22558580135046
+            },
+            "state": {
+                "time": -7151.774211569734
+            },
+            "type": "LFO",
+            "ui_data": {
+                "collapsed": false,
+                "pos": [
+                    -2154.0,
+                    2183.0
+                ],
+                "selected": false
+            }
+        },
+        {
+            "custom_ports": [],
+            "extra": {
+                "allow_preset_randomization": false
+            },
+            "id": 591,
+            "manual_values": {
+                "i_factor": 0.07999999821186066,
+                "i_mod": 0.0,
+                "i_reset": 0.0,
+                "o_output": 2753.640290941848
+            },
+            "state": {
+                "time": 2753.640290941848
+            },
+            "type": "Time",
+            "ui_data": {
+                "collapsed": true,
+                "pos": [
+                    -1624.0,
+                    2403.0
+                ],
+                "selected": false
+            }
+        },
+        {
+            "custom_ports": [],
+            "extra": {
+                "allow_preset_randomization": false
+            },
+            "id": 592,
+            "manual_values": {
+                "i_length": 250.0,
+                "i_max": 1.5,
+                "i_min": 0.5,
+                "i_phase": 0.0,
+                "i_type": 3.0,
+                "o_output": 0.5972572207758363
+            },
+            "state": {
+                "time": 1439.6490477067175
+            },
+            "type": "LFO",
+            "ui_data": {
+                "collapsed": false,
+                "pos": [
+                    -1704.0,
+                    2593.0
+                ],
+                "selected": false
+            }
+        },
+        {
+            "custom_ports": [],
+            "extra": {
+                "allow_preset_randomization": false
+            },
+            "id": 593,
+            "manual_values": {
+                "i_a": 2.5999999046325684,
+                "i_b": 0.0,
+                "i_op": 3.0,
+                "o_out": 2.5999999046325684
+            },
+            "state": {},
+            "type": "BinaryOpFloat",
+            "ui_data": {
+                "collapsed": false,
+                "pos": [
+                    -1834.0,
+                    2268.0
+                ],
+                "selected": false
+            }
+        },
+        {
+            "custom_ports": [
+                [
+                    "i_filter_mask",
+                    {
+                        "default": null,
+                        "dtype": "tex2d",
+                        "dtype_args": {},
+                        "dummy": false,
+                        "group": "default",
+                        "hide": true,
+                        "manual_input": true,
+                        "name": "filter_mask",
+                        "widgets": []
+                    }
+                ],
+                [
+                    "i_mask_factor",
+                    {
+                        "default": null,
+                        "dtype": "float",
+                        "dtype_args": {
+                            "default": 1.0
+                        },
+                        "dummy": false,
+                        "group": "default",
+                        "hide": true,
+                        "manual_input": true,
+                        "name": "mask_factor",
+                        "widgets": []
+                    }
+                ],
+                [
+                    "i_filter_mode",
+                    {
+                        "default": null,
+                        "dtype": "int",
+                        "dtype_args": {
+                            "choices": [
+                                "input",
+                                "mask",
+                                "filtered",
+                                "input_filtered_masked",
+                                "input_masked",
+                                "filtered_masked"
+                            ],
+                            "default": 2.0
+                        },
+                        "dummy": false,
+                        "group": "default",
+                        "hide": true,
+                        "manual_input": true,
+                        "name": "filter_mode",
+                        "widgets": []
+                    }
+                ],
+                [
+                    "i_filter_bg",
+                    {
+                        "default": null,
+                        "dtype": "color",
+                        "dtype_args": {
+                            "default": [
+                                0.0,
+                                0.0,
+                                0.0,
+                                0.0
+                            ]
+                        },
+                        "dummy": false,
+                        "group": "default",
+                        "hide": true,
+                        "manual_input": true,
+                        "name": "filter_bg",
+                        "widgets": []
+                    }
+                ],
+                [
+                    "i_uInputTransform",
+                    {
+                        "default": null,
+                        "dtype": "mat4",
+                        "dtype_args": {},
+                        "dummy": false,
+                        "group": "default",
+                        "hide": false,
+                        "manual_input": true,
+                        "name": "uInputTransform",
+                        "widgets": []
+                    }
+                ],
+                [
+                    "i_uInputWrapping",
+                    {
+                        "default": null,
+                        "dtype": "int",
+                        "dtype_args": {
+                            "choices": [
+                                "none",
+                                "repeat",
+                                "mirrored repeat"
+                            ],
+                            "default": 2.0
+                        },
+                        "dummy": false,
+                        "group": "default",
+                        "hide": false,
+                        "manual_input": true,
+                        "name": "uInputWrapping",
+                        "widgets": []
+                    }
+                ],
+                [
+                    "i_uAspectAdjust",
+                    {
+                        "default": null,
+                        "dtype": "float",
+                        "dtype_args": {
+                            "default": 1.0
+                        },
+                        "dummy": false,
+                        "group": "default",
+                        "hide": false,
+                        "manual_input": true,
+                        "name": "uAspectAdjust",
+                        "widgets": []
+                    }
+                ],
+                [
+                    "i_axis_angle",
+                    {
+                        "default": null,
+                        "dtype": "float",
+                        "dtype_args": {
+                            "unit": "deg"
+                        },
+                        "dummy": false,
+                        "group": "default",
+                        "hide": false,
+                        "manual_input": true,
+                        "name": "axis_angle",
+                        "widgets": []
+                    }
+                ],
+                [
+                    "i_angle",
+                    {
+                        "default": null,
+                        "dtype": "float",
+                        "dtype_args": {
+                            "unit": "deg"
+                        },
+                        "dummy": false,
+                        "group": "default",
+                        "hide": false,
+                        "manual_input": true,
+                        "name": "angle",
+                        "widgets": []
+                    }
+                ],
+                [
+                    "i_segments",
+                    {
+                        "default": null,
+                        "dtype": "int",
+                        "dtype_args": {
+                            "default": 4.0,
+                            "range": [
+                                0,
+                                Infinity
+                            ]
+                        },
+                        "dummy": false,
+                        "group": "default",
+                        "hide": false,
+                        "manual_input": true,
+                        "name": "segments",
+                        "widgets": []
+                    }
+                ],
+                [
+                    "i_segments1",
+                    {
+                        "default": null,
+                        "dtype": "int",
+                        "dtype_args": {
+                            "default": 2.0,
+                            "range": [
+                                0,
+                                Infinity
+                            ]
+                        },
+                        "dummy": false,
+                        "group": "default",
+                        "hide": false,
+                        "manual_input": true,
+                        "name": "segments1",
+                        "widgets": []
+                    }
+                ],
+                [
+                    "i_uGuide",
+                    {
+                        "default": null,
+                        "dtype": "bool",
+                        "dtype_args": {
+                            "default": 0.0
+                        },
+                        "dummy": false,
+                        "group": "default",
+                        "hide": false,
+                        "manual_input": true,
+                        "name": "uGuide",
+                        "widgets": []
+                    }
+                ]
+            ],
+            "extra": {
+                "allow_preset_randomization": false
+            },
+            "id": 595,
+            "manual_values": {
+                "i_advanced_filtering": 0.0,
+                "i_angle": -1.7200000286102295,
+                "i_axis_angle": 0.0,
+                "i_enabled": 1.0,
+                "i_filter_bg": [
+                    0.0,
+                    0.0,
+                    0.0,
+                    0.0
+                ],
+                "i_filter_mask": "",
+                "i_filter_mode": 2.0,
+                "i_force_change": 42.0,
+                "i_input": "",
+                "i_interpolation": 1.0,
+                "i_mask_factor": 1.0,
+                "i_segments": 5.0,
+                "i_segments1": 2.0,
+                "i_sizeref": "",
+                "i_transformUV": [
+                    [
+                        1.0,
+                        0.0,
+                        0.0,
+                        0.0
+                    ],
+                    [
+                        0.0,
+                        1.0,
+                        0.0,
+                        0.0
+                    ],
+                    [
+                        0.0,
+                        0.0,
+                        1.0,
+                        0.0
+                    ],
+                    [
+                        0.0,
+                        0.0,
+                        0.0,
+                        1.0
+                    ]
+                ],
+                "i_uAspectAdjust": 1.0,
+                "i_uGuide": 0.0,
+                "i_uInputTransform": [
+                    [
+                        1.0,
+                        0.0,
+                        0.0,
+                        0.0
+                    ],
+                    [
+                        0.0,
+                        1.0,
+                        0.0,
+                        0.0
+                    ],
+                    [
+                        0.0,
+                        0.0,
+                        1.0,
+                        0.0
+                    ],
+                    [
+                        0.0,
+                        0.0,
+                        0.0,
+                        1.0
+                    ]
+                ],
+                "i_uInputWrapping": 0.0,
+                "i_wrapping": 3.0,
+                "o_enabled": 1.0,
+                "o_output": ""
+            },
+            "state": {},
+            "type": "PolarMirror",
+            "ui_data": {
+                "collapsed": false,
+                "pos": [
+                    -1039.0,
+                    2288.0
+                ],
+                "selected": false
+            }
+        },
+        {
+            "custom_ports": [],
+            "extra": {
+                "allow_preset_randomization": false
+            },
+            "id": 596,
+            "manual_values": {
+                "i_input": [
+                    [
+                        1.0,
+                        0.0,
+                        0.0,
+                        0.0
+                    ],
+                    [
+                        0.0,
+                        1.0,
+                        0.0,
+                        0.0
+                    ],
+                    [
+                        0.0,
+                        0.0,
+                        1.0,
+                        0.0
+                    ],
+                    [
+                        0.0,
+                        0.0,
+                        0.0,
+                        1.0
+                    ]
+                ],
+                "i_uniform": 1.0,
+                "i_x": 0.5099999904632568,
+                "i_y": 0.6600000262260437,
+                "o_output": [
+                    [
+                        0.6600000262260437,
+                        0.0,
+                        0.0,
+                        0.0
+                    ],
+                    [
+                        0.0,
+                        0.6600000262260437,
+                        0.0,
+                        0.0
+                    ],
+                    [
+                        0.0,
+                        0.0,
+                        1.0,
+                        0.0
+                    ],
+                    [
+                        0.0,
+                        0.0,
+                        0.0,
+                        1.0
+                    ]
+                ]
+            },
+            "state": {},
+            "type": "Scale",
+            "ui_data": {
+                "collapsed": false,
+                "pos": [
+                    -1023.0,
+                    2020.0
+                ],
+                "selected": false
+            }
+        },
+        {
+            "custom_ports": [],
+            "extra": {
+                "allow_preset_randomization": false
+            },
+            "id": 598,
+            "manual_values": {
+                "i_a": 0.6600000262260437,
+                "i_b": 1.0,
+                "i_op": 2.0,
+                "o_out": 0.6600000262260437
+            },
+            "state": {},
+            "type": "BinaryOpFloat",
+            "ui_data": {
+                "collapsed": false,
+                "pos": [
+                    -1243.0,
+                    2025.0
+                ],
+                "selected": false
+            }
+        },
+        {
+            "custom_ports": [],
+            "extra": {
+                "allow_preset_randomization": false
+            },
+            "id": 602,
+            "manual_values": {
+                "i_factor": 1.0,
+                "i_mod": 0.0,
+                "i_reset": 0.0,
+                "o_output": 6984.493963913901
+            },
+            "state": {
+                "time": 6984.493963913901
+            },
+            "type": "Time",
+            "ui_data": {
+                "collapsed": true,
+                "pos": [
+                    -1614.0,
+                    2368.0
+                ],
+                "selected": false
+            }
+        },
+        {
+            "custom_ports": [],
+            "extra": {
+                "allow_preset_randomization": false
+            },
+            "id": 603,
+            "manual_values": {
+                "i_generate": 0.0,
+                "i_p": 0.5,
+                "o_output": 1.0
+            },
+            "state": {
+                "value": true
+            },
+            "type": "RandomBool",
+            "ui_data": {
+                "collapsed": true,
+                "pos": [
+                    -2064.0,
+                    2068.0
+                ],
+                "selected": false
+            }
+        },
+        {
+            "custom_ports": [],
+            "extra": {
+                "allow_preset_randomization": false
+            },
+            "id": 604,
+            "manual_values": {
+                "i_a": 0.0,
+                "i_alpha": 0.0,
+                "i_alpha0": 0.0,
+                "i_alpha1": 1.0,
+                "i_b": 0.0,
+                "o_output": 0.0
+            },
+            "state": {},
+            "type": "MixFloat",
+            "ui_data": {
+                "collapsed": true,
+                "pos": [
+                    -1865.0,
+                    2152.0
+                ],
+                "selected": false
+            }
+        },
+        {
+            "custom_ports": [],
+            "extra": {
+                "allow_preset_randomization": false
+            },
+            "id": 605,
+            "manual_values": {
+                "i_name": "next_mask_preset",
+                "o_output": 0.0
+            },
+            "state": {},
+            "type": "GetFloatVar",
+            "ui_data": {
+                "collapsed": true,
+                "pos": [
+                    -2304.0,
+                    2068.0
+                ],
+                "selected": false
+            }
+        },
+        {
+            "custom_ports": [
+                [
+                    "i_default_value",
+                    {
+                        "default": null,
+                        "dtype": "float",
+                        "dtype_args": {},
+                        "dummy": false,
+                        "group": "default",
+                        "hide": false,
+                        "manual_input": true,
+                        "name": "default_value",
+                        "widgets": []
+                    }
+                ],
+                [
+                    "i_test_value",
+                    {
+                        "default": null,
+                        "dtype": "float",
+                        "dtype_args": {},
+                        "dummy": false,
+                        "group": "default",
+                        "hide": false,
+                        "manual_input": true,
+                        "name": "test_value",
+                        "widgets": []
+                    }
+                ],
+                [
+                    "o_value",
+                    {
+                        "default": null,
+                        "dtype": "float",
+                        "dtype_args": {},
+                        "dummy": false,
+                        "group": "default",
+                        "hide": false,
+                        "manual_input": true,
+                        "name": "value",
+                        "widgets": []
+                    }
+                ]
+            ],
+            "extra": {
+                "allow_preset_randomization": false
+            },
+            "id": 607,
+            "manual_values": {
+                "i_default_value": 1.0,
+                "i_dtype": 3.0,
+                "i_name": "alpha",
+                "i_order": 1.0,
+                "i_test_value": 1.0,
+                "o_value": 1.0
+            },
+            "state": {},
+            "type": "ModuleInput",
+            "ui_data": {
+                "collapsed": true,
+                "pos": [
+                    -1410.0,
+                    2577.0
+                ],
+                "selected": false
+            }
+        },
+        {
+            "custom_ports": [
+                [
+                    "i_default_value",
+                    {
+                        "default": null,
+                        "dtype": "float",
+                        "dtype_args": {},
+                        "dummy": false,
+                        "group": "default",
+                        "hide": false,
+                        "manual_input": true,
+                        "name": "default_value",
+                        "widgets": []
+                    }
+                ],
+                [
+                    "i_test_value",
+                    {
+                        "default": null,
+                        "dtype": "float",
+                        "dtype_args": {},
+                        "dummy": false,
+                        "group": "default",
+                        "hide": false,
+                        "manual_input": true,
+                        "name": "test_value",
+                        "widgets": []
+                    }
+                ],
+                [
+                    "o_value",
+                    {
+                        "default": null,
+                        "dtype": "float",
+                        "dtype_args": {},
+                        "dummy": false,
+                        "group": "default",
+                        "hide": false,
+                        "manual_input": true,
+                        "name": "value",
+                        "widgets": []
+                    }
+                ]
+            ],
+            "extra": {
+                "allow_preset_randomization": false
+            },
+            "id": 608,
+            "manual_values": {
+                "i_default_value": 1.0,
+                "i_dtype": 3.0,
+                "i_name": "scale",
+                "i_order": 2.0,
+                "i_test_value": 1.0,
+                "o_value": 1.0
+            },
+            "state": {},
+            "type": "ModuleInput",
+            "ui_data": {
+                "collapsed": true,
+                "pos": [
+                    -2062.0,
+                    1948.0
+                ],
+                "selected": false
+            }
+        }
+    ],
+    "ui_data": {
+        "offset": [
+            -2451.0,
+            1678.0
+        ]
+    }
+}

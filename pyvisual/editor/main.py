@@ -1523,10 +1523,10 @@ class UIGraph(NodeGraphListener):
             key_i = glfw.GLFW_KEY_I
             key_escape = key_map[imgui.KEY_ESCAPE]
             key_delete = key_map[imgui.KEY_DELETE]
-            key_c = glfw.GLFW_KEY_C
-            key_v = glfw.GLFW_KEY_V
-            key_f = glfw.GLFW_KEY_F
+            key_y = glfw.GLFW_KEY_Z
+            key_p = glfw.GLFW_KEY_P
             key_x = glfw.GLFW_KEY_X
+            key_f = glfw.GLFW_KEY_F
 
             # select all nodes
             if self.is_key_down(key_a):
@@ -1551,10 +1551,10 @@ class UIGraph(NodeGraphListener):
 
             d = self.ui_graph_data
             # copy selected nodes
-            if self.is_key_down(key_c):
+            if self.is_key_down(key_y):
                 d.graph_clipboard = self.graph.serialize_selected()
             # paste copied nodes
-            if self.is_key_down(key_v):
+            if self.is_key_down(key_p):
                 if d.graph_clipboard is not None:
                     offset = self.screen_to_local(io.mouse_pos)
                     self.graph.unserialize_as_selected(d.graph_clipboard, pos_offset=offset)

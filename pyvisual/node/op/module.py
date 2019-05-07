@@ -77,3 +77,12 @@ class Module(Node):
     def stop(self):
         self._graph.stop()
 
+class EnableableModule(Module):
+    class Meta:
+        inputs = [
+            {"name" : "enabled", "dtype" : dtype.bool, "dtype_args" : {"default" : True}},
+        ]
+
+    def _evaluate(self):
+        if self.get("enabled"):
+            super()._evaluate()

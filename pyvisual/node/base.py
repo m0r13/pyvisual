@@ -292,9 +292,8 @@ class Node(metaclass=NodeMeta):
 
     def have_any_inputs_changed(self):
         for port_id, value in self.values.items():
-            if port_id[:2] == "i_":
-                if value.has_changed_fast():
-                    return True
+            if port_id[:2] == "i_" and value.has_changed_fast():
+                return True
         return False
 
     def have_inputs_changed(self, *port_names):

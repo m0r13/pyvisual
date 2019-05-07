@@ -6,6 +6,7 @@ import clipboard
 import json
 import re
 from pyvisual.node.op.gpu.base import BaseShader, Shader, ShaderNodeLoader
+from pyvisual.node.op.module import EnableableModule
 from pyvisual.node import dtype
 import pyvisual.editor.widget as node_widget
 from pyvisual import assets
@@ -290,3 +291,23 @@ class GLSLSandbox(TimeMaskedGenerate):
             self._export_fragment(reference_path)
             self._reference_file_watcher = assets.FileWatcher(reference_path)
 
+class AudioSamplesMask(EnableableModule):
+    class Meta:
+        pass
+
+    def __init__(self):
+        super().__init__("mask/AudioSamplesMask.json", embed_graph=True)
+
+class RorschachMask(EnableableModule):
+    class Meta:
+        pass
+
+    def __init__(self):
+        super().__init__("mask/RorschachMask.json", embed_graph=True)
+
+class SDF3DMask(EnableableModule):
+    class Meta:
+        pass
+
+    def __init__(self):
+        super().__init__("mask/SDF3DMask.json", embed_graph=True)
