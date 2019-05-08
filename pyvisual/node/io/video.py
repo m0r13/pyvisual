@@ -108,7 +108,7 @@ class VideoThread(threading.Thread):
         self._video_path_changed = False
 
         self._fps = 30.0
-        self._duration = 0.0
+        self._duration = 1.0
 
         path = os.path.join(assets.ASSET_PATH, self._video_path or "")
         if not self._video_path or not os.path.exists(path):
