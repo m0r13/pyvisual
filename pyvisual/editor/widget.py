@@ -6,6 +6,7 @@ import pyvisual.node.dtype as dtypes
 from pyvisual.node.base import InputValueHolder
 from pyvisual import assets, util
 from PIL import Image
+import numpy as np
 import time
 import contextlib
 import imgui
@@ -38,6 +39,7 @@ def create_widget(dtype, dtype_args, node):
         dtypes.event: Button,
         dtypes.int: Int,
         dtypes.float: Float,
+        dtypes.vec2: Vec2,
         dtypes.color: Color,
         dtypes.str: String,
         dtypes.tex2d: Texture,
@@ -45,7 +47,7 @@ def create_widget(dtype, dtype_args, node):
 
     # TODO maybe just pass dtype_args to widget?
     kwargs = {}
-    if dtype == dtypes.float:
+    if dtype in (dtypes.float, dtypes.vec2):
         kwargs["drag_factor"] = UNIT_DRAG_FACTORS.get(dtype_args.get("unit", ""), DEFAULT_UNIT_DRAG_FACTOR)
     if "range" in dtype_args:
         kwargs["minmax"] = dtype_args["range"]
@@ -177,6 +179,27 @@ class Float(Widget):
                 change_speed=self.drag_factor, min_value=self.minmax[0], max_value=self.minmax[1], format="%0.4f")
         if changed and not read_only:
             value.value = self.clamper(v)
+
+class Vec2(Widget):
+    def __init__(self, node, drag_factor=1.0):
+        super().__init__()
+
+        self.node = node
+        self.drag_factor = 0.01 * drag_factor
+
+    def _show(self, value, read_only):
+        imgui.push_item_width(WIDGET_WIDTH * 0.75)
+        imgui.push_id("v0")
+        changed0, v0 = imgui.drag_float("", value.value[0], change_speed=self.drag_factor, format="%0.4f")
+        imgui.pop_id()
+
+        imgui.push_item_width(WIDGET_WIDTH * 0.75)
+        imgui.push_id("v1")
+        changed1, v1 = imgui.drag_float("", value.value[1], change_speed=self.drag_factor, format="%0.4f")
+        imgui.pop_id()
+
+        if (changed0 or changed1) and not read_only:
+            value.value = np.array([v0, v1])
 
 class Color(Widget):
     def __init__(self, node):
