@@ -1,12 +1,8 @@
-#define RAYMARCHING_DITHERING
+#if dRaymarchingDithering == 1
+# define RAYMARCHING_DITHERING
+#endif
+
 #define RAYMARCHING_STEPS 64
-
-// Forms:
-// form 0: round one
-// form 1: more abstact and edgy
-#define FORM_TYPE 1
-
-#define FORM_FOG
 
 #include <generate/timemasked/raymarching/base.frag>
 
@@ -139,6 +135,19 @@ float opSmoothIntersection( float d1, float d2, float k ) {
     float h = clamp( 0.5 - 0.5*(d2-d1)/k, 0.0, 1.0 );
     return mix( d2, d1, h ) + k*h*(1.0-h); }
 
+// Forms:
+// form 0: round one
+// form 1: more abstact and edgy
+#define FORM_TYPE dFormType
+
+#if dRaymarchingFog == 1
+# define FORM_FOG
+#endif
+
+// preprocessor int dFormType; {"choices" : ["round", "angled"], "default" : 0, "group" : "additional"}
+// preprocessor bool dRaymarchingFog; {"default" : false, "group" : "additional"}
+// preprocessor bool dRaymarchingDithering; {"default" : false, "group" : "additional"}
+
 uniform float uRotation;
 uniform float uDisplace; // {"default" : 1.0, "range": [-1.0, 1.0]}
 uniform float uDisplaceOffset;
@@ -203,15 +212,15 @@ float scene(vec3 p) {
 #if FORM_TYPE == 0
     float displace = clamp(sin((p.x+p.y+p.z + uDisplaceOffset)*20.0)*0.03, 0.0, 1.0) * uDisplace;
     float sphere = sdSphere(p, 0.5);
-    float box = sdBox(p, vec3(0.5, 0.5, 0.5)) - 0.05;
+    float box = sdBox(p, vec3(0.5)) - 0.05;
     float time = sin(pyvisualTime * 0.2 + timeOffset);
-    time = time * 0.75 - 0.5;
+    //time = time * 0.75 - 0.5;
     float form = mix(box + displace, sphere, time);
     return form;
 #elif FORM_TYPE == 1
-    float testBox = sdBox(p, vec3(0.25));
-    float testPrism = sdTriPrism(p, vec2(0.5, 0.3));
-    float octa = sdOctahedron(p, 0.5);
+    //float testBox = sdBox(p, vec3(0.25));
+    float testPrism = sdTriPrism(p, vec2(1.0, 0.5)) - 0.05;
+    float octa = sdOctahedron(p, 1.0) - 0.05;
 
     float time = sin(pyvisualTime * 0.1 + timeOffset);
     // alpha from -0.5 to 1.5
@@ -221,7 +230,7 @@ float scene(vec3 p) {
     
     float displaceArg = (p.x+p.y+p.z) * 4.2 + uDisplaceOffset;
     //float displace = 2.0 / 3.14159 * asin(sin((2.0*3.14159*displaceArg) / 1.0)) * 0.1 * uDisplace;
-    float amplitude = 2 * 0.1 * uDisplace;
+    float amplitude = 0.1 * uDisplace;
     float period = 1.0;
     float displace = (2*amplitude) / period * abs(mod(displaceArg, period) - period/2.0) - (2*amplitude) / 4.0;
 

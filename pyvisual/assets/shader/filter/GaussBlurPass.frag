@@ -10,8 +10,8 @@
 uniform float uSigma; // {"default" : 3.0, "range" : [0.0001, Infinity]}
 uniform vec2 uDirection; // {"default" : [1.0, 0.0]}
 
-// TODO offer different variants
-const float numBlurPixelsPerSide = 9.0f;
+// preprocessor int dKernelRadius; {"range" : [1, Infinity], "default" : 3}
+const float numBlurPixelsPerSide = dKernelRadius;
 
 const float pi = 3.14159265f;
 

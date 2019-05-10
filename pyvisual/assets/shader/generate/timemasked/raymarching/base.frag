@@ -14,7 +14,7 @@ vec4 backgroundColor(vec2 uv);
 
 float rand(vec2 co) { return fract(sin(dot(co*0.123,vec2(12.9898,78.233))) * 43758.5453); }
 
-uniform float uDitheringAmount; // {"default" : 0.0}
+uniform float uDitheringAmount; // {"default" : 0.0, "range": [0.0, 5.0]}
 uniform float uDitheringTime;
 
 void generateFrag() {
@@ -34,10 +34,11 @@ void generateFrag() {
 
     #ifdef RAYMARCHING_DITHERING
     vec2 dpos = ( (vec2(pyvisualUV.x, 1.0 - pyvisualUV.y) * pyvisualResolution).xy / pyvisualResolution.xy );
-    vec2 num = vec2(1000.0);
+    vec2 num = vec2(750.0);
     num.x *= pyvisualResolution.x / pyvisualResolution.y;
     vec2 seed = floor(dpos*num) / num + fract(uDitheringTime);
     #endif
+
     for (int i = 0; i < steps; i++) {
         dscene = scene(pos);
         #ifdef RAYMARCHING_DITHERING

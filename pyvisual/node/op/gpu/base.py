@@ -85,6 +85,24 @@ WRAPPING_MODES_GL = [gl.GL_REPEAT, gl.GL_MIRRORED_REPEAT, gl.GL_CLAMP_TO_EDGE, g
 INTERPOLATION_MODES = ["nearest", "linear"]
 INTERPOLATION_MODES_GL = [gl.GL_NEAREST, gl.GL_LINEAR]
 
+# mapping of glsl data types to dtype's
+GL_TO_DTYPE = {
+    "bool" : dtype.bool,
+    "int" : dtype.int,
+    "float" : dtype.float,
+    "vec2" : dtype.vec2,
+    "vec4" : dtype.color,
+    "mat4" : dtype.mat4,
+    "sampler2D" : dtype.tex2d,
+}
+
+# mapping of dtype's to functions converting values for preprocessor value generation
+PREPROCESSOR_DTYPES = {
+    dtype.bool : lambda v: str(int(v)),
+    dtype.int : lambda v: str(int(v)),
+    dtype.float : str,
+}
+
 # it's called BaseShader to keep compatibility with some nodes
 # might be changeable soon
 class BaseShader(RenderNode):
@@ -96,7 +114,6 @@ class BaseShader(RenderNode):
             {"name" : "input", "dtype" : dtype.tex2d},
             {"name" : "wrapping", "dtype" : dtype.int, "dtype_args" : {"default" : 1, "choices" : WRAPPING_MODES}, "group" : "additional"},
             {"name" : "interpolation", "dtype" : dtype.int, "dtype_args" : {"default" : 1, "choices" : INTERPOLATION_MODES}, "group" : "additional"},
-            {"name" : "force_change", "dtype" : dtype.float, "hide" : True},
         ]
         outputs = [
             {"name" : "enabled", "dtype" : dtype.bool, "dtype_args" : {"default" : 1.0}},
@@ -111,9 +128,13 @@ class BaseShader(RenderNode):
 
         self.quad = None
         self.shader_error = None
+
+        # mapping of inputs to program preprocessor values
+        self._input_preprocessor_mapping = []
+        self._preprocessor_values = []
         # mapping of inputs to program uniforms (if uniforms should be handled)
         # returned by _parse_uniform_inputs, set when building program
-        self.input_uniform_mapping = []
+        self._input_uniform_mapping = []
 
         self.vertex_source = vertex_source
         self.fragment_source = fragment_source
@@ -139,6 +160,58 @@ class BaseShader(RenderNode):
         mode = max(0, min(len(INTERPOLATION_MODES), mode))
         return INTERPOLATION_MODES_GL[mode]
 
+    def _parse_preprocessor_inputs(self, fragment_source):
+        # returns these two lists:
+        # list of tuples (input value name, preprocessor value name, default value, value transform function)
+        input_preprocessor_mapping = []
+        # list of port specs representing preprocessor inputs
+        preprocessor_ports = []
+
+        inputs = assets.parse_shader_preprocessor_inputs(fragment_source)
+        for gltype, name, kwargs in inputs:
+            if not gltype in GL_TO_DTYPE:
+                raise RuntimeError("Unsupported glsl data type '%s' as node port input" % gltype)
+
+            if kwargs.get("skip", False):
+                continue
+
+            preprocessor_name = name
+            input_name = kwargs.get("alias", name)
+            port_spec = {"name" : input_name, "dtype" : GL_TO_DTYPE[gltype]}
+            if not port_spec["dtype"] in PREPROCESSOR_DTYPES:
+                raise ValueError("Unsupported data type '%s' as shader preprocessor input" % gltype)
+
+            default = port_spec["dtype"].default
+            if "default" in kwargs:
+                default = port_spec["dtype"].base_type.unserialize(kwargs["default"])
+
+            dtype_args = {"default" : default}
+            if port_spec["dtype"] == dtype.int and "choices" in kwargs:
+                dtype_args["choices"] = kwargs["choices"]
+            if "range" in kwargs:
+                dtype_args["range"] = kwargs["range"]
+            if "unit" in kwargs:
+                dtype_args["unit"] = kwargs["unit"]
+            if "group" in kwargs:
+                port_spec["group"] = kwargs["group"]
+            port_spec["dtype_args"] = dtype_args
+
+            value_transform = PREPROCESSOR_DTYPES[port_spec["dtype"]]
+            input_preprocessor_mapping.append((input_name, preprocessor_name, default, value_transform))
+            preprocessor_ports.append(port_spec)
+        return input_preprocessor_mapping, preprocessor_ports
+
+    def _generate_preprocessor_input_defines(self, input_preprocessor_mapping):
+        defines = ""
+        for input_name, preprocessor_name, default, value_transform in input_preprocessor_mapping:
+            # a preprocessor input might be new in a shader => no input port / value yet
+            # use the default value unless there is an input value
+            value = default
+            if "i_" + input_name in self.values:
+                value = self.get(input_name)
+            defines += "#define %s %s\n" % (preprocessor_name, value_transform(value))
+        return defines
+
     def _parse_uniform_inputs(self, vertex_source, fragment_source):
         # returns these two lists
         # list of tuples (input port name, uniform name, dtype)
@@ -146,19 +219,9 @@ class BaseShader(RenderNode):
         # port_specs suitable to set as custom input ports
         input_ports = []
 
-        gl2dtype = {
-            "bool" : dtype.bool,
-            "int" : dtype.int,
-            "float" : dtype.float,
-            "vec2" : dtype.vec2,
-            "vec4" : dtype.color,
-            "mat4" : dtype.mat4,
-            "sampler2D" : dtype.tex2d,
-        }
-
-        uniforms = assets.parse_shader_uniforms(vertex_source, fragment_source)
+        uniforms = assets.parse_shader_uniform_inputs(vertex_source, fragment_source)
         for gltype, name, kwargs in uniforms:
-            if not gltype in gl2dtype:
+            if not gltype in GL_TO_DTYPE:
                 raise RuntimeError("Unsupported glsl data type '%s' as node port input" % gltype)
 
             if kwargs.get("skip", False):
@@ -166,7 +229,7 @@ class BaseShader(RenderNode):
 
             uniform_name = name
             input_name = kwargs.get("alias", name)
-            port_spec = {"name" : input_name, "dtype" : gl2dtype[gltype]}
+            port_spec = {"name" : input_name, "dtype" : GL_TO_DTYPE[gltype]}
 
             dtype_args = {}
             if port_spec["dtype"] == dtype.int and "choices" in kwargs:
@@ -177,6 +240,8 @@ class BaseShader(RenderNode):
                 dtype_args["range"] = kwargs["range"]
             if "unit" in kwargs:
                 dtype_args["unit"] = kwargs["unit"]
+            if "group" in kwargs:
+                port_spec["group"] = kwargs["group"]
             port_spec["dtype_args"] = dtype_args
 
             input_uniform_mapping.append((input_name, uniform_name, port_spec["dtype"]))
@@ -201,7 +266,12 @@ class BaseShader(RenderNode):
             self.shader_error = "Empty vertex/fragment shader"
             return
 
-        input_uniform_mapping, input_ports = self._parse_uniform_inputs(vertex, fragment)
+        # gather preprocessor/uniform inputs from shader sources
+        input_preprocessor_mapping, preprocessor_ports = self._parse_preprocessor_inputs(fragment)
+        input_uniform_mapping, uniform_ports = self._parse_uniform_inputs(vertex, fragment)
+
+        # add preprocessor inputs to fragment shader source
+        fragment = self._generate_preprocessor_input_defines(input_preprocessor_mapping) + fragment
 
         try:
             if self.quad:
@@ -219,16 +289,27 @@ class BaseShader(RenderNode):
                 if gtype == gl.GL_SAMPLER_2D:
                     self.quad[uniform] = dummy
             self.quad.draw(gl.GL_TRIANGLE_STRIP)
-
             self.shader_error = None
-            if self.handle_uniforms:
-                self.input_uniform_mapping = input_uniform_mapping
-                self._process_uniform_inputs(input_ports)
-                self.set_custom_inputs(input_ports)
 
-            # TODO maybe let node base class have method for this
-            # force re-rendering of this node by changing at least one input
-            self.get_input("force_change").value = 42.0
+            # create custom input ports from preprocessor/uniform inputs
+            if self.handle_uniforms:
+                self._input_preprocessor_mapping = input_preprocessor_mapping
+                self._input_uniform_mapping = input_uniform_mapping
+                # allow subclasses to modify uniform inputs, see _process_uniform_inputs
+                self._process_uniform_inputs(uniform_ports)
+                self.set_custom_inputs(preprocessor_ports + uniform_ports)
+            else:
+                self.set_custom_inputs(uniform_ports)
+
+            # after custom ports have been generated:
+            # put input values of preprocessor inputs in a list for faster checking if a shader program update is required
+            # when one of these values has changed
+            self._preprocessor_values = []
+            for input_name, _, _, _ in input_preprocessor_mapping:
+                self._preprocessor_values.append(self.get_input(input_name))
+
+            # force a new evaluation after the shader program has been updated
+            self.force_evaluate()
         except Exception as e:
             if self.quad:
                 self.quad.delete()
@@ -238,7 +319,7 @@ class BaseShader(RenderNode):
             print("Error happened in class %s, node %d" % (self, self.id))
 
     def set_uniforms(self, program):
-        for input_name, uniform_name, dt in self.input_uniform_mapping:
+        for input_name, uniform_name, dt in self._input_uniform_mapping:
             value = self.get(input_name)
             if dt == dtype.tex2d and value is None:
                 value = dummy
@@ -247,8 +328,14 @@ class BaseShader(RenderNode):
             program[uniform_name] = value
 
     def evaluate(self):
+        # update program if shader source has changed, on first evaluation, or if a preprocessor input value has changed
         if self.vertex_source.has_changed or self.fragment_source.has_changed or self._last_evaluated == 0.0:
             self.update_program()
+        else:
+            for value in self._preprocessor_values:
+                if value.has_changed:
+                    self.update_program()
+                    break
 
         return super().evaluate()
 

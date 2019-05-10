@@ -62,9 +62,42 @@ def load_shader(path=None, source=None):
 
     return source
 
-def parse_shader_uniforms(vertex_source, fragment_source):
+def parse_shader_preprocessor_inputs(shader_source):
+    inputs = []
+    for line in shader_source.split("\n"):
+        line = line.strip()
+        if not line.startswith("// preprocessor "):
+            continue
+
+        line = line[len("// "):]
+
+        comment = None
+        if ";" in line:
+            comment_index = line.find(";")
+            comment = line[comment_index+2:].strip()
+            line = line[:comment_index]
+
+        parts = line.split(" ")
+        if len(parts) < 3:
+            continue
+        # extract opengl uniform type and uniform name
+        gltype = parts[1]
+        # remove trailing ";"
+        name = parts[2]
+
+        # in case there is a // comment after the uniform definition
+        # attempt to parse json object after this
+        kwargs = {}
+        if comment and comment.startswith("{") and comment.endswith("}"):
+            kwargs = json.loads(comment)
+
+        # uniform is then opengl type, name, and other kw arguments
+        inputs.append((gltype, name, kwargs))
+    return inputs
+
+def parse_shader_uniform_inputs(vertex_source, fragment_source):
     def parse_uniforms(source):
-        uniforms = []
+        inputs = []
         for line in source.split("\n"):
             line = line.strip()
             if not line.startswith("uniform"):
@@ -91,12 +124,12 @@ def parse_shader_uniforms(vertex_source, fragment_source):
                 kwargs = json.loads(comment)
 
             # uniform is then opengl type, name, and other kw arguments
-            uniforms.append((gltype, name, kwargs))
-        return uniforms
+            inputs.append((gltype, name, kwargs))
+        return inputs
 
     # we assume that vertex/fragment shader don't share any uniforms
-    uniforms = parse_uniforms(vertex_source) + parse_uniforms(fragment_source)
-    return uniforms
+    inputs = parse_uniforms(vertex_source) + parse_uniforms(fragment_source)
+    return inputs
 
 class ShaderSource:
     @property
