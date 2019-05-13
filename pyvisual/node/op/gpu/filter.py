@@ -40,7 +40,7 @@ class Filter(BaseShader):
         # called by Shader class when custom node inputs for uniforms are created
         # show advanced filter related inputs only when advanced filtering is enabled
         for port_spec in port_specs:
-            if port_spec["name"] in ("filter_mask", "mask_factor", "filter_mode", "filter_bg"):
+            if port_spec["name"] in ("filter_mask", "mask_factor", "mask_invert", "filter_mode", "filter_bg"):
                 port_spec["hide"] = not self.get("advanced_filtering")
 
     def _evaluate(self):

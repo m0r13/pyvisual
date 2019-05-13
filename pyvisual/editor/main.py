@@ -2126,10 +2126,16 @@ def on_draw(event):
             import tabulate
             stats_by_instance, stats_by_node_type = editor.root_graph.get_stats()
             print("=== Performance stats ===")
+            total_average = 0.0
             rows = []
             for node, values in stats_by_node_type[:25]:
-                rows.append([node, "%d" % values["count"], "%.2f" % (values["tot"] * 1000000.0), "%.2f%%" % (values["rel"] * 100.0), "%.2f%%" % (values["cum"] * 100.0)])
-            print(tabulate.tabulate(rows, headers=["Node type", "count", "tot time (micros)", "rel time", "inv cum time"]))
+                rows.append([node, "%d" % values["count"], "%.2f" % (values["avg"] * 1000000.0), "%.2f%%" % (values["rel"] * 100.0), "%.2f%%" % (values["cum"] * 100.0)])
+                total_average += values["avg"]
+            for node, values in stats_by_node_type[25:]:
+                total_average += values["avg"]
+            print(tabulate.tabulate(rows, headers=["Node type", "count", "avg time (micros)", "rel time", "inv cum time"]))
+            print("=== ===")
+            print("Total average time per frame: %.2f ms" % (total_average * 1000))
             print("=== ===")
             profile_time_count = 0
 

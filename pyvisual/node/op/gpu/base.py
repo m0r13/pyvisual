@@ -131,7 +131,9 @@ class BaseShader(RenderNode):
 
         # mapping of inputs to program preprocessor values
         self._input_preprocessor_mapping = []
+        # list of preprocessor input values. used as faster access when checking if shader needs to be rebuilt
         self._preprocessor_values = []
+
         # mapping of inputs to program uniforms (if uniforms should be handled)
         # returned by _parse_uniform_inputs, set when building program
         self._input_uniform_mapping = []

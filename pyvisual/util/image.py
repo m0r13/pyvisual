@@ -4,8 +4,8 @@ from PIL import Image
 
 from pyvisual import assets
 
-def generate_screenshot_path():
-    name = "%s.png" % (time.strftime("%Y-%m-%d_%H-%M-%S"))
+def generate_screenshot_path(suffix=".png"):
+    name = time.strftime("%Y-%m-%d_%H-%M-%S") + suffix
     return os.path.join(assets.SCREENSHOT_PATH, name)
 
 def save_screenshot(texture, path=None):
