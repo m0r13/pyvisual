@@ -1,17 +1,20 @@
-import os
-import numpy as np
-import random
-import threading
-import cv2
-import time
 import ctypes
-from pyvisual.node.base import Node
-from pyvisual.node import dtype
-from pyvisual import assets, util
-import imgui
-from glumpy import gloo, gl, glm, app
-from PIL import Image
+import os
 import random
+import random
+import subprocess
+import threading
+import time
+
+import cv2
+import imgui
+import numpy as np
+from PIL import Image
+from glumpy import gloo, gl, glm, app
+
+from pyvisual import assets, util
+from pyvisual.node import dtype
+from pyvisual.node.base import Node
 
 USE_PBO_TRANSFER = True
 
@@ -41,6 +44,7 @@ class VideoThread(threading.Thread):
 
         # initially set by _update_video
         self.frame = None
+        self.frame_changed = False
 
         self.speed = 1.0
 
@@ -113,6 +117,7 @@ class VideoThread(threading.Thread):
         path = os.path.join(assets.ASSET_PATH, self._video_path or "")
         if not self._video_path or not os.path.exists(path):
             self.frame = np.zeros((1, 1, 4), dtype=np.uint8)
+            self.frame_changed = True
             if not USE_PBO_TRANSFER:
                 self.frame = self.frame.view(gloo.Texture2D)
             return
@@ -128,6 +133,7 @@ class VideoThread(threading.Thread):
         self._fps = fps
         self._duration = max(0.0, (frame_count - 1) / fps)
         self.frame = np.zeros((height, width, 4), dtype=np.uint8)
+        self.frame_changed = True
         if not USE_PBO_TRANSFER:
             self.frame = self.frame.view(gloo.Texture2D)
 
@@ -165,6 +171,7 @@ class VideoThread(threading.Thread):
 
             frame_rgba = cv2.cvtColor(frame, cv2.COLOR_BGR2RGBA)
             self.frame[:, :, :] = frame_rgba
+            self.frame_changed = True
 
     def stop(self):
         self._running = False
@@ -231,7 +238,9 @@ class PlayVideo(Node):
 
         # do the transfer of pixel data from cpu to gpu using PBO's
         # inspired by this: https://gist.github.com/roxlu/4663550
-        if self._video_thread.has_video_loaded:
+        if self._video_thread.has_video_loaded and self._video_thread.frame_changed:
+            self._video_thread.frame_changed = False
+
             pbo = self._pbos[self._pbo_index]
             gl.glBindBuffer(gl.GL_PIXEL_UNPACK_BUFFER, pbo)
             t = self._frame._handle
@@ -246,7 +255,6 @@ class PlayVideo(Node):
             self._pbo_index = (self._pbo_index + 1) % 2
             pbo = self._pbos[self._pbo_index]
             gl.glBindBuffer(gl.GL_PIXEL_UNPACK_BUFFER, pbo)
-            gl.glBufferData(gl.GL_PIXEL_UNPACK_BUFFER, num_bytes, None, gl.GL_STREAM_DRAW)
             ptr = gl.glMapBuffer(gl.GL_PIXEL_UNPACK_BUFFER, gl.GL_WRITE_ONLY)
             if ptr != 0:
                 ctypes.memmove(ctypes.c_voidp(ptr), ctypes.c_void_p(self._video_thread.frame.ctypes.data), num_bytes)
@@ -308,4 +316,131 @@ class PlayVideo(Node):
                 duration = self._video_thread.duration
                 time = time % duration
             self._video_thread.time = time
+
+class FFMPEGVideoRecorder(Node):
+    class Meta:
+        inputs = [
+            {"name" : "input", "dtype" : dtype.tex2d},
+            {"name" : "start", "dtype" : dtype.event},
+            {"name" : "stop", "dtype" : dtype.event},
+        ]
+        outputs = [
+            {"name" : "recording", "dtype" : dtype.bool},
+        ]
+
+    def __init__(self):
+        super().__init__(always_evaluate=True)
+
+        self._recording = False
+        self._texture_shape = None
+        self._process = None
+
+        self._pbo_shape = None
+        self._pbo_index = 0
+        self._pbos = None
+
+    def _download_texture(self, texture):
+        # generate PBO's 
+        if self._pbos is None or self._pbo_shape != texture.shape:
+            if self._pbos is not None:
+                gl.glDeleteBuffers(2, self._pbos)
+
+            self._pbo_shape = texture.shape
+            self._pbos = gl.glGenBuffers(2)
+
+            h, w, b = self._pbo_shape
+            num_bytes = h*w*b
+            for pbo in self._pbos:
+                gl.glBindBuffer(gl.GL_PIXEL_PACK_BUFFER, pbo)
+                gl.glBufferData(gl.GL_PIXEL_PACK_BUFFER, num_bytes, None, gl.GL_STREAM_DRAW)
+            gl.glBindBuffer(gl.GL_PIXEL_PACK_BUFFER, 0)
+
+        # do the transfer of pixel data from gpu to cpu using PBO's
+        # inspired by this: https://gist.github.com/roxlu/4663550
+        h, w, b = self._pbo_shape
+        b -= 1
+        num_bytes = h*w*b
+        pbo = self._pbos[self._pbo_index]
+        gl.glBindBuffer(gl.GL_PIXEL_PACK_BUFFER, pbo)
+        t = texture._handle
+        assert t != None and t != 0
+        gl.glBindTexture(gl.GL_TEXTURE_2D, t)
+        gl.glGetTexImage(gl.GL_TEXTURE_2D, 0, gl.GL_RGB, gl.GL_UNSIGNED_BYTE, ctypes.c_void_p(0))
+
+        self._pbo_index = (self._pbo_index + 1) % 2
+        pbo = self._pbos[self._pbo_index]
+        gl.glBindBuffer(gl.GL_PIXEL_PACK_BUFFER, pbo)
+        ptr = gl.glMapBuffer(gl.GL_PIXEL_PACK_BUFFER, gl.GL_READ_ONLY)
+        data = None
+        if ptr != 0:
+            p = ctypes.cast(ptr, ctypes.POINTER(ctypes.c_ubyte * num_bytes))
+            data = np.frombuffer(p.contents, dtype=np.uint8).copy().reshape((h, w, b))
+            gl.glUnmapBuffer(gl.GL_PIXEL_PACK_BUFFER)
+        gl.glBindBuffer(gl.GL_PIXEL_PACK_BUFFER, 0)
+
+        assert data is not None
+        return data
+
+    def _start_recording(self):
+        path = "test.mp4"
+
+        texture = self.get("input")
+        if texture is None:
+            return
+        self._texture_shape = texture.shape
+        h, w, _ = texture.shape
+
+        command = [
+            "ffmpeg",
+            "-y",
+            "-f", "rawvideo",
+            "-vcodec", "rawvideo",
+            "-s", "%dx%d" % (w, h),
+            "-pix_fmt", "rgb24",
+            "-r", "30",
+            "-i", "-",
+            #"-i", "pipe:0",
+            "-c:v", "h264_nvenc", "-preset", "slow", "-profile:v", "high", "-b:v", "5M",
+            "-an",
+            util.image.generate_screenshot_path(suffix=".mp4"),
+        ]
+
+        self._process = subprocess.Popen(command, stdin=subprocess.PIPE, bufsize=-1) #1000000*10)
+
+        self._recording = True
+
+    def _stop_recording(self):
+        self._process.stdin.close()
+
+        self._recording = False
+
+    def _evaluate(self):
+        if self._recording and self.get("stop"):
+            self._stop_recording()
+        if not self._recording and self.get("start"):
+            self._start_recording()
+
+        if self._recording:
+            texture = self.get("input")
+            if texture is None or texture.shape != self._texture_shape:
+                self._stop_recording()
+            else:
+                #start = time.time()
+                data = self._download_texture(texture)
+                #end = time.time()
+                #print("Reading stuff takes %.2f ms" % ((end - start) * 1000))
+                #start = time.time()
+                b = data.tobytes()
+                #end = time.time()
+                #print("Test takes %.2f ms" % ((end - start) * 1000))
+                #start = time.time()
+                self._process.stdin.write(b)
+                #end = time.time()
+                #print("Write takes %.2f ms" % ((end - start) * 1000))
+
+        self.set("recording", self._recording)
+
+    def stop(self):
+        if self._recording:
+            self._stop_recording()
 
