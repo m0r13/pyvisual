@@ -309,7 +309,7 @@ class UnaryOpFloat(Node):
 
     def _evaluate(self):
         op_value = self.get_input("op")
-        if op_value.has_changed:
+        if op_value.has_changed():
             op = int(op_value.value)
             if op < 0 or op >= len(self.OPS):
                 op = 0
@@ -369,7 +369,7 @@ class BinaryOpFloat(Node):
 
     def _evaluate(self):
         op_value = self.get_input("op")
-        if op_value.has_changed:
+        if op_value.has_changed():
             op = int(op_value.value)
             if op < 0 or op >= len(self.OPS):
                 op = 0
@@ -676,7 +676,7 @@ class ChooseString(Node):
 
     def _evaluate(self):
         choices = self.get_input("choices")
-        if choices.has_changed:
+        if choices.has_changed():
             self._choices = choices.value.strip().split("\n")
 
         i = int(self.get("index"))
@@ -724,7 +724,7 @@ class DelayFloat(Node):
     def _after_evaluate(self):
         # Called after evaluation of all nodes, changed values in the previous frame are forwarded like this!
         value = self.get_input("input")
-        if value.has_changed:
+        if value.has_changed():
             self._next_value = value.value
             self.force_evaluate()
 

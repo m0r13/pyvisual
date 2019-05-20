@@ -3,7 +3,7 @@ import os
 import fnmatch
 import pyvisual.node as node_meta
 import pyvisual.node.dtype as dtypes
-from pyvisual.node.base import InputValueHolder
+from pyvisual.node.value import ConnectedValue
 from pyvisual import assets, util
 from PIL import Image
 import numpy as np
@@ -119,7 +119,7 @@ class Button(Widget):
         # when button is pressed even though a value is connected:
         # -> set force flag on manual value, don't forget to reset it
         value_to_set = value
-        if isinstance(value, InputValueHolder):
+        if isinstance(value, ConnectedValue):
             value_to_set = value.manual_value
 
         # set on click

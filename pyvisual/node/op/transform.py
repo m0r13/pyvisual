@@ -22,9 +22,9 @@ class Scale(Node):
         uniform = self.get("uniform")
         input_x = self.get_input("x")
         input_y = self.get_input("y")
-        if uniform and input_x.has_changed:
+        if uniform and input_x.has_changed():
             input_y.value = input_x.value
-        elif uniform and input_y.has_changed:
+        elif uniform and input_y.has_changed():
             input_x.value = input_y.value
 
         transform = np.array([[self.get("x"), 0.0, 0.0, 0.0],

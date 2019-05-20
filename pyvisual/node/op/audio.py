@@ -182,7 +182,7 @@ class SampleAudioSSBO(Node):
 
     def _evaluate(self):
         size = self.get_input("size")
-        if size.has_changed or self._ssbo is None:
+        if size.has_changed() or self._ssbo is None:
             self._update_ssbo(int(size.value))
 
         input_audio = self.get("input")

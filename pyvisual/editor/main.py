@@ -1,5 +1,8 @@
 #!/usr/bin/env python3
 
+# TODO write a setup.py with cython stuff!
+import pyximport; pyximport.install()
+
 import OpenGL
 #OpenGL.ERROR_CHECKING = False
 #OpenGL.ERROR_ON_COPY = True
@@ -22,6 +25,7 @@ from pyvisual.editor import glumpy_imgui
 
 # TODO the naming here?
 import pyvisual.node as node_meta
+from pyvisual.node.value import ConnectedValue
 from pyvisual.node.io.texture import Renderer
 import pyvisual.editor.widget as node_widget
 import pyvisual.node.dtype as node_dtype
@@ -506,8 +510,8 @@ class UINode:
             if is_input:
                 # we can change value of input port only if nothing is connected
                 # otherwise it's a read-only widget that just shows the value for the user
-                if isinstance(value, node_meta.InputValueHolder):
-                    if value.is_connected:
+                if isinstance(value, ConnectedValue):
+                    if value.is_connected():
                         read_only = True
                     else:
                         value = value.manual_value
@@ -668,8 +672,8 @@ class UINode:
             if node_meta.is_input(port_id):
                 # we can change value of input port only if nothing is connected
                 # otherwise it's a read-only widget that just shows the value for the user
-                if isinstance(value, node_meta.InputValueHolder):
-                    if value.is_connected:
+                if isinstance(value, ConnectedValue):
+                    if value.is_connected():
                         read_only = True
                     else:
                         value = value.manual_value

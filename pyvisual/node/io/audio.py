@@ -66,7 +66,7 @@ class InputPulseAudio(Node):
 
     def _evaluate(self):
         samplerate_value = self.get_input("samplerate")
-        if samplerate_value.has_changed:
+        if samplerate_value.has_changed():
             self.stop()
             sr = int(samplerate_value.value)
             bs = 2 ** int(math.log2(sr / 60.0))

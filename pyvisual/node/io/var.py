@@ -72,7 +72,7 @@ class SetVar(Node):
             self.duplicate = False
 
         value = self.get_input("input")
-        if value.has_changed or self._last_evaluated == 0.0:
+        if value.has_changed() or self._last_evaluated == 0.0:
             self.value = value.value
             self.value_has_changed = True
             # evaluate once more to trigger reset
@@ -156,7 +156,7 @@ class GetVar(Node):
         assert self.graph is not None
 
         input_name = self.get_input("name")
-        input_name_changed = input_name.has_changed
+        input_name_changed = input_name.has_changed()
         if input_name_changed:
             name = input_name.value
 

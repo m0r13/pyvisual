@@ -6,6 +6,8 @@ import time
 import random
 from collections import OrderedDict
 
+from pyvisual.node.value import SettableValue, ConnectedValue
+
 def find_node_base(bases):
     bases = list(filter(lambda b: issubclass(b, Node), bases))
     assert len(bases) == 1, "There must be exactly one Node base class"
@@ -118,7 +120,7 @@ class NodeSpec:
         self.outputs = self.outputs + child_spec.outputs
         # TODO how should states / presets be inherited ?
         self.presets = child_spec.presets
-        self.initial_state = child_spec.initial_state
+        self.initial_state.update(child_spec.initial_state)
         self.random_state = child_spec.random_state
         self.options = child_spec.options
 
@@ -184,7 +186,6 @@ class Node(metaclass=NodeMeta):
         self.graph = None
         self.id = -1
         self.dfs_index = -1
-        self._evaluated = False
         self._last_evaluated = 0.0
         self._force_evaluate = False
 
@@ -286,40 +287,25 @@ class Node(metaclass=NodeMeta):
     def update_input_nodes(self):
         self.input_nodes = set()
         for port_id, value in self.values.items():
-            #if is_input(port_id) and value.is_connected:
-            if port_id[:2] == "i_" and value.is_connected:
+            if port_id[0] == "i" and value.is_connected():
                 self.input_nodes.add(value.connected_node)
 
     def have_any_inputs_changed(self):
         for port_id, value in self.values.items():
-            if port_id[:2] == "i_" and value.has_changed_fast():
+            if port_id[0] == "i" and value.has_changed():
                 return True
         return False
 
     def have_inputs_changed(self, *port_names):
         assert len(port_names) != 0, "Use have_any_inputs_changed instead"
         for port_name in port_names:
-            if self.get_input(port_name).has_changed_fast():
+            if self.get_input(port_name).has_changed():
                 return True
         return False
-
-    @property
-    def evaluated(self):
-        return self._evaluated
-    @evaluated.setter
-    def evaluated(self, evaluated):
-        # at the beginning of each run where all nodes are not evaluated yet
-        # all values will be set unchanged so changes in evaluating nodes will
-        # result in the nodes after them to be evaluated accordingly
-        if not evaluated:
-            for value in self.values.values():
-                value.reset_changed()
-        self._evaluated = evaluated
 
     def reset_evaluated(self):
         for value in self.values.values():
             value.reset_changed()
-        self._evaluated = False
 
     def _create_value(self, port_id):
         assert port_id in self.ports, "Port %s not found" % port_id 
@@ -335,10 +321,9 @@ class Node(metaclass=NodeMeta):
 
         value = None
         if is_input:
-            manual_input = SettableValueHolder(default_value)
-            value = InputValueHolder(manual_input)
+            value = ConnectedValue(default_value)
         else:
-            value = SettableValueHolder(default_value)
+            value = SettableValue(default_value)
         return value
 
     def get_input(self, name):
@@ -374,10 +359,9 @@ class Node(metaclass=NodeMeta):
         # update a node
         # return True if node needed update
 
-        if not self._evaluated and (self.always_evaluate or self._last_evaluated == 0.0 or self._force_evaluate or self.have_any_inputs_changed()):
+        if self.always_evaluate or self._force_evaluate or self.have_any_inputs_changed() or self._last_evaluated == 0.0:
             self._force_evaluate = False
             self._evaluate()
-            self._evaluated = True
             self._last_evaluated = time.time()
             return True
         return False
@@ -521,106 +505,4 @@ class Node(metaclass=NodeMeta):
         # should return list of tuples (name, values)
         #   (values as dictionary port_id => manual value)
         return []
-
-class ValueHolder:
-    @property
-    def has_changed(self):
-        raise NotImplementedError()
-    @property
-    def value(self):
-        raise NotImplementedError()
-
-    def copy_to(self, value):
-        if self.has_changed_fast():
-            value.value = self.value
-
-class SettableValueHolder(ValueHolder):
-    def __init__(self, default_value):
-        self._value = default_value
-        self._changed = True
-
-        self.force_value = False
-
-    @property
-    def has_changed(self):
-        # TODO when to reset this
-        # maybe once all stages are evaluated
-        # make sure stages are evaluated in right order (output stage last)
-        return self._changed
-    @has_changed.setter
-    def has_changed(self, changed):
-        self._changed = changed
-
-    def has_changed_fast(self):
-        return self._changed
-    def reset_changed(self):
-        self._changed = False
-
-    @property
-    def value(self):
-        return self._value
-    @value.setter
-    def value(self, value):
-        self._value = value
-        self._changed = True
-
-class InputValueHolder(ValueHolder):
-    def __init__(self, manual_value):
-        self.manual_value = manual_value
-
-        # TODO storing value and the node might seem a bit weird
-        # but we need the node for knowing on which nodes this depends
-        # and the value so we don't have to look it up from the node every time
-        self.connected_node = None
-        self.connected_value = None
-        self.has_connection_changed = True
-    
-    @property
-    def is_connected(self):
-        return self.connected_value is not None
-
-    def connect(self, node, port_id):
-        self.connected_node = node
-        self.connected_value = node.get_value(port_id)
-        self.has_connection_changed = True
-
-    def disconnect(self):
-        # make the manual input keep the value when connection is removed
-        #if self.connected_value is not None:
-        #    self.manual_value.value = self.connected_value.value
-        self.connected_node = None
-        self.connected_value = None
-        self.has_connection_changed = True
-
-    @property
-    def has_changed(self):
-        return (self.connected_value and self.connected_value.has_changed) or self.manual_value.has_changed or self.has_connection_changed
-
-    @has_changed.setter
-    def has_changed(self, changed):
-        if not changed:
-            self.has_connection_changed = False
-            self.manual_value.has_changed = False
-
-    # TODO remove property at some time and use only functions?
-    # properties have some calling overhead and change check is called often
-    def has_changed_fast(self):
-        return (self.connected_value and self.connected_value.has_changed) or self.manual_value.has_changed or self.has_connection_changed
-
-    def reset_changed(self):
-        self.has_connection_changed = False
-        self.manual_value.reset_changed()
-
-    @property
-    def value(self):
-        connected_value = self.connected_value
-        manual_value = self.manual_value
-        # the manual value (like with button widget) can force a value
-        if connected_value is not None and not manual_value.force_value:
-            return connected_value.value
-        return manual_value.value
-
-    @value.setter
-    def value(self, value):
-        self.manual_value.value = value
 

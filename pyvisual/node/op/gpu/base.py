@@ -335,7 +335,7 @@ class BaseShader(RenderNode):
             self.update_program()
         else:
             for value in self._preprocessor_values:
-                if value.has_changed:
+                if value.has_changed():
                     self.update_program()
                     break
 

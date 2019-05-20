@@ -266,19 +266,19 @@ class PlayVideo(Node):
             self._transfer_frame_pbo()
 
         video = self.get_input("video")
-        if video.has_changed:
+        if video.has_changed():
             self._video_thread.video_path = video.value
 
         loop = self.get_input("loop")
-        if loop.has_changed:
+        if loop.has_changed():
             self._video_thread.loop = loop.value
 
         play = self.get_input("play")
-        if play.has_changed:
+        if play.has_changed():
             self._video_thread.play = play.value
 
         speed = self.get_input("speed")
-        if speed.has_changed:
+        if speed.has_changed():
             self._video_thread.speed = speed.value
 
         # allow seeking only when a video is loaded

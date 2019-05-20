@@ -2,6 +2,7 @@ import json
 import time
 from collections import defaultdict, OrderedDict
 import pyvisual.node.base as node_meta
+from pyvisual.node.value import ConnectedValue
 from pyvisual.node import dtype
 from glumpy import gl
 
@@ -132,9 +133,10 @@ class Graph:
         return active_instances
 
     def reset_instances(self):
-        for instance in self.instances:
+        instances = self.instances
+        for instance in instances:
             instance._after_evaluate()
-        for instance in self.instances:
+        for instance in instances:
             instance.reset_evaluated()
 
     # apply a function to each instance
@@ -265,7 +267,7 @@ class NodeGraph(Graph):
                 value = node.get_value(port_id)
                 port_spec = node.ports[port_id]
                 dtype = port_spec["dtype"]
-                if isinstance(value, node_meta.InputValueHolder):
+                if isinstance(value, ConnectedValue):
                     value = value.manual_value
                 manual_values[port_id] = dtype.base_type.serialize(value.value)
             node_data["manual_values"] = manual_values
