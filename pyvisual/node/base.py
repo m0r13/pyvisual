@@ -173,13 +173,19 @@ class Node(metaclass=NodeMeta):
         inputs = []
         outputs = []
 
+    # Some special node traits are shown as class variables, are overwritten in subclasses
+
     # Forces this node type to be executed as early as possible in the graph.
     # This means possibly even before the nodes where its input values come from.
     # Required for delaying a value by a frame in preventing problems with circular connections.
     # See also: DelayFloat
     FORCE_EARLY_EXECUTION = False
 
+    # Whether this node does some rendering with OpenGL
     USES_OPENGL = False
+
+    # Whether this node contains a subgraph
+    HAS_SUBGRAPH = False
 
     def __init__(self, always_evaluate=False):
         self.always_evaluate = always_evaluate
@@ -349,8 +355,16 @@ class Node(metaclass=NodeMeta):
         self._force_evaluate = True
 
     @property
-    def descriptive_title(self):
-        return None
+    def node_title(self):
+        # title that is showed in the UI when node is fully visible (i.e. not collapsed)
+        return self.spec.name
+
+    @property
+    def collapsed_node_title(self):
+        # title that is showed in the UI when node is collapsed
+        #   also shown in the search list as the collapsed title is usually a more descriptive one
+        # defaults to the normal node title
+        return self.node_title
 
     def start(self, graph):
         pass

@@ -6,7 +6,7 @@ import random
 import imgui
 from pyvisual.node.base import Node
 from pyvisual.node.op.gpu.base import BaseShader, Shader, ShaderNodeLoader
-from pyvisual.node.op.module import Module
+from pyvisual.node.op.module import StaticModule
 from pyvisual.node import dtype
 from pyvisual.editor import widget
 from pyvisual import assets
@@ -69,9 +69,11 @@ filter_loader = ShaderNodeLoader(
         module=__name__, globals_=globals()
 )
 
-class GaussBlur(Module):
+class GaussBlur(StaticModule):
     class Meta:
-        pass
+        options = {
+            "virtual" : False
+        }
 
     def __init__(self):
         super().__init__("GaussBlur.json")

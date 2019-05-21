@@ -1,7 +1,7 @@
 from pyvisual.node.base import Node
 from pyvisual.node import dtype
 from pyvisual.node.io.audio import AudioData, FFTData, DEFAULT_SAMPLE_RATE
-from pyvisual.node.op.module import Module
+from pyvisual.node.op.module import StaticModule
 from pyvisual.audio import util
 from scipy import signal
 from glumpy import gloo
@@ -377,7 +377,7 @@ class BeatAnalyzer(Node):
         self.set("beat_running", self.is_beat_running)
         self.set("bpm", self.current_bpm)
 
-class BeatDetection(Module):
+class BeatDetection(StaticModule):
     class Meta:
         pass
 

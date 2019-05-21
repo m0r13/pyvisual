@@ -7,33 +7,32 @@ import OpenGL
 #OpenGL.ERROR_CHECKING = False
 #OpenGL.ERROR_ON_COPY = True
 
+import cProfile
+import contextlib
+import glob
+import json
+import numpy as np
 import os
+import random
 import sys
 import time
-import contextlib
-import numpy as np
-import json
 import traceback
-import glob
-import random
 from collections import defaultdict
+
+import imgui
+import pyvisual.editor.widget as node_widget
+import pyvisual.node as node_meta
+import pyvisual.node.dtype as node_dtype
+
 from glumpy import app, gloo, gl, glm
 from glumpy.ext import glfw
-import imgui
-
-from pyvisual.editor import glumpy_imgui
-
-# TODO the naming here?
-import pyvisual.node as node_meta
-from pyvisual.node.value import ConnectedValue
-from pyvisual.node.io.texture import Renderer
-import pyvisual.editor.widget as node_widget
-import pyvisual.node.dtype as node_dtype
-from pyvisual.editor.graph import RootGraph, NodeGraph, NodeGraphListener
-from pyvisual.node.op.gpu.base import ShaderNodeLoader
 from pyvisual import assets, util
+from pyvisual.editor import glumpy_imgui
+from pyvisual.editor.graph import RootGraph, NodeGraph, NodeGraphListener
+from pyvisual.node.io.texture import Renderer
+from pyvisual.node.op.gpu.base import ShaderNodeLoader
+from pyvisual.node.value import ConnectedValue
 
-import cProfile
 profile = cProfile.Profile()
 
 # create window / opengl context already here
@@ -729,11 +728,11 @@ class UINode:
         imgui.set_cursor_pos(self.ui_graph.local_to_window(t_add(actual_pos, self.padding)))
         imgui.begin_group()
         if self.spec.options["show_title"]:
-            imgui.text(self.spec.name)
+            imgui.text(self.instance.node_title)
             #imgui.text(self.spec.name + " (%d)" % self.instance.dfs_index)
         elif self.collapsed:
-            imgui.text(self.instance.descriptive_title)
-            #imgui.text(self.instance.descriptive_title + " (%d)" % self.instance.dfs_index)
+            imgui.text(self.instance.collapsed_node_title)
+            #imgui.text(self.instance.collapsed_node_title + " (%d)" % self.instance.dfs_index)
         if not self.collapsed:
             port_filter = lambda port: not port[1]["hide"] and port[1]["group"] == "default"
             inputs = list(filter(port_filter, self.instance.input_ports.items()))
@@ -780,7 +779,8 @@ class UINode:
         # handle clicks / scrolling on the node
         if not self.ui_graph.is_dragging_connection() and self.hovered and not imgui.is_any_item_active():
             # handle collapsing/expanding
-            collapsible = self.spec.options["show_title"] or self.instance.descriptive_title is not None
+            collapsed_title = self.instance.collapsed_node_title
+            collapsible = self.spec.options["show_title"] or collapsed_title is not None
             if collapsible:
                 if self.collapsed and io.mouse_wheel < 0:
                     self.collapsed = False
@@ -819,6 +819,11 @@ class UINode:
                 self.ui_graph.remove_node(self)
             if imgui.menu_item("expand..." if self.collapsed else "collaps...")[0]:
                 self.collapsed = not self.collapsed
+            if self.instance.HAS_SUBGRAPH and imgui.menu_item("open subgraph")[0]:
+                name = self.instance.node_title
+                graph = self.instance.subgraph
+                parent_graph = self.ui_graph.graph
+                self.ui_graph.subgraph_handler.open_subgraph(name, graph, parent_graph)
             imgui.separator()
 
             additional_filter = lambda port: not port[1]["hide"] and port[1]["group"] == "additional"
@@ -933,8 +938,15 @@ class UIGraphData:
 
         self.node_specs = [ n.spec for n in node_types if not n.spec.options["virtual"] ]
 
+class SubgraphHandler:
+    def open_subgraph(self, name, graph, parent_graph):
+        pass
+
+    def remove_subgraph(self, graph):
+        pass
+
 class UIGraph(NodeGraphListener):
-    def __init__(self, graph, ui_graph_data):
+    def __init__(self, graph, ui_graph_data, subgraph_handler):
         self.graph = graph
         self.graph.add_listener(self)
 
@@ -942,6 +954,9 @@ class UIGraph(NodeGraphListener):
         self.ui_nodes = {}
         self.ui_connections = []
         self.ui_graph_data = ui_graph_data
+
+        # handler for subgraph things, must be instance of SubgraphHandler
+        self.subgraph_handler = subgraph_handler
 
         self.reset_cached_counter = 0
 
@@ -973,7 +988,16 @@ class UIGraph(NodeGraphListener):
 
         self.io = imgui.get_io()
         self.key_map = list(self.io.key_map)
-    
+
+        # generate events for all nodes/connections that already exist in the graph
+        # TODO at some point perhaps move this to graph
+        for instance in self.graph.instances:
+            ui_data = self.graph.node_ui_data[instance.id]
+            self.created_node(self.graph, instance, ui_data)
+        for src_node, connections in self.graph.connections_from.items():
+            for src_port_id, dst_node, dst_node_id in connections:
+                self.created_connection(self.graph, src_node, src_port_id, dst_node, dst_node_id)
+        self.changed_ui_data(self.graph, self.graph.ui_data)
     #
     # coordinate conversions
     #
@@ -1026,6 +1050,8 @@ class UIGraph(NodeGraphListener):
 
     def removed_node(self, graph, node):
         assert node.id in self.ui_nodes
+        if node.HAS_SUBGRAPH:
+            self.subgraph_handler.remove_subgraph(node.subgraph)
         del self.ui_nodes[node.id]
 
     def changed_node_ui_data(self, graph, node, ui_data):
@@ -1084,6 +1110,10 @@ class UIGraph(NodeGraphListener):
     @property
     def nodes(self):
         return self.ui_nodes.values()
+
+    @property
+    def selected_nodes(self):
+        return filter(lambda node: node.selected, self.nodes)
 
     def touch_z_index(self):
         i = self.nodes_z_index
@@ -1343,11 +1373,7 @@ class UIGraph(NodeGraphListener):
                 for i, ui_node in enumerate(self.ui_nodes.values()):
                     instance = ui_node.instance
                     spec = instance.spec
-                    t = instance.descriptive_title
-                    if t is not None:
-                        label = t
-                    else:
-                        label = "%s #%d" % (spec.name, instance.id)
+                    label = "%s #%d" % (instance.collapsed_node_title, instance.id)
                     contained, n = match_substring_partly(text.lower(), label.lower())
                     if contained:
                         filtered.append((n, (label, ui_node)))
@@ -1522,7 +1548,7 @@ class UIGraph(NodeGraphListener):
         # handle different selection and node modifications for some shortcuts
         if imgui.is_window_hovered() and not imgui.is_any_item_active():
             key_map = self.key_map
-            key_a = key_map[imgui.KEY_A]
+            key_a = glfw.GLFW_KEY_A
             key_d = glfw.GLFW_KEY_D
             key_i = glfw.GLFW_KEY_I
             key_escape = key_map[imgui.KEY_ESCAPE]
@@ -1594,27 +1620,42 @@ class UIGraph(NodeGraphListener):
         }
         return stats
 
-class NodeEditor(NodeGraphListener):
+class NodeEditor(NodeGraphListener, SubgraphHandler):
     def __init__(self, base_node=node_meta.Node):
-        # some settings
-        # - keep them saved in a file
-        settings = self.load_settings()
+        super().__init__()
 
+        # also UI graph representations share some data such as settings and clipboard
+        # that's kept in this instance
+        settings = self.load_settings()
+        self.ui_graph_data = UIGraphData(base_node=base_node, settings=settings)
+
+        # opened graphs and UI representations
+        self.graphs = []
+        self.ui_graphs = []
+        # some more information about graphs:
+        # name, parent graph (index), last visited subgraph (index)
+        # also: index of the last graph opened that wasn't the background graph
+        # also important: when graphs are removed, their entries are all set to None
+        #   (to not mess with the parent indices references etc.)
+        self.graph_names = []
+        self.parent_graphs = []
+        self.last_visited_subgraph = []
+        self.last_graph_not_background = 0
+
+        # current graph / UI representation
+        self.current_graph_index = None
+        self.current_graph = None
+        self.current_ui_graph = None
+
+        # per default we have two graphs running in parallel:
+        # - session graph, which is the main workspace, files should be loaded into this
+        # - background graph, where the beat detection happens mostly
+        self.root_graph = RootGraph()
         self.session_graph = NodeGraph()
         self.background_graph = NodeGraph()
-
-        self.graph_names = ["session", "beat detection"]
-        self.graphs = [self.session_graph, self.background_graph]
-        # need to register as listener in graphs to catch render nodes
-        for graph in self.graphs:
-            graph.add_listener(self)
-
-        self.ui_graph_data = UIGraphData(base_node=base_node, settings=settings)
-        self.ui_graphs = [ UIGraph(g, self.ui_graph_data) for g in self.graphs ]
-        self.current_graph_index = 0
-        self.current_graph = self.graphs[self.current_graph_index]
-        self.current_ui_graph = self.ui_graphs[self.current_graph_index]
-        self.root_graph = RootGraph(graphs=self.graphs)
+        self.add_graph("session", self.session_graph, add_to_root_graph=True)
+        self.add_graph("background", self.background_graph, add_to_root_graph=True)
+        self.set_graph(0)
 
         self.show_graph = settings.get("show_graph", True)
         self.show_external_window = settings.get("show_external_window", False)
@@ -1817,18 +1858,85 @@ class NodeEditor(NodeGraphListener):
         self.texture_program.draw(gl.GL_TRIANGLE_STRIP)
 
     #
+    # graph management
+    #
+
+    def set_graph(self, index):
+        self.current_graph_index = index
+        self.current_graph = self.graphs[self.current_graph_index]
+        self.current_ui_graph = self.ui_graphs[self.current_graph_index]
+        self.current_ui_graph.reset_cached_positions()
+        if index != 1:
+            self.last_visited_graph_not_background = index
+
+    def add_graph(self, name, graph, parent_index=None, add_to_root_graph=False):
+        if graph in self.graphs:
+            index = self.graphs.index(graph)
+            return index
+
+        index = len(self.graphs)
+        # if no parent index is specified, the graph is top-level, i.e. its own parent
+        if parent_index is None:
+            parent_index = index
+
+        # add us as listener (to find RenderNode's etc.)
+        graph.add_listener(self)
+        # top-level graphs (session, background) need to be evaluated by the root graph
+        if add_to_root_graph:
+            self.root_graph.append(graph)
+
+        # add graph / UI representation
+        self.graphs.append(graph)
+        self.ui_graphs.append(UIGraph(graph, self.ui_graph_data, self))
+
+        # other information
+        self.graph_names.append(name)
+        self.parent_graphs.append(parent_index)
+        self.last_visited_subgraph.append(index)
+        return index
+
+    def open_subgraph(self, name, graph, parent_graph):
+        name = "subgraph " + name
+        parent_index = self.graphs.index(parent_graph)
+        index = self.add_graph(name, graph, parent_index)
+        self.last_visited_subgraph[parent_index] = index
+        self.set_graph(index)
+
+    def remove_subgraph(self, graph):
+        # is called even when a subgraph is not opened
+        if graph not in self.graphs:
+            # ignore the call in that case
+            return
+        index = self.graphs.index(graph)
+        parent_index = self.parent_graphs[index]
+
+        # clear graph to recognize the removal of that graph (for RenderNode's for example)
+        graph.clear()
+
+        # disable all entries
+        self.graphs[index] = None
+        self.ui_graphs[index] = None
+        self.graph_names[index] = None
+        self.parent_graphs[index] = -1
+        if self.last_visited_subgraph[parent_index] == index:
+            self.last_visited_subgraph[parent_index] = parent_index
+
+        # remove child graphs of this graph
+        for i in range(len(self.graphs)):
+            if self.parent_graphs[i] == index:
+                self.remove_subgraph(self.graphs[i])
+
+        # switch to parent graph in case this graph is the current graph
+        if self.current_graph_index == index:
+            self.set_graph(self.parent_graphs[index])
+
+    #
     # rendering and interaction handling
     #
 
     def is_key_down(self, key):
         io = self.io
         return io.is_key_down(key) and io.get_key_down_duration(key) == 0.0
-
-    def switch_graphs(self):
-        self.current_graph_index = (self.current_graph_index + 1) % len(self.graphs)
-        self.current_graph = self.graphs[self.current_graph_index]
-        self.current_ui_graph = self.ui_graphs[self.current_graph_index]
-        self.current_ui_graph.reset_cached_positions()
 
     def show(self):
         # create editor window
@@ -1871,8 +1979,33 @@ class NodeEditor(NodeGraphListener):
             graph_stats = self.current_ui_graph.show(draw_list)
 
         # make sure to not get triggered when pressing e inside a text field
-        if not io.want_capture_keyboard and not io.want_text_input and self.is_key_down(glfw.GLFW_KEY_E):
-            self.switch_graphs()
+        if not io.want_capture_keyboard and not io.want_text_input:
+            if self.is_key_down(glfw.GLFW_KEY_E):
+                # switch between background graph and other graph (like you would expect tab to work)
+                # assumption: background graph is at index 1
+                if self.current_graph_index == 1:
+                    self.set_graph(self.last_visited_graph_not_background)
+                else:
+                    self.set_graph(1)
+            if self.is_key_down(glfw.GLFW_KEY_W):
+                # go to next parent graph
+                # (top-level graph is parent of itself)
+                parent = self.parent_graphs[self.current_graph_index]
+                self.set_graph(parent)
+            if self.is_key_down(glfw.GLFW_KEY_S):
+                # go to a subgraph
+                # either the one of currently selected node, or last one visitied from here
+                selected = list(self.current_ui_graph.selected_nodes)
+                if len(selected) == 1:
+                    instance = selected[0].instance
+                    if instance.HAS_SUBGRAPH:
+                        name = instance.node_title
+                        graph = instance.subgraph
+                        parent_graph = self.current_ui_graph.graph
+                        self.open_subgraph(name, graph, parent_graph)
+                else:
+                    subgraph = self.last_visited_subgraph[self.current_graph_index]
+                    self.set_graph(subgraph)
         if self.is_key_down(glfw.GLFW_KEY_F3):
             self.show_graph = not self.show_graph
             self.last_mouse_pos_changed = time.time()
@@ -1932,7 +2065,19 @@ class NodeEditor(NodeGraphListener):
                 if export_path is not None:
                     self.current_graph.export_file(export_path)
 
-                imgui.text("current graph: %s" % self.graph_names[self.current_graph_index])
+                if imgui.begin_combo("", self.graph_names[self.current_graph_index]):
+                    for i in range(len(self.graphs)):
+                        name = self.graph_names[i]
+                        # when graphs are removed, their entries are just set to None, consider this
+                        if name is None:
+                            continue
+                        is_selected = i == self.current_graph_index
+                        if is_selected:
+                            imgui.set_item_default_focus()
+                        opened, selected = imgui.selectable(name, is_selected)
+                        if opened:
+                            self.set_graph(i)
+                    imgui.end_combo()
 
                 imgui.end()
 

@@ -304,7 +304,7 @@ class UnaryOpFloat(Node):
         self._op = None
 
     @property
-    def descriptive_title(self):
+    def collapsed_node_title(self):
         return "op: %s" % self._op_name
 
     def _evaluate(self):
@@ -364,7 +364,7 @@ class BinaryOpFloat(Node):
         self._op = None
 
     @property
-    def descriptive_title(self):
+    def collapsed_node_title(self):
         return "op: %s" % self._op_name
 
     def _evaluate(self):

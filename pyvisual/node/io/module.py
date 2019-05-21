@@ -1,11 +1,13 @@
 import math
-import numpy as np
-import imgui
 from collections import OrderedDict
-from pyvisual.node.base import Node, prepare_port_spec
-from pyvisual.node import dtype
-from pyvisual.editor import widget
 from collections import defaultdict
+
+import numpy as np
+
+import imgui
+from pyvisual.editor import widget
+from pyvisual.node import dtype
+from pyvisual.node.base import Node, prepare_port_spec
 
 DTYPE_NAMES = list(dtype.dtypes.keys())
 DTYPES = list(dtype.dtypes.values())
@@ -29,13 +31,19 @@ class ModuleInputOutput(Node):
         super().__init__()
 
         self.is_input = is_input
-        self.use_defaults = True
+        # whether this i/o node is actually in use in a subgraph
+        # if yes: value is set from outside
+        # if no: use/provide test value that is a separate port
+        self.is_in_subgraph = False
 
         self.value_name = "value"
         self.default_value_name = "default_value"
         self.test_value_name = "test_value"
         if not self.is_input:
             self.value_name, self.test_value_name = self.test_value_name, self.value_name
+
+        # initialize custom ports with default values
+        self._update_custom_ports()
 
     @property
     def name(self):
@@ -62,7 +70,11 @@ class ModuleInputOutput(Node):
         custom_inputs = []
         custom_outputs = []
 
-        dt = self.dtype
+        dt = dtype.float
+        # make sure that we don't change the dtype value if it wasn't created yet!!
+        # that's an ugly hack, but okay
+        if "i_dtype" in self.values:
+            dt = self.dtype
         if self.is_input:
             custom_inputs.append({"name" : self.default_value_name, "dtype" : dt})
         custom_inputs.append({"name" : self.test_value_name, "dtype" : dt})
@@ -71,18 +83,12 @@ class ModuleInputOutput(Node):
         self.set_custom_inputs(custom_inputs)
         self.set_custom_outputs(custom_outputs)
 
-    def start(self, graph):
-        pass
-
     def _evaluate(self):
         if self.have_inputs_changed("name", "dtype"):
             self._update_custom_ports()
 
-        if self.use_defaults:
+        if not self.is_in_subgraph:
             self.get_input(self.test_value_name).copy_to(self.get_output(self.value_name))
-
-    def stop(self):
-        pass
 
 class ModuleInput(ModuleInputOutput):
     class Meta:

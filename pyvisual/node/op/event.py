@@ -1,7 +1,7 @@
 import random
 import time
 from pyvisual.node.base import Node
-from pyvisual.node.op.module import Module
+from pyvisual.node.op.module import StaticModule
 from pyvisual.node import dtype
 from pyvisual import util
 from glumpy.app import clock
@@ -239,7 +239,7 @@ class EveryNSequencer(Node):
         else:
             self.set("out", False)
 
-class EveryNBeat(Module):
+class EveryNBeat(StaticModule):
     class Meta:
         pass
 

@@ -1,10 +1,11 @@
 import json
 import time
 from collections import defaultdict, OrderedDict
+
 import pyvisual.node.base as node_meta
-from pyvisual.node.value import ConnectedValue
-from pyvisual.node import dtype
 from glumpy import gl
+from pyvisual.node import dtype
+from pyvisual.node.value import ConnectedValue
 
 class NodeGraphListener:
     def changed_ui_data(self, graph, ui_data):
@@ -200,18 +201,22 @@ class Graph:
             instance.stop()
 
 class RootGraph(Graph):
-    def __init__(self, graphs):
+    def __init__(self, graphs=[]):
         super().__init__(evaluate_all=True)
 
-        self.graphs = graphs
-        for graph in self.graphs:
-            graph.parent = self
-            graph.listeners.append(DFSChangedListener(lambda: self.reset_sorted_instances()))
+        self._graphs = []
+        for graph in graphs:
+            self.append(graph)
+
+    def append(self, graph):
+        graph.parent = self
+        graph.listeners.append(DFSChangedListener(lambda: self.reset_sorted_instances()))
+        self._graphs.append(graph)
 
     @property
     def instances(self):
         instances = []
-        for graph in self.graphs:
+        for graph in self._graphs:
             instances.extend(graph.instances)
         return instances
 
@@ -245,7 +250,7 @@ class NodeGraph(Graph):
     # serialization
     #
 
-    def serialize(self, node_filter=lambda node: True):
+    def serialize(self, node_filter=lambda node: True, as_json_dict=False):
         # TODO validation!!
 
         nodes = []
@@ -294,9 +299,11 @@ class NodeGraph(Graph):
                 connections.append(connection_data)
 
         data = {"ui_data" : self.ui_data, "nodes" : nodes, "connections" : connections}
-        return json.dumps(data, sort_keys=True, indent=4)
+        if as_json_dict:
+            return data
+        return json.dumps(data, sort_keys=True) #, indent=4)
 
-    def unserialize(self, data, as_selected=False, pos_offset=(0, 0), pos_normalize=True):
+    def unserialize(self, json_or_str_data, as_selected=False, pos_offset=(0, 0), pos_normalize=True):
         # unserializes nodes/connections that are serialized in data string
         # as_selected means that new nodes will be selected (other nodes will be unselected)
         # pos_offset is added to positions of all new nodes
@@ -305,7 +312,9 @@ class NodeGraph(Graph):
 
         # TODO validation!!
 
-        data = json.loads(data)
+        data = json_or_str_data
+        if type(data) != dict:
+            data = json.loads(data)
 
         if not as_selected:
             self.set_ui_data(data.get("ui_data", {}), notify=True)
@@ -327,26 +336,12 @@ class NodeGraph(Graph):
                 continue
 
             # TODO pass initial values and custom ports in constructor!!
-            node = self.create_node(spec, ui_data=node_data["ui_data"])
+            # note: custom ports are just created before listener is called, they're not passed to the constructor yet
+            custom_ports = node_data.get("custom_ports", [])
+            manual_values = node_data.get("manual_values", {}).items()
+            node = self.create_node(spec, ui_data=node_data["ui_data"], custom_ports=custom_ports, manual_values=manual_values)
             new_nodes.append(node)
             id_map[node_save_id] = node.id
-
-            for port_id, port_spec in node_data.get("custom_ports", []):
-                port_spec = unformat_port_spec(port_spec)
-
-                if node_meta.is_input(port_id):
-                    node.custom_input_ports[port_id] = port_spec
-                else:
-                    node.custom_output_ports[port_id] = port_spec
-            node.update_ports()
-
-            for port_id, json_value in node_data.get("manual_values", {}).items():
-                if port_id not in node.ports:
-                    print("### Warning: Unknown port %s of node %s #%d (trying to set manual value). Ignoring it." % (port_id, spec.name, node_save_id))
-                    continue
-                port_spec = node.ports[port_id]
-                dtype = port_spec["dtype"]
-                node.initial_manual_values[port_id] = dtype.base_type.unserialize(json_value)
 
             node.set_state(node_data.get("state", {}))
             node.set_extra(node_data.get("extra", {}))
@@ -440,6 +435,10 @@ class NodeGraph(Graph):
         self.clear()
         self.unserialize(data)
 
+    def load_json(self, json_data):
+        self.clear()
+        self.unserialize(json_data)
+
     def import_file(self, path, pos_offset):
         f = open(path, "r")
         data = f.read()
@@ -468,18 +467,42 @@ class NodeGraph(Graph):
             for listener in self.listeners:
                 listener.changed_ui_data(self, ui_data)
 
-    def create_node(self, spec, values={}, ui_data={}):
+    def create_node(self, spec, values={}, ui_data={}, custom_ports=[], manual_values={}):
+        # instantiate node / basic initialization
         node = spec.instantiate_node()
         assert node.graph is None
         node.graph = self
         node.id = self._assign_node_id()
+
+        # set custom ports
+        for port_id, port_spec in custom_ports:
+            port_spec = unformat_port_spec(port_spec)
+
+            if node_meta.is_input(port_id):
+                node.custom_input_ports[port_id] = port_spec
+            else:
+                node.custom_output_ports[port_id] = port_spec
+        node.update_ports()
+
+        for port_id, json_value in manual_values:
+            if port_id not in node.ports:
+                print("### Warning: Unknown port %s of node %s (trying to set manual value). Ignoring it." % (port_id, spec.name))
+                continue
+            port_spec = node.ports[port_id]
+            dtype = port_spec["dtype"]
+            node.initial_manual_values[port_id] = dtype.base_type.unserialize(json_value)
+
+        # set values
         # TODO maybe move this to extra function
         for port_id, value in values.items():
             node.get_value(port_id).value = value
-        node.start(self)
 
+        # done: store node and start!
         self.nodes[node.id] = node
         self.node_ui_data[node.id] = ui_data
+        node.start(self)
+
+        # notify listeners
         for listener in self.listeners:
             listener.created_node(self, node, ui_data)
         return node

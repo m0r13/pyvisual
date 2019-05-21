@@ -42,7 +42,7 @@ class SetVar(Node):
         self.get_input("name").value = name
 
     @property
-    def descriptive_title(self):
+    def collapsed_node_title(self):
         return "set var: %s" % self.name
 
     def start(self, graph):
@@ -130,7 +130,7 @@ class GetVar(Node):
         return presets
 
     @property
-    def descriptive_title(self):
+    def collapsed_node_title(self):
         return "get var: %s" % self.name
 
     def start(self, graph):
