@@ -1,6 +1,6 @@
 #version 150
-uniform sampler2D uInputTexture;
-uniform vec4 uColor;
+uniform sampler2D uInputTexture; // {"skip" : true}
+uniform vec4 uColor; // {"skip" : true}
 
 in vec2 TexCoord0;
 
