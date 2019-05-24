@@ -1,5 +1,7 @@
 #include <filter/basefilter.frag>
 
+// preprocessor bool dWithAlpha; {"default" : false, "group" : "additional"}
+
 uniform float uStep; // {"default" : 1.0, "range" : [0.0, Infinity]}
 uniform float uThreshold; // {"default" : 0.5, "range" : [0.0, Infinity]}
 uniform float uSoftness; // {"default" : 0.1, "range" : [0.0, 0.5]}
@@ -28,6 +30,10 @@ vec4 filterFrag(vec2 uv, vec4 frag) {
     float y = -tleft - 2.0*top - tright + bleft + 2.0 * bottom + bright;
     float color = sqrt((x*x) + (y*y));
 
-    return vec4(vec3(color), frag.a);
+#if dWithAlpha
+    return vec4(vec3(color), color);
+#else
+    return vec4(vec3(color), 1.0);
+#endif
 }
 
