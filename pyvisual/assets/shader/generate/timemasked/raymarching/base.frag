@@ -4,6 +4,10 @@
 #  define RAYMARCHING_STEPS 64
 #endif
 
+#ifndef DITHERING_COUNT_Y
+#  define DITHERING_COUNT_Y 750.0
+#endif
+
 // uniforms
 
 uniform float uScale; // {"default" : 1.0, "range" : [0.0001, Infinity]}
@@ -34,7 +38,7 @@ void generateFrag() {
 
     #ifdef RAYMARCHING_DITHERING
     vec2 dpos = ( (vec2(pyvisualUV.x, 1.0 - pyvisualUV.y) * pyvisualResolution).xy / pyvisualResolution.xy );
-    vec2 num = vec2(750.0);
+    vec2 num = vec2(DITHERING_COUNT_Y);
     num.x *= pyvisualResolution.x / pyvisualResolution.y;
     vec2 seed = floor(dpos*num) / num + fract(uDitheringTime);
     #endif
