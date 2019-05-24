@@ -1,12 +1,21 @@
 #define DONT_SAMPLE_FRAGMENT
 #include <filter/basefilter.frag>
 
-uniform int uMode; // {"default" : 1, "choices" : ["passthrough", "1", "2", "3", "4", "5"]}
-// only for modes 4 and 5
+uniform int uMode; // {"default" : 1, "choices" : ["passthrough", "vertical", "horizontal", "vertical and horizontal", "double vertical", "double horizontal"]}
+uniform bool uInvertVertical;
+uniform bool uInvertHorizontal;
+// only for double modes
 uniform float uDoubleCenter; // {"default" : 0.2, "range" : [0.0, 0.5]}
 
 vec4 filterFrag(vec2 uv, vec4 frag) {
     vec2 texCoords = uv;
+
+    if (uInvertVertical) {
+        texCoords.x = 1.0 - texCoords.x;
+    }
+    if (uInvertHorizontal) {
+        texCoords.y = 1.0 - texCoords.y;
+    }
 
     // uMode == 0 is just passthrough
     if (uMode == 1) {
@@ -61,6 +70,13 @@ vec4 filterFrag(vec2 uv, vec4 frag) {
             float t = 1.0 - uDoubleCenter;
             texCoords.y = t + (-1.0) * (texCoords.y - t);
         }
+    }
+
+    if (uInvertVertical) {
+        texCoords.x = 1.0 - texCoords.x;
+    }
+    if (uInvertHorizontal) {
+        texCoords.y = 1.0 - texCoords.y;
     }
 
     return texture2D(uInputTexture, texCoords);
