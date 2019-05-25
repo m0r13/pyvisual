@@ -20,9 +20,10 @@ import traceback
 from collections import defaultdict
 
 import imgui
-import pyvisual.editor.widget as node_widget
 import pyvisual.node as node_meta
 import pyvisual.node.dtype as node_dtype
+# import this later than all node types (widget is required by pyvisual.node.io.system_var)
+import pyvisual.editor.widget as node_widget
 
 from glumpy import app, gloo, gl, glm
 from glumpy.ext import glfw
@@ -32,6 +33,7 @@ from pyvisual.editor.graph import RootGraph, NodeGraph, NodeGraphListener
 from pyvisual.node.io.texture import Renderer
 from pyvisual.node.op.gpu.base import ShaderNodeLoader
 from pyvisual.node.value import ConnectedValue
+from pyvisual.node.io import system_var
 
 profile = cProfile.Profile()
 
@@ -1241,7 +1243,7 @@ class UIGraph(NodeGraphListener):
         # - BUT: if you drag a new connection on top of another node, the context menu should still open
         no_node_hovered = lambda: not any(map(lambda n: n.hovered, self.nodes))
         if imgui.is_window_hovered() \
-                and (imgui.is_mouse_clicked(1) or self.is_key_down(glfw.GLFW_KEY_G) or create_node_from_connection) \
+                and (imgui.is_mouse_clicked(1) or create_node_from_connection) \
                 and (create_node_from_connection or no_node_hovered()):
             context_name = "context_create"
             if io.key_shift and not create_node_from_connection:
@@ -2161,7 +2163,7 @@ class NodeEditor(NodeGraphListener, SubgraphHandler):
                     if changed:
                         global_time.paused = paused
 
-                    changed, global_time.time_offset = imgui.drag_float("time offset", global_time.time_offset, 1.0)
+                    changed, global_time.time_offset = imgui.drag_float("time offset", global_time.time_offset, 0.1)
 
                 if imgui.collapsing_header("states & presets", flags=imgui.TREE_NODE_DEFAULT_OPEN)[0]:
                     changed, self.random_seed = imgui.input_text("random seed", self.random_seed, 255)
@@ -2182,6 +2184,30 @@ class NodeEditor(NodeGraphListener, SubgraphHandler):
                         random.seed(seed)
                         self.root_graph.apply_instances(lambda node: node.randomize_preset())
                         self.root_graph.apply_instances(lambda node: node.randomize_state())
+
+                imgui.end()
+
+            if imgui.begin("scene properties", False, flags):
+                value_changed = False
+                for name, value in system_var.values.items():
+                    widget = system_var.widgets[name]
+
+                    imgui.push_id(name)
+                    widget.show(value, read_only=False)
+                    imgui.same_line()
+                    imgui.text(name)
+                    imgui.pop_id()
+
+                    if name == "threshold" and io.is_key_down(glfw.GLFW_KEY_T):
+                        value.value += io.mouse_wheel * 0.1 * 0.1
+                    if name == "gain" and io.is_key_down(glfw.GLFW_KEY_G):
+                        value.value += io.mouse_wheel * 0.1
+
+                    value_changed = value_changed or value.has_changed()
+
+                if value_changed:
+                    system_var.notify_change()
+                system_var.write_variables(force=False)
 
                 imgui.end()
 
@@ -2304,6 +2330,7 @@ def on_key_press(key, modifier):
         #editor.background_graph.save_file("background.json")
         editor.background_graph.stop()
         editor.write_settings()
+        system_var.write_variables(force=True)
         profile.dump_stats("profile.stats")
         sys.exit(0)
 

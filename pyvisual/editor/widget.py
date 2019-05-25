@@ -33,7 +33,7 @@ UNIT_DRAG_FACTORS = {
     "deg" : 5.0,
 }
 
-def create_widget(dtype, dtype_args, node):
+def create_widget(dtype, dtype_args, node=None):
     widget_types = {
         dtypes.bool: Bool,
         dtypes.event: Button,
@@ -63,6 +63,8 @@ def create_widget(dtype, dtype_args, node):
 class Widget:
     def __init__(self, ignore_read_only=False):
         self._ignore_read_only = ignore_read_only
+
+        self.width = WIDGET_WIDTH
 
     def _show(self):
         pass
@@ -104,7 +106,7 @@ class Button(Widget):
         if active:
             imgui.push_style_color(imgui.COLOR_BUTTON, 1.0, 0.0, 0.0, 1.0)
             imgui.push_style_color(imgui.COLOR_BUTTON_HOVERED, 1.0, 0.0, 0.0, 1.0)
-        imgui.push_item_width(WIDGET_WIDTH)
+        imgui.push_item_width(self.width)
         clicked = imgui.button("Click me")
         if active:
             imgui.pop_style_color(2)
@@ -145,7 +147,7 @@ class Int(Widget):
         self.clamper = clamper(minmax)
 
     def _show(self, value, read_only):
-        imgui.push_item_width(WIDGET_WIDTH)
+        imgui.push_item_width(self.width)
         changed, v = imgui.input_int("", value.value)
         if changed and not read_only:
             value.value = int(self.clamper(v))
@@ -159,7 +161,7 @@ class Choice(Widget):
         self.choices = [ choice for i, choice in enumerate(choices) ]
 
     def _show(self, value, read_only):
-        imgui.push_item_width(WIDGET_WIDTH)
+        imgui.push_item_width(self.width)
         changed, v = imgui.combo("", value.value, self.choices)
         if changed and not read_only:
             value.value = v
@@ -173,8 +175,10 @@ class Float(Widget):
         self.minmax = minmax
         self.clamper = clamper(minmax)
 
+        self.width *= 0.75
+
     def _show(self, value, read_only):
-        imgui.push_item_width(WIDGET_WIDTH * 0.75)
+        imgui.push_item_width(self.width)
         changed, v = imgui.drag_float("", value.value,
                 change_speed=self.drag_factor, min_value=self.minmax[0], max_value=self.minmax[1], format="%0.4f")
         if changed and not read_only:
@@ -187,13 +191,15 @@ class Vec2(Widget):
         self.node = node
         self.drag_factor = 0.01 * drag_factor
 
+        self.width *= 0.75
+
     def _show(self, value, read_only):
-        imgui.push_item_width(WIDGET_WIDTH * 0.75)
+        imgui.push_item_width(self.width)
         imgui.push_id("v0")
         changed0, v0 = imgui.drag_float("", value.value[0], change_speed=self.drag_factor, format="%0.4f")
         imgui.pop_id()
 
-        imgui.push_item_width(WIDGET_WIDTH * 0.75)
+        imgui.push_item_width(self.width)
         imgui.push_id("v1")
         changed1, v1 = imgui.drag_float("", value.value[1], change_speed=self.drag_factor, format="%0.4f")
         imgui.pop_id()
@@ -286,7 +292,7 @@ class String(Widget):
         super().__init__()
 
     def _show(self, value, read_only):
-        imgui.push_item_width(WIDGET_WIDTH)
+        imgui.push_item_width(self.width)
         changed, v = imgui.input_text("", value.value, 255, imgui.INPUT_TEXT_ENTER_RETURNS_TRUE)
         if imgui.is_item_hovered() and not imgui.is_item_active():
             imgui.set_tooltip(value.value)
@@ -300,14 +306,14 @@ class AssetPath(Widget):
         self.prefix = prefix
 
     def _show(self, value, read_only):
-        imgui.push_item_width(WIDGET_WIDTH)
+        imgui.push_item_width(self.width)
         changed, v = imgui.input_text("", value.value, 255, imgui.INPUT_TEXT_ENTER_RETURNS_TRUE)
         if imgui.is_item_hovered() and not imgui.is_item_active():
             imgui.set_tooltip(value.value)
         if changed:
             value.value = v
             return
-        imgui.push_item_width(WIDGET_WIDTH)
+        imgui.push_item_width(self.width)
         if imgui.button("Select file"):
             imgui.open_popup("select_file")
 
