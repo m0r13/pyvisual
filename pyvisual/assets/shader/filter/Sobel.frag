@@ -3,8 +3,8 @@
 // preprocessor bool dWithAlpha; {"default" : false, "group" : "additional"}
 
 uniform float uStep; // {"default" : 1.0, "range" : [0.0, Infinity]}
-uniform float uThreshold; // {"default" : 0.5, "range" : [0.0, Infinity]}
-uniform float uSoftness; // {"default" : 0.1, "range" : [0.0, 0.5]}
+uniform float uAlphaIntensity; // {"default" : 1.0, "range" : [0.0, Infinity]}
+uniform vec4 uColor;
 
 float intensity(in vec4 color){
     //return sqrt((color.x*color.x)+(color.y*color.y)+(color.z*color.z));
@@ -28,12 +28,12 @@ vec4 filterFrag(vec2 uv, vec4 frag) {
 
     float x = tleft + 2.0*left + bleft - tright - 2.0*right - bright;
     float y = -tleft - 2.0*top - tright + bleft + 2.0 * bottom + bright;
-    float color = sqrt((x*x) + (y*y));
+    float edge = sqrt((x*x) + (y*y));
 
 #if dWithAlpha
-    return vec4(vec3(color), color);
+    return vec4(uColor.rgb * edge, edge * uAlphaIntensity);
 #else
-    return vec4(vec3(color), 1.0);
+    return vec4(uColor.rgb * edge, 1.0);
 #endif
 }
 
