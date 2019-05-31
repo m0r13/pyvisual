@@ -5,7 +5,8 @@ uniform sampler2D uInputTexture; // {"skip" : true, "alias" : "input"}
 // and should appear different from the other uniform inputs
 uniform sampler2D uFilterMaskTexture; // {"alias" : "filter_mask"}
 uniform float uFilterMaskFactor; // {"alias" : "mask_factor", "default" : 1.0}
-uniform int uFilterMaskMode; // {"alias" : "filter_mode", "default" : 2, "choices" : ["input", "mask", "filtered", "input_filtered_masked", "input_masked", "filtered_masked"]}
+uniform bool uFilterMaskInvert; // {"alias" : "mask_invert", "default" : false}
+uniform int uFilterMaskMode; // {"alias" : "filter_mode", "default" : 2, "choices" : ["input", "mask", "filtered", "input_filtered_masked", "input_masked", "filtered_masked"], "group" : "additional"}
 uniform vec4 uFilterBackgroundColor; // {"alias" : "filter_bg", "default" : [0.0, 0.0, 0.0, 0.0]}
 
 in vec2 TexCoordi;
@@ -28,6 +29,9 @@ void main( ) {
 
 #ifdef ADVANCED_FILTERING
     float mask = texture2D(uFilterMaskTexture, TexCoord0).r * uFilterMaskFactor;
+    if (uFilterMaskInvert) {
+        mask = 1.0 - mask;
+    }
 
     if (uFilterMaskMode == 0) {
         // only input

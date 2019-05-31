@@ -2,7 +2,7 @@
 # define RAYMARCHING_DITHERING
 #endif
 
-#define RAYMARCHING_STEPS 64
+#define RAYMARCHING_STEPS 32
 
 #include <generate/timemasked/raymarching/base.frag>
 

@@ -4,7 +4,7 @@
 
 uniform float uStep; // {"default" : 1.0, "range" : [0.0, Infinity]}
 uniform float uAlphaIntensity; // {"default" : 1.0, "range" : [0.0, Infinity]}
-uniform vec4 uColor;
+uniform vec4 uColor; // {"default" : [1.0, 1.0, 1.0, 1.0]}
 
 float intensity(in vec4 color){
     //return sqrt((color.x*color.x)+(color.y*color.y)+(color.z*color.z));
