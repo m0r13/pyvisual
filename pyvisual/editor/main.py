@@ -1629,6 +1629,7 @@ class NodeEditor(NodeGraphListener, SubgraphHandler):
         # also UI graph representations share some data such as settings and clipboard
         # that's kept in this instance
         settings = self.load_settings()
+        util.time.global_time.paused = settings.get("paused", False)
         self.ui_graph_data = UIGraphData(base_node=base_node, settings=settings)
 
         # opened graphs and UI representations
@@ -1747,6 +1748,7 @@ class NodeEditor(NodeGraphListener, SubgraphHandler):
 
     def write_settings(self):
         settings = {}
+        settings["paused"] = util.time.global_time.paused
         settings["show_graph"] = self.show_graph
         settings["show_external_window"] = self.show_external_window
         settings["external_window_i3_handle"] = self.external_window_i3_handle
@@ -1933,6 +1935,27 @@ class NodeEditor(NodeGraphListener, SubgraphHandler):
             self.set_graph(self.parent_graphs[index])
 
     #
+    # graph states
+    #
+
+    def reset_graphs(self):
+        self.root_graph.apply_instances(lambda node: node.reset_preset())
+        self.root_graph.apply_instances(lambda node: node.reset_state())
+
+    def randomize_graphs(self):
+        seed = self.random_seed.strip()
+        try:
+            seed = int(seed)
+        except ValueError:
+            pass
+        if type(seed) == str and len(seed) == 0:
+            seed = None
+
+        random.seed(seed)
+        self.root_graph.apply_instances(lambda node: node.randomize_preset())
+        self.root_graph.apply_instances(lambda node: node.randomize_state())
+
+    #
     # rendering and interaction handling
     #
 
@@ -2018,9 +2041,12 @@ class NodeEditor(NodeGraphListener, SubgraphHandler):
                 util.image.save_screenshot(output_texture.get(), path=path)
                 self.session_graph.save_file(path.replace(".png", ".json"))
 
-        if self.is_key_down(glfw.GLFW_KEY_SPACE):
-            global_time = util.time.global_time
-            global_time.paused = not global_time.paused
+        if not io.want_capture_keyboard:
+            if self.is_key_down(glfw.GLFW_KEY_SPACE):
+                global_time = util.time.global_time
+                global_time.paused = not global_time.paused
+            if self.is_key_down(glfw.GLFW_KEY_R):
+                self.randomize_graphs()
 
         draw_list.channels_merge()
 
@@ -2030,7 +2056,7 @@ class NodeEditor(NodeGraphListener, SubgraphHandler):
             dock_padding = 0
 
             flags = imgui.WINDOW_NO_RESIZE | imgui.WINDOW_ALWAYS_AUTO_RESIZE
-            flags_static = imgui.WINDOW_NO_MOVE | imgui.WINDOW_NO_RESIZE
+            flags_static = imgui.WINDOW_NO_MOVE | imgui.WINDOW_NO_RESIZE | imgui.WINDOW_ALWAYS_AUTO_RESIZE
 
             imgui.set_next_window_position(pos[0] + dock_padding, pos[1] + dock_padding)
             if self.show_graph and imgui.begin("io", False, flags_static):
@@ -2091,8 +2117,12 @@ class NodeEditor(NodeGraphListener, SubgraphHandler):
                 imgui.text("processing time: %.2f ms ~ %.2f%%" % (self.processing_time * 1000.0, self.processing_time_relative * 100.0))
                 imgui.text("total: %.2f ms ~ %.2f%%" % (self.total_time * 1000.0, self.total_time_relative * 100.0))
 
+                if util.time.global_time.paused:
+                    imgui.text_colored("PAUSED", 1.0, 0.0, 0.0)
+                else:
+                    imgui.text("")
+
                 if graph_stats is not None:
-                    imgui.dummy(1, 10)
                     imgui.text("c: %d / %d n: %d / %d" % (graph_stats["connections"] + graph_stats["nodes"]))
                 imgui.end()
 
@@ -2169,22 +2199,9 @@ class NodeEditor(NodeGraphListener, SubgraphHandler):
                     changed, self.random_seed = imgui.input_text("random seed", self.random_seed, 255)
 
                     if imgui.button("reset"):
-                        self.root_graph.apply_instances(lambda node: node.reset_preset())
-                        self.root_graph.apply_instances(lambda node: node.reset_state())
-
+                        self.reset_graphs()
                     if imgui.button("randomize"):
-                        seed = self.random_seed.strip()
-                        try:
-                            seed = int(seed)
-                        except ValueError:
-                            pass
-                        if type(seed) == str and len(seed) == 0:
-                            seed = None
-
-                        random.seed(seed)
-                        self.root_graph.apply_instances(lambda node: node.randomize_preset())
-                        self.root_graph.apply_instances(lambda node: node.randomize_state())
-
+                        self.randomize_graphs()
                 imgui.end()
 
             if imgui.begin("scene properties", False, flags):
@@ -2199,9 +2216,15 @@ class NodeEditor(NodeGraphListener, SubgraphHandler):
                     imgui.pop_id()
 
                     if name == "threshold" and io.is_key_down(glfw.GLFW_KEY_T):
-                        value.value += io.mouse_wheel * 0.1 * 0.1
+                        factor = 0.01
+                        if io.key_shift:
+                            factor *= 5.0
+                        value.value += io.mouse_wheel * factor
                     if name == "gain" and io.is_key_down(glfw.GLFW_KEY_G):
-                        value.value += io.mouse_wheel * 0.1
+                        factor = 0.25
+                        if io.key_shift:
+                            factor *= 5.0
+                        value.value += io.mouse_wheel * factor
 
                     value_changed = value_changed or value.has_changed()
 
