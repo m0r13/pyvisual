@@ -173,6 +173,10 @@ class StaticModule(Module):
         graph.load_file(os.path.join(assets.ASSET_PATH, "saves", "module", self._path))
 
 class UserModule(Module):
+
+    # Let's just assume that user modules use OpenGL
+    USES_OPENGL = True
+
     class Meta:
         options = {
             "virtual" : False
