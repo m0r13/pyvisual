@@ -182,6 +182,9 @@ class UserModule(Module):
             "virtual" : False
         }
 
+    def __init__(self):
+        super().__init__(embed_graph=True)
+
     def get_extra(self):
         extra = super().get_extra()
         extra["subgraph"] = self._graph.serialize(as_json_dict=True)

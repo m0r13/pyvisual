@@ -2354,7 +2354,7 @@ def on_key_press(key, modifier):
         editor.background_graph.stop()
         editor.write_settings()
         system_var.write_variables(force=True)
-        profile.dump_stats("profile.stats")
+        #profile.dump_stats("profile.stats")
         sys.exit(0)
 
 window.event(on_key_press)

@@ -17,7 +17,7 @@ from pyvisual.node import dtype
 from pyvisual.node.base import Node
 
 USE_PBO_TRANSFER = True
-PBO_COUNT = 2
+PBO_COUNT = 4
 
 class VideoThread(threading.Thread):
     def __init__(self, video_path=""):
