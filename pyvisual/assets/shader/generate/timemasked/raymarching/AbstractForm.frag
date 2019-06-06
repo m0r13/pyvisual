@@ -147,13 +147,15 @@ float opSmoothIntersection( float d1, float d2, float k ) {
 // preprocessor int dFormType; {"choices" : ["round", "angled"], "default" : 0, "group" : "additional"}
 // preprocessor bool dRaymarchingFog; {"default" : false, "group" : "additional"}
 // preprocessor bool dRaymarchingDithering; {"default" : false, "group" : "additional"}
+//
+// preprocessor int dMirrorCount; {"default" : 0, "range" : [0, Infinity], "group" : "additional"}
 
 uniform float uRotation;
 uniform float uDisplace; // {"default" : 1.0, "range": [-1.0, 1.0]}
 uniform float uDisplaceOffset;
 uniform float uAlpha; // {"default" : 1.0, "range" : [0.0, 1.0]}
 
-uniform float uMirrorCount; // {"default" : 4.0, "range" : [0.0, Infinity]}
+#define uMirrorCount dMirrorCount
 uniform float uMirrorRotation;
 
 //uniform float uSliceForm;
@@ -162,6 +164,8 @@ uniform float uMirrorRotation;
 
 uniform float uSliceTime; // {"default" : 1.5}
 uniform float uSliceTimeOffset; // {"default" : 0.5}
+
+uniform float uPos;
 
 vec3 finalPP;
 
@@ -176,6 +180,7 @@ float scene(vec3 p) {
     p = opRotateZ(p, 0.4*uRotation);
     */
     p = opRotate(p, vec3(0.3, 0.05, 0.4) * uRotation);
+    p.x += uPos;
 
 #ifdef MIRROR
     float mirrorRotation = uMirrorRotation * 0.1;
@@ -185,8 +190,11 @@ float scene(vec3 p) {
         p = opRotateY(p, mirrorRotation);
         p = opRotateZ(p, -0.5 * mirrorRotation - 2.76);
         */
+        vec2 polar = opXYToPolar(p.xz);
+        polar = opPolarMirror(polar, uMirrorCount, -mirrorRotation);
+        p.xz = opPolarToXY(polar);
         p = opRotate(p, vec3(0.8, 1.0, -0.5) * mirrorRotation);
-        p.xz = opPolarToXY(opPolarMirror(opXYToPolar(p.xz), uMirrorCount, -mirrorRotation));
+        p += vec3(sin(mirrorRotation * 0.75) * 0.5, cos(mirrorRotation * 0.75) * 0.5, 0.0);
     }
 #endif
     float timeOffset = p.y > uSliceTime ? uSliceTimeOffset : 0.0;
@@ -205,7 +213,7 @@ float scene(vec3 p) {
     p = opRotateX(p, -(0.8 * mirrorRotation + 4.73));
     */
     if (uMirrorCount > 0.0) {
-        p = opRotateInv(p, vec3(0.8, 1.0, -0.5) * mirrorRotation);
+    //    p = opRotateInv(p, vec3(0.8, 1.0, -0.5) * mirrorRotation);
     }
 #endif
 
@@ -258,7 +266,7 @@ vec4 sceneColor(vec3 p, float camDist, vec4 bgColor) {
     // nearest dist: 1.7
     // farthest dist: 2.5
     float minDist = 1.5;
-    float maxDist = 2.0;
+    float maxDist = 2.5;
     float dist = (camDist - minDist) / (minDist - maxDist);
     dist = 1.0 - clamp(dist*dist, 0.0, 1.0);
     /*

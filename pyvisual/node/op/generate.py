@@ -168,6 +168,7 @@ class MoveAndJump(Node):
         ]
         outputs = [
             {"name" : "value", "dtype" : dtype.float},
+            {"name" : "value_no_jumps", "dtype" : dtype.float},
         ]
         initial_state = {
             "dir" : 0,
@@ -188,10 +189,21 @@ class MoveAndJump(Node):
 
         super().__init__(always_evaluate=True)
 
-    def _evaluate(self):
-        global_speed = self.get("global_speed")
+    def _emit_value(self, name, t):
+        if self._lfo is None:
+            self.set(name, t)
+            return
+
         timer_min = self.get("timer_min")
         timer_max = self.get("timer_max")
+        timer_duration = self.get("timer_duration")
+
+        value = self._lfo(t, timer_duration, 0.0)
+        value = timer_min + value * (timer_max - timer_min)
+        self.set(name, value)
+
+    def _evaluate(self):
+        global_speed = self.get("global_speed")
         timer_duration = self.get("timer_duration")
 
         event = self.get("event")
@@ -206,10 +218,10 @@ class MoveAndJump(Node):
             if jump_type == 1:
                 jump_factor = speed
             elif jump_type == 2:
-                jump_factor = timer_duration * 0.5
+                jump_factor = timer_duration
             self._time_offset += self.get("jump_amount") * jump_factor
 
-        self._time = self._time_offset + self._timer(global_speed * speed)
+        self._time = self._timer(global_speed * speed)
 
         timer_type = self.get_input("timer_type") 
         if timer_type.has_changed():
@@ -219,23 +231,20 @@ class MoveAndJump(Node):
             else:
                 lfos = list(LFO_OSCILLATORS.values())
                 self._lfo = lfos[min(len(lfos) - 1, index)]
-        if self._lfo is None:
-            self.set("value", self._time)
-            return
 
-        value = self._lfo(self._time, timer_duration, 0.0)
-        value = timer_min + value * (timer_max - timer_min)
-        self.set("value", value)
+        self._emit_value("value", self._time + self._time_offset)
+        self._emit_value("value_no_jumps", self._time)
 
     def get_state(self):
-        return {"dir" : self._dir, "time" : self._time}
+        return {"dir" : self._dir, "time" : self._time, "time_offset" : self._time_offset}
 
     def set_state(self, state):
         if "dir" in state:
             self._dir = state["dir"]
         if "time" in state:
             self._timer = util.time.ScalableTimer(state["time"])
-            self._time_offset = 0.0
+        if "time_offset" in state:
+            self._time_offset = state["time_offset"]
 
 def random_float(a, b):
     alpha = random.random()
