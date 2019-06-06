@@ -55,7 +55,7 @@ class LFO(Node):
         generator = int(self.get("type"))
         length = self.get("length")
         self._time = self._timer(1.0 / length, False)
-        value = LFO.OSCILLATORS[generator](self._time, 1.0 + 0.0 * self.get("length"), self.get("phase"))
+        value = LFO.OSCILLATORS[generator](self._time, 1.0, self.get("phase"))
         value = self.get("min") + value * (self.get("max") - self.get("min"))
         self.set("output", value)
 
@@ -150,6 +150,92 @@ class Time(Node):
     def set_state(self, state):
         if "time" in state:
             self._timer = util.time.ScalableTimer(state["time"])
+
+class MoveAndJump(Node):
+    class Meta:
+        inputs = [
+            {"name" : "event", "dtype" : dtype.event},
+            {"name" : "global_speed", "dtype" : dtype.float, "dtype_args" : {"default" : 1.0}},
+            {"name" : "speed0", "dtype" : dtype.float, "dtype_args" : {"default" : 1.0}},
+            {"name" : "speed1", "dtype" : dtype.float, "dtype_args" : {"default" : -1.0}},
+            {"name" : "jump_amount", "dtype" : dtype.float, "dtype_args" : {"default" : 0.0}},
+            {"name" : "jump_smooth", "dtype" : dtype.bool, "dtype_args" : {"default" : False}},
+            {"name" : "jump_type", "dtype" : dtype.int, "dtype_args" : {"choices" : ["fixed", "relative_speed", "relative_duration"]}},
+            {"name" : "timer_type", "dtype" : dtype.int, "dtype_args" : {"choices" : ["identity", "saw", "triangle", "sine"]}},
+            {"name" : "timer_min", "dtype": dtype.float, "dtype_args" : {"default" : 0.0}},
+            {"name" : "timer_max", "dtype": dtype.float, "dtype_args" : {"default" : 1.0}},
+            {"name" : "timer_duration", "dtype": dtype.float, "dtype_args" : {"default" : 1.0, "range" : [0.0, float("infinity")]}},
+        ]
+        outputs = [
+            {"name" : "value", "dtype" : dtype.float},
+        ]
+        initial_state = {
+            "dir" : 0,
+            "time" : 0.0,
+        }
+        random_state = {
+            "dir" : lambda node: random.randint(0, 1),
+            "time" : random_time,
+        }
+
+    def __init__(self):
+        self._dir = 0
+        self._timer = util.time.ScalableTimer()
+        self._time_offset = 0.0
+        self._time = 0.0
+
+        self._lfo = None
+
+        super().__init__(always_evaluate=True)
+
+    def _evaluate(self):
+        global_speed = self.get("global_speed")
+        timer_min = self.get("timer_min")
+        timer_max = self.get("timer_max")
+        timer_duration = self.get("timer_duration")
+
+        event = self.get("event")
+        if event:
+            self._dir = (self._dir + 1) % 2
+
+        speed = self.get("speed1") if self._dir else self.get("speed0")
+        if event:
+            jump_type = self.get("jump_type")
+
+            jump_factor = 1.0
+            if jump_type == 1:
+                jump_factor = speed
+            elif jump_type == 2:
+                jump_factor = timer_duration * 0.5
+            self._time_offset += self.get("jump_amount") * jump_factor
+
+        self._time = self._time_offset + self._timer(global_speed * speed)
+
+        timer_type = self.get_input("timer_type") 
+        if timer_type.has_changed():
+            index = int(self.get("timer_type"))
+            if index == 0:
+                self._lfo = None
+            else:
+                lfos = list(LFO_OSCILLATORS.values())
+                self._lfo = lfos[min(len(lfos) - 1, index)]
+        if self._lfo is None:
+            self.set("value", self._time)
+            return
+
+        value = self._lfo(self._time, timer_duration, 0.0)
+        value = timer_min + value * (timer_max - timer_min)
+        self.set("value", value)
+
+    def get_state(self):
+        return {"dir" : self._dir, "time" : self._time}
+
+    def set_state(self, state):
+        if "dir" in state:
+            self._dir = state["dir"]
+        if "time" in state:
+            self._timer = util.time.ScalableTimer(state["time"])
+            self._time_offset = 0.0
 
 def random_float(a, b):
     alpha = random.random()
