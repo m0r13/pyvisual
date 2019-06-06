@@ -290,24 +290,3 @@ class GLSLSandbox(TimeMaskedGenerate):
         if reference_path is not None:
             self._export_fragment(reference_path)
             self._reference_file_watcher = assets.FileWatcher(reference_path)
-
-class AudioSamplesMask(StaticModule):
-    class Meta:
-        pass
-
-    def __init__(self):
-        super().__init__("mask/AudioSamplesMask.json", embed_graph=True)
-
-class RorschachMask(StaticModule):
-    class Meta:
-        pass
-
-    def __init__(self):
-        super().__init__("mask/RorschachMask.json", embed_graph=True)
-
-class SDF3DMask(StaticModule):
-    class Meta:
-        pass
-
-    def __init__(self):
-        super().__init__("mask/SDF3DMask.json", embed_graph=True)
