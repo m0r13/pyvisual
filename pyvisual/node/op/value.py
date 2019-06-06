@@ -696,16 +696,11 @@ class ChooseString(Node):
 # Misc / Meta operations
 #
 
-# Delays a float value by one frame
-# Always required for cyclic connections in the graph!
-class DelayFloat(Node):
+class DelayXXX(Node):
     class Meta:
-        inputs = [
-            {"name" : "input", "dtype" : dtype.float}
-        ]
-        outputs = [
-            {"name" : "output", "dtype" : dtype.float}
-        ]
+        options = {
+            "virtual" : True
+        }
 
     FORCE_EARLY_EXECUTION = True
 
@@ -727,4 +722,24 @@ class DelayFloat(Node):
         if value.has_changed():
             self._next_value = value.value
             self.force_evaluate()
+
+# Delays a float value by one frame
+# Always required for cyclic connections in the graph!
+class DelayFloat(DelayXXX):
+    class Meta:
+        inputs = [
+            {"name" : "input", "dtype" : dtype.float}
+        ]
+        outputs = [
+            {"name" : "output", "dtype" : dtype.float}
+        ]
+
+class DelayTexture(DelayXXX):
+    class Meta:
+        inputs = [
+            {"name" : "input", "dtype" : dtype.tex2d}
+        ]
+        outputs = [
+            {"name" : "output", "dtype" : dtype.tex2d}
+        ]
 

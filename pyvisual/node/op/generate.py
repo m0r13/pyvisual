@@ -214,7 +214,7 @@ class MoveAndJump(Node):
             self._dir = (self._dir + 1) % 2
 
         speed = self.get("speed1") if self._dir else self.get("speed0")
-        self.set("speed", speed)
+        self.set("speed", global_speed * speed)
         if event:
             jump_type = self.get("jump_type")
 
