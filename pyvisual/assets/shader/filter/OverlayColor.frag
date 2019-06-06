@@ -1,6 +1,6 @@
 #include <filter/basefilter.frag>
 
-uniform int uMode; // {"choices" : ["difference", "overlay", "grain merge", "exclusion", "hsv hue", "hsv saturation", "hsv value"]}
+uniform int uMode; // {"choices" : ["difference", "overlay", "grain merge", "exclusion", "hsv hue", "hsv saturation", "hsv value", "multiply"]}
 uniform vec4 uColor;
 
 #include <lib/hsv.glsl>
@@ -28,6 +28,8 @@ vec4 filterFrag(vec2 uv, vec4 frag) {
         } else if (uMode == 6) {
             result.rgb = hsv2rgb(vec3(hsvBG.r, hsvBG.g, hsvFG.b));
         }
+    } else if (uMode == 7) {
+        result.rgb = frag.rgb * uColor.rgb;
     }
     return vec4(mix(frag.rgb, result.rgb, uColor.a), frag.a);
 }
