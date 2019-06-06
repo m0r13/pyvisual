@@ -28,6 +28,7 @@ class VideoThread(threading.Thread):
         self._video = None
         self._fps = 30.0
         self._duration = 0.0
+        self._is_stream = False
 
         self._clock = app.clock.Clock()
 
@@ -111,12 +112,16 @@ class VideoThread(threading.Thread):
     def _update_video(self):
         self._video = None
         self._video_path_changed = False
+        self._is_stream = False
 
         self._fps = 30.0
         self._duration = 1.0
 
-        path = os.path.join(assets.ASSET_PATH, self._video_path or "")
-        if not self._video_path or not os.path.exists(path):
+        path = self._video_path
+        is_local_path = not path.startswith("http://")
+        if is_local_path:
+            path = os.path.join(assets.ASSET_PATH, self._video_path or "")
+        if not self._video_path or (is_local_path and not os.path.exists(path)):
             self.frame = np.zeros((1, 1, 4), dtype=np.uint8)
             self.frame_changed = True
             if not USE_PBO_TRANSFER:
@@ -133,6 +138,7 @@ class VideoThread(threading.Thread):
 
         self._fps = fps
         self._duration = max(0.0, (frame_count - 1) / fps)
+        self._is_stream = not is_local_path
         self.frame = np.zeros((height, width, 4), dtype=np.uint8)
         self.frame_changed = True
         if not USE_PBO_TRANSFER:
@@ -149,7 +155,7 @@ class VideoThread(threading.Thread):
             if self._video is None:
                 continue
 
-            if self.is_over and self.loop:
+            if self.is_over and self.loop and not self._is_stream:
                 self.time = 0.0
             if self._seek_time is not None:
                 seek_time = max(0, min(self._seek_time, self._duration))
@@ -256,9 +262,16 @@ class PlayVideo(Node):
             self._pbo_index = (self._pbo_index + 1) % PBO_COUNT
             pbo = self._pbos[self._pbo_index]
             gl.glBindBuffer(gl.GL_PIXEL_UNPACK_BUFFER, pbo)
+            # this might be an alternative, but not so fast as tested so far
+            #gl.glBufferSubData(gl.GL_PIXEL_UNPACK_BUFFER, 0, num_bytes, ctypes.c_void_p(self._video_thread.frame.ctypes.data))
+
             ptr = gl.glMapBuffer(gl.GL_PIXEL_UNPACK_BUFFER, gl.GL_WRITE_ONLY)
             if ptr != 0:
+                #start = time.time()
                 ctypes.memmove(ctypes.c_voidp(ptr), ctypes.c_void_p(self._video_thread.frame.ctypes.data), num_bytes)
+                #end = time.time()
+                #elapsed = end - start
+                #print("Took %.2fms, %.2fMB/s" % (elapsed * 1000, (num_bytes / 1000000) / elapsed))
                 gl.glUnmapBuffer(gl.GL_PIXEL_UNPACK_BUFFER)
             gl.glBindBuffer(gl.GL_PIXEL_UNPACK_BUFFER, 0)
 
@@ -401,7 +414,7 @@ class FFMPEGVideoRecorder(Node):
             "-r", "30",
             "-i", "-",
             #"-i", "pipe:0",
-            "-c:v", "h264_nvenc", "-preset", "slow", "-profile:v", "high", "-b:v", "5M",
+            #"-c:v", "h264_nvenc", "-preset", "slow", "-profile:v", "high", "-b:v", "5M",
             "-an",
             util.image.generate_screenshot_path(suffix=".mp4"),
         ]
