@@ -17,6 +17,7 @@ from pyvisual.node import dtype
 from pyvisual.node.base import Node
 
 USE_PBO_TRANSFER = True
+PBO_COUNT = 2
 
 class VideoThread(threading.Thread):
     def __init__(self, video_path=""):
@@ -218,10 +219,10 @@ class PlayVideo(Node):
         # generate PBO's 
         if self._video_thread.has_video_loaded and (self._pbo_shape != self._video_thread.frame.shape):
             if self._pbos is not None:
-                gl.glDeleteBuffers(2, self._pbos)
+                gl.glDeleteBuffers(PBO_COUNT, self._pbos)
 
             self._pbo_shape = self._video_thread.frame.shape
-            self._pbos = gl.glGenBuffers(2)
+            self._pbos = gl.glGenBuffers(PBO_COUNT)
 
             h, w, b = self._pbo_shape
             num_bytes = h*w*b
@@ -252,7 +253,7 @@ class PlayVideo(Node):
             h, w, b = self._pbo_shape
             num_bytes = h*w*b
 
-            self._pbo_index = (self._pbo_index + 1) % 2
+            self._pbo_index = (self._pbo_index + 1) % PBO_COUNT
             pbo = self._pbos[self._pbo_index]
             gl.glBindBuffer(gl.GL_PIXEL_UNPACK_BUFFER, pbo)
             ptr = gl.glMapBuffer(gl.GL_PIXEL_UNPACK_BUFFER, gl.GL_WRITE_ONLY)
