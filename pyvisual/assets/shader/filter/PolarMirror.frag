@@ -3,8 +3,10 @@
 
 #include <lib/transform.glsl>
 
+// preprocessor int dInputWrapping; {"choices" : ["none", "repeat", "mirrored repeat"], "default" : 2, "group" : "additional"}
+// preprocessor int dBlendMode; {"choices" : ["max", "multiply", "difference", "screen", "add factored", "add-1"], "default" : 0, "group" : "additional"}
+
 uniform mat4 uInputTransform;
-uniform int uInputWrapping; // {"choices" : ["none", "repeat", "mirrored repeat"], "default" : 2}
 uniform float uAspectAdjust; // {"default" : 1.0}
 uniform float uAxisAngle; // {"alias" : "axis_angle", "unit" : "deg"}
 uniform float uAngleOffset; // {"alias" : "angle", "unit" : "deg"}
@@ -46,13 +48,13 @@ vec2 polarMirror(vec2 polar, float n) {
 }
 
 vec4 sampleMirroredFrag(vec2 uv) {
-    if (uInputWrapping == 0) {
+    if (dInputWrapping == 0) {
         if (uv.x < 0.0 || uv.y < 0.0 || uv.x > 1.0 || uv.y > 1.0) {
             return vec4(vec3(0.0), 1.0);
         }
-    } else if (uInputWrapping == 1) {
+    } else if (dInputWrapping == 1) {
         uv = fract(uv);
-    } else if (uInputWrapping == 2) {
+    } else if (dInputWrapping == 2) {
         // TODO haha
         // I was too lazy to find out a formula for mirrored repeat
         // it's already mirrored repeated when the input texture is on that by default
@@ -105,14 +107,23 @@ vec4 filterFrag(vec2 uv, vec4 _) {
         vec2 uv1 = polarToUV(polar1);
 
         vec4 frag1 = sampleMirroredFrag(uv1);
-        // manchmal übersteuert
-        frag = max(frag, frag1);
-        // hält farbe ganz nice
-        //frag = frag * frag1;
-        // etwas knallig übersteuerte farben, aber nice
-        //frag = (1 - (1 - frag) / frag1);
-        // auch etwas knallige farben, aber noch mehr details moduliert
-        //frag = frag + frag1 - 1.0;
+        if (dBlendMode == 0) {
+            // manchmal übersteuert
+            frag = max(frag, frag1);
+        } else if (dBlendMode == 1) {
+            // hält farbe ganz nice
+            frag = frag * frag1;
+        } else if (dBlendMode == 2) {
+            frag = vec4(abs(frag - frag1).rgb, frag.a);
+        } else if (dBlendMode == 3) {
+            // etwas knallig übersteuerte farben, aber nice
+            frag = (1 - (1 - frag) / frag1);
+        } else if (dBlendMode == 4) {
+            frag = 0.75 * frag + 0.5 * frag1;
+        } else if (dBlendMode == 5) {
+            // auch etwas knallige farben, aber noch mehr details moduliert
+            frag = frag + frag1 - 1.0;
+        }
         // overlay:
         /*
         float a = frag.a;
