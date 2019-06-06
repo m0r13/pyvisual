@@ -82,7 +82,6 @@ class VideoThread(threading.Thread):
         return self._speed
     @speed.setter
     def speed(self, speed):
-        assert speed >= 0.0, "Negative speed not allowed!"
         clock_fps = abs(self._fps * speed)
         if abs(speed) < 0.0001:
             self._force_read = True
@@ -103,7 +102,11 @@ class VideoThread(threading.Thread):
 
     @property
     def is_over(self):
-        return self.time >= self.duration or not self._frame_grabbed
+        if not self._frame_grabbed:
+            return True
+        if self._speed < 0.0:
+            return self.time == 0.0
+        return self.time >= self.duration
 
     @property
     def duration(self):
@@ -155,19 +158,29 @@ class VideoThread(threading.Thread):
             if self._video is None:
                 continue
 
-            if self.is_over and self.loop and not self._is_stream:
-                self.time = 0.0
+            # seek time before looping to handle reverse playing and saved time correctly
             if self._seek_time is not None:
                 seek_time = max(0, min(self._seek_time, self._duration))
                 self._video.set(cv2.CAP_PROP_POS_MSEC, seek_time * 1000.0)
                 self._seek_time = None
                 self._force_read = True
+            if not self._is_stream and self.is_over and self.loop:
+                if self._speed > 0.0:
+                    self.time = 0.0
+                else:
+                    self.time = self.duration
             # respect global time for playback, pause video too (but we don't care about time offset)
-            if (not self._play or self._speed < 0.001 or util.time.global_time.paused) and not self._force_read:
+            if (not self._play or abs(self._speed) < 0.001 or util.time.global_time.paused) and not self._force_read:
                 continue
             self._force_read = False
 
             grabbed, frame = self._video.read()
+
+            # if we're playing reverse: go two frames back
+            # two frames because we just read one and want to go another frame back
+            if self._speed < 0.0:
+                index = int(self._video.get(cv2.CAP_PROP_POS_FRAMES))
+                self._video.set(cv2.CAP_PROP_POS_FRAMES, index - 2)
 
             # remember if there was a problem grabbing the frame
             # seems to happen sometimes with last frame(s) of a video

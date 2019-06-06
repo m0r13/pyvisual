@@ -167,6 +167,9 @@ class MoveAndJump(Node):
             {"name" : "timer_duration", "dtype": dtype.float, "dtype_args" : {"default" : 1.0, "range" : [0.0, float("infinity")]}},
         ]
         outputs = [
+            {"name" : "speed", "dtype" : dtype.float},
+            {"name" : "jump", "dtype" : dtype.event},
+            {"name" : "jump_amount", "dtype" : dtype.float},
             {"name" : "value", "dtype" : dtype.float},
             {"name" : "value_no_jumps", "dtype" : dtype.float},
         ]
@@ -211,6 +214,7 @@ class MoveAndJump(Node):
             self._dir = (self._dir + 1) % 2
 
         speed = self.get("speed1") if self._dir else self.get("speed0")
+        self.set("speed", speed)
         if event:
             jump_type = self.get("jump_type")
 
@@ -219,7 +223,10 @@ class MoveAndJump(Node):
                 jump_factor = speed
             elif jump_type == 2:
                 jump_factor = timer_duration
-            self._time_offset += self.get("jump_amount") * jump_factor
+            amount = self.get("jump_amount") * jump_factor
+            self._time_offset += amount
+            self.set("jump", True)
+            self.set("jump_amount", amount)
 
         self._time = self._timer(global_speed * speed)
 
