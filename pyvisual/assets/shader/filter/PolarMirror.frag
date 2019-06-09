@@ -12,6 +12,7 @@ uniform float uAxisAngle; // {"alias" : "axis_angle", "unit" : "deg"}
 uniform float uAngleOffset; // {"alias" : "angle", "unit" : "deg"}
 uniform int uSegmentCount; // {"alias" : "segments", "default" : 4, "range" : [0, Infinity]}
 uniform int uSecondarySegmentCount; // {"alias" : "segments1", "default" : 2, "range" : [0, Infinity]}
+uniform bool uMirrorSegments; // {"default" : 1}
 uniform bool uGuide; // {"default" : 0}
 
 vec2 uvToPolar(vec2 uv) {
@@ -41,7 +42,7 @@ vec2 polarMirror(vec2 polar, float n) {
     }
     float modAngle = radians(360.0) / n;
     polar.x = mod(polar.x + radians(uAxisAngle), modAngle);
-    if (polar.x > modAngle / 2) {
+    if (uMirrorSegments && polar.x > modAngle / 2) {
         polar.x = modAngle - polar.x;
     }
     return polar;
