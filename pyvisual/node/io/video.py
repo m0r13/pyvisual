@@ -203,8 +203,10 @@ class PlayVideo(Node):
             {"name" : "loop", "dtype" : dtype.bool, "dtype_args" : {"default" : True}},
             {"name" : "play", "dtype" : dtype.bool, "dtype_args" : {"default" : True}},
             {"name" : "speed", "dtype" : dtype.float, "dtype_args" : {"default" : 1.0}},
-            {"name" : "seek_time", "dtype" : dtype.float, "dtype_args" : {"default" : 0.0}},
-            {"name" : "seek", "dtype" : dtype.event},
+            {"name" : "rel_seek_time", "dtype" : dtype.float, "dtype_args" : {"default" : 0.0}},
+            {"name" : "rel_seek", "dtype" : dtype.event},
+            {"name" : "abs_seek_time", "dtype" : dtype.float, "dtype_args" : {"default" : 0.0}},
+            {"name" : "abs_seek", "dtype" : dtype.event},
             {"name" : "random_seek", "dtype" : dtype.event},
         ]
         outputs = [
@@ -312,8 +314,12 @@ class PlayVideo(Node):
         #  (prevent it here because video thread doesn't forbid it
         #  so set_state can set time already before video is loaded)
         if self._video_thread.has_video_loaded:
-            if self.get("seek"):
-                self._video_thread.time = self.get("seek_time")
+            if self.get("abs_seek"):
+                self._video_thread.time = self.get("abs_seek_time")
+            if self.get("rel_seek"):
+                duration = self._video_thread.duration
+                if duration != 0.0:
+                    self._video_thread.time = (self._video_thread.time + self.get("rel_seek_time")) % duration
             if self.get("random_seek"):
                 duration = self._video_thread.duration
                 time = random.random() * duration

@@ -227,6 +227,8 @@ class MoveAndJump(Node):
             self._time_offset += amount
             self.set("jump", True)
             self.set("jump_amount", amount)
+        else:
+            self.set("jump", False)
 
         self._time = self._timer(global_speed * speed)
 
@@ -272,6 +274,8 @@ class RandomFloat(Node):
             {"name" : "generate", "dtype" : dtype.event},
             {"name" : "min", "dtype" : dtype.float, "dtype_args" : {"default" : 0.0}},
             {"name" : "max", "dtype" : dtype.float, "dtype_args" : {"default" : 1.0}},
+            {"name" : "clamp_min", "dtype" : dtype.float, "dtype_args" : {"default" : float("-inf")}},
+            {"name" : "clamp_max", "dtype" : dtype.float, "dtype_args" : {"default" : float("inf")}},
             {"name" : "mod", "dtype" : dtype.float, "dtype_args" : {"default" : 0.0}},
         ]
         outputs = [
@@ -304,6 +308,7 @@ class RandomFloat(Node):
             n = (max_value - min_value) / mod
             v = random.randint(0, int(n))
             value = min_value + v * mod
+        value = min(self.get("clamp_max"), max(self.get("clamp_min"), value))
         return value
 
     def get_state(self):

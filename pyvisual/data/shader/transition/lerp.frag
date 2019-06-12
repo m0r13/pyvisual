@@ -1,9 +1,9 @@
 #version 150
 
-uniform sampler2D uInputTexture;
-uniform sampler2D uTexture1;
-uniform sampler2D uTexture2;
-uniform float uAlpha;
+uniform sampler2D uInputTexture; // {"skip" : true}
+uniform sampler2D uTexture1; // {"skip" : true}
+uniform sampler2D uTexture2; // {"skip" : true}
+uniform float uAlpha; // {"skip" : true}
 
 in vec2 TexCoord0;
 out vec4 oFragColor;

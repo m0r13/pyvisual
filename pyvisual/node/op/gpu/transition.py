@@ -25,6 +25,9 @@ class MixTexture(Shader):
             "category" : "shader"
         }
 
+    def __init__(self, vertex_shader, fragment_shader):
+        super().__init__(vertex_shader, fragment_shader, handle_uniforms=False)
+
     def set_uniforms(self, program):
         source = self.get("destination")
         if source is None:
@@ -81,13 +84,13 @@ class SwipeMixTexture(MixTexture):
 
         program["uDirection"] = (self.get("x"), self.get("y"))
 
-class TestTransition(MixTexture):
-    class Meta:
-        inputs = [
-        ]
-
-    def __init__(self):
-        super().__init__("common/passthrough.vert", "transition/test.frag", handle_uniforms=True)
+#class TestTransition(MixTexture):
+#    class Meta:
+#        inputs = [
+#        ]
+#
+#    def __init__(self):
+#        super().__init__("common/passthrough.vert", "transition/test.frag", handle_uniforms=True)
 
 class TransitionTimer(Node):
     class Meta:
