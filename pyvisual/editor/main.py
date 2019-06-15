@@ -30,6 +30,7 @@ from glumpy.ext import glfw
 from pyvisual import assets, util
 from pyvisual.editor import glumpy_imgui
 from pyvisual.editor.graph import RootGraph, NodeGraph, NodeGraphListener
+from pyvisual.editor.graph_traits import GraphTraits
 from pyvisual.node.io.texture import Renderer
 from pyvisual.node.op.gpu.base import ShaderNodeLoader
 from pyvisual.node.value import ConnectedValue
@@ -1622,7 +1623,7 @@ class UIGraph(NodeGraphListener):
         }
         return stats
 
-class NodeEditor(NodeGraphListener, SubgraphHandler):
+class NodeEditor(SubgraphHandler):
     def __init__(self, base_node=node_meta.Node):
         super().__init__()
 
@@ -1656,6 +1657,9 @@ class NodeEditor(NodeGraphListener, SubgraphHandler):
         self.root_graph = RootGraph()
         self.session_graph = NodeGraph()
         self.background_graph = NodeGraph()
+        # also create graph traits handler before graphs are added
+        # graph traits handles keeping track of special nodes like Renderer, Input values, etc.
+        self.graph_traits = GraphTraits()
         self.add_graph("session", self.session_graph, add_to_root_graph=True)
         self.add_graph("background", self.background_graph, add_to_root_graph=True)
         self.set_graph(0)
@@ -1690,9 +1694,6 @@ class NodeEditor(NodeGraphListener, SubgraphHandler):
         self.autoplay_fade_out = lambda: min(1.0, self.autoplay_time / (self.autoplay_fade_duration + 0.0001))
 
         self.random_seed = ""
-
-        # rendering nodes caught from graph
-        self.render_nodes = []
 
         # appearance states
         self.last_mouse_pos = None
@@ -1780,15 +1781,6 @@ class NodeEditor(NodeGraphListener, SubgraphHandler):
         self.total_time = editor_time + imgui_render_time + processing_time
         self.total_time_relative = self.total_time / (1.0 / self.fps)
 
-    # callback methods from graph
-    # to catch render nodes
-    def created_node(self, graph, node, ui_data):
-        if isinstance(node, Renderer):
-            self.render_nodes.append(node)
-    def removed_node(self, graph, node):
-        if isinstance(node, Renderer):
-            self.render_nodes.remove(node)
-
     def set_external_window_visibility(self, visible):
         if visible:
             external_window.show()
@@ -1820,14 +1812,8 @@ class NodeEditor(NodeGraphListener, SubgraphHandler):
 
         return pick()
 
-    @property
-    def output_texture(self):
-        if len(self.render_nodes) == 0:
-            return None
-        return self.render_nodes[-1].texture
-
     def draw_output_texture(self, target_size, is_external_output=False):
-        texture = self.output_texture
+        texture = self.graph_traits.output_texture
         if texture is None:
             return
 
@@ -1883,8 +1869,8 @@ class NodeEditor(NodeGraphListener, SubgraphHandler):
         if parent_index is None:
             parent_index = index
 
-        # add us as listener (to find RenderNode's etc.)
-        graph.add_listener(self)
+        # tell graph traits to have a look at special nodes of this graph
+        self.graph_traits.add_graph(graph)
         # top-level graphs (session, background) need to be evaluated by the root graph
         if add_to_root_graph:
             self.root_graph.append(graph)
@@ -2035,7 +2021,7 @@ class NodeEditor(NodeGraphListener, SubgraphHandler):
             self.show_graph = not self.show_graph
             self.last_mouse_pos_changed = time.time()
         if self.is_key_down(glfw.GLFW_KEY_F10):
-            output_texture = self.output_texture
+            output_texture = self.graph_traits.output_texture
             if output_texture is not None:
                 path = util.image.generate_screenshot_path()
                 util.image.save_screenshot(output_texture.get(), path=path)
