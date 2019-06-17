@@ -327,7 +327,7 @@ class Node(metaclass=NodeMeta):
 
         value = None
         if is_input:
-            value = ConnectedValue(default_value)
+            value = ConnectedValue(default_value, keep_value_on_disconnect=dtype.base_type.keep_value_on_disconnect)
         else:
             value = SettableValue(default_value)
         return value

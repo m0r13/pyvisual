@@ -1,7 +1,10 @@
 from collections import namedtuple
 import numpy as np
 
-BaseType = namedtuple("BaseDType", ["name", "serialize", "unserialize"])
+# keep_value_on_disconnect: whether to take over the connected value into the manual value
+#   when a connection from one node to another is removed
+# basically set this to true for all directly editable data types (numeric, str, vec2, ...)
+BaseType = namedtuple("BaseDType", ["name", "serialize", "unserialize", "keep_value_on_disconnect"])
 
 def dummy_serializer():
     def serialize(value):
@@ -33,16 +36,16 @@ def float_serializer():
         return _float(json_value)
     return serialize, unserialize
 
-base_float = BaseType("float", *float_serializer())
-base_str = BaseType("str", lambda value: value, lambda json_value: json_value)
-base_vec2 = BaseType("vec2", *numpy_serializer())
-base_vec4 = BaseType("vec4", *numpy_serializer())
-base_mat4 = BaseType("mat4", *numpy_serializer())
-base_tex2d = BaseType("tex2d", *dummy_serializer())
-base_ssbo = BaseType("ssbo", *dummy_serializer())
-base_audio = BaseType("audio", *dummy_serializer())
-base_midi = BaseType("midi", *dummy_serializer())
-base_fft = BaseType("fft", *dummy_serializer())
+base_float = BaseType("float", *float_serializer(), True)
+base_str = BaseType("str", lambda value: value, lambda json_value: json_value, True)
+base_vec2 = BaseType("vec2", *numpy_serializer(), True)
+base_vec4 = BaseType("vec4", *numpy_serializer(), True)
+base_mat4 = BaseType("mat4", *numpy_serializer(), False)
+base_tex2d = BaseType("tex2d", *dummy_serializer(), False)
+base_ssbo = BaseType("ssbo", *dummy_serializer(), False)
+base_audio = BaseType("audio", *dummy_serializer(), False)
+base_midi = BaseType("midi", *dummy_serializer(), False)
+base_fft = BaseType("fft", *dummy_serializer(), False)
 
 Type = namedtuple("DType", ["name", "base_type", "default"])
 

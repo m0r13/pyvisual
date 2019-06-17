@@ -383,6 +383,7 @@ class Texture(Widget):
                     if imgui.menu_item("save")[0]:
                         util.image.save_screenshot(texture.get())
                     imgui.menu_item("texture handle: %s" % texture._handle, None, False, False)
+                    imgui.menu_item("texture dtype: %s" % str(texture.dtype), None, False, False)
                     imgui.menu_item("texture shape: %s" % str(texture.shape), None, False, False)
                     imgui.end_popup()
             imgui.end()

@@ -55,13 +55,16 @@ cdef class ConnectedValue(Value):
     cdef object _connected_node
     cdef SettableValue _connected_value
     cdef SettableValue _manual_value
+    cdef int _keep_value_on_disconnect
     cdef int _has_connection_changed
 
-    def __init__(self, default_value):
+    def __init__(self, default_value, keep_value_on_disconnect=False):
+        self._keep_value_on_disconnect = keep_value_on_disconnect
         self._manual_value = SettableValue(default_value)
 
     def __cinit__(self):
         self._connected_node = None
+        self._keep_value_on_disconnect = True
         self._has_connection_changed = False
 
     def connect(self, node, port_id):
@@ -71,7 +74,7 @@ cdef class ConnectedValue(Value):
 
     def disconnect(self):
         # make the manual input keep the value when connection is removed
-        if self._connected_value is not None:
+        if self._keep_value_on_disconnect and self._connected_value is not None:
             self._manual_value.value = self._connected_value.value
         self._connected_node = None
         self._connected_value = None
