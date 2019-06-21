@@ -128,18 +128,20 @@ class Button(Widget):
         if isinstance(value, ConnectedValue):
             value_to_set = value.manual_value
 
+        reset_force_value = self._reset_force_value
+
         # set on click
         if clicked:
             value_to_set.value = 1.0
             if read_only:
                 value_to_set.force_value = True
                 self._reset_force_value = True
-        elif self._reset_force_value:
+        elif reset_force_value:
             value_to_set.force_value = False
             self._reset_force_value = False
 
         # reset otherwise if still active
-        if not clicked and value.value:
+        if reset_force_value and (not clicked and value.value):
             value_to_set.value = 0.0
 
 import sys

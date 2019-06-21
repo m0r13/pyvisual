@@ -20,12 +20,13 @@ class InputXXX(Node):
     def create_class(cls, name, dt, extra_inputs=[], extra_outputs=[]):
         class Meta:
             inputs = [
+                {"name" : "input", "dtype" : dt},
                 {"name" : "midi_mapping", "dtype" : dtype.obj, "hide" : True},
                 {"name" : "name", "dtype" : dtype.str, "group" : "additional"},
                 {"name" : "default", "dtype" : dt, "group" : "additional"}
             ] + extra_inputs
             outputs = [
-                {"name" : "output", "dtype" : dt, "manual_input" : True}
+                {"name" : "output", "dtype" : dt, "hide_widget" : True}
             ] + extra_outputs
             options = {
                 "virtual" : False,
@@ -34,8 +35,8 @@ class InputXXX(Node):
 
         return type(name, (cls,), {"DTYPE" : dt, "Meta" : Meta, "__module__" : __name__})
 
-    def __init__(self):
-        super().__init__()
+    def __init__(self, always_evaluate=False):
+        super().__init__(always_evaluate=always_evaluate)
 
     def start(self, graph):
         super().start(graph)
@@ -63,12 +64,13 @@ class InputXXX(Node):
         self._set_value(self._get_value() + offset)
 
     def _get_value(self):
-        return self.get_value("o_output").value
+        return self.get_value("i_input").value
     def _set_value(self, value):
-        self.get_value("o_output").value = value
+        self.get_value("i_input").value = value
 
     def _evaluate(self):
-        pass
+        self.get_input("input").copy_to(self.get_output("output"))
+        #self.set("output", self.get("input"))
 
     def _show_custom_context(self):
         if imgui.button("set default value"):
@@ -101,14 +103,16 @@ class ClampedInputXXX(InputXXX):
         self._set_value(self.get("min") * (1.0 - alpha) + self.get("max") * alpha)
 
     def _evaluate(self):
+        super()._evaluate()
+
         r = [self.get("min"), self.get("max")]
 
-        port_spec = self.get_port("o_output")
+        port_spec = self.get_port("i_input")
         port_spec["dtype_args"] = {"range" : r}
         if "o_default" in self.values:
-            v = self.values["o_output"].value
-            self.initial_manual_values["o_output"] = v
-            del self.values["o_output"]
+            v = self.values["i_input"].value
+            self.initial_manual_values["i_input"] = v
+            del self.values["i_input"]
 
     def _show_custom_context(self):
         super()._show_custom_context()
@@ -127,12 +131,13 @@ InputFloat = ClampedInputXXX.create_class("InputFloat", dtype.float)
 class InputBool(InputXXX):
     class Meta:
         inputs = [
+            {"name" : "input", "dtype" : dtype.bool},
             {"name" : "midi_mapping", "dtype" : dtype.obj, "hide" : True},
             {"name" : "name", "dtype" : dtype.str, "group" : "additional"},
             {"name" : "default", "dtype" : dtype.bool, "group" : "additional"},
         ]
         outputs = [
-            {"name" : "output", "dtype" : dtype.bool, "manual_input" : True}
+            {"name" : "output", "dtype" : dtype.bool, "hide_widget" : True}
         ]
         options = {
             "show_title" : False
@@ -149,22 +154,44 @@ class InputBool(InputXXX):
 class InputEvent(InputXXX):
     class Meta:
         inputs = [
+            {"name" : "input", "dtype" : dtype.event, "manual_input" : True},
             {"name" : "midi_mapping", "dtype" : dtype.obj, "hide" : True},
             {"name" : "name", "dtype" : dtype.str, "group" : "additional"},
             {"name" : "default", "dtype" : dtype.event, "hide" : True, "group" : "additional"},
         ]
         outputs = [
-            {"name" : "output", "dtype" : dtype.event, "manual_input" : True}
+            {"name" : "output", "dtype" : dtype.event, "hide_widget" : True}
         ]
         options = {
             "show_title" : False
         }
 
+    def __init__(self):
+        super().__init__(always_evaluate=True)
+
+        self._was_on = False
+
+    def start(self, graph):
+        self._set_value(0.0)
+
     def get_relative_value(self):
         return self._get_value()
     def set_relative_value(self, alpha):
-        print("Setting to %f" % alpha)
-        self._set_value(alpha >= 0.5)
+        self._set_value(alpha)
+
+    def _evaluate(self):
+        #super()._evaluate()
+
+        v = self.get("input")
+        #print("i:", v, self._was_on)
+        if v and self._was_on:
+            self._was_on = False
+            v = 0.0
+        if v:
+            self._was_on = True
+        self._set_value(v)
+        self.set("output", v)
+        #print("o:", v, self._was_on)
 
     def set_offset_value(self, offset):
         self._set_value((self._get_value() + offset) % 2)
@@ -172,13 +199,14 @@ class InputEvent(InputXXX):
 class InputChoice(InputXXX):
     class Meta:
         inputs = [
+            {"name" : "input", "dtype" : dtype.int, "manual_input" : True},
             {"name" : "midi_mapping", "dtype" : dtype.obj, "hide" : True},
             {"name" : "name", "dtype" : dtype.str, "group" : "additional"},
             {"name" : "default", "dtype" : dtype.int, "group" : "additional"},
             {"name" : "choices", "dtype" : dtype.str, "group" : "additional", "dtype_args": {"variant" : "text"}},
         ]
         outputs = [
-            {"name" : "output", "dtype" : dtype.int, "manual_input" : True}
+            {"name" : "output", "dtype" : dtype.int, "hide_widget" : True}
         ]
         options = {
             "show_title" : False
@@ -206,6 +234,8 @@ class InputChoice(InputXXX):
         self._set_value(self._get_value() + offset * 0.5)
 
     def _evaluate(self):
+        super()._evaluate()
+
         self._choices = self.get("choices").strip().split("\n")
         if len(self._choices) == 0:
             self._set_value(0)
@@ -217,6 +247,13 @@ class InputChoice(InputXXX):
             v = self.get("default")
             self.initial_manual_values["i_default"] = v
             del self.values["i_default"]
+
+        port_spec = self.get_port("i_input")
+        port_spec["dtype_args"] = {"choices" : self._choices}
+        if "i_input" in self.values:
+            v = self.values["i_input"].value
+            self.initial_manual_values["i_input"] = v
+            del self.values["i_input"]
 
         port_spec = self.get_port("o_output")
         port_spec["dtype_args"] = {"choices" : self._choices}

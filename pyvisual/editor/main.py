@@ -468,12 +468,15 @@ class UINode:
         if not port_id in self.widgets:
             assert port_id in self.instance.ports, "Port %s must be in instance ports" % port_id
             port_spec = self.instance.ports[port_id]
-            dtype = port_spec["dtype"]
-            dtype_args = port_spec["dtype_args"]
-            self.widgets[port_id] = node_widget.create_widget(dtype, dtype_args, self)
-            if port_spec.get("group") == "additional":
-                self.widgets[port_id].width *= 2
-            self.widget_port_specs[port_id] = dict(port_spec)
+            if port_spec.get("hide_widget"):
+                self.widgets[port_id] = None
+            else:
+                dtype = port_spec["dtype"]
+                dtype_args = port_spec["dtype_args"]
+                self.widgets[port_id] = node_widget.create_widget(dtype, dtype_args, self)
+                if port_spec.get("group") == "additional":
+                    self.widgets[port_id].width *= 2
+                self.widget_port_specs[port_id] = dict(port_spec)
         return self.widgets[port_id]
 
     def get_port_position(self, port_id):
@@ -2249,7 +2252,8 @@ class NodeEditor(SubgraphHandler):
                         if mapping is not None:
                             #imgui.text("%s:channel=%d,id=%d" % (mapping["type"], mapping["channel"], mapping["id"]))
                             #imgui.text("mapped")
-                            midi._midi_behaviors[midi._reverse_mappings[node]].show()
+                            if node in midi._reverse_mappings:
+                                midi._midi_behaviors[midi._reverse_mappings[node]].show()
                         elif learning_node == node:
                             imgui.text("gimme some midi...")
                         imgui.next_column()
