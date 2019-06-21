@@ -168,6 +168,14 @@ class NodeSpec:
                 return NodeSpec.from_cls(cls)
         raise NodeTypeNotFound()
 
+# to access some input value of a node like a property
+def input_value_property(name):
+    def getter(node):
+        return node.get(name)
+    def setter(node, value):
+        node.get_input(name).value = value
+    return property(getter, setter)
+
 class Node(metaclass=NodeMeta):
     class Meta:
         inputs = []
