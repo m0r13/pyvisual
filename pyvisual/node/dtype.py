@@ -6,6 +6,13 @@ import numpy as np
 # basically set this to true for all directly editable data types (numeric, str, vec2, ...)
 BaseType = namedtuple("BaseDType", ["name", "serialize", "unserialize", "keep_value_on_disconnect"])
 
+def identity_serializer():
+    def serialize(value):
+        return value
+    def unserialize(json_data):
+        return json_data
+    return serialize, unserialize
+
 def dummy_serializer():
     def serialize(value):
         return ""
@@ -36,6 +43,7 @@ def float_serializer():
         return _float(json_value)
     return serialize, unserialize
 
+base_obj = BaseType("obj", *identity_serializer(), False)
 base_float = BaseType("float", *float_serializer(), True)
 base_str = BaseType("str", lambda value: value, lambda json_value: json_value, True)
 base_vec2 = BaseType("vec2", *numpy_serializer(), True)
@@ -49,6 +57,7 @@ base_fft = BaseType("fft", *dummy_serializer(), False)
 
 Type = namedtuple("DType", ["name", "base_type", "default"])
 
+obj = Type("obj", base_obj, lambda: None)
 bool = Type("bool", base_float, lambda: 0.0)
 event = Type("event", base_float, lambda: 0.0)
 int = Type("int", base_float, lambda: 0.0)
@@ -65,6 +74,6 @@ midi = Type("midi", base_midi, lambda: [])
 fft = Type("fft", base_fft, lambda: None)
 
 dtypes = {}
-for dtype in (bool, event, int, float, str, assetpath, vec2, color, mat4, tex2d, ssbo, audio, midi, fft):
+for dtype in (bool, event, int, float, str, assetpath, vec2, color, mat4, tex2d, ssbo, audio, midi, fft, obj):
     dtypes[dtype.name] = dtype
 

@@ -4,7 +4,7 @@ Pillow
 cython
 noise
 mido
-rtmidi
+python-rtmidi
 clipboard
 librosa
 tabulate

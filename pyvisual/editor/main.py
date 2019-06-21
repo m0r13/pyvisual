@@ -7,17 +7,18 @@ import OpenGL
 #OpenGL.ERROR_CHECKING = False
 #OpenGL.ERROR_ON_COPY = True
 
+from collections import defaultdict
 import cProfile
 import contextlib
 import glob
 import json
+import mido
 import numpy as np
 import os
 import random
 import sys
 import time
 import traceback
-from collections import defaultdict
 
 import imgui
 import pyvisual.node as node_meta
@@ -31,6 +32,7 @@ from pyvisual import assets, util
 from pyvisual.editor import glumpy_imgui
 from pyvisual.editor.graph import RootGraph, NodeGraph, NodeGraphListener
 from pyvisual.editor.graph_traits import GraphTraits
+from pyvisual.editor.midi import MidiIntegration
 from pyvisual.node.io.texture import Renderer
 from pyvisual.node.op.gpu.base import ShaderNodeLoader
 from pyvisual.node.value import ConnectedValue
@@ -454,7 +456,13 @@ class UINode:
             port_spec = self.instance.ports[port_id]
             old_port_spec = self.widget_port_specs[port_id]
             # compare only dtype for now
-            if old_port_spec["dtype"] != port_spec["dtype"]:
+            dtype_args = dict(port_spec["dtype_args"])
+            old_dtype_args = dict(port_spec["dtype_args"])
+            if "default" in dtype_args:
+                del dtype_args["default"]
+            if "default" in old_dtype_args:
+                del old_dtype_args["default"]
+            if old_port_spec["dtype"] != port_spec["dtype"] or dtype_args != old_dtype_args:
                 del self.widgets[port_id]
 
         if not port_id in self.widgets:
@@ -463,6 +471,8 @@ class UINode:
             dtype = port_spec["dtype"]
             dtype_args = port_spec["dtype_args"]
             self.widgets[port_id] = node_widget.create_widget(dtype, dtype_args, self)
+            if port_spec.get("group") == "additional":
+                self.widgets[port_id].width *= 2
             self.widget_port_specs[port_id] = dict(port_spec)
         return self.widgets[port_id]
 
@@ -1710,6 +1720,13 @@ class NodeEditor(SubgraphHandler):
         self.texture_program["uTextureSize"] = np.float32([1.0, 1.0], dtype=np.float32)
         self.texture_program["uTransformUV"] = np.eye(4, dtype=np.float32)
 
+        # midi integration
+        devices = mido.get_input_names()
+        if not devices:
+            self._midi = None
+        else:
+            self._midi = MidiIntegration(devices[0])
+
         # performance measurement stuffs
         self.fps = 0.0
         self.editor_time = 0.0
@@ -1969,6 +1986,9 @@ class NodeEditor(SubgraphHandler):
         self.pos = imgui.get_window_position()
         self.size = imgui.get_window_size()
 
+        if self._midi is not None:
+            self._midi.handle(self.graph_traits.input_value_nodes)
+
         # make only editor window have transparent background
         # thus pop the color from the stack again already
         imgui.pop_style_color()
@@ -2041,7 +2061,7 @@ class NodeEditor(SubgraphHandler):
             w, h = imgui.get_window_size()
             dock_padding = 0
 
-            flags = imgui.WINDOW_NO_RESIZE | imgui.WINDOW_ALWAYS_AUTO_RESIZE
+            flags = imgui.WINDOW_NO_RESIZE * 0 | imgui.WINDOW_ALWAYS_AUTO_RESIZE * 0
             flags_static = imgui.WINDOW_NO_MOVE | imgui.WINDOW_NO_RESIZE | imgui.WINDOW_ALWAYS_AUTO_RESIZE
 
             imgui.set_next_window_position(pos[0] + dock_padding, pos[1] + dock_padding)
@@ -2189,6 +2209,52 @@ class NodeEditor(SubgraphHandler):
                     if imgui.button("randomize"):
                         self.randomize_graphs()
                 imgui.end()
+
+            if imgui.begin("midi parameters", False, flags):
+                if self._midi is None:
+                    imgui.text("No midi available!")
+                    imgui.end()
+                else:
+                    midi = self._midi
+                    learning_node = midi.learning_node
+
+                    imgui.text("Midi device: %s" % midi.device_name)
+                    imgui.text("")
+
+                    imgui.columns(3, "test")
+                    for i, node in enumerate(self.graph_traits.input_value_nodes):
+                        if not node.name:
+                            continue
+                        imgui.push_id(i)
+                        imgui.text(node.name)
+                        imgui.next_column()
+
+                        mapping = node.midi_mapping
+                        if mapping:
+                            if imgui.button("unmap"):
+                                midi.remove_mapping(node)
+                                mapping = None
+                            # show variants here! (variants should depend on mapping type and dtype)
+                        else:
+                            if learning_node == node:
+                                imgui.push_id("abort")
+                                if imgui.button("abort"):
+                                    midi.abort_learning(node)
+                                imgui.pop_id()
+                            else:
+                                if imgui.button("map"):
+                                    midi.begin_learning(node)
+                        imgui.same_line()
+                        imgui.next_column()
+                        if mapping is not None:
+                            #imgui.text("%s:channel=%d,id=%d" % (mapping["type"], mapping["channel"], mapping["id"]))
+                            #imgui.text("mapped")
+                            midi._midi_behaviors[midi._reverse_mappings[node]].show()
+                        elif learning_node == node:
+                            imgui.text("gimme some midi...")
+                        imgui.next_column()
+                        imgui.pop_id()
+                    imgui.end()
 
             if imgui.begin("scene properties", False, flags):
                 value_changed = False

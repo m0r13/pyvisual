@@ -6,6 +6,8 @@ import pyvisual.node.dtype as dtypes
 from pyvisual.node.value import ConnectedValue
 from pyvisual import assets, util
 from PIL import Image
+
+import clipboard
 import numpy as np
 import time
 import contextlib
@@ -54,6 +56,8 @@ def create_widget(dtype, dtype_args, node=None):
 
     if dtype == dtypes.int and "choices" in dtype_args:
         return Choice(node, choices=dtype_args["choices"])
+    if dtype == dtypes.str and dtype_args.get("variant") == "text":
+        return Text(node)
     if dtype == dtypes.assetpath:
         return AssetPath(node, prefix=dtype_args.get("prefix", ""))
     if dtype in widget_types:
@@ -138,6 +142,8 @@ class Button(Widget):
         if not clicked and value.value:
             value_to_set.value = 0.0
 
+import sys
+
 class Int(Widget):
     def __init__(self, node, minmax=[float("-inf"), float("inf")]):
         super().__init__()
@@ -148,7 +154,12 @@ class Int(Widget):
 
     def _show(self, value, read_only):
         imgui.push_item_width(self.width)
-        changed, v = imgui.input_int("", value.value)
+        vv = value.value
+        if vv == float("inf"):
+            vv = 2147483647
+        elif vv == float("-inf"):
+            vv = -2147483648
+        changed, v = imgui.input_int("", vv)
         if changed and not read_only:
             value.value = int(self.clamper(v))
 
@@ -165,6 +176,12 @@ class Choice(Widget):
         changed, v = imgui.combo("", value.value, self.choices)
         if changed and not read_only:
             value.value = v
+        if imgui.is_item_hovered() and imgui.is_mouse_clicked(2):
+            imgui.open_popup("choice_context")
+        if imgui.begin_popup("choice_context"):
+            if imgui.menu_item("copy choices")[0]:
+                clipboard.copy("\n".join(self.choices))
+            imgui.end_popup()
 
 class Float(Widget):
     def __init__(self, node, drag_factor=1.0, minmax=[float("-inf"), float("inf")]):
@@ -296,6 +313,15 @@ class String(Widget):
         changed, v = imgui.input_text("", value.value, 255, imgui.INPUT_TEXT_ENTER_RETURNS_TRUE)
         if imgui.is_item_hovered() and not imgui.is_item_active():
             imgui.set_tooltip(value.value)
+        if changed:
+            value.value = v
+
+class Text(Widget):
+    def __init__(self, node):
+        super().__init__()
+
+    def _show(self, value, read_only):
+        changed, v = imgui.input_text_multiline("", value.value, 2048, self.width, 200)
         if changed:
             value.value = v
 

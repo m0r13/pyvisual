@@ -1,86 +1,315 @@
+import clipboard
+import imgui
 import numpy as np
-from pyvisual.node.base import Node
+
+from pyvisual.node.base import Node, input_value_property
 from pyvisual.node import dtype
 
-class InputBool(Node):
+class InputXXX(Node):
     class Meta:
+        outputs = [
+            #{"name" : "output", "dtype" : dtype.bool, "manual_input" : True}
+        ]
+        options = {
+            "virtual" : True,
+            "show_title" : False,
+        }
+
+
+    @classmethod
+    def create_class(cls, name, dt, extra_inputs=[], extra_outputs=[]):
+        class Meta:
+            inputs = [
+                {"name" : "midi_mapping", "dtype" : dtype.obj, "hide" : True},
+                {"name" : "name", "dtype" : dtype.str, "group" : "additional"},
+                {"name" : "default", "dtype" : dt, "group" : "additional"}
+            ] + extra_inputs
+            outputs = [
+                {"name" : "output", "dtype" : dt, "manual_input" : True}
+            ] + extra_outputs
+            options = {
+                "virtual" : False,
+                "show_title" : False
+            }
+
+        return type(name, (cls,), {"DTYPE" : dt, "Meta" : Meta, "__module__" : __name__})
+
+    def __init__(self):
+        super().__init__()
+
+    def start(self, graph):
+        super().start(graph)
+
+        #self.get_input("midi_mapping").value = None
+
+    @property
+    def name(self):
+        return self.get("name")
+
+    midi_mapping = input_value_property("midi_mapping")
+    #@property
+    #def midi_mapping(self):
+    #    return self._midi_mapping
+    #@midi_mapping.setter
+    #def midi_mapping(self, midi_mapping):
+    #    self._midi_mapping = midi_mapping
+
+    def get_absolute_value(self, value):
+        raise NotImplemented()
+    def set_absolute_value(self, value):
+        raise NotImplemented()
+
+    def set_offset_value(self, offset):
+        self._set_value(self._get_value() + offset)
+
+    def _get_value(self):
+        return self.get_value("o_output").value
+    def _set_value(self, value):
+        self.get_value("o_output").value = value
+
+    def _evaluate(self):
+        pass
+
+    def _show_custom_context(self):
+        if imgui.button("set default value"):
+            self._set_value(self.get("default"))
+
+# TODO actually handle clamping on input value
+#    - manipulate port spec, but also change value?!
+# or - have custom port, how does it handle current value and re-creating values?
+class ClampedInputXXX(InputXXX):
+    class Meta:
+        options = {
+            "virtual" : True,
+            "show_title" : False,
+        }
+
+    @classmethod
+    def create_class(cls, name, dt):
+        extra_inputs = [
+            {"name" : "min", "dtype" : dt, "dtype_args" : {"default" : float("-inf")}, "group" : "additional"},
+            {"name" : "max", "dtype" : dt, "dtype_args" : {"default" : float("inf")}, "group" : "additional"},
+            {"name" : "base", "dtype" : dtype.float, "dtype_args" : {"default" : 1.0, "range" : [0.001, float("inf")]}, "group" : "additional"}
+        ]
+        return super().create_class(name, dt, extra_inputs=extra_inputs)
+
+    def get_relative_value(self):
+        alpha = (self._get_value() - self.get("min")) / (self.get("max") - self.get("min"))
+        return alpha
+    def set_relative_value(self, alpha):
+        alpha = alpha ** self.get("base")
+        self._set_value(self.get("min") * (1.0 - alpha) + self.get("max") * alpha)
+
+    def _evaluate(self):
+        r = [self.get("min"), self.get("max")]
+
+        port_spec = self.get_port("o_output")
+        port_spec["dtype_args"] = {"range" : r}
+        if "o_default" in self.values:
+            v = self.values["o_output"].value
+            self.initial_manual_values["o_output"] = v
+            del self.values["o_output"]
+
+    def _show_custom_context(self):
+        super()._show_custom_context()
+
+        if imgui.button("min=-Infinity"):
+            self.get_input("min").value = float("-inf")
+        imgui.same_line()
+        if imgui.button("max=Infinity"):
+            self.get_input("max").value = float("inf")
+
+InputInt = ClampedInputXXX.create_class("InputInt", dtype.int)
+InputFloat = ClampedInputXXX.create_class("InputFloat", dtype.float)
+
+# InputString
+
+class InputBool(InputXXX):
+    class Meta:
+        inputs = [
+            {"name" : "midi_mapping", "dtype" : dtype.obj, "hide" : True},
+            {"name" : "name", "dtype" : dtype.str, "group" : "additional"},
+            {"name" : "default", "dtype" : dtype.bool, "group" : "additional"},
+        ]
         outputs = [
             {"name" : "output", "dtype" : dtype.bool, "manual_input" : True}
         ]
         options = {
-            "category" : "input",
             "show_title" : False
         }
 
-class OutputBool(Node):
+    def get_relative_value(self):
+        return self._get_value()
+    def set_relative_value(self, alpha):
+        self._set_value(alpha >= 0.5)
+
+    def set_offset_value(self, offset):
+        self._set_value((self._get_value() + offset) % 2)
+
+class InputEvent(InputXXX):
     class Meta:
         inputs = [
-            {"name" : "input", "dtype" : dtype.bool, "manual_input" : False}
+            {"name" : "midi_mapping", "dtype" : dtype.obj, "hide" : True},
+            {"name" : "name", "dtype" : dtype.str, "group" : "additional"},
+            {"name" : "default", "dtype" : dtype.event, "hide" : True, "group" : "additional"},
         ]
-        options = {
-            "category" : "output",
-            "show_title" : False
-        }
-
-class InputEvent(Node):
-    class Meta:
         outputs = [
             {"name" : "output", "dtype" : dtype.event, "manual_input" : True}
         ]
         options = {
-            "category" : "input",
             "show_title" : False
         }
 
-class OutputEvent(Node):
+    def get_relative_value(self):
+        return self._get_value()
+    def set_relative_value(self, alpha):
+        print("Setting to %f" % alpha)
+        self._set_value(alpha >= 0.5)
+
+    def set_offset_value(self, offset):
+        self._set_value((self._get_value() + offset) % 2)
+
+class InputChoice(InputXXX):
     class Meta:
         inputs = [
-            {"name" : "input", "dtype" : dtype.event, "manual_input" : False}
+            {"name" : "midi_mapping", "dtype" : dtype.obj, "hide" : True},
+            {"name" : "name", "dtype" : dtype.str, "group" : "additional"},
+            {"name" : "default", "dtype" : dtype.int, "group" : "additional"},
+            {"name" : "choices", "dtype" : dtype.str, "group" : "additional", "dtype_args": {"variant" : "text"}},
         ]
-        options = {
-            "category" : "output",
-            "show_title" : False
-        }
-
-class InputInt(Node):
-    class Meta:
         outputs = [
             {"name" : "output", "dtype" : dtype.int, "manual_input" : True}
         ]
         options = {
-            "category" : "input",
             "show_title" : False
         }
 
-class OutputInt(Node):
-    class Meta:
-        inputs = [
-            {"name" : "input", "dtype" : dtype.int, "manual_input" : False}
-        ]
-        options = {
-            "category" : "output",
-            "show_title" : False
-        }
+    def __init__(self):
+        super().__init__()
 
-class InputFloat(Node):
-    class Meta:
-        outputs = [
-            {"name" : "output", "dtype" : dtype.float, "manual_input" : True}
-        ]
-        options = {
-            "category" : "input",
-            "show_title" : False
-        }
+        self._choices = []
 
-class OutputFloat(Node):
-    class Meta:
-        inputs = [
-            {"name" : "input", "dtype" : dtype.float, "manual_input" : False}
-        ]
-        options = {
-            "category" : "output",
-            "show_title" : False
-        }
+    def _set_value(self, value):
+        if len(self._choices) == 0:
+            super()._set_value(0)
+            return
+
+        super()._set_value(value % len(self._choices))
+
+    def set_relative_value(self, alpha):
+        choices = len(self._choices)
+        if choices > 0:
+            choices -= 1
+        self._set_value(alpha * choices)
+
+    def set_offset_value(self, offset):
+        self._set_value(self._get_value() + offset * 0.5)
+
+    def _evaluate(self):
+        self._choices = self.get("choices").strip().split("\n")
+        if len(self._choices) == 0:
+            self._set_value(0)
+            return
+
+        port_spec = self.get_port("i_default")
+        port_spec["dtype_args"] = {"choices" : self._choices}
+        if "i_default" in self.values:
+            v = self.get("default")
+            self.initial_manual_values["i_default"] = v
+            del self.values["i_default"]
+
+        port_spec = self.get_port("o_output")
+        port_spec["dtype_args"] = {"choices" : self._choices}
+        if "o_default" in self.values:
+            v = self.values["o_output"].value
+            self.initial_manual_values["o_output"] = v
+            del self.values["o_output"]
+
+    def _show_custom_context(self):
+        super()._show_custom_context()
+
+        if imgui.button("paste choices"):
+            self.get_input("choices").value = clipboard.paste()
+
+#class InputBool(Node):
+#    class Meta:
+#        outputs = [
+#            {"name" : "output", "dtype" : dtype.bool, "manual_input" : True}
+#        ]
+#        options = {
+#            "category" : "input",
+#            "show_title" : False
+#        }
+
+#class OutputBool(Node):
+#    class Meta:
+#        inputs = [
+#            {"name" : "input", "dtype" : dtype.bool, "manual_input" : False}
+#        ]
+#        options = {
+#            "category" : "output",
+#            "show_title" : False
+#        }
+
+#class InputEvent(Node):
+#    class Meta:
+#        outputs = [
+#            {"name" : "output", "dtype" : dtype.event, "manual_input" : True}
+#        ]
+#        options = {
+#            "category" : "input",
+#            "show_title" : False
+#        }
+
+#class OutputEvent(Node):
+#    class Meta:
+#        inputs = [
+#            {"name" : "input", "dtype" : dtype.event, "manual_input" : False}
+ #       ]
+ ##       options = {
+#            "category" : "output",
+#            "show_title" : False
+#        }
+
+#class InputInt(Node):
+#    class Meta:
+#        outputs = [
+#            {"name" : "output", "dtype" : dtype.int, "manual_input" : True}
+#        ]
+#        options = {
+#            "category" : "input",
+#            "show_title" : False
+#        }
+#
+#class OutputInt(Node):
+#    class Meta:
+#        inputs = [
+#            {"name" : "input", "dtype" : dtype.int, "manual_input" : False}
+#        ]
+#        options = {
+#            "category" : "output",
+#            "show_title" : False
+#        }
+
+#class InputFloat(Node):
+#    class Meta:
+#        outputs = [
+#            {"name" : "output", "dtype" : dtype.float, "manual_input" : True}
+#        ]
+#        options = {
+#            "category" : "input",
+#            "show_title" : False
+#        }
+
+#class OutputFloat(Node):
+#    class Meta:
+#        inputs = [
+#            {"name" : "input", "dtype" : dtype.float, "manual_input" : False}
+#        ]
+#        options = {
+#            "category" : "output",
+#            "show_title" : False
+#        }
 
 class InputColor(Node):
     class Meta:
