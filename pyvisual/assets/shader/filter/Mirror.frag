@@ -1,6 +1,9 @@
 #define DONT_SAMPLE_FRAGMENT
 #include <filter/basefilter.frag>
 
+#include <lib/transform.glsl>
+
+uniform mat4 uPreTransform;
 uniform int uMode; // {"default" : 1, "choices" : ["passthrough", "vertical", "horizontal", "vertical and horizontal", "double vertical", "double horizontal"]}
 uniform bool uInvertVertical;
 uniform bool uInvertHorizontal;
@@ -78,6 +81,8 @@ vec4 filterFrag(vec2 uv, vec4 frag) {
     if (uInvertHorizontal) {
         texCoords.y = 1.0 - texCoords.y;
     }
+
+    texCoords = transformUV(texCoords, uPreTransform, textureSize(uInputTexture, 0));
 
     return texture2D(uInputTexture, texCoords);
 }
