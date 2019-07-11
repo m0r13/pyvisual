@@ -99,8 +99,6 @@ class Button(Widget):
 
         # when the event was last triggered
         self._last_active = 0
-        # whether to reset force value flag on manual input next frame
-        self._reset_force_value = False
 
     def _show(self, value, read_only):
         active = value.value or time.time() - self._last_active < Button.ACTIVE_TIME
@@ -128,21 +126,12 @@ class Button(Widget):
         if isinstance(value, ConnectedValue):
             value_to_set = value.manual_value
 
-        reset_force_value = self._reset_force_value
-
-        # set on click
+        # when the button is clicked we use the force value option of the manual value
         if clicked:
-            value_to_set.value = 1.0
-            if read_only:
-                value_to_set.force_value = True
-                self._reset_force_value = True
-        elif reset_force_value:
+            value_to_set.force_value = True
+        # and reset it again in the next frame
+        elif value_to_set.force_value:
             value_to_set.force_value = False
-            self._reset_force_value = False
-
-        # reset otherwise if still active
-        if reset_force_value and (not clicked and value.value):
-            value_to_set.value = 0.0
 
 import sys
 

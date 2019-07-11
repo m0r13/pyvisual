@@ -20,6 +20,8 @@ cdef class Value:
 cdef class SettableValue(Value):
     cdef object _value
     cdef int _changed
+    # force value is used for events
+    # button widgets can force an event by setting this to 1. must reset it in the next frame also
     cdef int _force_value
 
     def __init__(self, default_value):
@@ -32,6 +34,8 @@ cdef class SettableValue(Value):
 
     @property
     def value(self):
+        if self._force_value:
+            return self._force_value
         return self._value
     @value.setter
     def value(self, object value):
@@ -44,6 +48,7 @@ cdef class SettableValue(Value):
     @force_value.setter
     def force_value(self, int force_value):
         self._force_value = force_value
+        self._changed = True
 
     cpdef has_changed(self):
         return self._changed
@@ -95,6 +100,8 @@ cdef class ConnectedValue(Value):
     def value(self):
         connected_value = self._connected_value
         manual_value = self._manual_value
+        # connected value over manual value
+        # but forced manual value over connected value
         if connected_value is not None and not manual_value._force_value:
             return connected_value.value
         return manual_value.value

@@ -12,7 +12,6 @@ class InputXXX(Node):
         ]
         options = {
             "virtual" : True,
-            "show_title" : False,
         }
 
 
@@ -30,7 +29,6 @@ class InputXXX(Node):
             ] + extra_outputs
             options = {
                 "virtual" : False,
-                "show_title" : False
             }
 
         return type(name, (cls,), {"DTYPE" : dt, "Meta" : Meta, "__module__" : __name__})
@@ -42,6 +40,10 @@ class InputXXX(Node):
         super().start(graph)
 
         #self.get_input("midi_mapping").value = None
+
+    @property
+    def node_title(self):
+        return "I: %s" % self.get("name")
 
     @property
     def name(self):
@@ -83,7 +85,6 @@ class ClampedInputXXX(InputXXX):
     class Meta:
         options = {
             "virtual" : True,
-            "show_title" : False,
         }
 
     @classmethod
@@ -140,7 +141,6 @@ class InputBool(InputXXX):
             {"name" : "output", "dtype" : dtype.bool, "hide_widget" : True}
         ]
         options = {
-            "show_title" : False
         }
 
     def get_relative_value(self):
@@ -163,7 +163,6 @@ class InputEvent(InputXXX):
             {"name" : "output", "dtype" : dtype.event, "hide_widget" : True}
         ]
         options = {
-            "show_title" : False
         }
 
     def __init__(self):
@@ -209,7 +208,6 @@ class InputChoice(InputXXX):
             {"name" : "output", "dtype" : dtype.int, "hide_widget" : True}
         ]
         options = {
-            "show_title" : False
         }
 
     def __init__(self):
