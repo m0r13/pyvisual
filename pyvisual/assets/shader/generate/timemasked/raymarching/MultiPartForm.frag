@@ -1,6 +1,7 @@
 #if dRaymarchingDithering == 1
 # define RAYMARCHING_DITHERING
 #endif
+#define RAYMARCHING_STEPS 48
 #include <generate/timemasked/raymarching/base.frag>
 
 float sdSphere(vec3 p, float s) {
