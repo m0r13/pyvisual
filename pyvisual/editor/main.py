@@ -1725,7 +1725,7 @@ class NodeEditor(SubgraphHandler):
 
         # midi integration
         devices = mido.get_input_names()
-        if not devices:
+        if not devices or len(devices) == 1:
             self._midi = None
         else:
             self._midi = MidiIntegration(devices[0])

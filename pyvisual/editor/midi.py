@@ -109,6 +109,7 @@ class BehaviorWrapper:
             self._index = index
 
 class MidiIntegration:
+    # handle midi things only every few frames to improve performance
     CHECK_EVERY_FRAMES = 5
     def __init__(self, device_name):
         self._device_name = device_name
@@ -139,6 +140,9 @@ class MidiIntegration:
 
         self._ignore_once = set()
 
+        # counter to handle midi messages only every N frames
+        self._counter = 0
+
         # assumptions: the message to learn each input button/knob does not change
 
     @property
@@ -159,6 +163,11 @@ class MidiIntegration:
         self._mapped_nodes[node] = midi_id
 
     def handle(self, nodes):
+        self._counter += 1
+        if (self._counter % 3) != 0:
+            return
+        self._counter = 0
+
         for node in nodes:
             if not node.name:
                 continue
