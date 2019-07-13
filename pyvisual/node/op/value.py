@@ -548,6 +548,44 @@ class SetResetToggle(Node):
         if "value" in state:
             self._value = state["value"]
 
+class Ramp(Node):
+    class Meta:
+        inputs = [
+            {"name" : "event", "dtype" : dtype.event},
+            {"name" : "duration", "dtype" : dtype.float, "dtype_args" : {"default" : 1.0, "range" : [0.0, float("inf")]}},
+            {"name" : "delay", "dtype" : dtype.float, "dtype_args" : {"default" : 0.0, "range" : [0.0, float("inf")]}},
+            {"name" : "base", "dtype" : dtype.float, "dtype_args" : {"default" : 1.0, "range" : [0.0001, float("inf")]}},
+            {"name" : "v0", "dtype" : dtype.float, "dtype_args" : {"default" : 0.0}},
+            {"name" : "v1", "dtype" : dtype.float, "dtype_args" : {"default" : 1.0}},
+            {"name" : "fallback", "dtype" : dtype.bool, "dtype_args" : {"default" : False}, "group" : "additional"},
+        ]
+        outputs = [
+            {"name" : "out", "dtype" : dtype.float}
+        ]
+
+    def __init__(self):
+        super().__init__(always_evaluate=True)
+
+        self._start = None
+
+    def _evaluate(self):
+        if self.get("event"):
+            self._start = time.time()
+
+        if self._start is not None:
+            delta = time.time() - self._start
+            delta = max(0.0, delta - self.get("delay"))
+            alpha = delta / self.get("duration")
+            if alpha >= 1.0:
+                alpha = 1.0
+                if self.get("fallback"):
+                    self.set("out", self.get("v0"))
+                    self._start = None
+                    return
+            alpha = alpha**self.get("base")
+            value = (1.0-alpha) * self.get("v0") + alpha * self.get("v1")
+            self.set("out", value)
+
 #
 # Vec2 operations
 #
