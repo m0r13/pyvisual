@@ -323,6 +323,11 @@ class UnaryOpFloat(Node):
     def get_presets(cls, graph):
         return UNARY_OP_PRESETS
 
+def min_abs(a, b):
+    if abs(a) < abs(b):
+        return a
+    return b
+
 BINARY_OPS = OrderedDict(
     add=lambda a, b: a + b,
     sub=lambda a, b: a - b,
@@ -334,7 +339,9 @@ BINARY_OPS = OrderedDict(
 
     divmod=lambda a, b: a - (a % b),
 
-    pow=lambda a, b: a**b
+    pow=lambda a, b: a**b,
+
+    minabs=min_abs,
 )
 
 BINARY_OP_PRESETS = [

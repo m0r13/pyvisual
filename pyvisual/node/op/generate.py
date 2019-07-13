@@ -16,7 +16,7 @@ def random_time(node, a=-10000.0, b=10000.0):
 
 LFO_OSCILLATORS = OrderedDict(
     square=lambda t, length, phase: float(math.fmod(t - phase, length) < 0.5 * length),
-    saw=lambda t, length, phase: float(2.0 / math.pi * math.atan(math.tan((2*math.pi*t - phase) / length))) * 0.5 + 0.5,
+    saw=lambda t, length, phase: float(2.0 / math.pi * math.atan(math.tan((2*math.pi*t - phase - math.pi * 0.5) / length))) * 0.5 + 0.5,
     triangle=lambda t, length, phase: float(2.0 / math.pi * math.asin(math.sin((2*math.pi*t - phase) / length))) * 0.5 + 0.5,
     sine=lambda t, length, phase: math.sin((2*math.pi*t - phase) / length) * 0.5 + 0.5
 )
@@ -54,6 +54,8 @@ class LFO(Node):
     def _evaluate(self):
         generator = int(self.get("type"))
         length = self.get("length")
+        if length == 0.0:
+            length = 0.000001
         self._time = self._timer(1.0 / length, False)
         value = LFO.OSCILLATORS[generator](self._time, 1.0, self.get("phase"))
         value = self.get("min") + value * (self.get("max") - self.get("min"))
