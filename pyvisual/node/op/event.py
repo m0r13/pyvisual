@@ -245,3 +245,59 @@ class EveryNBeat(StaticModule):
 
     def __init__(self):
         super().__init__("EveryNBeat.json", embed_graph=True)
+
+class TapBPM(Node):
+    class Meta:
+        inputs = [
+            {"name" : "tap", "dtype" : dtype.event},
+            {"name" : "tap_count", "dtype" : dtype.int, "dtype_args" : {"range" : [1, float("inf")], "default" : 4}, "group" : "additional"},
+            {"name" : "min_bpm", "dtype" : dtype.float, "dtype_args" : {"range" : [0.1, 240.0], "default" : 60.0}, "group" : "additional"},
+            {"name" : "max_bpm", "dtype" : dtype.float, "dtype_args" : {"range" : [0.1, 240.0], "default" : 180.0}, "group" : "additional"},
+        ]
+        outputs = [
+            {"name" : "bpm", "dtype" : dtype.float},
+        ]
+
+    def __init__(self):
+        super().__init__()
+
+        self._taps = []
+
+    def _evaluate(self):
+        if self.get("tap"):
+            self._taps.append(time.time())
+
+            tap_count = self.get("tap_count")
+            min_bpm = self.get("min_bpm")
+            max_bpm = self.get("max_bpm")
+            while len(self._taps) > tap_count:
+                self._taps.pop(0)
+
+            keep_from = 0
+            last_t = self._taps[0]
+            for i, t in enumerate(self._taps[1:]):
+                bpm = 60.0 / (t - last_t)
+                if bpm < min_bpm or bpm > max_bpm:
+                    keep_from = i + 1
+                last_t = t
+
+            if keep_from != 0:
+                self._taps = self._taps[keep_from:]
+
+            if len(self._taps) <= 1:
+                return
+
+            bpm = 60.0 / (self._taps[-1] - self._taps[0]) * (len(self._taps) - 1)
+            self.set("bpm", bpm)
+
+class BeatWaveform(Node):
+    class Meta:
+        inputs = [
+            {"name" : "bpm", "dtype" : dtype.float, "dtype_args" : {"default" : 120.0}},
+            {"name" : "sync", "dtype" : dtype.event},
+        ]
+        outputs = [
+            {"name" : "out", "dtype" : dtype.float}
+        ]
+
+    # sawtooth lfo phase: 2*beat time
