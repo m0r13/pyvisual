@@ -1,14 +1,19 @@
 #include <filter/basefilter.frag>
 
+#include <lib/transform.glsl>
+
 // Set the precision for data types used in this shader
 precision highp float;
 precision highp int;
 
+// preprocessor bool dGlitchRGB; {"default" : true, "group" : "additional"}
+
+uniform mat4 uTransformGlitch;
+uniform float uOffsetFactor; // {"default" : 1.0}
+
 uniform float time;
 uniform float amount;
 uniform float speed;
-
-uniform float uAlpha; // {"default" : 1.0}
 
 float random1d(float n){
     return fract(sin(n) * 43758.5453);
@@ -27,6 +32,8 @@ float rand(vec2 co){
 }
 
 vec4 filterFrag(vec2 uv, vec4 frag) {
+    vec2 referenceUV = transformUV(uv, uTransformGlitch, textureSize(uInputTexture, 0));
+
     float sTime = floor(time * speed * 6.0 * 24.0);
     vec3 inCol = frag.rgb;
     vec3 outCol = inCol;
@@ -39,9 +46,9 @@ vec4 filterFrag(vec2 uv, vec4 frag) {
         float sliceH = random2d(vec2(sTime + amount, 9035.0 + float(i))) * 0.25;
         float hOffset = randomRange(vec2(sTime + amount, 9625.0 + float(i)), -maxOffset, maxOffset);
         uvOff = uv;
-        uvOff.x += hOffset;
+        uvOff.x += hOffset * uOffsetFactor;
         vec2 uvOff = fract(uvOff);
-        if (insideRange(uv.y, sliceY, fract(sliceY+sliceH)) == 1.0 ){
+        if (insideRange(fract(referenceUV.y), sliceY, fract(sliceY+sliceH)) == 1.0 ){
             outCol = texture2D(uInputTexture, uvOff).rgb;
         }
     }
@@ -50,12 +57,15 @@ vec4 filterFrag(vec2 uv, vec4 frag) {
     uvOff = fract(uv + colOffset);
     float rnd = random2d(vec2(sTime + amount, 9545.0));
     if (rnd < 0.33){
-        outCol.r = texture2D(uInputTexture, uvOff).r;
-    }else if (rnd < 0.66){
+        outCol.rgb = texture2D(uInputTexture, uvOff).rgb;
+    }
+#if dGlitchRGB
+    else if (rnd < 0.66) {
         outCol.g = texture2D(uInputTexture, uvOff).g;
-    } else{
+    } else {
         outCol.b = texture2D(uInputTexture, uvOff).b;
     }
-    return vec4(mix(frag.rgb, outCol.rgb, uAlpha),1.0);
+#endif
+    return vec4(outCol,1.0);
 }
 
