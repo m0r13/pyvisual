@@ -9,7 +9,8 @@ precision highp int;
 // preprocessor bool dGlitchRGB; {"default" : true, "group" : "additional"}
 
 uniform mat4 uTransformGlitch;
-uniform float uOffsetFactor; // {"default" : 1.0}
+uniform float uStripeOffset; // {"default" : 1.0}
+uniform float uStripeHeight; // {"default" : 1.0, "range" : [-1, 1]}
 
 uniform float time;
 uniform float amount;
@@ -46,12 +47,21 @@ vec4 filterFrag(vec2 uv, vec4 frag) {
         float sliceH = random2d(vec2(sTime + amount, 9035.0 + float(i))) * 0.25;
         float hOffset = randomRange(vec2(sTime + amount, 9625.0 + float(i)), -maxOffset, maxOffset);
         uvOff = uv;
-        uvOff.x += hOffset * uOffsetFactor;
+        uvOff.x += hOffset * uStripeOffset;
         vec2 uvOff = fract(uvOff);
-        if (insideRange(fract(referenceUV.y), sliceY, fract(sliceY+sliceH)) == 1.0 ){
+
+        // a and b are the limits for uv.y where a stripe with offseted texture occurs
+        float a = sliceY;
+        float b = fract(sliceY + sliceH);
+        // this allows to make the stripes become thinner and disappear
+        a = mix(a, (a+b) * 0.5, (1.0 - uStripeHeight) * 2.0);
+        b = mix(b, (a+b) * 0.5, (1.0 - uStripeHeight) * 2.0);
+
+        if (insideRange(fract(referenceUV.y), a, b) == 1.0 ){
             outCol = texture2D(uInputTexture, uvOff).rgb;
         }
     }
+#if dGlitchRGB
     float maxColOffset = amount/6.0;
     vec2 colOffset = vec2(randomRange(vec2(sTime + amount, 3545.0),-maxColOffset,maxColOffset), randomRange(vec2(sTime , 7205.0),-maxColOffset,maxColOffset));
     uvOff = fract(uv + colOffset);
@@ -59,7 +69,6 @@ vec4 filterFrag(vec2 uv, vec4 frag) {
     if (rnd < 0.33){
         outCol.rgb = texture2D(uInputTexture, uvOff).rgb;
     }
-#if dGlitchRGB
     else if (rnd < 0.66) {
         outCol.g = texture2D(uInputTexture, uvOff).g;
     } else {
