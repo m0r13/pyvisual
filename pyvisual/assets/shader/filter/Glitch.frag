@@ -36,8 +36,7 @@ vec4 filterFrag(vec2 uv, vec4 frag) {
     vec2 referenceUV = transformUV(uv, uTransformGlitch, textureSize(uInputTexture, 0));
 
     float sTime = floor(time * speed * 6.0 * 24.0);
-    vec3 inCol = frag.rgb;
-    vec3 outCol = inCol;
+    vec4 outCol = frag;
     float maxOffset = amount/2.0;
     vec2 uvOff;
     for (float i = 0.0; i < 10.0; i += 1.0) {
@@ -58,7 +57,7 @@ vec4 filterFrag(vec2 uv, vec4 frag) {
         b = mix(b, (a+b) * 0.5, (1.0 - uStripeHeight) * 2.0);
 
         if (insideRange(fract(referenceUV.y), a, b) == 1.0 ){
-            outCol = texture2D(uInputTexture, uvOff).rgb;
+            outCol = texture2D(uInputTexture, uvOff).rgba;
         }
     }
 #if dGlitchRGB
@@ -67,7 +66,7 @@ vec4 filterFrag(vec2 uv, vec4 frag) {
     uvOff = fract(uv + colOffset);
     float rnd = random2d(vec2(sTime + amount, 9545.0));
     if (rnd < 0.33){
-        outCol.rgb = texture2D(uInputTexture, uvOff).rgb;
+        outCol.r = texture2D(uInputTexture, uvOff).r;
     }
     else if (rnd < 0.66) {
         outCol.g = texture2D(uInputTexture, uvOff).g;
@@ -75,6 +74,6 @@ vec4 filterFrag(vec2 uv, vec4 frag) {
         outCol.b = texture2D(uInputTexture, uvOff).b;
     }
 #endif
-    return vec4(outCol,1.0);
+    return outCol;
 }
 
