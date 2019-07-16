@@ -553,7 +553,8 @@ class Ramp(Node):
         inputs = [
             {"name" : "event", "dtype" : dtype.event},
             {"name" : "duration", "dtype" : dtype.float, "dtype_args" : {"default" : 1.0, "range" : [0.0, float("inf")]}},
-            {"name" : "delay", "dtype" : dtype.float, "dtype_args" : {"default" : 0.0, "range" : [0.0, float("inf")]}},
+            {"name" : "delay0", "dtype" : dtype.float, "dtype_args" : {"default" : 0.0, "range" : [0.0, float("inf")]}},
+            {"name" : "delay1", "dtype" : dtype.float, "dtype_args" : {"default" : 0.0, "range" : [0.0, float("inf")]}},
             {"name" : "base", "dtype" : dtype.float, "dtype_args" : {"default" : 1.0, "range" : [0.0001, float("inf")]}},
             {"name" : "v0", "dtype" : dtype.float, "dtype_args" : {"default" : 0.0}},
             {"name" : "v1", "dtype" : dtype.float, "dtype_args" : {"default" : 1.0}},
@@ -573,10 +574,13 @@ class Ramp(Node):
             self._start = time.time()
 
         if self._start is not None:
+            duration = self.get("duration") + 0.0001
             delta = time.time() - self._start
-            delta = max(0.0, delta - self.get("delay"))
-            alpha = delta / self.get("duration")
-            if alpha >= 1.0:
+            delta = max(0.0, delta - self.get("delay0"))
+            if delta > duration:
+                delta = max(duration, delta - self.get("delay1"))
+            alpha = delta / duration
+            if alpha > 1.0:
                 alpha = 1.0
                 if self.get("fallback"):
                     self.set("out", self.get("v0"))
