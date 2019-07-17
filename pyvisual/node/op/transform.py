@@ -84,3 +84,24 @@ class Dot(Node):
     def _evaluate(self):
         self.set("output", np.dot(self.get("t1"), self.get("t2")))
 
+class Inverse(Node):
+    class Meta:
+        inputs = [
+            {"name" : "t", "dtype" : dtype.mat4},
+        ]
+        outputs = [
+            {"name" : "original", "dtype" : dtype.mat4},
+            {"name" : "output", "dtype" : dtype.mat4},
+        ]
+
+    def _evaluate(self):
+        t = self.get("t")
+        try:
+            inv = np.linalg.inv(t)
+            self.set("original", t)
+            self.set("output", inv)
+        except np.linalg.LinAlgError:
+            eye = np.eye(4, dtype=np.float32)
+            self.set("original", eye)
+            self.set("output", eye)
+
