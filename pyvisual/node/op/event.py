@@ -1,3 +1,4 @@
+import math
 import random
 import time
 from pyvisual.node.base import Node
@@ -250,12 +251,13 @@ class TapBPM(Node):
     class Meta:
         inputs = [
             {"name" : "tap", "dtype" : dtype.event},
-            {"name" : "tap_count", "dtype" : dtype.int, "dtype_args" : {"range" : [1, float("inf")], "default" : 4}, "group" : "additional"},
+            {"name" : "tap_count", "dtype" : dtype.int, "dtype_args" : {"range" : [1, float("inf")], "default" : 8}, "group" : "additional"},
             {"name" : "min_bpm", "dtype" : dtype.float, "dtype_args" : {"range" : [0.1, 240.0], "default" : 60.0}, "group" : "additional"},
             {"name" : "max_bpm", "dtype" : dtype.float, "dtype_args" : {"range" : [0.1, 240.0], "default" : 180.0}, "group" : "additional"},
         ]
         outputs = [
             {"name" : "bpm", "dtype" : dtype.float},
+            {"name" : "variance", "dtype" : dtype.float},
         ]
 
     def __init__(self):
@@ -273,12 +275,15 @@ class TapBPM(Node):
             while len(self._taps) > tap_count:
                 self._taps.pop(0)
 
+            bpms = []
             keep_from = 0
             last_t = self._taps[0]
             for i, t in enumerate(self._taps[1:]):
                 bpm = 60.0 / (t - last_t)
+                bpms.append(bpm)
                 if bpm < min_bpm or bpm > max_bpm:
                     keep_from = i + 1
+                    bpms.clear()
                 last_t = t
 
             if keep_from != 0:
@@ -288,7 +293,10 @@ class TapBPM(Node):
                 return
 
             bpm = 60.0 / (self._taps[-1] - self._taps[0]) * (len(self._taps) - 1)
+            variances = [ abs(bpm - b) for b in bpms ]
+            variance = sum(variances) / len(variances)
             self.set("bpm", bpm)
+            self.set("variance", variance)
 
 class BeatWaveform(Node):
     class Meta:
@@ -300,4 +308,63 @@ class BeatWaveform(Node):
             {"name" : "out", "dtype" : dtype.float}
         ]
 
-    # sawtooth lfo phase: 2*beat time
+    def __init__(self):
+        super().__init__(always_evaluate=True)
+
+        from pyvisual.node.op.generate import LFO_OSCILLATORS
+        self._timer = util.time.ScalableTimer()
+        self._saw = LFO_OSCILLATORS["saw"]
+
+        # phase correction of saw wave
+        # pi is multiplied to this
+        self._phase = 0.0
+        self._last_value = 0.0
+
+    def _evaluate(self):
+        bpm = self.get("bpm") + 0.01
+        bpm_time = 60.0 / bpm
+        length = bpm_time * 2.0
+        if self.get("sync"):
+            # value goes from 0 to 1, so this sets the waveform back to where 0 is
+            self._phase -= self._last_value
+        t = self._timer(1.0 / length, False)
+        self._last_value = self._saw(t, 1.0, self._phase * math.pi)
+        self.set("out", self._last_value)
+
+class BeatWaveformTrigger(Node):
+    class Meta:
+        inputs = [
+            {"name" : "waveform", "dtype" : dtype.float},
+            {"name" : "delay", "dtype" : dtype.float},
+            {"name" : "divider", "dtype" : dtype.float, "dtype_args" : {"default" : 1.0, "range" : [1.0, float("inf")]}},
+            {"name" : "duration", "dtype" : dtype.float, "dtype_args" : {"default" : 0.2, "range" : [0.01, 0.95]}},
+        ]
+        outputs = [
+            {"name" : "beat_on", "dtype" : dtype.bool},
+            {"name" : "beat_rising", "dtype" : dtype.event},
+        ]
+
+    def __init__(self):
+        super().__init__()
+
+        self._was_on = False
+        self._acc = 0.0
+
+    def _evaluate(self):
+        value = self.get("waveform") - self.get("delay")
+        # divider must be >= 1
+        value *= self.get("divider")
+        # like fract(value)
+        value = value - int(value)
+
+        duration = self.get("duration") * 0.5
+        # beat is on near 0 and near 1
+        # (to make sure beat is always triggered even when it is synced and the waveform jumps around)
+        beat_on = value > (1.0 - duration) or value < duration
+        if beat_on:
+            self.set("beat_rising", not self._was_on)
+            self._was_on = True
+        else:
+            self._was_on = False
+            self.set("beat_rising", False)
+        self.set("beat_on", beat_on)
