@@ -25,8 +25,19 @@ void generateFrag() {
     vec2 uv = 2.0*(vec2(pyvisualUV.x, 1.0 - pyvisualUV.y) * pyvisualResolution).xy/pyvisualResolution - 1.0; 
     uv.x *= pyvisualResolution.x/pyvisualResolution.y;
 
+    vec3 camForward = normalize(vec3(0.0) - vec3(0.0, 0.0, 2.0));
+    vec3 camRight = normalize(cross(vec3(0.0, 1.0, 0.0), camForward));
+    vec3 camUp = normalize(cross(camForward, camRight));
+
+    float fPersp = 1.4;
+    vec3 vDir = normalize(uv.x * camRight + uv.y * camUp + camForward * fPersp);
+
     vec3 ro = vec3(0.0, 0.0, 2.0); 
-    vec3 rd = normalize(vec3(uv.x, uv.y, -1.4 * uScale)); 
+    /*
+    vec3 rd = normalize(vec3(uv.x, uv.y, -1.4* uScale));
+    */
+
+    vec3 rd = vDir;
 
     const int steps = RAYMARCHING_STEPS;
     const float epsilon = 0.001;
@@ -44,7 +55,7 @@ void generateFrag() {
     #endif
 
     for (int i = 0; i < steps; i++) {
-        dscene = scene(pos);
+        dscene = scene(pos / uScale) * uScale;
         #ifdef RAYMARCHING_DITHERING
         dscene *= mix(1.0, (0.25+0.5*rand(seed*vec2(i))), uDitheringAmount);
         #endif 
