@@ -251,6 +251,7 @@ class TapBPM(Node):
     class Meta:
         inputs = [
             {"name" : "tap", "dtype" : dtype.event},
+            {"name" : "reset", "dtype" : dtype.event},
             {"name" : "tap_count", "dtype" : dtype.int, "dtype_args" : {"range" : [1, float("inf")], "default" : 8}, "group" : "additional"},
             {"name" : "min_bpm", "dtype" : dtype.float, "dtype_args" : {"range" : [0.1, 240.0], "default" : 60.0}, "group" : "additional"},
             {"name" : "max_bpm", "dtype" : dtype.float, "dtype_args" : {"range" : [0.1, 240.0], "default" : 180.0}, "group" : "additional"},
@@ -266,6 +267,9 @@ class TapBPM(Node):
         self._taps = []
 
     def _evaluate(self):
+        if self.get("reset"):
+            self._taps = []
+
         if self.get("tap"):
             self._taps.append(time.time())
 
@@ -345,7 +349,7 @@ class BeatWaveformTrigger(Node):
         ]
 
     def __init__(self):
-        super().__init__()
+        super().__init__(always_evaluate=True)
 
         self._was_on = False
         self._acc = 0.0
