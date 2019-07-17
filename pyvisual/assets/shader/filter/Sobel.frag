@@ -28,7 +28,7 @@ vec4 filterFrag(vec2 uv, vec4 frag) {
 
     float x = tleft + 2.0*left + bleft - tright - 2.0*right - bright;
     float y = -tleft - 2.0*top - tright + bleft + 2.0 * bottom + bright;
-    float edge = sqrt((x*x) + (y*y));
+    float edge = sqrt((x*x) + (y*y)) * frag.a;
 
 #if dWithAlpha
     return vec4(uColor.rgb * edge, edge * uAlphaIntensity);

@@ -112,6 +112,7 @@ class PWM(Node):
 class Time(Node):
     class Meta:
         inputs = [
+            {"name" : "enabled", "dtype" : dtype.bool, "dtype_args" : {"default" : True}},
             {"name" : "factor", "dtype" : dtype.float, "dtype_args" : {"default" : 1.0}},
             {"name" : "mod", "dtype" : dtype.float, "dtype_args" : {"default" : 0.0}, "group" : "additional"},
             {"name" : "reset", "dtype" : dtype.event}
@@ -136,7 +137,13 @@ class Time(Node):
         self._time = 0.0
 
     def _evaluate(self):
+        if not self.get("enabled") and not self.get("reset"):
+            self._timer(0.0, False)
+            return
+
         self._time = self._timer(self.get("factor"), self.get("reset"))
+        if self.get("reset"):
+            self._time = 0.0
 
         mod = self.get("mod")
         if mod > 0.00001:
@@ -467,4 +474,9 @@ class PoissonTimer(Node):
             self.set("output", True)
         else:
             self.set("output", False)
+
+    def _show_custom_context(self):
+        imgui.text("Next event: %ds" % (self._next - util.time.global_time.time()))
+        if imgui.button("force"):
+            self._next = 0.0
 
