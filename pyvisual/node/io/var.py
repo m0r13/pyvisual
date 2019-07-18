@@ -28,7 +28,6 @@ class SetVar(Node):
 
         # TODO
         self.value = 0.0
-        self.value_has_changed = False
 
     @property
     def valid(self):
@@ -74,11 +73,8 @@ class SetVar(Node):
         value = self.get_input("input")
         if value.has_changed() or self._last_evaluated == 0.0:
             self.value = value.value
-            self.value_has_changed = True
             # evaluate once more to trigger reset
             self.force_evaluate()
-        else:
-            self.value_has_changed = False
 
     def stop(self):
         assert self.graph is not None
@@ -184,11 +180,7 @@ class GetVar(Node):
                 self.set("output", self.connected_node.value)
                 self._force_value_update = False
             else:
-                # TODO clean this up!!
-                # this thing is *slightly* faster
-                if self.connected_node.value_has_changed:
-                    self.set("output", self.connected_node.value)
-                #self.connected_node.get_input("input").copy_to(self.get_output("output"))
+                self.connected_node.get_input("input").copy_to(self.get_output("output"))
 
         if input_name_changed:
             # see above where connected node is associated

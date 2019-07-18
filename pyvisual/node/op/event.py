@@ -213,7 +213,7 @@ class EveryNSequencer(Node):
             {"name" : "index", "dtype" : dtype.int},
             {"name" : "next", "dtype" : dtype.event},
             {"name" : "reset", "dtype" : dtype.event},
-            {"name" : "n", "dtype" : dtype.int, "dtype_args" : {"default" : 1, "range" : [1, float("inf")]}},
+            {"name" : "n", "dtype" : dtype.int, "dtype_args" : {"default" : 1, "range" : [0, float("inf")]}},
             {"name" : "offset", "dtype" : dtype.int, "dtype_args" : {"default" : 0}},
             {"name" : "p", "dtype" : dtype.float, "dtype_args" : {"default" : 1, "range" : [0.0, 1.0]}},
             {"name" : "reset_p", "dtype" : dtype.float, "dtype_args" : {"default" : 1, "range" : [0.0, 1.0]}},
@@ -228,13 +228,15 @@ class EveryNSequencer(Node):
     def _evaluate(self):
         if self.get("next"):
             index = self.get("index")
-            n = self.get("n")
+            n = int(self.get("n"))
             offset = self.get("offset")
 
             p = self.get("p")
             if self.get("reset"):
                 p = self.get("reset_p")
-            triggered = (index - offset) % n == 0 and random.random() <= p
+            triggered = False
+            if n != 0:
+                triggered = (index - offset) % int(n) == 0 and random.random() <= p
             self.set("out", triggered)
         else:
             self.set("out", False)

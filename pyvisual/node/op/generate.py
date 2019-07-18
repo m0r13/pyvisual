@@ -71,7 +71,7 @@ class LFO(Node):
 class PWM(Node):
     class Meta:
         inputs = [
-            {"name" : "length", "dtype" : dtype.float, "dtype_args" : {"default" : 1.0, "range" : [0.000001, float("inf")]}},
+            {"name" : "f", "dtype" : dtype.float, "dtype_args" : {"default" : 1.0, "range" : [0.000001, float("inf")]}},
             {"name" : "value", "dtype" : dtype.float, "dtype_args" : {"default" : 0.5, "range" : [0.0, 1.0]}},
             {"name" : "min", "dtype" : dtype.float, "dtype_args" : {"default" : 0.0}},
             {"name" : "max", "dtype" : dtype.float, "dtype_args" : {"default" : 1.0}},
@@ -92,11 +92,10 @@ class PWM(Node):
         self._time = 0.0
 
     def _evaluate(self):
-        length = self.get("length")
-        if length == 0:
-            self.set("output", float("nan"))
-            return
-        self._time = self._timer(1.0 / length, False)
+        f = self.get("f") * 2.0
+        if f == 0.0:
+            self.set("output", self.get("min"))
+        self._time = self._timer(f, False)
         if self._time % 1.0 < self.get("value"):
             self.set("output", self.get("max"))
         else:
