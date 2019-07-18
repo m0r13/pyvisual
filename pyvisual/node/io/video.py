@@ -36,6 +36,7 @@ class VideoThread(threading.Thread):
         self._play = False
         self._loop = True
         self._speed = None
+        self._speed_multiplier = None
         self._seek_time = None
 
         # read one frame even though video is paused
@@ -82,12 +83,18 @@ class VideoThread(threading.Thread):
         return self._speed
     @speed.setter
     def speed(self, speed):
+        multiplier = 1
+        while abs(speed) >= 2.0:
+            speed = speed / 2.0
+            multiplier *= 2
+
         clock_fps = abs(self._fps * speed)
         if abs(speed) < 0.0001:
             self._force_read = True
             clock_fps = 30.0
 
         self._speed = speed
+        self._speed_multiplier = multiplier
         self._clock.set_fps_limit(clock_fps)
 
     @property
@@ -178,9 +185,13 @@ class VideoThread(threading.Thread):
 
             # if we're playing reverse: go two frames back
             # two frames because we just read one and want to go another frame back
+            step_size = self._speed_multiplier
             if self._speed < 0.0:
                 index = int(self._video.get(cv2.CAP_PROP_POS_FRAMES))
-                self._video.set(cv2.CAP_PROP_POS_FRAMES, index - 2)
+                self._video.set(cv2.CAP_PROP_POS_FRAMES, index - 1 - step_size)
+            elif self._speed_multiplier > 1:
+                index = int(self._video.get(cv2.CAP_PROP_POS_FRAMES))
+                self._video.set(cv2.CAP_PROP_POS_FRAMES, index + step_size - 1)
 
             # remember if there was a problem grabbing the frame
             # seems to happen sometimes with last frame(s) of a video

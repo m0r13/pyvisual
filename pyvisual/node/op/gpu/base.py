@@ -32,7 +32,14 @@ class RenderNode(Node):
             if size == (w, h):
                 return self._fbo
         w, h = size
-        texture = np.zeros((h, w, 4), dtype=np.uint8).view(gloo.Texture2D)
+        dt = np.uint8
+        #if type(self).__name__ in ("ReactionDiffusion2", "ReactionDiffusion3", "LerpMixTextureB", "NoiseTest", "SampleTexture"):
+        #    dt = np.float32
+        texture = np.zeros((h, w, 4), dtype=dt)
+        if dt == np.float32:
+            texture = texture.view(gloo.TextureFloat2D)
+        else:
+            texture = texture.view(gloo.Texture2D)
         self._fbo = gloo.FrameBuffer(color=[texture])
         return self._fbo
 
@@ -183,7 +190,7 @@ class BaseShader(RenderNode):
             if not port_spec["dtype"] in PREPROCESSOR_DTYPES:
                 raise ValueError("Unsupported data type '%s' as shader preprocessor input" % gltype)
 
-            default = port_spec["dtype"].default
+            default = port_spec["dtype"].default()
             if "default" in kwargs:
                 default = port_spec["dtype"].base_type.unserialize(kwargs["default"])
 

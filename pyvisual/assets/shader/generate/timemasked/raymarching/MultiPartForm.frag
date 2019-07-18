@@ -155,16 +155,19 @@ float opSmoothIntersection( float d1, float d2, float k ) {
     float h = clamp( 0.5 - 0.5*(d2-d1)/k, 0.0, 1.0 );
     return mix( d2, d1, h ) + k*h*(1.0-h); }
 
+// preprocessor int dFormCount; {"default" : 4, "range" : [1, Infinity], "group" : "additional"}
+// preprocessor bool dSymmetricTime; {"default" : false, "group" : "additional"}
 // preprocessor bool dRaymarchingDithering; {"default" : false, "group" : "additional"}
 // preprocessor float DITHERING_HEIGHT; {"default" : 750.0, "range" : [1.0, Infinity], "group" : "additional"}
 
 uniform float uDrift;
 
 uniform float uGlobalRotation;
+uniform float uTestRotation;
 uniform float uRotation;
-uniform float uRotationOffset;
+//uniform float uRotationOffset;
 uniform float uAlpha; // {"default" : 1.0}
-uniform float uAlphaFactor; // {"default" : 1.0}
+//uniform float uAlphaFactor; // {"default" : 1.0}
 
 // mirroring enabled, but uMirrorCount == 0.0 should be as mirroring disabled
 // both looks and performance
@@ -179,20 +182,32 @@ float scene(vec3 p) {
 
     float d = 999999.9;
 
-    p = opRotate(p, vec3(0.3, 0.2, 0.0) * uGlobalRotation + vec3(0.0, 1.5, 0.0));
+    p = opRotate(p, vec3(0.2, 0.0, 0.0) * uTestRotation + vec3(0.0, 0.0, 0.0));
+    p = opRotate(p, vec3(0.3, 0.2, 0.0) * uGlobalRotation + vec3(0.0, 0.0, 0.0));
     vec3 op = p;
-    for (int i = 0; i < 4; i++) {
-        p = op + vec3(uDrift, 0.0, 0.0) * (float(i) - 2);
-        p = opRotate(p, vec3(0.3, 0.05, 0.4) * ((uRotation - uRotationOffset * float(i)) * vec3(1.5, 1.0, 1.0)));
+    for (int ii = 0; ii < dFormCount; ii++) {
+        float i = ii - dFormCount / 2;
+        if (mod(dFormCount, 2) == 0) {
+            i += 0.5;
+        }
+
+        p = op + vec3(uDrift, 0.0, 0.0) * i;
+        p = opRotate(p, vec3(0.3, 0.05, 0.4) * ((uRotation /*- uRotationOffset * float(ii)*/) * vec3(1.5, 1.0, 1.0)));
 
         float testBox = sdBox(p, vec3(0.25));
         float testPrism = sdTriPrism(p, vec2(0.5, 0.3) * 1.5);
         float octa = sdOctahedron(p, 0.5 * 1.5);
         float torus = sdTorus(p, vec2(0.4, 0.015 * 5.0));
 
-        float time = sin((pyvisualTime + 2.0 * float(i)) * 0.1);
+#if !dSymmetricTime
+        float time = sin((pyvisualTime + 5.0 * ii * 0.5) * 0.1);
+#else
+        float time = sin((pyvisualTime + 10.0 * abs(i) * 0.5) * 0.1);
+#endif
+        time = time * 0.5 + 0.5;
         // alpha from -0.5 to 1.5
-        float alpha = time + 0.5;
+        //float alpha = time + 0.5;
+        float alpha = time * 1.75 - 0.5;
         float test = mix(octa, testPrism, alpha);
         //float test = mix(sdSphere(p, 0.5), sdBox(p, vec3(0.5)), alpha + 0.5);
         //float test = mix(sdBox(p, vec3(0.5)), sdSphere(p, 0.5), sin(pyvisualTime * 0.2));
@@ -222,7 +237,7 @@ vec4 sceneColor(vec3 p, float camDist, vec4 bgColor) {
     vec3 ro = vec3(0.0, 0.0, 2.0); 
     vec3 r = reflect(normalize(p - ro),n); 
     vec3 h = -normalize(n + p - ro);
-    float v = (pow(dot(n, normalize(vec3(1, 1, 1))), 1.0) * 0.7 + 0.3) * uAlpha * uAlphaFactor;
+    float v = (pow(dot(n, normalize(vec3(1, 1, 1))), 1.0) * 0.7 + 0.3) * uAlpha /* * uAlphaFactor*/;
     return vec4(vec3(v, n.xy * 0.5 + 0.5), 1.0);
     //return vec4(vec3(v), 1.0);
 }
