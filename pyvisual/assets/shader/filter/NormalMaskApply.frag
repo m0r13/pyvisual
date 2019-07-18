@@ -4,6 +4,7 @@
 
 uniform sampler2D uForeground;
 uniform sampler2D uMask;
+uniform float uAlpha; // {"default" : 1.0}
 
 uniform bool uSwitch;
 
@@ -15,12 +16,18 @@ vec4 filterFrag(vec2 uv, vec4 frag) {
 #if dTransparent
     //return mix(bg, fg, mask.r * mask.a);
 #else
+    vec4 fg_result;
+    vec4 bg_result = uSwitch ? fg : bg;
     if (mask.a > 0.0) {
         float value = mask.r;
         vec4 f = uSwitch ? bg : fg;
-        return vec4(f.rgb * value, f.a);
+        fg_result = vec4(f.rgb * value, f.a);
+        //return fg_result;
+    } else {
+        fg_result = bg_result;
     }
 
-    return uSwitch ? fg : bg;
+    //return bg_result;
+    return mix(bg_result, fg_result, uAlpha);
 #endif
 }

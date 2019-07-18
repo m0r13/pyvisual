@@ -21,14 +21,15 @@ from glumpy.app import clock
 class Latch(Node):
     class Meta:
         inputs = [
-            {"name" : "pass", "dtype" : dtype.bool, "dtype_args" : {"default" : True}}
+            {"name" : "enabled", "dtype" : dtype.bool, "dtype_args" : {"default" : True}},
+            {"name" : "pass", "dtype" : dtype.bool, "dtype_args" : {"default" : True}},
         ]
         options = {
             "virtual" : True
         }
 
     def _evaluate(self):
-        if self.get("pass"):
+        if self.get("pass") or not self.get("enabled"):
             self.set("output", self.get("input"))
 
 class Lambda(Node):

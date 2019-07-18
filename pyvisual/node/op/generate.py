@@ -282,8 +282,8 @@ class RandomFloat(Node):
             {"name" : "generate", "dtype" : dtype.event},
             {"name" : "min", "dtype" : dtype.float, "dtype_args" : {"default" : 0.0}},
             {"name" : "max", "dtype" : dtype.float, "dtype_args" : {"default" : 1.0}},
-            {"name" : "clamp_min", "dtype" : dtype.float, "dtype_args" : {"default" : float("-inf")}},
-            {"name" : "clamp_max", "dtype" : dtype.float, "dtype_args" : {"default" : float("inf")}},
+            {"name" : "clamp_min", "dtype" : dtype.float, "dtype_args" : {"default" : float("-inf")}, "group" : "additional"},
+            {"name" : "clamp_max", "dtype" : dtype.float, "dtype_args" : {"default" : float("inf")}, "group" : "additional"},
             {"name" : "mod", "dtype" : dtype.float, "dtype_args" : {"default" : 0.0}},
         ]
         outputs = [

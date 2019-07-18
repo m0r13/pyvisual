@@ -1,12 +1,14 @@
 // uInputTexture is (still) built-in to Shader class
 uniform sampler2D uInputTexture; // {"skip" : true, "alias" : "input"}
 
+// preprocessor bool dMaskRGB; {"default" : false, "group" : "additional"}
+
 // alias these inputs as they are "built-in" into the filter nodes
 // and should appear different from the other uniform inputs
 uniform sampler2D uFilterMaskTexture; // {"alias" : "filter_mask"}
 uniform float uFilterMaskFactor; // {"alias" : "mask_factor", "default" : 1.0}
 uniform bool uFilterMaskInvert; // {"alias" : "mask_invert", "default" : false}
-uniform int uFilterMaskMode; // {"alias" : "filter_mode", "default" : 2, "choices" : ["input", "mask", "filtered", "input_filtered_masked", "input_masked", "filtered_masked"], "group" : "additional"}
+uniform int uFilterMaskMode; // {"alias" : "filter_mode", "default" : 3, "choices" : ["input", "mask", "filtered", "input_filtered_masked", "input_masked", "filtered_masked"], "group" : "additional"}
 uniform vec4 uFilterBackgroundColor; // {"alias" : "filter_bg", "default" : [0.0, 0.0, 0.0, 0.0]}
 
 in vec2 TexCoordi;
@@ -28,7 +30,12 @@ void main( ) {
     vec4 fragFiltered = filterFrag(TexCoord0, frag);
 
 #ifdef ADVANCED_FILTERING
-    float mask = texture2D(uFilterMaskTexture, TexCoord0).r * uFilterMaskFactor;
+
+#if dMaskRGB
+    vec4 mask = texture2D(uFilterMaskTexture, TexCoord0) * uFilterMaskFactor;
+#else
+    vec4 mask = vec4(texture2D(uFilterMaskTexture, TexCoord0).r * uFilterMaskFactor);
+#endif
     if (uFilterMaskInvert) {
         mask = 1.0 - mask;
     }
@@ -38,7 +45,7 @@ void main( ) {
         oFragColor = frag;
     } else if (uFilterMaskMode == 1) {
         // only mask
-        oFragColor = vec4(vec3(mask), 1.0);
+        oFragColor = vec4(mask.rgb, 1.0);
     } else if (uFilterMaskMode == 2) {
         // only filtered
         oFragColor = fragFiltered;
