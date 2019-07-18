@@ -17,28 +17,40 @@ def weighted_random(weights):
 class ChooseBool(Node):
     class Meta:
         inputs = [
-            {"name" : "count", "dtype" : dtype.int, "dtype_args" : {"default" : 2, "range" : [0, float("inf")]}},
+            {"name" : "enabled", "dtype" : dtype.bool, "dtype_args" : {"default" : True}},
             {"name" : "event", "dtype" : dtype.event},
-            {"name" : "min", "dtype" : dtype.int, "dtype_args" : {"default" : 1, "range" : [0, float("inf")]}},
-            {"name" : "max", "dtype" : dtype.int, "dtype_args" : {"default" : 1, "range" : [0, float("inf")]}},
+            {"name" : "count", "dtype" : dtype.int, "dtype_args" : {"default" : 2, "range" : [0, float("inf")]}, "group" : "additional"},
+            {"name" : "min", "dtype" : dtype.int, "dtype_args" : {"default" : 1, "range" : [0, float("inf")]}, "group" : "additional"},
+            {"name" : "max", "dtype" : dtype.int, "dtype_args" : {"default" : 1, "range" : [0, float("inf")]}, "group" : "additional"},
         ]
         outputs = [
-            {"name" : "dummy0", "dtype" : dtype.int, "dummy" : True},
-            {"name" : "dummy1", "dtype" : dtype.int, "dummy" : True},
+            #{"name" : "dummy0", "dtype" : dtype.int, "dummy" : True},
+            #{"name" : "dummy1", "dtype" : dtype.int, "dummy" : True},
             {"name" : "dummy2", "dtype" : dtype.int, "dummy" : True},
             {"name" : "dummy3", "dtype" : dtype.int, "dummy" : True},
         ]
 
+    def __init__(self):
+        super().__init__()
+
+        # list of enabled indices
+        # TODO state!!!
+        self._choices = []
+
     def _update_custom_ports(self):
         custom_inputs = []
         custom_outputs = []
-        for i in range(int(self.get("count"))):
+
+        count = int(self.get("count"))
+        for i in range(count):
             input_port = {"name" : "w%d" % i, "dtype" : dtype.float, "dtype_args": {"default" : 1.0, "range" : [0, float("inf")]}}
             output_port = {"name" : "o%d" % i, "dtype" : dtype.bool}
             custom_inputs.append(input_port)
             custom_outputs.append(output_port)
         self.set_custom_inputs(custom_inputs)
         self.set_custom_outputs(custom_outputs)
+
+        self._choices = []
 
     def _evaluate(self):
         if self.have_inputs_changed("count"):
@@ -51,8 +63,10 @@ class ChooseBool(Node):
         if self.get("min") > self.get("max"):
             self.get_input("max").value = self.get("min")
 
-        if self.get("event"):
-            count = self.get("count")
+        # super hacky right now!
+        # doesn't keep the state!
+        count = int(self.get("count"))
+        if self.get("event") or self._last_evaluated == 0.:
             min_enabled = max(0, self.get("min"))
             max_enabled = max(min_enabled, min(count, self.get("max")))
             enable_count = random.randint(min_enabled, max_enabled)
@@ -62,11 +76,14 @@ class ChooseBool(Node):
                 weights[i] = weight.value
             weights = weights / np.sum(weights)
 
-            enabled = [False]*count
             choices = random.choices(list(range(count)), weights=weights, k=enable_count)
-            choices = np.random.choice(count, enable_count, replace=False, p=weights)
-            for i in choices:
-                enabled[i] = True
+            self._choices = np.random.choice(count, enable_count, replace=False, p=weights)
+
+        if self.get("event") or self.get_input("enabled").has_changed():
+            self_enabled = self.get("enabled")
+            enabled = [False]*count
+            for i in self._choices:
+                enabled[int(i)] = True and self_enabled
 
             for i, (_, output) in enumerate(self.yield_custom_output_values()):
                 output.value = enabled[i]
