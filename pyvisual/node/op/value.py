@@ -793,3 +793,30 @@ class DelayTexture(DelayXXX):
             {"name" : "output", "dtype" : dtype.tex2d}
         ]
 
+
+class AlphaGlitchSelect(Node):
+    class Meta:
+        inputs = [
+            {"name" : "index", "dtype" : dtype.int, "dtype_args" : {"default" : 0, "range": [0, 2]}},
+            {"name" : "factor", "dtype" : dtype.float, "dtype_args" : {"default" : 1.0, "range" : [0.0, 1.0]}},
+            {"name" : "f0", "dtype" : dtype.float, "dtype_args" : {"default" : 1.0, "range" : [0.0, 1.0]}},
+            {"name" : "f1", "dtype" : dtype.float, "dtype_args" : {"default" : 1.0, "range" : [0.0, 1.0]}},
+            {"name" : "f2", "dtype" : dtype.float, "dtype_args" : {"default" : 1.0, "range" : [0.0, 1.0]}},
+        ]
+        outputs = [
+            {"name" : "dummy0", "dtype" : dtype.float, "dummy" : True},
+            {"name" : "dummy1", "dtype" : dtype.float, "dummy" : True},
+            {"name" : "o0", "dtype" : dtype.float},
+            {"name" : "o1", "dtype" : dtype.float},
+            {"name" : "o2", "dtype" : dtype.float},
+        ]
+
+    def _evaluate(self):
+        factors = [self.get("f0"), self.get("f1"), self.get("f2")]
+        factor = self.get("factor")
+        index = int(self.get("index"))
+        index = min(2, max(0, index))
+        factors[index] *= factor
+        self.set("o0", factors[0])
+        self.set("o1", factors[1])
+        self.set("o2", factors[2])
