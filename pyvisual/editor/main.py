@@ -2073,14 +2073,12 @@ class NodeEditor(SubgraphHandler):
                     self.current_graph.clear()
 
                 imgui.same_line()
-                save_label = "save"
                 if self.current_graph_index == 1:
                     imgui.push_style_color(imgui.COLOR_BUTTON, 1.0, 0.0, 0.0, 0.5)
                     imgui.push_style_color(imgui.COLOR_BUTTON_HOVERED, 1.0, 0.0, 0.0, 1.0)
-                if imgui.button(save_label):
+
+                if imgui.button("save"):
                     imgui.open_popup("save")
-                if self.current_graph_index == 1:
-                    imgui.pop_style_color(2)
                 save_path = node_widget.imgui_pick_file("save", assets.SAVE_PATH)
                 if save_path is not None:
                     self.current_graph.save_file(save_path)
@@ -2091,6 +2089,9 @@ class NodeEditor(SubgraphHandler):
                 load_path = node_widget.imgui_pick_file("load", assets.SAVE_PATH)
                 if load_path is not None:
                     self.current_graph.load_file(load_path)
+
+                if self.current_graph_index == 1:
+                    imgui.pop_style_color(2)
 
                 imgui.same_line()
                 if imgui.button("import"):

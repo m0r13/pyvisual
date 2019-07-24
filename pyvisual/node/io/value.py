@@ -92,6 +92,7 @@ class ClampedInputXXX(InputXXX):
         extra_inputs = [
             {"name" : "min", "dtype" : dt, "dtype_args" : {"default" : float("-inf")}, "group" : "additional"},
             {"name" : "max", "dtype" : dt, "dtype_args" : {"default" : float("inf")}, "group" : "additional"},
+            {"name" : "step", "dtype" : dt, "dtype_args" : {"default" : 1.0}, "group" : "additional"},
             {"name" : "base", "dtype" : dtype.float, "dtype_args" : {"default" : 1.0, "range" : [0.001, float("inf")]}, "group" : "additional"}
         ]
         return super().create_class(name, dt, extra_inputs=extra_inputs)
@@ -102,6 +103,9 @@ class ClampedInputXXX(InputXXX):
     def set_relative_value(self, alpha):
         alpha = alpha ** self.get("base")
         self._set_value(self.get("min") * (1.0 - alpha) + self.get("max") * alpha)
+
+    def set_offset_value(self, offset):
+        self._set_value(self._get_value() + offset * self.get("step"))
 
     def _evaluate(self):
         super()._evaluate()
