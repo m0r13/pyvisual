@@ -2073,8 +2073,14 @@ class NodeEditor(SubgraphHandler):
                     self.current_graph.clear()
 
                 imgui.same_line()
-                if imgui.button("save"):
+                save_label = "save"
+                if self.current_graph_index == 1:
+                    imgui.push_style_color(imgui.COLOR_BUTTON, 1.0, 0.0, 0.0, 0.5)
+                    imgui.push_style_color(imgui.COLOR_BUTTON_HOVERED, 1.0, 0.0, 0.0, 1.0)
+                if imgui.button(save_label):
                     imgui.open_popup("save")
+                if self.current_graph_index == 1:
+                    imgui.pop_style_color(2)
                 save_path = node_widget.imgui_pick_file("save", assets.SAVE_PATH)
                 if save_path is not None:
                     self.current_graph.save_file(save_path)
@@ -2406,7 +2412,7 @@ def on_key_press(key, modifier):
     if key == ord("Q"):
         editor.session_graph.save_file("session.json")
         editor.session_graph.stop()
-        #editor.background_graph.save_file("background.json")
+        editor.background_graph.save_file("background.json")
         editor.background_graph.stop()
         editor.write_settings()
         system_var.write_variables(force=True)

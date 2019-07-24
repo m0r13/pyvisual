@@ -452,6 +452,7 @@ class PoissonTimer(Node):
         inputs = [
             {"name" : "enabled", "dtype" : dtype.bool, "dtype_args" : {"default" : True}},
             {"name" : "per_minute", "dtype" : dtype.float, "dtype_args" : {"default" : 6.0}},
+            {"name" : "per_hour", "dtype" : dtype.float, "dtype_args" : {"default" : 0.0}},
         ]
         outputs = [
             {"name" : "output", "dtype" : dtype.event},
@@ -469,7 +470,7 @@ class PoissonTimer(Node):
             per_minute = self.get("per_minute")
             if per_minute == 0.0:
                 pass
-            self._next = t + random.expovariate(1.0 / (60.0 / self.get("per_minute")))
+            self._next = t + random.expovariate(1.0 / (60.0 / (self.get("per_minute") + self.get("per_hour") / 60.0)))
             self.set("output", True)
         else:
             self.set("output", False)
