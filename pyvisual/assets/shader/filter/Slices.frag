@@ -1,6 +1,10 @@
 #define DONT_SAMPLE_FRAGMENT
 #include <filter/basefilter.frag>
 
+#include <lib/transform.glsl>
+
+uniform mat4 uTransformGlitch;
+
 uniform float slices; // {"default" : 3.0}
 uniform float offset; // {"default" : 100.0}
 uniform float timeH; // {"default" : 0.0}
@@ -22,7 +26,8 @@ float noise1d(float p){
 
 const float TWO_PI = 6.283185307179586;
 vec4 filterFrag(vec2 uv, vec4 _) {
-    float n = noise1d(uv.y * slices + /*timeH **/ timeV * 3.0);
+    vec2 referenceUV = transformUV(uv, uTransformGlitch, textureSize(uInputTexture, 0));
+    float n = noise1d(referenceUV.y * slices + /*timeH **/ timeV * 3.0);
     float ns = steppedVal(fract(n  ),slices) + 2.0;
     float nsr = random1d(ns);
     vec2 uvn = uv;

@@ -1,5 +1,7 @@
 #include <filter/basefilter.frag>
 
+// preprocessor bool dExcludeBackground; // {"default" : false, "group" : "additional"}
+
 uniform sampler2D uMask;
 uniform float uAngle;
 
@@ -10,10 +12,12 @@ vec4 filterFrag(vec2 uv, vec4 frag) {
     float theta = 3.141595 * 0.25;
     theta = atan(mask.y, mask.x) + radians(uAngle) * 0.0;
     // background is excluded by default due to some weird math thing when length(mask) == 0.0
+#if dExcludeBackground
     if (length(mask) < 0.1) {
         theta = radians(uAngle);
         discard;
     }
+#endif
     vec2 texCoords = uv;
     texCoords -= 0.5;
     texCoords.x *= size.x / size.y;
