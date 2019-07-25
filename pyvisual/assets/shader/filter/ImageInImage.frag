@@ -12,19 +12,26 @@ vec4 filterFrag(vec2 uv, vec4 frag) {
     vec2 origUV = uv;
     uv = (uv - 0.5) * 2.0;
 
-    float t = 1.0 + uStepSize;
+    vec2 size = textureSize(uInputTexture, 0);
+    vec2 referenceUV = uv;
+    //referenceUV.x /= size.x / size.y;
+
+    float s = uStepSize * 0.1;
+    float t = 1.0 + s;
     int j;
     for (int i = 0; i < uCount; i++) {
-        t = t - uStepSize;
-        if (abs(uv.x) < t && abs(uv.y) < t) {
+        t = t - s;
+        if (abs(referenceUV.x) < t && abs(referenceUV.y) < t) {
             uv /= t;
             //uv /= (1.0 - uStepSize);
             j = i;
         }
     }
 
+    /*
     float a = j / float(uCount - 1);
     return vec4(a, 0.0, 0.0, 1.0);
+    */
 
     uv = (uv * 0.5) + 0.5;
 
