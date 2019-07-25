@@ -335,7 +335,7 @@ class BeatWaveform(Node):
             # value goes from 0 to 1, so this sets the waveform back to where 0 is
             self._phase -= self._last_value
         t = self._timer(1.0 / length, False)
-        self._last_value = self._saw(t, 1.0, (self._phase + self.get("phase_adjust")) * math.pi)
+        self._last_value = self._saw(t, 1.0, (self._phase - self.get("phase_adjust")) * math.pi)
         self.set("out", self._last_value)
 
 class BeatWaveformTrigger(Node):

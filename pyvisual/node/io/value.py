@@ -1,6 +1,7 @@
 import clipboard
 import imgui
 import numpy as np
+import random
 
 from pyvisual.node.base import Node, input_value_property
 from pyvisual.node import dtype
@@ -22,6 +23,7 @@ class InputXXX(Node):
                 {"name" : "input", "dtype" : dt},
                 {"name" : "midi_mapping", "dtype" : dtype.obj, "hide" : True},
                 {"name" : "name", "dtype" : dtype.str, "group" : "additional"},
+                {"name" : "enable_randomization", "dtype" : dtype.bool, "dtype_args" : {"default" : False}, "group" : "additional"},
                 {"name" : "default", "dtype" : dt, "group" : "additional"}
             ] + extra_inputs
             outputs = [
@@ -50,12 +52,7 @@ class InputXXX(Node):
         return self.get("name")
 
     midi_mapping = input_value_property("midi_mapping")
-    #@property
-    #def midi_mapping(self):
-    #    return self._midi_mapping
-    #@midi_mapping.setter
-    #def midi_mapping(self, midi_mapping):
-    #    self._midi_mapping = midi_mapping
+    enable_randomization = input_value_property("enable_randomization")
 
     def get_absolute_value(self, value):
         raise NotImplemented()
@@ -63,12 +60,19 @@ class InputXXX(Node):
         raise NotImplemented()
 
     def set_offset_value(self, offset):
-        self._set_value(self._get_value() + offset)
+        self._set_value(self._get_random_value())
+
+    def set_random_value(self, force=1.0):
+        if self.enable_randomization and random.random() <= force:
+            self._set_value(self._get_random_value())
 
     def _get_value(self):
         return self.get_value("i_input").value
     def _set_value(self, value):
         self.get_value("i_input").value = value
+
+    def _get_random_value(self):
+        return self.get("default")
 
     def _evaluate(self):
         self.get_input("input").copy_to(self.get_output("output"))
@@ -107,6 +111,13 @@ class ClampedInputXXX(InputXXX):
     def set_offset_value(self, offset):
         self._set_value(self._get_value() + offset * self.get("step"))
 
+    def _get_random_value(self):
+        if self.__class__ == InputInt:
+            return random.randint(self.get("min"), self.get("max"))
+        else:
+            alpha = random.random()
+            return (1.0 - alpha) * self.get("min") + alpha * self.get("max")
+
     def _evaluate(self):
         super()._evaluate()
 
@@ -139,6 +150,7 @@ class InputBool(InputXXX):
             {"name" : "input", "dtype" : dtype.bool},
             {"name" : "midi_mapping", "dtype" : dtype.obj, "hide" : True},
             {"name" : "name", "dtype" : dtype.str, "group" : "additional"},
+            {"name" : "enable_randomization", "dtype" : dtype.bool, "dtype_args" : {"default" : False}, "group" : "additional"},
             {"name" : "default", "dtype" : dtype.bool, "group" : "additional"},
         ]
         outputs = [
@@ -155,12 +167,17 @@ class InputBool(InputXXX):
     def set_offset_value(self, offset):
         self._set_value((self._get_value() + offset) % 2)
 
+    def _get_random_value(self):
+        #return random.random() > 0.5
+        return not self._get_value()
+
 class InputEvent(InputXXX):
     class Meta:
         inputs = [
             {"name" : "input", "dtype" : dtype.event, "manual_input" : True},
             {"name" : "midi_mapping", "dtype" : dtype.obj, "hide" : True},
             {"name" : "name", "dtype" : dtype.str, "group" : "additional"},
+            {"name" : "enable_randomization", "dtype" : dtype.bool, "dtype_args" : {"default" : False}, "group" : "additional"},
             {"name" : "default", "dtype" : dtype.event, "hide" : True, "group" : "additional"},
         ]
         outputs = [
@@ -205,6 +222,7 @@ class InputChoice(InputXXX):
             {"name" : "input", "dtype" : dtype.int, "manual_input" : True},
             {"name" : "midi_mapping", "dtype" : dtype.obj, "hide" : True},
             {"name" : "name", "dtype" : dtype.str, "group" : "additional"},
+            {"name" : "enable_randomization", "dtype" : dtype.bool, "dtype_args" : {"default" : False}, "group" : "additional"},
             {"name" : "default", "dtype" : dtype.int, "group" : "additional"},
             {"name" : "choices", "dtype" : dtype.str, "group" : "additional", "dtype_args": {"variant" : "text"}},
         ]
@@ -234,6 +252,11 @@ class InputChoice(InputXXX):
 
     def set_offset_value(self, offset):
         self._set_value(self._get_value() + offset * 0.5)
+
+    def _get_random_value(self):
+        if len(self._choices) == 0:
+            return 0
+        return random.randint(0, len(self._choices) - 1)
 
     def _evaluate(self):
         super()._evaluate()
