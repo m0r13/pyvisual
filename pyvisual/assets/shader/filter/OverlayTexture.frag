@@ -3,7 +3,7 @@
 uniform sampler2D uOtherTexture;
 uniform float uFactor0; // {"default" : 1.0}
 uniform float uFactor1; // {"default" : 1.0}
-uniform int uMode; // {"choices" : ["add", "mul"]}
+uniform int uMode; // {"choices" : ["add", "mul", "diff"]}
 
 vec4 filterFrag(vec2 uv, vec4 frag) {
     vec4 otherFrag = texture2D(uOtherTexture, uv);
@@ -18,6 +18,8 @@ vec4 filterFrag(vec2 uv, vec4 frag) {
         result.rgb = frag.rgb * uFactor0 + otherFrag.rgb * uFactor1;
     } else if (uMode == 1) {
         result.rgb = frag.rgb * uFactor0 * otherFrag.rgb * uFactor1;
+    } else if (uMode == 2) {
+        result.rgb = abs(frag.rgb * uFactor0 - otherFrag.rgb * uFactor1);
     }
     
     return result;
