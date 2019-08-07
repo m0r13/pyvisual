@@ -45,7 +45,7 @@ void generateFrag() {
     vec3 pos = ro; 
     float dist = 0.0;
     float dscene = 0.0;
-    float lr = 0.8;
+    float lr = 1.0;
 
     #ifdef RAYMARCHING_DITHERING
     vec2 dpos = ( (vec2(pyvisualUV.x, 1.0 - pyvisualUV.y) * pyvisualResolution).xy / pyvisualResolution.xy );

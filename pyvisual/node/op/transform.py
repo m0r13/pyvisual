@@ -71,6 +71,42 @@ class Translate(Node):
                               [0.0, 0.0, 0.0, 1.0]], dtype=np.float32).T
         self.set("output", dot(self.get("input"), transform))
 
+class ScaleRotateTranslate(Node):
+    class Meta:
+        inputs = [
+             {"name" : "s", "dtype" : dtype.float, "dtype_args" : {"default" : 1.0}},
+             {"name" : "sx", "dtype" : dtype.float, "dtype_args" : {"default" : 1.0}},
+             {"name" : "sy", "dtype" : dtype.float, "dtype_args" : {"default" : 1.0}},
+             {"name" : "r", "dtype" : dtype.float, "dtype_args" : {"default" : 0.0, "unit" : "deg"}},
+             {"name" : "tx", "dtype" : dtype.float, "dtype_args" : {"default" : 0.0, "unit" : "px"}},
+             {"name" : "ty", "dtype" : dtype.float, "dtype_args" : {"default" : 0.0, "unit" : "px"}},
+        ]
+        outputs = [
+             {"name" : "output", "dtype" : dtype.mat4}
+        ]
+
+    def _evaluate(self):
+        s = self.get("s")
+        scale = np.array([[self.get("sx") * s, 0.0, 0.0, 0.0],
+                          [0.0, self.get("sy") * s, 0.0, 0.0],
+                          [0.0, 0.0, 1.0, 0.0],
+                          [0.0, 0.0, 0.0, 1.0]], dtype=np.float32).T
+
+        theta = math.radians(self.get("r"))
+        sinT = math.sin(theta)
+        cosT = math.cos(theta)
+        rotate = np.array([[cosT, -sinT, 0.0, 0.0],
+                           [sinT, cosT, 0.0, 0.0],
+                           [0.0, 0.0, 1.0, 0.0],
+                           [0.0, 0.0, 0.0, 1.0]], dtype=np.float32).T
+
+        translate = np.array([[1.0, 0.0, 0.0, self.get("tx")],
+                              [0.0, 1.0, 0.0, self.get("ty")],
+                              [0.0, 0.0, 1.0, 0.0],
+                              [0.0, 0.0, 0.0, 1.0]], dtype=np.float32).T
+
+        self.set("output", dot(dot(scale, rotate), translate))
+
 class Dot(Node):
     class Meta:
         inputs = [

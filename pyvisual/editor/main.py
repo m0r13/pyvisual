@@ -693,11 +693,18 @@ class UINode:
                     else:
                         value = value.manual_value
 
+            # gray-out values that are connected
+            if value.is_connected():
+                imgui.push_style_color(imgui.COLOR_TEXT, 0.5, 0.5, 0.5, 1.0)
+
             text_start = imgui.get_cursor_screen_pos()
             imgui.text(port_spec["name"])
 
             imgui.set_cursor_screen_pos((text_start[0] + 150, text_start[1]))
             widget.show(value, read_only=read_only or not port_spec["manual_input"])
+            
+            if value.is_connected():
+                imgui.pop_style_color()
 
             imgui.pop_id()
 
@@ -842,17 +849,22 @@ class UINode:
                 self.ui_graph.subgraph_handler.open_subgraph(name, graph, parent_graph)
             imgui.separator()
 
+            main_filter = lambda port: not port[1]["hide"] and port[1]["group"] != "additional"
             additional_filter = lambda port: not port[1]["hide"] and port[1]["group"] == "additional"
-            inputs = list(filter(additional_filter, self.instance.input_ports.items()))
-            outputs = list(filter(additional_filter, self.instance.output_ports.items()))
+            main_inputs = list(filter(main_filter, self.instance.input_ports.items()))
+            additional_inputs = list(filter(additional_filter, self.instance.input_ports.items()))
 
-            if len(inputs) > 0:
-                imgui.text("additional inputs")
-                self.show_context_ports(inputs)
+            if len(main_inputs) > 0 and self.collapsed:
+                imgui.text("inputs")
+                imgui.push_id(0)
+                self.show_context_ports(main_inputs)
+                imgui.pop_id()
                 imgui.separator()
-            if len(outputs) > 0:
-                imgui.text("additional outputs")
-                self.show_context_ports(outputs)
+            if len(additional_inputs) > 0:
+                imgui.text("additional inputs")
+                imgui.push_id(1)
+                self.show_context_ports(additional_inputs)
+                imgui.pop_id()
                 imgui.separator()
 
             self.instance._show_custom_context()
@@ -1059,6 +1071,8 @@ class UIGraph(NodeGraphListener):
             port_id = port_ids[0]
             if "i_input" in port_ids:
                 port_id = "i_input"
+            if "i_alpha" in port_ids:
+                port_id = "i_alpha"
 
             # finish the connection and align node so that port is that connection position
             self.finish_dragging_connection(ui_node, port_id)
@@ -1297,15 +1311,21 @@ class UIGraph(NodeGraphListener):
                 for i, spec in enumerate(node_specs):
                     label = "%s (%s)" % (spec.name, spec.module_name)
                     contained, n = match_substring_partly(text.lower(), label.lower())
+                    #label = "%d %s" % (n, label)
                     if contained:
                         filtered.append((n, (label, spec, {})))
 
                     for name, preset_values in spec.cls.get_presets(self.graph):
                         label = "%s: %s (%s)" % (spec.name, name, spec.module_name)
                         contained, n = match_substring_partly(text.lower(), label.lower())
+                        #label = "%d %s" % (n, label)
                         if contained:
                             filtered.append((n, (label, spec, preset_values)))
 
+                # list entries are tupels: (n, (label, node spec, preset values))
+                # sort by length of node (descending)
+                filtered.sort(key = lambda item: len(item[1][1].name))
+                # sort by how well substring is contained
                 filtered.sort(key = lambda item: item[0])
                 return [ item[1] for item in filtered ]
 
@@ -1730,6 +1750,11 @@ class NodeEditor(SubgraphHandler):
         else:
             self._midi = MidiIntegration(devices[0])
 
+        self._midi_randomize = settings.get("midi_randomize", False)
+        self._midi_randomize_per_minute = settings.get("midi_randomize_per_minute", 1.0)
+        self._midi_randomize_p = settings.get("midi_randomize_p", 0.5)
+        self._midi_next_randomize = 0.0
+
         # performance measurement stuffs
         self.fps = 0.0
         self.editor_time = 0.0
@@ -1778,6 +1803,9 @@ class NodeEditor(SubgraphHandler):
         settings["hide_after_seconds"] = self.hide_after_seconds
         settings["output_value"] = self.output_value
         settings["output_aspect_zoom_out"] = self.output_aspect_zoom_out
+        settings["midi_randomize"] = self._midi_randomize
+        settings["midi_randomize_per_minute"] = self._midi_randomize_per_minute
+        settings["midi_randomize_p"] = self._midi_randomize_p
         settings.update(self.ui_graph_data.get_settings())
 
         autoplay = {}
@@ -2223,7 +2251,6 @@ class NodeEditor(SubgraphHandler):
             if imgui.begin("midi parameters", False, flags):
                 if self._midi is None:
                     imgui.text("No midi available!")
-                    imgui.end()
                 else:
                     midi = self._midi
                     learning_node = midi.learning_node
@@ -2265,7 +2292,32 @@ class NodeEditor(SubgraphHandler):
                             imgui.text("gimme some midi...")
                         imgui.next_column()
                         imgui.pop_id()
-                    imgui.end()
+
+
+                imgui.push_item_width(100)
+                clicked, self._midi_randomize_p = imgui.drag_float("", self._midi_randomize_p, 0.01 * 0.25, 0.0, 1.0)
+                imgui.same_line()
+                if imgui.button("randomize"):
+                    for node in self.graph_traits.input_value_nodes:
+                        node.set_random_value(force=self._midi_randomize_p)
+
+                clicked, self._midi_randomize = imgui.checkbox("auto random", self._midi_randomize)
+                if clicked and self._midi_randomize:
+                    self._midi_next_randomize = 0.0
+
+                imgui.push_item_width(100)
+                clicked, self._midi_randomize_per_minute = imgui.drag_float("per minute", self._midi_randomize_per_minute, 0.05, 0.0, float("inf"))
+
+                if self._midi_randomize:
+                    delta = self._midi_next_randomize - time.time()
+                    imgui.text("next randomize: %ds" % delta)
+                imgui.end()
+
+            if self._midi_randomize and time.time() > self._midi_next_randomize:
+                delta = random.expovariate(1.0 / (60.0 / self._midi_randomize_per_minute))
+                self._midi_next_randomize = time.time() + delta
+                for node in self.graph_traits.input_value_nodes:
+                    node.set_random_value(force=self._midi_randomize_p)
 
             if imgui.begin("scene properties", False, flags):
                 value_changed = False

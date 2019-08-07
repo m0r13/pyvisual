@@ -7,6 +7,9 @@ cdef class Value:
     def value(self, object value):
         pass
 
+    def is_connected(self):
+        return False
+
     cpdef has_changed(self):
         return False
 

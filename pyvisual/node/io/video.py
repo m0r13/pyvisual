@@ -208,6 +208,9 @@ class VideoThread(threading.Thread):
         self._running = False
 
 class PlayVideo(Node):
+
+    USES_OPENGL = True
+
     class Meta:
         inputs = [
             {"name" : "video", "dtype" : dtype.assetpath, "dtype_args" : {"prefix" : "video"}},
