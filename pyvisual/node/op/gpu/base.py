@@ -466,6 +466,7 @@ class Blend(RenderNode):
         inputs = [
             {"name" : "input1", "dtype" : dtype.tex2d},
             {"name" : "input2", "dtype" : dtype.tex2d},
+            {"name" : "input3", "dtype" : dtype.tex2d},
         ]
         outputs = [
             {"name" : "output", "dtype" : dtype.tex2d}
@@ -490,36 +491,57 @@ class Blend(RenderNode):
         pass
 
     def _evaluate(self):
-        input1 = self.get("input1")
-        input2 = self.get("input2")
-        if input1 is None:
+        inputs = [self.get("input1"), self.get("input2"), self.get("input3")]
+
+        #input1 = self.get("input1")
+        #input2 = self.get("input2")
+        #if input1 is None:
+        #    self.set("output", None)
+        #    return
+
+        #if input2 is None:
+        #    self.set("output", input1)
+        #    return
+
+        target_size = None
+        for inp in inputs:
+            if inp is not None:
+                target_size = inp.shape[:2][::-1]
+                break
+        if target_size is None:
             self.set("output", None)
             return
-
-        if input2 is None:
-            self.set("output", input1)
-            return
-
-        target_size = input1.shape[:2][::-1]
-        input1_size = input1.shape[:2][::-1]
-        input2_size = input2.shape[:2][::-1]
+        #target_size = input1.shape[:2][::-1]
+        #input1_size = input1.shape[:2][::-1]
+        #input2_size = input2.shape[:2][::-1]
         def do_render():
             eye = np.eye(4, dtype=np.float32)
 
-            model, view, projection, transform_uv = self.create_transform(eye, input1_size, target_size)
-            self.quad["uModelViewProjection"] = np.dot(model, np.dot(view, projection))
-            self.quad["uTextureSize"] = input1_size
-            self.quad["uTransformUV"] = transform_uv
-            self.quad["uInputTexture"] = input1
-            self.quad.draw(gl.GL_TRIANGLE_STRIP)
+            for inp in inputs:
+                if inp is None:
+                    continue
 
-            model, view, projection, transform_uv = self.create_transform(eye, input2_size, target_size)
-            self.quad["uModelViewProjection"] = np.dot(model, np.dot(view, projection))
-            self.quad["uTextureSize"] = input2_size
-            self.quad["uTransformUV"] = transform_uv
-            self.quad["uInputTexture"] = input2
-            self.quad.draw(gl.GL_TRIANGLE_STRIP)
+                inp_size = inp.shape[:2][::-1]
+                model, view, projection, transform_uv = self.create_transform(eye, inp_size, target_size)
+                self.quad["uModelViewProjection"] = np.dot(model, np.dot(view, projection))
+                self.quad["uTextureSize"] = inp_size
+                self.quad["uTransformUV"] = transform_uv
+                self.quad["uInputTexture"] = inp
+                self.quad.draw(gl.GL_TRIANGLE_STRIP)
+
+            #model, view, projection, transform_uv = self.create_transform(eye, input1_size, target_size)
+            #self.quad["uModelViewProjection"] = np.dot(model, np.dot(view, projection))
+            #self.quad["uTextureSize"] = input1_size
+            #self.quad["uTransformUV"] = transform_uv
+            #self.quad["uInputTexture"] = input1
+            #self.quad.draw(gl.GL_TRIANGLE_STRIP)
+
+            #model, view, projection, transform_uv = self.create_transform(eye, input2_size, target_size)
+            #self.quad["uModelViewProjection"] = np.dot(model, np.dot(view, projection))
+            #self.quad["uTextureSize"] = input2_size
+            #self.quad["uTransformUV"] = transform_uv
+            #self.quad["uInputTexture"] = input2
+            #self.quad.draw(gl.GL_TRIANGLE_STRIP)
 
         self.set("output", self.render(target_size, do_render))
-
 

@@ -12,7 +12,9 @@ vec4 filterFrag(vec2 uv, vec4 frag) {
     otherFrag.rgb *= uv.x < 0.5 ? uFactorLeft : uFactorRight;
 
     vec4 result;
-    result.a = frag.a;
+    // TODO !!
+    // for masking compatibility also multiply mask value
+    result.a = frag.a * otherFrag.r;
     //result.rgb = mix(frag.rgb, otherFrag.rgb, otherFrag.a);
     //result.a = max(frag.a * otherFrag.a, otherFrag.a);
     

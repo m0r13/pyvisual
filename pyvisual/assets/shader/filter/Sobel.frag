@@ -33,7 +33,7 @@ vec4 filterFrag(vec2 uv, vec4 frag) {
 #if dWithAlpha
     return vec4(uColor.rgb * edge, edge * uAlphaIntensity);
 #else
-    return vec4(uColor.rgb * edge, 1.0);
+    return vec4(uColor.rgb * edge * uAlphaIntensity, 1.0);
 #endif
 }
 

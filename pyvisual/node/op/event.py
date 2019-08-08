@@ -51,6 +51,26 @@ class TimerEvent(Node):
             alpha = random.random()
             self._next_event = t + min_interval * (1.0-alpha) + max_interval * alpha
 
+class OnceEvent(Node):
+    class Meta:
+        inputs = [
+        ]
+        outputs = [
+            {"name" : "out", "dtype" : dtype.event},
+        ]
+
+    def evaluate(self):
+        super().evaluate()
+
+        if self.get_output("out").value:
+            self.force_evaluate()
+
+    def _evaluate(self):
+        if self._last_evaluated == 0.0:
+            self.set("out", True)
+        else:
+            self.set("out", False)
+
 class FPSTimerEvent(Node):
     class Meta:
         inputs = [

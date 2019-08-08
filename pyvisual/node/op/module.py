@@ -34,6 +34,7 @@ class Module(Node):
         inputs = [
             {"name" : "module_enabled", "dtype" : dtype.bool, "dtype_args" : {"default" : True}},
             {"name" : "module_name", "dtype" : dtype.str, "group" : "additional"},
+            {"name" : "evaluate_sometimes", "dtype" : dtype.bool, "dtype_args" : {"default" : False}, "group" : "additional"},
         ]
         outputs = [
             {"name" : "dummy", "dtype" : dtype.float, "dummy" : True}
@@ -119,7 +120,8 @@ class Module(Node):
         # custom ports are now updated by listener, no more manual _update_custom_ports necessary
 
     def _evaluate(self):
-        if self._graph is None or not self.get("module_enabled"):
+        force_evaluate = self._force_evaluate or self._last_evaluated == 0.0
+        if self._graph is None or (not self.get("module_enabled") and not force_evaluate):
             self._was_disabled = True
             return
 

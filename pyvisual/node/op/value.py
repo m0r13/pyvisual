@@ -253,7 +253,8 @@ class MixFloat(Node):
             {"name" : "alpha1", "dtype" : dtype.float, "dtype_args" : {"default" : 1.0}, "group" : "additional"},
         ]
         outputs = [
-            {"name" : "output", "dtype" : dtype.float}
+            {"name" : "output", "dtype" : dtype.float},
+            {"name" : "output_inv", "dtype" : dtype.float},
         ]
         options = {
             "category" : "math"
@@ -271,6 +272,7 @@ class MixFloat(Node):
         a = self.get("a")
         b = self.get("b")
         self.set("output", (1.0-alpha) * a + alpha * b)
+        self.set("output_inv", alpha * a + (1.0 - alpha) * b)
 
 UNARY_OPS = OrderedDict(
     id=lambda x: x,
