@@ -127,7 +127,8 @@ class GetVar(Node):
 
     @property
     def collapsed_node_title(self):
-        return "get var: %s" % self.name
+        name = self.name or "<none>"
+        return "get var: %s" % name
 
     def start(self, graph):
         self.graph = graph
@@ -308,7 +309,7 @@ class MixFloatVar(GetFloatVar):
             {"name" : "output", "dtype" : dtype.float, "manual_input" : True}
         ]
         options = {
-            "show_title" : True
+            "show_title" : False
         }
 
     def __init__(self):
@@ -318,7 +319,8 @@ class MixFloatVar(GetFloatVar):
 
     @property
     def collapsed_node_title(self):
-        return "mix var: %s" % self.name
+        name = self.name or "<none>"
+        return "mix var: %s" % name
 
     def _evaluate(self):
         super()._evaluate()
