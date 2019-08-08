@@ -461,12 +461,12 @@ class ShaderNodeLoader():
         for loader in cls.instances:
             loader.reload()
 
+BLEND_INPUTS = [ "input%d" % i for i in range(4) ]
+
 class Blend(RenderNode):
     class Meta:
         inputs = [
-            {"name" : "input1", "dtype" : dtype.tex2d},
-            {"name" : "input2", "dtype" : dtype.tex2d},
-            {"name" : "input3", "dtype" : dtype.tex2d},
+            {"name" : name, "dtype" : dtype.tex2d} for name in BLEND_INPUTS
         ]
         outputs = [
             {"name" : "output", "dtype" : dtype.tex2d}
@@ -491,7 +491,7 @@ class Blend(RenderNode):
         pass
 
     def _evaluate(self):
-        inputs = [self.get("input1"), self.get("input2"), self.get("input3")]
+        inputs = [ self.get(name) for name in BLEND_INPUTS ]
 
         #input1 = self.get("input1")
         #input2 = self.get("input2")
