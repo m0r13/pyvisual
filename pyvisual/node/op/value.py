@@ -485,6 +485,8 @@ class LowpassFloat(Node):
         self._filter = None
         self.status = None
 
+        self._last_value = None
+
     def _create_filter(self, order, cutoff):
         try:
             fps = clock.get_default().get_fps_limit() * 0.75
@@ -495,15 +497,19 @@ class LowpassFloat(Node):
             self.status = str(e)
 
     def _evaluate(self):
-        if self.have_inputs_changed("order", "cutoff") or self._last_evaluated == 0.0:
+        value = self.get("input")
+        last_value = self._last_value or value
+        big_change = abs(value - last_value) > 25.0
+
+        if self.have_inputs_changed("order", "cutoff") or self._last_evaluated == 0.0 or big_change:
             self._filter = self._create_filter(self.get("order"), self.get("cutoff"))
 
-        value = self.get("input")
         if self._filter:
             filtered = self._filter.process(np.array([value]))[0]
-            self.set("output", filtered if self.get("enabled") else value)
+            self._last_value = filtered if self.get("enabled") else value
         else:
-            self.set("output", value)
+            self._last_value = value
+        self.set("output", self._last_value)
 
     def _show_custom_ui(self):
         if self.status:
