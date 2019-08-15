@@ -474,6 +474,7 @@ class LowpassFloat(Node):
             {"name" : "order", "dtype" : dtype.int, "dtype_args" : {"default" : 2, "range" : [0, float("inf")]}},
             # TODO fps automatically!
             {"name" : "cutoff", "dtype" : dtype.float, "dtype_args" : {"default" : 2.5, "range" : [0.00001, 60.0 / 2.0 - 0.00001]}},
+            {"name" : "ignore_threshold", "dtype" : dtype.float, "dtype_args" : {"default" : float("inf"), "range" : [0.0001, float("inf")]}, "group" : "additional"},
         ]
         outputs = [
             {"name" : "output", "dtype" : dtype.float},
@@ -499,7 +500,7 @@ class LowpassFloat(Node):
     def _evaluate(self):
         value = self.get("input")
         last_value = self._last_value or value
-        big_change = abs(value - last_value) > 25.0
+        big_change = abs(value - last_value) > self.get("ignore_threshold")
 
         if self.have_inputs_changed("order", "cutoff") or self._last_evaluated == 0.0 or big_change:
             self._filter = self._create_filter(self.get("order"), self.get("cutoff"))
@@ -828,3 +829,110 @@ class AlphaGlitchSelect(Node):
         self.set("o0", factors[0])
         self.set("o1", factors[1])
         self.set("o2", factors[2])
+
+class DualLightValue(Node):
+    class Meta:
+        inputs = [
+            {"name" : "poisson_event", "dtype" : dtype.event},
+            {"name" : "minor_event", "dtype" : dtype.event},
+            {"name" : "major_event", "dtype" : dtype.event},
+            {"name" : "mode", "dtype" : dtype.int, "dtype_args" : {"choices" : ["poisson hold", "on", "toggle on/off", "beat hold", "strobo"]}},
+            {"name" : "strobo_f", "dtype" : dtype.float, "dtype_args" : {"default" : 10.0, "range" : [0.001, 60.0]}},
+        ]
+        outputs = [
+            {"name" : "value", "dtype" : dtype.float},
+            {"name" : "lowpass", "dtype" : dtype.bool},
+        ]
+
+    def __init__(self):
+        super().__init__(always_evaluate=True)
+
+        self._on_until = 0.0
+
+    def _evaluate(self):
+        # mode
+        # - poisson
+        # - toggle on/off every n beat
+        # - turn on every n beat
+        # - strobo
+
+        event = self.get("major_event")
+        poisson_event = self.get("poisson_event")
+        mode = self.get("mode")
+        #self._was_changed = self._was_changed or self.have_inputs_changed("mode")
+
+        v = self.get_output("value").value
+        lowpass = False
+        if mode == 0:
+            if poisson_event:
+                # turn on for X sec (longer time)
+                self._on_until = time.time() + 1.5
+            v = time.time() < self._on_until
+            lowpass = True
+        elif mode == 1:
+            v = 1
+        elif mode == 2 and event:
+            v = not v
+        elif mode == 3:
+            if event:
+                # turn on for X sec (beat time)
+                self._on_until = time.time() + 0.3
+            v = time.time() < self._on_until
+        elif mode == 4:
+            # strobo!!!!
+            f = self.get("strobo_f")
+            finv = 1.0 / f
+            v = time.time() % finv < 0.5 * finv
+
+        self.set("value", v)
+        self.set("lowpass", lowpass)
+
+class DualLightMapping(Node):
+    class Meta:
+        inputs = [
+            {"name" : "poisson_event", "dtype" : dtype.event},
+            {"name" : "minor_event", "dtype" : dtype.event},
+            {"name" : "major_event", "dtype" : dtype.event},
+            {"name" : "mode", "dtype" : dtype.int, "dtype_args" : {"choices" : ["both on", "swap l and r", "toggle both"]}},
+            {"name" : "mode_poisson", "dtype" : dtype.bool}
+        ]
+        outputs = [
+            {"name" : "l", "dtype" : dtype.float},
+            {"name" : "r", "dtype" : dtype.float},
+        ]
+
+    def __init__(self):
+        super().__init__()
+
+        self._was_changed = True
+
+    def _evaluate(self):
+        # modes:
+        # - complete
+        # - swap l and r
+        # - toggle both together
+        # - randomly toggle all the time
+
+        event = self.get("major_event") or (self.get("mode_poisson") and self.get("poisson_event"))
+        mode = self.get("mode")
+        self._was_changed = self._was_changed or self.have_inputs_changed("mode")
+
+        if not event:
+            return
+
+        l, r = self.get_output("l").value, self.get_output("r").value
+        if mode == 0:
+            l, r = 1, 1
+        elif mode == 1:
+            if self._was_changed:
+                l, r = 1, 0
+            l, r = r, l
+        elif mode == 2:
+            l = not l
+            r = l
+        elif mode == 3:
+            pass
+
+        self.set("l", l)
+        self.set("r", r)
+        self._was_changed = False

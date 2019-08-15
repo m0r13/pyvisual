@@ -3,6 +3,8 @@
 
 #include <lib/transform.glsl>
 
+// preprocessor bool dSymmetric; {"default" : false, "group" : "additional"}
+
 uniform mat4 uTransformGlitch;
 
 uniform float slices; // {"default" : 3.0}
@@ -26,11 +28,19 @@ float noise1d(float p){
 
 const float TWO_PI = 6.283185307179586;
 vec4 filterFrag(vec2 uv, vec4 _) {
-    vec2 referenceUV = transformUV(uv, uTransformGlitch, textureSize(uInputTexture, 0));
+    vec2 uu = uv;
+    float f = 1.0;
+#if dSymmetric
+    if (uu.x < 0.5) {
+        uu.x = 0.5 - (uu.x - 0.5);
+        f = -1.0;
+    }
+#endif
+    vec2 referenceUV = transformUV(uu, uTransformGlitch, textureSize(uInputTexture, 0));
     float n = noise1d(referenceUV.y * slices + /*timeH **/ timeV * 3.0);
     float ns = steppedVal(fract(n  ),slices) + 2.0;
     float nsr = random1d(ns);
     vec2 uvn = uv;
-    uvn.x += nsr * sin(timeH * TWO_PI + nsr * 20.0) * offset / textureSize(uInputTexture, 0).x;
+    uvn.x += f * nsr * sin(timeH * TWO_PI + nsr * 20.0) * offset / textureSize(uInputTexture, 0).x;
     return texture2D(uInputTexture, uvn);
 }
