@@ -4,13 +4,20 @@ uniform int uCount; // {"default" : 4, "range" : [1, Infinity]}
 uniform float uIndex; // {"default" : 0, "range" : [0, Infinity]}
 uniform int uMode; // {"choices" : ["single-on", "sweep-in", "sweep-out"], "default" : 0}
 uniform bool uInvert; // {"default" : false}
+uniform bool uInvertX;
 
 vec4 filterFrag(vec2 uv, vec4 frag) {
     if (frag.a < 0.5) {
-        return vec4(vec3(0.0), 1.0);
+        return vec4(vec3(0.0), 0.0);
     }
 
     int i = int(ceil(frag.r * uCount - 0.01));
+    if (i == 0) {
+        return vec4(vec3(0.0), 0.0);
+    }
+    if (uInvertX) {
+        i = 1 + uCount - i;
+    }
 
     bool on = false;
     float d = 0.0;
@@ -26,10 +33,10 @@ vec4 filterFrag(vec2 uv, vec4 frag) {
     }
 
     float value = d > 0.0 ? 0.0 : 1.0;
-    //float value = 1.0 - smoothstep(0.0, 1.5, d);
+    //float value = 1.0 - smoothstep(0.5, 1.5, d);
     if (uInvert) {
         value = 1.0 - value;
     }
 
-    return vec4(vec3(value), 1.0);
+    return vec4(vec3(value), value);
 }

@@ -187,8 +187,15 @@ class Float(Widget):
 
     def _show(self, value, read_only):
         imgui.push_item_width(self.width)
-        changed, v = imgui.drag_float("", value.value,
-                change_speed=self.drag_factor, min_value=self.minmax[0], max_value=self.minmax[1], format="%0.4f")
+        vv = value.value
+        # TODO workaround for port widgets being updated only every N frames
+        # it can happen that a float widget is replaced by a texture widget (ModuleInput node for example)
+        # and the float widget receives the texture value (None) for a few frames
+        # this prevents imgui from failing because None was passed
+        if vv is None:
+            vv = 0.0
+        changed, v = imgui.drag_float("", vv,
+                change_speed=self.drag_factor, min_value=self.minmax[0] or float("-inf"), max_value=self.minmax[1] or float("inf"), format="%0.4f")
         if changed and not read_only:
             value.value = self.clamper(v)
 
@@ -239,7 +246,7 @@ class Color(Widget):
 
 def imgui_pick_file(name, base_path, wildcard="*"):
     if imgui.begin_popup(name):
-        path = _imgui_pick_file_menu(base_path, wildcard)
+        path = imgui_pick_file_menu(base_path, wildcard)
         if path is not None:
             imgui.close_current_popup()
             imgui.end_popup()
@@ -247,7 +254,7 @@ def imgui_pick_file(name, base_path, wildcard="*"):
         imgui.end_popup()
 
 WILDCARDS = ["*.jpg", "*.png"]
-def _imgui_pick_file_menu(base_path, wildcard="*"):
+def imgui_pick_file_menu(base_path, wildcard="*"):
     MAX_FILE_DISPLAY_LENGTH = 60
 
     try:
@@ -279,7 +286,7 @@ def _imgui_pick_file_menu(base_path, wildcard="*"):
 
             if not not_is_dir:
                 if imgui.begin_menu(display_name):
-                    selected_path = _imgui_pick_file_menu(os.path.join(base_path, name), wildcard)
+                    selected_path = imgui_pick_file_menu(os.path.join(base_path, name), wildcard)
                     imgui.end_menu()
                     if selected_path is not None:
                         return os.path.join(base_path, selected_path)

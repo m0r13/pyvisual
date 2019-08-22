@@ -1,6 +1,6 @@
 #include <filter/basefilter.frag>
 
-uniform int uMode; // {"choices" : ["difference", "overlay", "grain merge", "exclusion", "hsv hue", "hsv saturation", "hsv value", "multiply"]}
+uniform int uMode; // {"choices" : ["difference", "overlay", "grain merge", "exclusion", "hsv hue", "hsv saturation", "hsv value", "multiply", "multiply for mask"]}
 uniform float uFactorLeft; // {"default" : 1.0, "range" : [0.0, 1.0]}
 uniform float uFactorRight; // {"default" : 1.0, "range" : [0.0, 1.0]}
 uniform vec4 uColor;
@@ -35,6 +35,9 @@ vec4 filterFrag(vec2 uv, vec4 frag) {
         }
     } else if (uMode == 7) {
         result.rgb = frag.rgb * color.rgb;
+    } else if (uMode == 8) {
+        result.rgb = frag.rgb * color.rgb;
+        frag.a *= frag.r;
     }
     return vec4(mix(frag.rgb, result.rgb, color.a), frag.a);
 }

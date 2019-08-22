@@ -466,11 +466,10 @@ class PoissonTimer(Node):
     def _evaluate(self):
         t = util.time.global_time.time()
 
+        per_minute = self.get("per_minute") + self.get("per_hour") / 60.0
+        enabled = self.get("enabled") and per_minute != 0.0
         if self._next < t and self.get("enabled"):
-            per_minute = self.get("per_minute")
-            if per_minute == 0.0:
-                pass
-            self._next = t + random.expovariate(1.0 / (60.0 / (self.get("per_minute") + self.get("per_hour") / 60.0)))
+            self._next = t + random.expovariate(1.0 / (60.0 / per_minute))
             self.set("output", True)
         else:
             self.set("output", False)

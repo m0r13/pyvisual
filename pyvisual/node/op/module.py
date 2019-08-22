@@ -170,9 +170,26 @@ class StaticModule(Module):
         super().__init__(embed_graph=embed_graph)
 
         self._path = path
+        self._full_path = os.path.join(assets.ASSET_PATH, "saves", "module", self._path)
 
     def _init_graph(self, graph):
-        graph.load_file(os.path.join(assets.ASSET_PATH, "saves", "module", self._path))
+        self._graph.load_file(self._full_path)
+
+    def _save_graph(self):
+        self._graph.save_file(self._full_path)
+
+    def _show_custom_context(self):
+        if imgui.button("save subgraph"):
+            self._save_graph()
+
+class StaticModuleWrapper(StaticModule):
+    SAVE_PATH = None
+
+    class Meta:
+        pass
+
+    def __init__(self):
+        super().__init__(self.SAVE_PATH, embed_graph=True)
 
 class UserModule(Module):
 
@@ -200,4 +217,37 @@ class UserModule(Module):
         if self._graph is not None:
             self._graph.clear()
             self._graph.unserialize(extra.get("subgraph", {}))
+
+    def _show_custom_context(self):
+        if imgui.button("export subgraph..."):
+            imgui.open_popup("module_save_path")
+        save_path = widget.imgui_pick_file("module_save_path", os.path.join(assets.SAVE_PATH, "module", "auto"))
+        if save_path is not None:
+            self._graph.save_file(save_path)
+
+class ModuleLoader:
+    def __init__(self, globals_):
+        self._globals = globals_
+        self._classes = {}
+
+        self.reload()
+
+    def reload(self):
+        g = self._globals
+        for path in assets.glob_paths("saves/module/auto/*/*.json"):
+            name = os.path.basename(path).replace(".json", "")
+            if name in g:
+                if not issubclass(g[name], self._baseclass):
+                    print("### Warning: Seems that class name %s in module %s is already taken" % (name, module))
+                else:
+                    # class already exists, no need to recreate it for now
+                    continue
+
+            save_path = os.path.relpath(path, "saves/module")
+            attrs = {"SAVE_PATH" : save_path, "__module__" : __name__}
+            module_class = type(name, (StaticModuleWrapper,), attrs)
+            g[name] = module_class
+            del module_class
+
+module_loader = ModuleLoader(globals())
 

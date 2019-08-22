@@ -11,6 +11,6 @@ vec4 filterFrag(vec2 uv, vec4 frag) {
     hsv.r += uHueOffset;
     frag.rgb = hsv2rgb(hsv);
 
-    frag.rb = smoothstep(uRedThreshold - uRedSmoothness*0.5, uRedThreshold + uRedSmoothness*0.5, frag.rb);
+    frag.rgb = smoothstep(uRedThreshold - uRedSmoothness*0.5, uRedThreshold + uRedSmoothness*0.5, frag.rgb);
     return frag;
 }

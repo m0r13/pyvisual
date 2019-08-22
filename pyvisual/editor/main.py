@@ -842,11 +842,12 @@ class UINode:
                 self.ui_graph.remove_node(self)
             if imgui.menu_item("expand..." if self.collapsed else "collaps...")[0]:
                 self.collapsed = not self.collapsed
-            if self.instance.HAS_SUBGRAPH and imgui.menu_item("open subgraph")[0]:
-                name = self.instance.node_title
-                graph = self.instance.subgraph
-                parent_graph = self.ui_graph.graph
-                self.ui_graph.subgraph_handler.open_subgraph(name, graph, parent_graph)
+            if self.instance.HAS_SUBGRAPH:
+                if imgui.menu_item("open subgraph")[0]:
+                    name = self.instance.node_title
+                    graph = self.instance.subgraph
+                    parent_graph = self.ui_graph.graph
+                    self.ui_graph.subgraph_handler.open_subgraph(name, graph, parent_graph)
             imgui.separator()
 
             main_filter = lambda port: not port[1]["hide"] and port[1]["group"] != "additional"

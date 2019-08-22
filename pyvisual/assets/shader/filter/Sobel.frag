@@ -5,6 +5,7 @@
 uniform float uStep; // {"default" : 1.0, "range" : [0.0, Infinity]}
 uniform float uAlphaIntensity; // {"default" : 1.0, "range" : [0.0, Infinity]}
 uniform vec4 uColor; // {"default" : [1.0, 1.0, 1.0, 1.0]}
+uniform int uDirection; // {"default" : 0, "choices" : ["x and y", "x", "y"]}
 
 float intensity(in vec4 color){
     //return sqrt((color.x*color.x)+(color.y*color.y)+(color.z*color.z));
@@ -28,6 +29,11 @@ vec4 filterFrag(vec2 uv, vec4 frag) {
 
     float x = tleft + 2.0*left + bleft - tright - 2.0*right - bright;
     float y = -tleft - 2.0*top - tright + bleft + 2.0 * bottom + bright;
+    if (uDirection == 1) {
+        y = 0.0;
+    } else if (uDirection == 2) {
+        x = 0.0;
+    }
     float edge = sqrt((x*x) + (y*y)) * frag.a;
 
 #if dWithAlpha

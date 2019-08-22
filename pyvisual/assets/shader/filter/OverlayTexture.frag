@@ -9,7 +9,7 @@ vec4 filterFrag(vec2 uv, vec4 frag) {
     vec4 otherFrag = texture2D(uOtherTexture, uv);
 
     vec4 result;
-    result.a = frag.a;
+    result.a = 1.0;
     //result.rgb = mix(frag.rgb, otherFrag.rgb, otherFrag.a);
     //result.a = max(frag.a * otherFrag.a, otherFrag.a);
     
