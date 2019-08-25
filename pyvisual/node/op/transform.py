@@ -71,9 +71,28 @@ class Translate(Node):
                               [0.0, 0.0, 0.0, 1.0]], dtype=np.float32).T
         self.set("output", dot(self.get("input"), transform))
 
+class Shear(Node):
+    class Meta:
+        inputs = [
+            {"name" : "input", "dtype" : dtype.mat4},
+            {"name" : "lx", "dtype" : dtype.float, "dtype_args" : {"unit" : ""}},
+            {"name" : "ly", "dtype" : dtype.float, "dtype_args" : {"unit" : ""}},
+        ]
+        outputs = [
+            {"name" : "output", "dtype" : dtype.mat4},
+        ]
+
+    def _evaluate(self):
+        transform = np.array([[1.0, self.get("lx"), 0.0, 0.0],
+                              [self.get("ly"), 1.0, 0.0, 0.0],
+                              [0.0, 0.0, 1.0, 0.0],
+                              [0.0, 0.0, 0.0, 1.0]], dtype=np.float32).T
+        self.set("output", dot(self.get("input"), transform))
+
 class ScaleRotateTranslate(Node):
     class Meta:
         inputs = [
+             {"name" : "input", "dtype" : dtype.mat4},
              {"name" : "s", "dtype" : dtype.float, "dtype_args" : {"default" : 1.0}},
              {"name" : "sx", "dtype" : dtype.float, "dtype_args" : {"default" : 1.0}},
              {"name" : "sy", "dtype" : dtype.float, "dtype_args" : {"default" : 1.0}},
@@ -105,7 +124,7 @@ class ScaleRotateTranslate(Node):
                               [0.0, 0.0, 1.0, 0.0],
                               [0.0, 0.0, 0.0, 1.0]], dtype=np.float32).T
 
-        self.set("output", dot(dot(scale, rotate), translate))
+        self.set("output", dot(self.get("input"), dot(dot(scale, rotate), translate)))
 
 class Dot(Node):
     class Meta:
