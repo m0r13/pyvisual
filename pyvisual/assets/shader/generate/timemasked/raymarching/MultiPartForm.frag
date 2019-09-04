@@ -2,7 +2,7 @@
 # define RAYMARCHING_DITHERING
 #endif
 #define RAYMARCHING_STEPS 48
-#include <generate/timemasked/raymarching/base.frag>
+#include <generate/timemasked/raymarching/base_ditheringmask.frag>
 
 float sdSphere(vec3 p, float s) {
     return length(p)-s;
