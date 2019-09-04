@@ -165,7 +165,7 @@ class DummyTexture(Node):
         height = int(self.get("height"))
         width = int(a * height)
 
-        self._texture = np.zeros((height, width, 1), dtype=np.uint8).view(gloo.Texture2D)
+        self._texture = np.zeros((height, width, 4), dtype=np.uint8).view(gloo.Texture2D)
         self.set("out", self._texture)
 
 class Renderer(Node):

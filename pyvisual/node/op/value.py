@@ -251,6 +251,7 @@ class MixFloat(Node):
             {"name" : "alpha", "dtype" : dtype.float, "dtype_args" : {}},
             {"name" : "alpha0", "dtype" : dtype.float, "dtype_args" : {"default" : 0.0}, "group" : "additional"},
             {"name" : "alpha1", "dtype" : dtype.float, "dtype_args" : {"default" : 1.0}, "group" : "additional"},
+            {"name" : "clamp_alpha", "dtype" : dtype.bool, "dtype_args" : {"default" : False}, "group" : "additional"},
         ]
         outputs = [
             {"name" : "output", "dtype" : dtype.float},
@@ -268,6 +269,8 @@ class MixFloat(Node):
             alpha = (alpha - alpha0) / (alpha1 - alpha0)
         else:
             alpha = float("nan")
+        if self.get("clamp_alpha"):
+            alpha = min(1.0, max(0.0, alpha))
 
         a = self.get("a")
         b = self.get("b")
@@ -571,7 +574,8 @@ class Ramp(Node):
             {"name" : "fallback", "dtype" : dtype.bool, "dtype_args" : {"default" : False}, "group" : "additional"},
         ]
         outputs = [
-            {"name" : "out", "dtype" : dtype.float}
+            {"name" : "out", "dtype" : dtype.float},
+            {"name" : "active", "dtype" : dtype.bool},
         ]
 
     def __init__(self):
@@ -592,13 +596,15 @@ class Ramp(Node):
             alpha = delta / duration
             if alpha > 1.0:
                 alpha = 1.0
+                self._start = None
+                self.set("active", False)
                 if self.get("fallback"):
                     self.set("out", self.get("v0"))
-                    self._start = None
                     return
             alpha = alpha**self.get("base")
             value = (1.0-alpha) * self.get("v0") + alpha * self.get("v1")
             self.set("out", value)
+            self.set("active", True)
 
 #
 # Vec2 operations
