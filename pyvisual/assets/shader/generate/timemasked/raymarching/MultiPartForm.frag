@@ -166,8 +166,10 @@ uniform float uGlobalRotation;
 uniform float uTestRotation;
 uniform float uRotation;
 //uniform float uRotationOffset;
-uniform float uAlpha; // {"default" : 1.0}
+//uniform float uAlpha; // {"default" : 1.0}
 //uniform float uAlphaFactor; // {"default" : 1.0}
+
+uniform float uTest;
 
 // mirroring enabled, but uMirrorCount == 0.0 should be as mirroring disabled
 // both looks and performance
@@ -184,6 +186,8 @@ float scene(vec3 p) {
 
     p = opRotate(p, vec3(0.2, 0.0, 0.0) * uTestRotation + vec3(0.0, 0.0, 0.0));
     p = opRotate(p, vec3(0.3, 0.2, 0.0) * uGlobalRotation + vec3(0.0, 0.0, 0.0));
+    float box = sdBox(p + vec3(uTest - 1.5, 0.0, 0.0), vec3(uTest, 2.5, 2.5));
+
     vec3 op = p;
     for (int ii = 0; ii < dFormCount; ii++) {
         float i = ii - dFormCount / 2;
@@ -192,7 +196,7 @@ float scene(vec3 p) {
         }
 
         p = op + vec3(uDrift, 0.0, 0.0) * i;
-        p = opRotate(p, vec3(0.3, 0.05, 0.4) * ((uRotation /*- uRotationOffset * float(ii)*/) * vec3(1.5, 1.0, 1.0)));
+        p = opRotate(p, vec3(0.3, 0.05, 0.4) * ((uRotation + i * 0.25) * vec3(1.5, 1.0, 1.0)));
 
         float testBox = sdBox(p, vec3(0.25));
         float testPrism = sdTriPrism(p, vec2(0.5, 0.3) * 1.5);
@@ -213,8 +217,10 @@ float scene(vec3 p) {
         //float test = mix(sdBox(p, vec3(0.5)), sdSphere(p, 0.5), sin(pyvisualTime * 0.2));
         
         //d = min(d, test);
-        d = opSmoothUnion(d, test, 0.1);
+        d = opSmoothUnion(d, test, 0.0);
     }
+
+    d = opIntersection(d, box);
 
     d -= 0.1;
     
@@ -237,13 +243,13 @@ vec4 sceneColor(vec3 p, float camDist, vec4 bgColor) {
     vec3 ro = vec3(0.0, 0.0, 2.0); 
     vec3 r = reflect(normalize(p - ro),n); 
     vec3 h = -normalize(n + p - ro);
-    float v = (pow(dot(n, normalize(vec3(1, 1, 1))), 1.0) * 0.7 + 0.3) * uAlpha /* * uAlphaFactor*/;
+    float v = (pow(dot(n, normalize(vec3(1, 1, 1))), 1.0) * 0.7 + 0.3) /* *uAlpha /* * uAlphaFactor*/;
     return vec4(vec3(v, n.xy * 0.5 + 0.5), 1.0);
     //return vec4(vec3(v), 1.0);
 }
 
 vec4 backgroundColor(vec2 uv) {
     return vec4(vec3(0.0), 0.0);
-    return vec4((1.0 - vec3(length(uv*0.5)))*0.2, 1.0);
+    //return vec4((1.0 - vec3(length(uv*0.5)))*0.2, 1.0);
 }
 
