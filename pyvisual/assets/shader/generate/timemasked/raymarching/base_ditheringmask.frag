@@ -10,7 +10,8 @@
 
 // uniforms
 
-uniform float uScale; // {"default" : 1.0, "range" : [0.0001, Infinity]}
+#define uScale 0.83
+//uniform float uScale; // {"default" : 1.0, "range" : [0.0001, Infinity]}
 
 float scene(vec3 p);
 vec4 sceneColor(vec3 p, float camDist, vec4 bgColor);
@@ -21,7 +22,9 @@ float rand(vec2 co) { return fract(sin(dot(co*0.123,vec2(12.9898,78.233))) * 437
 uniform sampler2D uDitheringMask;
 uniform float uDitheringAmount; // {"default" : 0.0, "range": [0.0, 5.0]}
 uniform float uDitheringOffset; // {"default" : 0.0}
-uniform float uDitheringTime;
+
+#define uDitheringTime 0.0
+//uniform float uDitheringTime;
 
 void generateFrag() {
     vec2 uv = 2.0*(vec2(pyvisualUV.x, 1.0 - pyvisualUV.y) * pyvisualResolution).xy/pyvisualResolution - 1.0; 
@@ -54,20 +57,20 @@ void generateFrag() {
     vec2 num = vec2(DITHERING_COUNT_Y);
     num.x *= pyvisualResolution.x / pyvisualResolution.y;
     vec2 seed = floor(dpos*num) / num + fract(uDitheringTime);
-    float ditheringAmountOffset = texture(uDitheringMask, pyvisualUV).r * uDitheringOffset;
+    float ditheringAmount = uDitheringAmount + texture(uDitheringMask, pyvisualUV).r * uDitheringOffset;
     #endif
 
     for (int i = 0; i < steps; i++) {
         dscene = scene(pos / uScale) * uScale;
         #ifdef RAYMARCHING_DITHERING
-        dscene *= mix(1.0, (0.25+0.5*rand(seed*vec2(i))), uDitheringAmount + ditheringAmountOffset);
+        dscene *= mix(1.0, (0.25+0.5*rand(seed*vec2(i))), ditheringAmount);
         #endif 
         if (abs(dscene) < epsilon) {
             break;
         }
         pos += rd*dscene * lr;
         dist += dscene * lr;
-        lr = max(0.5, lr*0.85);
+        //lr = max(0.5, lr*0.85);
     }
 
     vec4 color = backgroundColor(uv);

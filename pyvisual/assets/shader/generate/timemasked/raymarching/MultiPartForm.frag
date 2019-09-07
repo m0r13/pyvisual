@@ -1,7 +1,8 @@
 #if dRaymarchingDithering == 1
 # define RAYMARCHING_DITHERING
+# define DITHERING_COUNT_Y DITHERING_HEIGHT
 #endif
-#define RAYMARCHING_STEPS 48
+#define RAYMARCHING_STEPS 32
 #include <generate/timemasked/raymarching/base_ditheringmask.frag>
 
 float sdSphere(vec3 p, float s) {
@@ -162,6 +163,7 @@ float opSmoothIntersection( float d1, float d2, float k ) {
 
 uniform float uDrift;
 
+//#define uGlobalRotation (-1.59)
 uniform float uGlobalRotation;
 uniform float uTestRotation;
 uniform float uRotation;
@@ -176,17 +178,11 @@ uniform float uTest;
 #define MIRROR
 
 float scene(vec3 p) {
-    /*
-    p = opRotateX(p, 0.3*uRotation);
-    p = opRotateY(p, 0.2*uRotation);
-    p = opRotateZ(p, 0.4*uRotation);
-    */
-
     float d = 999999.9;
 
     p = opRotate(p, vec3(0.2, 0.0, 0.0) * uTestRotation + vec3(0.0, 0.0, 0.0));
     p = opRotate(p, vec3(0.3, 0.2, 0.0) * uGlobalRotation + vec3(0.0, 0.0, 0.0));
-    float box = sdBox(p + vec3(uTest - 1.5, 0.0, 0.0), vec3(uTest, 2.5, 2.5));
+    float box = sdBox(p + vec3(uTest - 2.5, 0.0, 0.0), vec3(uTest, 2.5, 2.5));
 
     vec3 op = p;
     for (int ii = 0; ii < dFormCount; ii++) {
@@ -228,24 +224,46 @@ float scene(vec3 p) {
 }
 
 vec3 estimateSceneNormal(vec3 p) {
-    //vec2 e = vec2(0.01, 0.0);
-    //return normalize((vec3(scene(p+e.xyy), scene(p+e.yxy), scene(p+e.yyx)) - scene(p)) / e.x);
+    vec2 e = vec2(0.01, 0.0);
+    return normalize((vec3(scene(p+e.xyy), scene(p+e.yxy), scene(p+e.yyx)) - scene(p)) / e.x);
 
+    /*
     vec3 eps = vec3(0.01, 0.0, 0.0);
     float nx = scene(p + eps.xyy) - scene(p - eps.xyy); 
     float ny = scene(p + eps.yxy) - scene(p - eps.yxy); 
     float nz = scene(p + eps.yyx) - scene(p - eps.yyx); 
     return normalize(vec3(nx, ny, nz));
+    */
 }
 
 vec4 sceneColor(vec3 p, float camDist, vec4 bgColor) {
     vec3 n = estimateSceneNormal(p);
+    return vec4(normalize(n), 1.0);
+
     vec3 ro = vec3(0.0, 0.0, 2.0); 
     vec3 r = reflect(normalize(p - ro),n); 
     vec3 h = -normalize(n + p - ro);
     float v = (pow(dot(n, normalize(vec3(1, 1, 1))), 1.0) * 0.7 + 0.3) /* *uAlpha /* * uAlphaFactor*/;
     return vec4(vec3(v, n.xy * 0.5 + 0.5), 1.0);
     //return vec4(vec3(v), 1.0);
+   
+    //return vec4(n.xyz * 0.5 + 0.5, 1.0);
+    /*
+    float fr = 1.0;
+    float fg = 0.0;
+    float diff  = 1.0*clamp(dot(n, normalize(vec3(1,1,1))), 0.0, 1.0);
+    //diff = 0.0;
+    float diff2 = 0.2*clamp(dot(n, normalize(vec3(0.7,-1,0.5))), 0.0, 1.0);
+    //diff2 = 0.0;
+    float diff3 = 0.1*clamp(dot(n, normalize(vec3(-0.7,-0.4,0.7))), 0.0, 1.0);
+    //diff3 = 0.0;
+    float spec = pow(clamp(dot(h, normalize(vec3(1,1,1))), 0.0, 1.0), 50.0); 
+    //float amb = 0.2 + p.y; 
+    float amb = 1.0;
+    vec3 cubeColor = diff*vec3(1,1,1) + diff2*vec3(fr,fg,0)  + diff3*vec3(fr,fg,1) + spec*vec3(1,1,1)  + amb*vec3(0.2,0.2,0.2);
+    cubeColor /= camDist;
+    return vec4(cubeColor, 1.0);
+    */
 }
 
 vec4 backgroundColor(vec2 uv) {
